@@ -347,6 +347,8 @@ function OrderModal({ order, products, onClose, onSave, onDelete }) {
 
 // ── Modal Xác nhận xóa ────────────────────────────────────────────
 function DeleteModal({ order, onClose, onConfirm, loading }) {
+  const [restoreStock, setRestoreStock] = useState(true);
+
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[400px] p-6 flex flex-col items-center text-center">
@@ -354,12 +356,23 @@ function DeleteModal({ order, onClose, onConfirm, loading }) {
           <span className="material-symbols-outlined text-error">delete_forever</span>
         </div>
         <h3 className="text-[17px] font-bold text-on-surface mb-1">Xác nhận xóa</h3>
-        <p className="text-sm text-on-surface-variant mb-6">
+        <p className="text-sm text-on-surface-variant mb-4">
           Bạn có chắc muốn xóa đơn hàng <span className="font-semibold text-on-surface">"{order.orderId}"</span> không? Hành động này không thể hoàn tác.
         </p>
+
+        <label className="flex items-center gap-2 text-sm text-on-surface-variant mb-6 cursor-pointer bg-surface-container-low px-4 py-2.5 rounded-lg border border-outline-variant/30 w-full hover:bg-surface-container transition-colors">
+          <input 
+            type="checkbox" 
+            checked={restoreStock} 
+            onChange={(e) => setRestoreStock(e.target.checked)} 
+            className="rounded text-primary focus:ring-primary w-4 h-4 cursor-pointer"
+          />
+          <span className="flex-1 text-left font-medium">Khôi phục lại nguyên liệu vào kho</span>
+        </label>
+
         <div className="flex justify-center gap-3 w-full">
-          <button onClick={onClose} className="px-5 py-2 rounded-lg border border-outline-variant text-on-surface-variant text-sm font-semibold hover:bg-surface-container">Hủy</button>
-          <button onClick={onConfirm} disabled={loading} className="px-5 py-2 rounded-lg bg-error text-white text-sm font-semibold hover:opacity-90 disabled:opacity-50 flex items-center gap-2">
+          <button onClick={onClose} className="px-5 py-2 rounded-lg border border-outline-variant text-on-surface-variant text-sm font-semibold hover:bg-surface-container flex-1">Hủy</button>
+          <button onClick={() => onConfirm(restoreStock)} disabled={loading} className="px-5 py-2 rounded-lg bg-error text-white text-sm font-semibold hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2 flex-1">
             {loading && <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
             Xóa đơn hàng
           </button>
@@ -412,10 +425,10 @@ export default function OrderManagement() {
     fetchData();
   };
 
-  const handleDelete = async () => {
+  const handleDelete = async (restoreStock) => {
     setActionLoading(true);
     try {
-      await orderService.deleteOrder(modal.data._id);
+      await orderService.deleteOrder(modal.data._id, restoreStock);
       showToast('Đã xóa đơn hàng');
       setModal(null);
       fetchData();

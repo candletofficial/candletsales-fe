@@ -177,7 +177,7 @@ function MaterialModal({ material, onClose, onSave, onDelete }) {
 }
 
 // ── Modal Xác nhận xóa ────────────────────────────────────────────
-function DeleteModal({ material, onClose, onConfirm, loading }) {
+function DeleteModal({ material, onClose, onConfirm, loading, error }) {
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[400px] p-6 flex flex-col items-center text-center">
@@ -185,9 +185,16 @@ function DeleteModal({ material, onClose, onConfirm, loading }) {
           <span className="material-symbols-outlined text-error">delete_forever</span>
         </div>
         <h3 className="text-[17px] font-bold text-on-surface mb-1">Xác nhận xóa</h3>
-        <p className="text-sm text-on-surface-variant mb-6">
+        <p className={`text-sm text-on-surface-variant ${error ? 'mb-4' : 'mb-6'}`}>
           Bạn có chắc muốn xóa <span className="font-semibold text-on-surface">"{material.name}"</span> không? Hành động này không thể hoàn tác.
         </p>
+        
+        {error && (
+          <div className="w-full bg-error-container/40 text-error border border-error/20 p-3 rounded-lg text-[13px] font-semibold text-left mb-6 flex items-start gap-2">
+            <span className="material-symbols-outlined text-[18px] mt-0.5">warning</span>
+            <span>{error}</span>
+          </div>
+        )}
         <div className="flex justify-center gap-3 w-full mt-2">
           <button onClick={onClose}
             className="px-5 py-2 rounded-lg border border-outline-variant text-on-surface-variant text-sm font-semibold hover:bg-surface-container">
@@ -212,6 +219,7 @@ export default function MaterialManagement() {
   const [currentPage, setCurrentPage] = useState(1);
   const [modal, setModal] = useState(null); // null | { type: 'add' | 'edit' | 'delete', data?: {} }
   const [actionLoading, setActionLoading] = useState(false);
+  const [actionError, setActionError] = useState('');
   const [toast, setToast] = useState(null);
 
   const showToast = (message, type = 'success') => {
@@ -231,19 +239,21 @@ export default function MaterialManagement() {
 
   const handleSave = () => {
     setModal(null);
+    setActionError('');
     showToast(modal?.type === 'edit' ? 'Đã cập nhật nguyên liệu' : 'Đã tạo nguyên liệu mới');
     fetchMaterials();
   };
 
   const handleDelete = async () => {
     setActionLoading(true);
+    setActionError('');
     try {
       await materialService.deleteMaterial(modal.data._id);
       showToast('Đã xóa nguyên liệu');
       setModal(null);
       fetchMaterials();
-    } catch {
-      showToast('Xóa thất bại', 'error');
+    } catch (err) {
+      setActionError(err.response?.data?.message || 'Xóa thất bại');
     } finally {
       setActionLoading(false);
     }
@@ -292,13 +302,13 @@ export default function MaterialManagement() {
 
       {/* Modals */}
       {modal?.type === 'add' && (
-        <MaterialModal onClose={() => setModal(null)} onSave={handleSave} />
+        <MaterialModal onClose={() => { setModal(null); setActionError(''); }} onSave={handleSave} />
       )}
       {modal?.type === 'edit' && (
-        <MaterialModal material={modal.data} onClose={() => setModal(null)} onSave={handleSave} onDelete={() => setModal({ type: 'delete', data: modal.data })} />
+        <MaterialModal material={modal.data} onClose={() => { setModal(null); setActionError(''); }} onSave={handleSave} onDelete={() => { setModal({ type: 'delete', data: modal.data }); setActionError(''); }} />
       )}
       {modal?.type === 'delete' && (
-        <DeleteModal material={modal.data} onClose={() => setModal(null)} onConfirm={handleDelete} loading={actionLoading} />
+        <DeleteModal material={modal.data} onClose={() => { setModal(null); setActionError(''); }} onConfirm={handleDelete} loading={actionLoading} error={actionError} />
       )}
 
       <div className="p-lg">

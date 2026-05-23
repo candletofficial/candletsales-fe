@@ -168,7 +168,7 @@ function ProductModal({ product, materials, onClose, onSave, onDelete }) {
 
           {activeTab === 'base_ingredients' && (
             <div>
-              <div className="flex justify-between items-center mb-4">
+              <div className="flex justify-between items-center mb-4 sticky -top-6 bg-surface-container-low z-10 py-3 -mx-6 px-6 border-b border-outline-variant/30 shadow-sm">
                 <p className="text-sm text-on-surface-variant">Công thức này sẽ được áp dụng chung cho TẤT CẢ các phân loại.</p>
                 <button type="button" onClick={() => setForm({ ...form, base_ingredients: [...form.base_ingredients, { ingredient_id: '', quantity: 1 }] })}
                   className="text-primary text-sm font-bold flex items-center gap-1 hover:bg-primary-container/30 px-3 py-1.5 rounded-lg transition-colors">
@@ -221,7 +221,7 @@ function ProductModal({ product, materials, onClose, onSave, onDelete }) {
 
           {activeTab === 'variants' && (
             <div>
-              <div className="flex justify-between items-center mb-4">
+              <div className="flex justify-between items-center mb-4 sticky -top-6 bg-surface-container-low z-10 py-3 -mx-6 px-6 border-b border-outline-variant/30 shadow-sm">
                 <p className="text-sm text-on-surface-variant">Thêm các nhóm phân loại (VD: Mùi hương, Kích cỡ).</p>
                 <button type="button" onClick={() => setForm({ ...form, variant_groups: [...form.variant_groups, { id: `g${form.variant_groups.length + 1}`, name: '', options: [] }] })}
                   className="text-primary text-sm font-bold flex items-center gap-1 hover:bg-primary-container/30 px-3 py-1.5 rounded-lg transition-colors">
@@ -284,7 +284,7 @@ function ProductModal({ product, materials, onClose, onSave, onDelete }) {
 
           {activeTab === 'skus' && (
             <div>
-              <div className="flex justify-between items-center mb-4">
+              <div className="flex justify-between items-center mb-4 sticky -top-6 bg-surface-container-low z-10 py-3 -mx-6 px-6 border-b border-outline-variant/30 shadow-sm">
                 <p className="text-sm text-on-surface-variant">Danh sách các phân loại cụ thể của sản phẩm.</p>
                 <button type="button" onClick={handleGenerateSKUs}
                   className="bg-primary-container text-on-primary-container text-sm font-bold flex items-center gap-1 hover:brightness-95 px-4 py-2 rounded-lg transition-all shadow-sm">
