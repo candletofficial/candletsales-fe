@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { importService } from '../services/importService';
 import { materialService } from '../services/materialService';
@@ -268,6 +268,7 @@ const TABS = [
 export default function ImportManagement() {
   const { user } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [tickets, setTickets] = useState([]);
   const [materials, setMaterials] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -307,10 +308,10 @@ export default function ImportManagement() {
     if (location.state?.autoOpenImport && materials.length > 0) {
       setInitialMaterialId(location.state.materialId);
       setModalOpen(true);
-      // Xoá state để không bị mở lại khi refresh
-      window.history.replaceState({}, document.title);
+      // Xoá state để không bị mở lại khi refresh hoặc render lại
+      navigate(location.pathname, { replace: true, state: {} });
     }
-  }, [location.state, materials]);
+  }, [location.state, materials, navigate, location.pathname]);
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
