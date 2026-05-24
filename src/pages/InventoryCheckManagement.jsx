@@ -3,12 +3,24 @@ import Layout from '../components/Layout';
 import { inventoryCheckService } from '../services/inventoryCheckService';
 import { materialService } from '../services/materialService';
 import { useAuth } from '../hooks/useAuth';
+import SearchableSelect from '../components/SearchableSelect';
 
 function InventoryCheckModal({ materials, user, onClose, onSave }) {
   const [items, setItems] = useState([]);
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const materialOptions = useMemo(() => materials.map(m => ({
+    value: m._id,
+    label: `${m.name} (Hệ thống: ${m.actualStock} ${m.unit})`
+  })), [materials]);
+
+  const getOptionsForIndex = (index) => {
+    return materialOptions.filter(opt => 
+      !items.some((i, idx) => i.material_id === opt.value && idx !== index)
+    );
+  };
 
   useEffect(() => {
     if (materials && materials.length > 0) {
@@ -114,21 +126,15 @@ function InventoryCheckModal({ materials, user, onClose, onSave }) {
               const material = materials.find(m => m._id === item.material_id);
               return (
                 <div key={index} className="flex gap-3 items-start bg-surface-container-lowest p-4 rounded-xl border border-outline-variant/30">
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <label className="block text-[12px] font-medium text-on-surface-variant mb-1">Nguyên liệu</label>
-                    <select
+                    <SearchableSelect
+                      options={getOptionsForIndex(index)}
                       value={item.material_id}
-                      onChange={(e) => handleItemChange(index, 'material_id', e.target.value)}
-                      className="w-full px-3 py-2 border border-outline-variant rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-[14px]"
-                      required
-                    >
-                      <option value="">Chọn nguyên liệu...</option>
-                      {materials.map(m => (
-                        <option key={m._id} value={m._id} disabled={items.some((i, idx) => i.material_id === m._id && idx !== index)}>
-                          {m.name} (Hệ thống: {m.actualStock} {m.unit})
-                        </option>
-                      ))}
-                    </select>
+                      onChange={(val) => handleItemChange(index, 'material_id', val)}
+                      placeholder="Chọn nguyên liệu..."
+                      className="border border-outline-variant bg-white"
+                    />
                   </div>
 
                   <div className="w-[120px]">
@@ -364,7 +370,7 @@ export default function InventoryCheckManagement() {
         </div>
       )}
 
-      {modalOpen && <InventoryCheckModal materials={materials} user={user} onClose={() => setModalOpen(false)} onSave={() => { setModalOpen(false); showToast('Đã lưu phiếu kiểm kho'); fetchData(); }} />}
+      {modalOpen && <InventoryCheckModal materials={materials} user={user} onClose={() => setModalOpen(false)} onSave={() => { setModalOpen(false); showToast('Đã lưu phiếu kiểm kho'); fetchData(); window.dispatchEvent(new CustomEvent('materialsChanged')); }} />}
       {detailsTicket && <TicketDetailsModal ticket={detailsTicket} onClose={() => setDetailsTicket(null)} />}
 
       <div className="flex justify-between items-center mb-6">

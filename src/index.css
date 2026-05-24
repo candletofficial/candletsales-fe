@@ -81,8 +81,9 @@
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* Layout */
-.layout { display: flex; min-height: 100vh; }
-.main-content { flex: 1; margin-left: 260px; padding: 32px 36px; min-height: 100vh; background: var(--color-surface-container-low); overflow-y: auto; }
+.layout { display: flex; height: 100vh; overflow: hidden; }
+.main-wrapper { flex: 1; margin-left: 260px; display: flex; flex-direction: column; height: 100vh; background: var(--color-surface-container-low); }
+.main-content { flex: 1; padding: 32px 60px; overflow-y: auto; }
 
 /* Sidebar */
 .sidebar { width: 260px; position: fixed; top: 0; left: 0; bottom: 0; background: var(--color-surface); border-right: 1px solid var(--color-outline-variant); display: flex; flex-direction: column; z-index: 40; }

@@ -1,4 +1,5 @@
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 
 const NAV_ITEMS = [
@@ -73,6 +74,37 @@ const NAV_ITEMS = [
     label: 'Chi phí Quảng cáo',
   },
   {
+    label: 'Công cụ tính',
+    isGroup: true,
+    icon: (
+      <span className="material-symbols-outlined text-[20px]">calculate</span>
+    ),
+    children: [
+      {
+        to: '/tools/shopee',
+        icon: (
+          <span className="w-5 h-5 rounded flex-shrink-0 overflow-hidden">
+            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="100" height="100" rx="18" fill="#EE4D2D"/>
+              <path d="M50 18C43.4 18 38 23.4 38 30H28C26.3 30 25 31.3 25 33L22 72C22 73.7 23.3 75 25 75H75C76.7 75 78 73.7 78 72L75 33C75 31.3 73.7 30 72 30H62C62 23.4 56.6 18 50 18ZM50 24C53.3 24 56 26.7 56 30H44C44 26.7 46.7 24 50 24ZM50 52C46.7 52 44 49.3 44 46C44 42.7 46.7 40 50 40C53.3 40 56 42.7 56 46C56 49.3 53.3 52 50 52Z" fill="white"/>
+            </svg>
+          </span>
+        ),
+        label: 'Shopee',
+      },
+      {
+        to: '/tools/tiktok',
+        icon: (
+          <span className="w-5 h-5 bg-[#010101] rounded flex items-center justify-center flex-shrink-0">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.23 8.23 0 004.84 1.56V6.79a4.85 4.85 0 01-1.07-.1z"/></svg>
+          </span>
+        ),
+        label: 'TikTok Shop',
+        comingSoon: true,
+      },
+    ],
+  },
+  {
     to: '/users',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -89,6 +121,13 @@ const NAV_ITEMS = [
 export default function Sidebar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [openGroups, setOpenGroups] = useState(() => {
+    // Auto-open if on a tool page
+    return location.pathname.startsWith('/tools') ? { 'Công cụ tính': true } : {};
+  });
+
+  const toggleGroup = (label) => setOpenGroups(g => ({ ...g, [label]: !g[label] }));
 
   const handleLogout = () => {
     logout();
@@ -102,33 +141,73 @@ export default function Sidebar() {
       </div>
 
       <nav className="sidebar-nav">
-        {NAV_ITEMS.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-          >
-            {item.icon}
-            <span>{item.label}</span>
-          </NavLink>
-        ))}
+        {NAV_ITEMS.map((item) => {
+          if (item.isGroup) {
+            const isOpen = !!openGroups[item.label];
+            const isChildActive = item.children.some(c => location.pathname === c.to);
+            return (
+              <div key={item.label}>
+                <button
+                  onClick={() => toggleGroup(item.label)}
+                  className={`nav-item w-full text-left ${isChildActive ? 'text-primary font-semibold' : ''}`}
+                >
+                  {item.icon}
+                  <span className="flex-1">{item.label}</span>
+                  <span className={`material-symbols-outlined text-[16px] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>expand_more</span>
+                </button>
+                {isOpen && (
+                  <div className="mt-0.5 mb-1 space-y-0.5">
+                    {item.children.map(child => (
+                      <NavLink
+                        key={child.to}
+                        to={child.to}
+                        className={({ isActive }) =>
+                          `flex items-center gap-3 pl-10 pr-3 py-2 rounded-lg text-[13px] font-medium transition-all ${
+                            isActive
+                              ? 'bg-primary-container text-primary font-semibold'
+                              : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
+                          }`
+                        }
+                      >
+                        {child.icon}
+                        <span className="flex-1">{child.label}</span>
+                        {child.comingSoon && (
+                          <span className="text-[10px] font-bold bg-[#fef3c7] text-[#d97706] px-1.5 py-0.5 rounded-full">Soon</span>
+                        )}
+                      </NavLink>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          }
+          return (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            >
+              {item.icon}
+              <span>{item.label}</span>
+            </NavLink>
+          );
+        })}
       </nav>
 
       <div className="sidebar-footer">
-        <div className="user-card">
-          <div className="user-avatar">{user?.name?.[0]?.toUpperCase() || 'A'}</div>
-          <div className="user-info">
-            <span className="user-name">{user?.name || 'Admin'}</span>
-            {user?.isDefaultAdmin && <span className="badge-root">Root Admin</span>}
-          </div>
-        </div>
-        <button id="logout-btn" className="logout-btn" onClick={handleLogout}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-            <polyline points="16 17 21 12 16 7" />
-            <line x1="21" y1="12" x2="9" y2="12" />
-          </svg>
-          Đăng xuất
+        <NavLink
+          to="/settings"
+          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+        >
+          <span className="material-symbols-outlined text-[20px]">settings</span>
+          <span>Cài đặt</span>
+        </NavLink>
+        <button 
+          onClick={handleLogout}
+          className="nav-item w-full text-left cursor-pointer hover:!bg-[#fee2e2] hover:!text-[#dc2626]"
+        >
+          <span className="material-symbols-outlined text-[20px]">logout</span>
+          <span>Đăng xuất</span>
         </button>
       </div>
     </aside>

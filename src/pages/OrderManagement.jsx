@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Layout from '../components/Layout';
 import { orderService } from '../services/orderService';
 import { productService } from '../services/productService';
 
 // ── Helpers ────────────────────────────────────────────────────────
 const formatPrice = (n) =>
-  (n ?? 0).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+  Math.round(n ?? 0).toLocaleString('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 });
 
 const formatDate = (d) =>
   d ? new Date(d).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—';
@@ -22,10 +22,12 @@ function OrderModal({ order, products, onClose, onSave, onDelete }) {
   const [orderedAt, setOrderedAt] = useState(
     order?.ordered_at ? new Date(order.ordered_at).toISOString().split('T')[0] : today()
   );
+  const [source, setSource] = useState(order?.source || 'shopee');
   const [autoTotal, setAutoTotal] = useState(!isEdit);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showProductPicker, setShowProductPicker] = useState(false);
+  const [productSearch, setProductSearch] = useState('');
 
   // Tính tổng tự động
   const calcTotal = useCallback(() => {
@@ -36,18 +38,29 @@ function OrderModal({ order, products, onClose, onSave, onDelete }) {
     if (autoTotal) setTotalPrice(calcTotal());
   }, [items, autoTotal, calcTotal]);
 
+  const filteredProducts = useMemo(() => {
+    if (!productSearch) return products;
+    const term = productSearch.toLowerCase();
+    return products.filter(p => {
+      const matchName = p.name?.toLowerCase().includes(term);
+      const matchSku = p.productId?.toLowerCase().includes(term);
+      const matchInnerSku = p.skus?.some(sku => sku.sku?.toLowerCase().includes(term));
+      return matchName || matchSku || matchInnerSku;
+    });
+  }, [products, productSearch]);
+
   // Thêm sản phẩm / SKU vào đơn hàng
   const handlePickProduct = (product, sku = null) => {
     const unit_price = sku ? (sku.price || product.base_price || 0) : (product.base_price || 0);
-    const unit_cost  = sku ? (sku.cost  || product.base_cost  || 0) : (product.base_cost  || 0);
+    const unit_cost = sku ? (sku.cost || product.base_cost || 0) : (product.base_cost || 0);
     const sku_label = sku
       ? sku.combination?.map(optId => {
-          for (const g of product.variant_groups || []) {
-            const opt = g.options.find(o => o.id === optId);
-            if (opt) return opt.label;
-          }
-          return optId;
-        }).join(' - ') || ''
+        for (const g of product.variant_groups || []) {
+          const opt = g.options.find(o => o.id === optId);
+          if (opt) return opt.label;
+        }
+        return optId;
+      }).join(' - ') || ''
       : '';
 
     // Kiểm tra đã có trong đơn chưa
@@ -91,7 +104,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete }) {
     setError('');
     setLoading(true);
     try {
-      const payload = { items, total_price: totalPrice, logistics_cost: logisticsCost, note, ordered_at: new Date(orderedAt) };
+      const payload = { items, total_price: totalPrice, logistics_cost: logisticsCost, source, note, ordered_at: new Date(orderedAt) };
       if (isEdit) {
         await orderService.updateOrder(order._id, payload);
       } else {
@@ -128,8 +141,8 @@ function OrderModal({ order, products, onClose, onSave, onDelete }) {
             <div className="p-3 bg-error-container text-error rounded-lg text-sm font-medium">{error}</div>
           )}
 
-          {/* Ngày đặt hàng, Phí Ship, Ghi chú */}
-          <div className="grid grid-cols-3 gap-4">
+          {/* Ngày đặt hàng, Nguồn, Phí Ship, Ghi chú */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Ngày đặt hàng</label>
               <input
@@ -140,7 +153,23 @@ function OrderModal({ order, products, onClose, onSave, onDelete }) {
               />
             </div>
             <div>
-              <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Phí ship & đóng gói (đ)</label>
+              <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Nguồn đơn hàng</label>
+              <select
+                value={source}
+                onChange={e => setSource(e.target.value)}
+                className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-[15px] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-white"
+              >
+                <option value="khác">Khác</option>
+                <option value="shopee">Shopee</option>
+                <option value="tiktok">TikTok</option>
+                <option value="facebook">Facebook</option>
+                <option value="instagram">Instagram</option>
+                <option value="youtube">YouTube</option>
+                <option value="google">Google</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Phí ship (đ)</label>
               <input
                 type="number"
                 min="0"
@@ -282,17 +311,30 @@ function OrderModal({ order, products, onClose, onSave, onDelete }) {
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setShowProductPicker(false)} />
           <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[75vh] flex flex-col animate-[fadeIn_0.15s_ease]">
-            <div className="px-5 py-4 border-b border-outline-variant/30 flex justify-between items-center">
-              <h3 className="font-bold text-[16px] text-on-surface">Chọn sản phẩm</h3>
-              <button onClick={() => setShowProductPicker(false)} className="p-1.5 rounded-lg hover:bg-surface-container transition-colors">
-                <span className="material-symbols-outlined text-[20px] text-on-surface-variant">close</span>
-              </button>
+            <div className="px-5 py-4 border-b border-outline-variant/30 flex flex-col gap-3">
+              <div className="flex justify-between items-center">
+                <h3 className="font-bold text-[16px] text-on-surface">Chọn sản phẩm</h3>
+                <button onClick={() => setShowProductPicker(false)} className="p-1.5 rounded-lg hover:bg-surface-container transition-colors">
+                  <span className="material-symbols-outlined text-[20px] text-on-surface-variant">close</span>
+                </button>
+              </div>
+              <div className="relative">
+                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant">search</span>
+                <input
+                  type="text"
+                  placeholder="Tìm tên hoặc mã sản phẩm..."
+                  value={productSearch}
+                  onChange={(e) => setProductSearch(e.target.value)}
+                  className="w-full bg-surface-container-low border border-outline-variant/50 rounded-lg pl-9 pr-3 py-2 text-[13px] text-on-surface focus:outline-none focus:border-primary focus:bg-white transition-all"
+                  autoFocus
+                />
+              </div>
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
-              {products.length === 0 && (
-                <p className="text-center text-on-surface-variant py-8">Chưa có sản phẩm nào trong hệ thống.</p>
+              {filteredProducts.length === 0 && (
+                <p className="text-center text-on-surface-variant py-8">Chưa có sản phẩm nào phù hợp.</p>
               )}
-              {products.map(product => (
+              {filteredProducts.map(product => (
                 <div key={product._id} className="border border-outline-variant/30 rounded-xl overflow-hidden">
                   {/* Sản phẩm không có phân loại → chọn thẳng */}
                   <div
@@ -361,10 +403,10 @@ function DeleteModal({ order, onClose, onConfirm, loading }) {
         </p>
 
         <label className="flex items-center gap-2 text-sm text-on-surface-variant mb-6 cursor-pointer bg-surface-container-low px-4 py-2.5 rounded-lg border border-outline-variant/30 w-full hover:bg-surface-container transition-colors">
-          <input 
-            type="checkbox" 
-            checked={restoreStock} 
-            onChange={(e) => setRestoreStock(e.target.checked)} 
+          <input
+            type="checkbox"
+            checked={restoreStock}
+            onChange={(e) => setRestoreStock(e.target.checked)}
             className="rounded text-primary focus:ring-primary w-4 h-4 cursor-pointer"
           />
           <span className="flex-1 text-left font-medium">Khôi phục lại nguyên liệu vào kho</span>
@@ -392,9 +434,11 @@ export default function OrderManagement() {
   const [actionLoading, setActionLoading] = useState(false);
   const [toast, setToast] = useState(null);
   // Date filter
-  const [datePreset, setDatePreset] = useState('30d'); // 'all' | '7d' | '30d' | '90d' | '365d' | 'custom'
+  const [datePreset, setDatePreset] = useState('thisMonth'); // 'all' | 'today' | 'thisWeek' | 'thisMonth' | 'thisYear' | 'custom'
   const [customFrom, setCustomFrom] = useState('');
-  const [customTo, setCustomTo]   = useState('');
+  const [customTo, setCustomTo] = useState('');
+  // Source filter
+  const [sourceFilter, setSourceFilter] = useState('all'); // 'all' | 'shopee' | 'tiktok' | ...
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
@@ -439,19 +483,29 @@ export default function OrderManagement() {
     }
   };
 
-  // Filtered orders theo bộ lọc thời gian
+  // Filtered orders theo bộ lọc thời gian & nguồn
   const filteredOrders = orders.filter(o => {
+    // Lọc theo nguồn
+    const orderSource = o.source || 'khác';
+    if (sourceFilter !== 'all' && orderSource !== sourceFilter) return false;
+
+    // Lọc theo thời gian
     const d = new Date(o.ordered_at);
     const now = new Date();
-    if (datePreset === '7d')  return d >= new Date(now - 7  * 86400000);
-    if (datePreset === '30d') return d >= new Date(now - 30 * 86400000);
-    if (datePreset === '90d') return d >= new Date(now - 90 * 86400000);
-    if (datePreset === '365d') return d >= new Date(now - 365 * 86400000);
+    if (datePreset === 'today') return d.toDateString() === now.toDateString();
+    if (datePreset === 'thisWeek') {
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - (now.getDay() === 0 ? 6 : now.getDay() - 1));
+      startOfWeek.setHours(0, 0, 0, 0);
+      return d >= startOfWeek;
+    }
+    if (datePreset === 'thisMonth') return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    if (datePreset === 'thisYear') return d.getFullYear() === now.getFullYear();
     if (datePreset === 'custom') {
       const from = customFrom ? new Date(customFrom) : null;
-      const to   = customTo   ? new Date(new Date(customTo).setHours(23,59,59,999)) : null;
+      const to = customTo ? new Date(new Date(customTo).setHours(23, 59, 59, 999)) : null;
       if (from && d < from) return false;
-      if (to   && d > to)   return false;
+      if (to && d > to) return false;
       return true;
     }
     return true; // 'all'
@@ -459,9 +513,9 @@ export default function OrderManagement() {
 
   // Stats
   const totalRevenue = filteredOrders.reduce((s, o) => s + (o.total_price || 0), 0);
-  const totalItems   = filteredOrders.reduce((s, o) => s + (o.items?.reduce((a, i) => a + i.quantity, 0) || 0), 0);
-  const totalCost    = filteredOrders.reduce((s, o) => s + (o.items?.reduce((a, i) => a + (i.unit_cost || 0) * i.quantity, 0) || 0) + (o.logistics_cost || 0), 0);
-  const totalProfit  = totalRevenue - totalCost;
+  const totalItems = filteredOrders.reduce((s, o) => s + (o.items?.reduce((a, i) => a + i.quantity, 0) || 0), 0);
+  const totalCost = filteredOrders.reduce((s, o) => s + (o.items?.reduce((a, i) => a + (i.unit_cost || 0) * i.quantity, 0) || 0) + (o.logistics_cost || 0), 0);
+  const totalProfit = totalRevenue - totalCost;
   const profitMargin = totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(1) : 0;
 
   const ITEMS_PER_PAGE = 10;
@@ -494,7 +548,7 @@ export default function OrderManagement() {
         <DeleteModal order={modal.data} onClose={() => setModal(null)} onConfirm={handleDelete} loading={actionLoading} />
       )}
 
-      <div className="p-lg">
+      <div>
         {/* Header */}
         <div className="flex justify-between items-end mb-lg">
           <div>
@@ -509,65 +563,75 @@ export default function OrderManagement() {
             <span>Tạo đơn hàng mới</span>
           </button>
         </div>
-        {/* Date Filter bar */}
-        <div className="bg-white rounded-xl shadow-sm border border-outline-variant/30 px-lg py-md mb-lg flex flex-wrap items-center gap-3">
-          <span className="text-[13px] font-bold text-on-surface-variant">Lọc theo thời gian:</span>
-          <div className="flex flex-wrap gap-2">
-            {[
-              { key: 'all',  label: 'Tất cả' },
-              { key: '7d',   label: '7 ngày' },
-              { key: '30d',  label: '1 tháng' },
-              { key: '90d',  label: '3 tháng' },
-              { key: '365d', label: '1 năm' },
-              { key: 'custom', label: 'Tuỳ chọn' },
-            ].map(p => (
-              <button
-                key={p.key}
-                onClick={() => { setDatePreset(p.key); setCurrentPage(1); }}
-                className={`px-3 py-1.5 rounded-lg text-[13px] font-semibold transition-all border ${
-                  datePreset === p.key
-                    ? 'bg-primary text-white border-primary shadow-sm'
-                    : 'bg-white text-on-surface-variant border-outline-variant hover:bg-surface-container-low'
-                }`}
-              >
-                {p.label}
-              </button>
-            ))}
+        {/* Filter bar */}
+        <div className="bg-white rounded-xl shadow-sm border border-outline-variant/30 px-lg py-md mb-lg flex flex-wrap items-center gap-6">
+          {/* Time Filter */}
+          <div className="flex items-center gap-3">
+            <span className="text-[13px] font-bold text-on-surface-variant">Lọc theo thời gian:</span>
+            <select
+              value={datePreset}
+              onChange={(e) => { setDatePreset(e.target.value); setCurrentPage(1); }}
+              className="border border-outline-variant rounded-lg px-3 py-1.5 text-[13px] font-semibold bg-surface-container-lowest focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary min-w-[120px] cursor-pointer"
+            >
+              <option value="all">Tất cả</option>
+              <option value="today">Hôm nay</option>
+              <option value="thisWeek">Tuần này</option>
+              <option value="thisMonth">Tháng này</option>
+              <option value="thisYear">Năm nay</option>
+              <option value="custom">Tuỳ chỉnh...</option>
+            </select>
+
+            {/* Custom date range */}
+            {datePreset === 'custom' && (
+              <div className="flex items-center gap-2 ml-2">
+                <input
+                  type="date"
+                  value={customFrom}
+                  onChange={e => { setCustomFrom(e.target.value); setCurrentPage(1); }}
+                  className="border border-outline-variant rounded-lg px-3 py-1.5 text-[13px] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                />
+                <span className="text-on-surface-variant text-[13px]">—</span>
+                <input
+                  type="date"
+                  value={customTo}
+                  onChange={e => { setCustomTo(e.target.value); setCurrentPage(1); }}
+                  className="border border-outline-variant rounded-lg px-3 py-1.5 text-[13px] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                />
+              </div>
+            )}
           </div>
 
-          {/* Custom date range */}
-          {datePreset === 'custom' && (
-            <div className="flex items-center gap-2 ml-2">
-              <input
-                type="date"
-                value={customFrom}
-                onChange={e => { setCustomFrom(e.target.value); setCurrentPage(1); }}
-                className="border border-outline-variant rounded-lg px-3 py-1.5 text-[13px] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-              />
-              <span className="text-on-surface-variant text-[13px]">—</span>
-              <input
-                type="date"
-                value={customTo}
-                onChange={e => { setCustomTo(e.target.value); setCurrentPage(1); }}
-                className="border border-outline-variant rounded-lg px-3 py-1.5 text-[13px] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-              />
-            </div>
-          )}
+          {/* Source Filter */}
+          <div className="flex items-center gap-3">
+            <span className="text-[13px] font-bold text-on-surface-variant">Nguồn đơn hàng:</span>
+            <select
+              value={sourceFilter}
+              onChange={(e) => { setSourceFilter(e.target.value); setCurrentPage(1); }}
+              className="border border-outline-variant rounded-lg px-3 py-1.5 text-[13px] font-semibold bg-surface-container-lowest focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary min-w-[120px] cursor-pointer"
+            >
+              <option value="all">Tất cả</option>
+              <option value="shopee">Shopee</option>
+              <option value="tiktok">TikTok</option>
+              <option value="facebook">Facebook</option>
+              <option value="instagram">Instagram</option>
+              <option value="youtube">YouTube</option>
+              <option value="google">Google</option>
+              <option value="khác">Khác</option>
+            </select>
+          </div>
 
           {/* Badge kết quả lọc */}
-          {datePreset !== 'all' && (
-            <span className="ml-auto text-[12px] text-on-surface-variant bg-surface-container px-3 py-1 rounded-full">
-              {filteredOrders.length} / {orders.length} đơn hàng
-            </span>
-          )}
+          <span className="ml-auto text-[12px] text-on-surface-variant bg-surface-container px-4 py-1.5 rounded-full font-bold">
+            {filteredOrders.length} / {orders.length} đơn hàng
+          </span>
         </div>
 
         <div className="grid grid-cols-4 gap-md mb-lg">
           {[
-            { label: 'Tổng đơn hàng',        value: loading ? null : orders.length,                          icon: 'receipt_long', color: 'text-primary',    bg: 'bg-primary-container' },
-            { label: 'Sản phẩm bán ra',      value: loading ? null : totalItems.toLocaleString('vi-VN'),    icon: 'inventory_2',  color: 'text-[#059669]', bg: 'bg-[#d1fae5]' },
-            { label: 'Tổng doanh thu',         value: loading ? null : formatPrice(totalRevenue),             icon: 'payments',     color: 'text-[#d97706]', bg: 'bg-[#fef3c7]' },
-            { label: 'Biên lợi nhuận',         value: loading ? null : formatPrice(totalProfit), sub: loading ? null : `${profitMargin}% biên`, icon: 'trending_up', color: totalProfit >= 0 ? 'text-[#059669]' : 'text-error', bg: totalProfit >= 0 ? 'bg-[#d1fae5]' : 'bg-error-container' },
+            { label: 'Tổng đơn hàng', value: loading ? null : orders.length, icon: 'receipt_long', color: 'text-primary', bg: 'bg-primary-container' },
+            { label: 'Sản phẩm bán ra', value: loading ? null : totalItems.toLocaleString('vi-VN'), icon: 'inventory_2', color: 'text-[#059669]', bg: 'bg-[#d1fae5]' },
+            { label: 'Tổng doanh thu', value: loading ? null : formatPrice(totalRevenue), icon: 'payments', color: 'text-[#d97706]', bg: 'bg-[#fef3c7]' },
+            { label: 'Biên lợi nhuận', value: loading ? null : formatPrice(totalProfit), sub: loading ? null : `${profitMargin}% biên`, icon: 'trending_up', color: totalProfit >= 0 ? 'text-[#059669]' : 'text-error', bg: totalProfit >= 0 ? 'bg-[#d1fae5]' : 'bg-error-container' },
           ].map(card => (
             <div key={card.label} className="bg-white rounded-xl p-lg shadow-sm border border-outline-variant/30 flex items-center justify-between">
               <div>
@@ -632,9 +696,37 @@ export default function OrderManagement() {
                         className="hover:bg-surface-container-lowest transition-colors cursor-pointer group"
                       >
                         <td className="px-lg py-md">
-                          <span className="font-mono text-[13px] font-semibold text-on-surface bg-surface-container-high px-2 py-1 rounded border border-outline-variant/30">
-                            {order.orderId}
-                          </span>
+                          <div className="flex flex-col gap-1 items-start">
+                            <span className="font-mono text-[13px] font-semibold text-on-surface bg-surface-container-high px-2 py-1 rounded border border-outline-variant/30">
+                              {order.orderId}
+                            </span>
+                            {order.source && order.source !== 'khác' && (
+                              <span className={`flex items-center gap-1 text-[10px] uppercase font-bold px-1.5 py-0.5 rounded w-max ${{
+                                  shopee: 'bg-[#ee4d2d]/10 text-[#ee4d2d] border border-[#ee4d2d]/20',
+                                  tiktok: 'bg-black text-white border border-black/20',
+                                  facebook: 'bg-[#1877f2]/10 text-[#1877f2] border border-[#1877f2]/20',
+                                  instagram: 'bg-[#e1306c]/10 text-[#e1306c] border border-[#e1306c]/20',
+                                  youtube: 'bg-[#ff0000]/10 text-[#ff0000] border border-[#ff0000]/20',
+                                  google: 'bg-[#4285f4]/10 text-[#4285f4] border border-[#4285f4]/20'
+                                }[order.source] || 'bg-primary/10 text-primary'
+                                }`}>
+                                <span
+                                  className="w-[11px] h-[11px] bg-current inline-block opacity-90"
+                                  style={{
+                                    maskImage: `url(https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/${order.source}.svg)`,
+                                    maskSize: 'contain',
+                                    maskRepeat: 'no-repeat',
+                                    maskPosition: 'center',
+                                    WebkitMaskImage: `url(https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/${order.source}.svg)`,
+                                    WebkitMaskSize: 'contain',
+                                    WebkitMaskRepeat: 'no-repeat',
+                                    WebkitMaskPosition: 'center'
+                                  }}
+                                />
+                                {order.source}
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="px-lg py-md">
                           <div className="space-y-1">

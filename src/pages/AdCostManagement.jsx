@@ -6,30 +6,30 @@ import { orderService } from '../services/orderService';
 
 // ─── Platform config ───────────────────────────────────────────────
 const PLATFORMS = [
-  { key: 'facebook',  label: 'Facebook',  short: 'FB',  color: '#1877F2', bg: '#e7f0fd', textColor: '#1877F2' },
-  { key: 'tiktok',    label: 'TikTok',    short: 'TT',  color: '#010101', bg: '#f0f0f0', textColor: '#010101' },
-  { key: 'shopee',    label: 'Shopee',    short: 'SP',  color: '#EE4D2D', bg: '#fdf0ed', textColor: '#EE4D2D' },
-  { key: 'google',    label: 'Google',    short: 'GG',  color: '#34A853', bg: '#e8f5e9', textColor: '#34A853' },
-  { key: 'instagram', label: 'Instagram', short: 'IG',  color: '#C13584', bg: '#fce8f5', textColor: '#C13584' },
-  { key: 'youtube',   label: 'YouTube',   short: 'YT',  color: '#FF0000', bg: '#ffe8e8', textColor: '#FF0000' },
+  { key: 'shopee', label: 'Shopee', short: 'SP', color: '#EE4D2D', bg: '#fdf0ed', textColor: '#EE4D2D' },
+  { key: 'facebook', label: 'Facebook', short: 'FB', color: '#1877F2', bg: '#e7f0fd', textColor: '#1877F2' },
+  { key: 'tiktok', label: 'TikTok', short: 'TT', color: '#010101', bg: '#f0f0f0', textColor: '#010101' },
+  { key: 'google', label: 'Google', short: 'GG', color: '#34A853', bg: '#e8f5e9', textColor: '#34A853' },
+  { key: 'instagram', label: 'Instagram', short: 'IG', color: '#C13584', bg: '#fce8f5', textColor: '#C13584' },
+  { key: 'youtube', label: 'YouTube', short: 'YT', color: '#FF0000', bg: '#ffe8e8', textColor: '#FF0000' },
 ];
 
 const getPlatform = (key) => PLATFORMS.find(p => p.key === key) || PLATFORMS[0];
 
 // ─── Helpers ───────────────────────────────────────────────────────
 const formatPrice = (n) =>
-  (n ?? 0).toLocaleString('vi-VN') + ' ₫';
+  Math.round(n ?? 0).toLocaleString('vi-VN', { maximumFractionDigits: 0 }) + ' ₫';
 
 const formatShortPrice = (n) => {
   if (!n) return '0';
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1) + 'M';
-  if (n >= 1_000)     return (n / 1_000).toFixed(n % 1_000 === 0 ? 0 : 0) + 'k';
-  return n.toString();
+  if (n >= 1_000) return (n / 1_000).toFixed(n % 1_000 === 0 ? 0 : 0) + 'k';
+  return Math.round(n).toString();
 };
 
 const VI_DAYS = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
-const VI_MONTHS = ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6',
-                   'Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
+const VI_MONTHS = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
+  'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
 
 function getDaysInMonth(year, month) {
   return new Date(year, month + 1, 0).getDate();
@@ -46,19 +46,49 @@ function AdCostModal({ record, defaultDate, onClose, onSave, onDelete }) {
       ? new Date(record.date).toISOString().split('T')[0]
       : (defaultDate || new Date().toISOString().split('T')[0])
   );
-  const [platform, setPlatform] = useState(record?.platform || 'facebook');
-  const [amount, setAmount] = useState(record?.amount ?? '');
+  const getVatForPlatform = (plat) => plat === 'shopee' ? 8 : 10;
+
+  const isOldRecord = record && record.base_amount == null;
+  const initialVat = isOldRecord ? getVatForPlatform(record.platform) : (record?.vat ?? getVatForPlatform(record?.platform || 'shopee'));
+  
+  let initialBaseAmount = record?.base_amount ?? '';
+  if (isOldRecord && record?.amount) {
+    initialBaseAmount = Number((record.amount / (1 + initialVat / 100)).toFixed(2));
+    if (initialBaseAmount % 1 === 0) initialBaseAmount = Math.round(initialBaseAmount);
+  }
+
+  const [platform, setPlatform] = useState(record?.platform || 'shopee');
+  const [baseAmount, setBaseAmount] = useState(initialBaseAmount);
+  const [vat, setVat] = useState(initialVat);
   const [note, setNote] = useState(record?.note || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const handlePlatformChange = (p) => {
+    setPlatform(p);
+    if (isEdit && p === record.platform) {
+      setVat(initialVat);
+    } else {
+      setVat(getVatForPlatform(p));
+    }
+  };
+
+  const amount = baseAmount ? Number(baseAmount) + (Number(baseAmount) * Number(vat) / 100) : 0;
+
   const handleSubmit = async () => {
-    if (!amount || Number(amount) < 0) { setError('Vui lòng nhập số tiền hợp lệ'); return; }
+    if (!baseAmount || Number(baseAmount) < 0) { setError('Vui lòng nhập chi phí hợp lệ'); return; }
     setError(''); setLoading(true);
     try {
-      const payload = { date: new Date(date), platform, amount: Number(amount), note };
+      const payload = { 
+        date: new Date(date), 
+        platform, 
+        base_amount: Number(baseAmount),
+        vat: Number(vat),
+        amount: amount, 
+        note 
+      };
       if (isEdit) await adCostService.updateAdCost(record._id, payload);
-      else        await adCostService.createAdCost(payload);
+      else await adCostService.createAdCost(payload);
       onSave();
     } catch (err) {
       setError(err.response?.data?.message || 'Có lỗi xảy ra');
@@ -93,10 +123,9 @@ function AdCostModal({ record, defaultDate, onClose, onSave, onDelete }) {
             <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Nền tảng</label>
             <div className="grid grid-cols-3 gap-2">
               {PLATFORMS.map(p => (
-                <button key={p.key} onClick={() => setPlatform(p.key)}
-                  className={`py-2.5 rounded-lg text-[13px] font-bold border-2 transition-all ${
-                    platform === p.key ? 'shadow-sm scale-[1.02]' : 'border-outline-variant/40 hover:border-outline-variant'
-                  }`}
+                <button key={p.key} onClick={() => handlePlatformChange(p.key)}
+                  className={`py-2.5 rounded-lg text-[13px] font-bold border-2 transition-all ${platform === p.key ? 'shadow-sm scale-[1.02]' : 'border-outline-variant/40 hover:border-outline-variant'
+                    }`}
                   style={{ color: platform === p.key ? p.color : '#5f6368', backgroundColor: platform === p.key ? p.bg : 'white', borderColor: platform === p.key ? p.color : undefined }}
                 >
                   {p.label}
@@ -105,15 +134,26 @@ function AdCostModal({ record, defaultDate, onClose, onSave, onDelete }) {
             </div>
           </div>
 
-          <div>
-            <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Chi phí (VNĐ)</label>
-            <input type="number" min="0" value={amount} onChange={e => setAmount(e.target.value)}
-              placeholder="Ví dụ: 500000"
-              className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-[16px] font-bold focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
-            {amount > 0 && (
-              <p className="text-[12px] text-primary mt-1 font-medium">{formatPrice(Number(amount))}</p>
-            )}
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Chi phí gốc (VNĐ)</label>
+              <input type="number" min="0" value={baseAmount} onChange={e => setBaseAmount(e.target.value)}
+                placeholder="Ví dụ: 500000"
+                className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-[16px] font-bold focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+            </div>
+            <div className="w-[100px]">
+              <label className="block text-[13px] font-bold text-on-surface-variant mb-2">VAT (%)</label>
+              <input type="number" min="0" max="100" value={vat} onChange={e => setVat(e.target.value)}
+                className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-[16px] font-bold text-center focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+            </div>
           </div>
+
+          {baseAmount > 0 && (
+            <div className="bg-primary-container/30 px-4 py-3 rounded-lg border border-primary/20 flex justify-between items-center">
+              <span className="text-[13px] font-bold text-on-surface-variant">Tổng chi phí (Gốc + VAT)</span>
+              <span className="text-[16px] font-bold text-primary">{formatPrice(amount)}</span>
+            </div>
+          )}
 
           <div>
             <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Ghi chú</label>
@@ -150,13 +190,13 @@ function AdCostModal({ record, defaultDate, onClose, onSave, onDelete }) {
 // ─── Main Component ────────────────────────────────────────────────
 export default function AdCostManagement() {
   const now = new Date();
-  const [viewYear, setViewYear]   = useState(now.getFullYear());
+  const [viewYear, setViewYear] = useState(now.getFullYear());
   const [viewMonth, setViewMonth] = useState(now.getMonth()); // 0-indexed
-  const [records, setRecords]     = useState([]);
-  const [loading, setLoading]     = useState(true);
+  const [records, setRecords] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedDay, setSelectedDay] = useState(now.getDate());
-  const [modal, setModal]         = useState(null); // null | { type: 'add'|'edit', data?, defaultDate? }
-  const [toast, setToast]         = useState(null);
+  const [modal, setModal] = useState(null); // null | { type: 'add'|'edit', data?, defaultDate? }
+  const [toast, setToast] = useState(null);
   const [filterPlatform, setFilterPlatform] = useState('all');
   const [orders, setOrders] = useState([]);
 
@@ -225,11 +265,11 @@ export default function AdCostManagement() {
       return d.getFullYear() === viewYear && d.getMonth() === viewMonth && d.getDate() === selectedDay;
     }).length;
   }, [orders, viewYear, viewMonth, selectedDay]);
-  
+
   const costPerOrder = selectedDayOrdersCount > 0 ? (dayTotal / selectedDayOrdersCount) : 0;
 
   // Calendar data
-  const daysInMonth  = getDaysInMonth(viewYear, viewMonth);
+  const daysInMonth = getDaysInMonth(viewYear, viewMonth);
   const firstWeekDay = getFirstDayOfWeek(viewYear, viewMonth); // 0=Sun
 
   // Re-order: Mon first (T2...CN)
@@ -263,7 +303,7 @@ export default function AdCostManagement() {
     } catch { showToast('Xóa thất bại', 'error'); }
   };
 
-  const selectedDateStr = `${String(selectedDay).padStart(2,'0')}/${String(viewMonth+1).padStart(2,'0')}/${viewYear}`;
+  const selectedDateStr = `${String(selectedDay).padStart(2, '0')}/${String(viewMonth + 1).padStart(2, '0')}/${viewYear}`;
 
   // Build calendar grid: 7 cols, up to 6 rows
   const totalCells = startCol + daysInMonth;
@@ -273,9 +313,8 @@ export default function AdCostManagement() {
     <Layout>
       {/* Toast */}
       {toast && (
-        <div className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg text-sm font-semibold animate-[fadeIn_0.3s_ease] ${
-          toast.type === 'error' ? 'bg-error-container text-on-error-container' : 'bg-[#d1fae5] text-[#059669]'
-        }`}>{toast.msg}</div>
+        <div className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg text-sm font-semibold animate-[fadeIn_0.3s_ease] ${toast.type === 'error' ? 'bg-error-container text-on-error-container' : 'bg-[#d1fae5] text-[#059669]'
+          }`}>{toast.msg}</div>
       )}
 
       {/* Modal */}
@@ -286,14 +325,14 @@ export default function AdCostManagement() {
         <AdCostModal record={modal.data} onClose={() => setModal(null)} onSave={handleSave} onDelete={handleDelete} />
       )}
 
-      <div className="p-lg h-full flex flex-col">
+      <div className="h-full flex flex-col">
         {/* Header */}
         <div className="flex justify-between items-end mb-lg">
           <div>
             <h2 className="text-[24px] font-bold text-on-surface">Chi phí Quảng cáo</h2>
             <p className="text-on-surface-variant mt-1 text-[14px]">Theo dõi chi phí quảng cáo theo từng ngày và nền tảng</p>
           </div>
-          <button onClick={() => setModal({ type: 'add', defaultDate: `${viewYear}-${String(viewMonth+1).padStart(2,'0')}-${String(selectedDay).padStart(2,'0')}` })}
+          <button onClick={() => setModal({ type: 'add', defaultDate: `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}` })}
             className="flex items-center gap-xs px-lg py-sm bg-primary text-white rounded-lg hover:opacity-90 shadow-sm font-semibold text-sm">
             <span className="material-symbols-outlined text-[20px]">add</span>
             <span>Thêm chi phí</span>
@@ -322,7 +361,7 @@ export default function AdCostManagement() {
 
             {/* Day-of-week header: T2...CN */}
             <div className="grid grid-cols-7 border-b border-outline-variant/20">
-              {['T2','T3','T4','T5','T6','T7','CN'].map((d, i) => (
+              {['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map((d, i) => (
                 <div key={d} className={`py-2 text-center text-[12px] font-bold uppercase tracking-wider ${i === 6 ? 'text-error' : 'text-on-surface-variant'}`}>
                   {d}
                 </div>
@@ -341,7 +380,7 @@ export default function AdCostManagement() {
                     const isSelected = isValid && day === selectedDay;
                     const isSunday = colIdx === 6;
                     const dayRecords = isValid ? (byDay[day] || []) : [];
-                    const dayTotal  = dayRecords.reduce((s, r) => s + r.amount, 0);
+                    const dayTotal = dayRecords.reduce((s, r) => s + r.amount, 0);
 
                     return (
                       <div key={colIdx}
@@ -404,7 +443,7 @@ export default function AdCostManagement() {
                   <p className="text-[16px] font-bold text-on-surface">Chi tiết ngày {selectedDateStr}</p>
                   <p className="text-[12px] text-on-surface-variant mt-0.5">{VI_MONTHS[viewMonth]}</p>
                 </div>
-                <button onClick={() => setModal({ type: 'add', defaultDate: `${viewYear}-${String(viewMonth+1).padStart(2,'0')}-${String(selectedDay).padStart(2,'0')}` })}
+                <button onClick={() => setModal({ type: 'add', defaultDate: `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}` })}
                   className="p-1.5 text-primary hover:bg-primary-container/30 rounded-lg transition-colors">
                   <span className="material-symbols-outlined text-[20px]">add_circle</span>
                 </button>
@@ -430,7 +469,7 @@ export default function AdCostManagement() {
               {/* Records list */}
               <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-2 max-h-[280px]">
                 {loading ? (
-                  Array.from({length:3}).map((_,i) => (
+                  Array.from({ length: 3 }).map((_, i) => (
                     <div key={i} className="h-14 bg-surface-container rounded-xl animate-pulse" />
                   ))
                 ) : selectedRecords.length === 0 ? (
@@ -507,7 +546,7 @@ export default function AdCostManagement() {
               <h4 className="font-bold text-[14px] text-on-surface mb-4">Phân bổ nền tảng</h4>
               {loading ? (
                 <div className="space-y-3">
-                  {[...Array(3)].map((_,i) => <div key={i} className="h-8 bg-surface-container-high rounded animate-pulse" />)}
+                  {[...Array(3)].map((_, i) => <div key={i} className="h-8 bg-surface-container-high rounded animate-pulse" />)}
                 </div>
               ) : platformTotals.length === 0 ? (
                 <p className="text-[13px] text-on-surface-variant text-center py-4">Chưa có dữ liệu trong tháng</p>

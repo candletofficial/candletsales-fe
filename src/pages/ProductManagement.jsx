@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { productService } from '../services/productService';
 import { materialService } from '../services/materialService';
 import Layout from '../components/Layout';
+import SearchableSelect from '../components/SearchableSelect';
 import { formatPrice } from '../utils/formatPrice';
 
 const getEmptyForm = () => ({
@@ -16,6 +18,11 @@ const getEmptyForm = () => ({
 });
 
 function ProductModal({ product, materials, onClose, onSave, onDelete }) {
+  const materialOptions = useMemo(() => materials.map(m => ({
+    value: m._id,
+    label: `${m.name} (${formatPrice(m.price)} / ${m.unit})`
+  })), [materials]);
+
   const [form, setForm] = useState(() => {
     if (!product) return getEmptyForm();
     const p = JSON.parse(JSON.stringify(product));
@@ -179,18 +186,17 @@ function ProductModal({ product, materials, onClose, onSave, onDelete }) {
               <div className="space-y-3">
                 {form.base_ingredients.map((item, idx) => (
                   <div key={idx} className="flex gap-4 items-center bg-white p-3 rounded-lg border border-outline-variant/50 shadow-sm">
-                    <div className="flex-1">
-                      <select value={item.ingredient_id} onChange={e => {
-                        const newArr = [...form.base_ingredients];
-                        newArr[idx].ingredient_id = e.target.value;
-                        setForm({ ...form, base_ingredients: newArr });
-                      }}
-                        className="w-full border-none bg-transparent focus:ring-0 text-[15px] text-on-surface">
-                        <option value="" disabled hidden>-- Chọn nguyên liệu --</option>
-                        {materials.map(m => (
-                          <option key={m._id} value={m._id}>{m.name} ({formatPrice(m.price)} / {m.unit})</option>
-                        ))}
-                      </select>
+                    <div className="flex-1 min-w-0">
+                      <SearchableSelect
+                        options={materialOptions}
+                        value={item.ingredient_id}
+                        onChange={(val) => {
+                          const newArr = [...form.base_ingredients];
+                          newArr[idx].ingredient_id = val;
+                          setForm({ ...form, base_ingredients: newArr });
+                        }}
+                        placeholder="-- Chọn nguyên liệu --"
+                      />
                     </div>
                     <div className="w-[120px]">
                       <input type="number" min="0" step="0.01" value={item.quantity} onChange={e => {
@@ -294,8 +300,8 @@ function ProductModal({ product, materials, onClose, onSave, onDelete }) {
 
               <div className="space-y-4">
                 {form.skus.map((sku, sIdx) => (
-                  <div key={sIdx} className="bg-white border border-outline-variant/50 rounded-xl shadow-sm overflow-hidden">
-                    <div className="bg-surface-container-low px-4 py-2 border-b border-outline-variant/50 flex justify-between items-center">
+                  <div key={sIdx} className="bg-white border border-outline-variant/50 rounded-xl shadow-sm">
+                    <div className="bg-surface-container-low px-4 py-2 border-b border-outline-variant/50 flex justify-between items-center rounded-t-xl">
                       <div className="flex items-center gap-3">
                         <span className="font-mono text-sm font-bold text-on-surface">{sku.id}</span>
                         <div className="flex gap-1">
@@ -328,17 +334,19 @@ function ProductModal({ product, materials, onClose, onSave, onDelete }) {
                       <p className="text-[12px] font-bold text-on-surface-variant mb-2 uppercase">Nguyên liệu bổ sung riêng (Extra Ingredients)</p>
                       {sku.extra_ingredients.map((item, idx) => (
                         <div key={idx} className="flex gap-3 items-center mb-2">
-                          <select value={item.ingredient_id} onChange={e => {
-                            const newSkus = [...form.skus];
-                            newSkus[sIdx].extra_ingredients[idx].ingredient_id = e.target.value;
-                            setForm({ ...form, skus: newSkus });
-                          }}
-                            className="flex-1 text-sm border border-outline-variant rounded-md px-2 py-1.5">
-                            <option value="" disabled hidden>-- Chọn nguyên liệu --</option>
-                            {materials.map(m => (
-                              <option key={m._id} value={m._id}>{m.name} ({formatPrice(m.price)} / {m.unit})</option>
-                            ))}
-                          </select>
+                          <div className="flex-1 min-w-[250px]">
+                            <SearchableSelect
+                              options={materialOptions}
+                              value={item.ingredient_id}
+                              onChange={(val) => {
+                                const newSkus = [...form.skus];
+                                newSkus[sIdx].extra_ingredients[idx].ingredient_id = val;
+                                setForm({ ...form, skus: newSkus });
+                              }}
+                              className="border border-outline-variant"
+                              placeholder="-- Chọn nguyên liệu --"
+                            />
+                          </div>
                           <input type="number" min="0" step="0.01" value={item.quantity} onChange={e => {
                             const newSkus = [...form.skus];
                             newSkus[sIdx].extra_ingredients[idx].quantity = Number(e.target.value);
@@ -406,6 +414,8 @@ export default function ProductManagement() {
   const [currentPage, setCurrentPage] = useState(1);
   const [modal, setModal] = useState(null); // { type: 'add' | 'edit' | 'delete', data?: any }
   const [toast, setToast] = useState(null);
+  const [searchParams] = useSearchParams();
+  const searchTerm = searchParams.get('q') || '';
 
   useEffect(() => {
     fetchData();
@@ -465,9 +475,26 @@ export default function ProductManagement() {
     }
   };
 
+  const filteredProducts = useMemo(() => {
+    if (!searchTerm) return products;
+    const term = searchTerm.toLowerCase();
+    return products.filter(p => {
+      const matchName = p.name?.toLowerCase().includes(term);
+      const matchSku = p.productId?.toLowerCase().includes(term);
+      // Also check inner SKUs
+      const matchInnerSku = p.skus?.some(sku => sku.sku?.toLowerCase().includes(term));
+      return matchName || matchSku || matchInnerSku;
+    });
+  }, [products, searchTerm]);
+
+  // Reset page when search term changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
   const ITEMS_PER_PAGE = 10;
-  const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE);
-  const currentProducts = products.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
+  const currentProducts = filteredProducts.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   return (
     <Layout>
@@ -499,7 +526,7 @@ export default function ProductManagement() {
         </div>
       )}
 
-      <div className="p-lg">
+      <div>
         {/* Header */}
         <div className="flex justify-between items-end mb-lg">
           <div>
@@ -627,10 +654,10 @@ export default function ProductManagement() {
           </div>
 
           {/* Footer */}
-          {!loading && products.length > 0 && (
+          {!loading && filteredProducts.length > 0 && (
             <div className="px-lg py-md border-t border-outline-variant/30 flex flex-col sm:flex-row gap-4 justify-between items-center bg-white">
               <p className="text-on-surface-variant text-[13px]">
-                Hiển thị <span className="font-bold text-on-surface">{currentProducts.length}</span> / <span className="font-bold text-on-surface">{products.length}</span> sản phẩm
+                Hiển thị <span className="font-bold text-on-surface">{currentProducts.length}</span> trong <span className="font-bold text-on-surface">{filteredProducts.length}</span> sản phẩm {searchTerm && `(từ ${products.length})`}
               </p>
 
               {totalPages > 1 && (

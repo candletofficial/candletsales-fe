@@ -1,15 +1,26 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { importService } from '../services/importService';
 import { materialService } from '../services/materialService';
+import SearchableSelect from '../components/SearchableSelect';
 import { formatPrice } from '../utils/formatPrice';
 import { useAuth } from '../hooks/useAuth';
 
-function ImportModal({ materials, user, onClose, onSave }) {
-  const [items, setItems] = useState([]);
+function ImportModal({ materials, user, onClose, onSave, initialMaterialId }) {
+  const [items, setItems] = useState(
+    initialMaterialId 
+      ? [{ material_id: initialMaterialId, quantity: '', total_price: '' }] 
+      : []
+  );
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const materialOptions = useMemo(() => materials.map(m => ({
+    value: m._id,
+    label: `${m.sku} - ${m.name} (${m.unit})`
+  })), [materials]);
 
   const handleAddItem = () => {
     setItems([...items, { material_id: '', quantity: '', total_price: '' }]);
@@ -106,13 +117,13 @@ function ImportModal({ materials, user, onClose, onSave }) {
             return (
               <div key={index} className="grid grid-cols-12 gap-3 mb-3 items-start bg-surface-container-low p-3 rounded-lg">
                 <div className="col-span-4">
-                  <select value={item.material_id} onChange={e => handleItemChange(index, 'material_id', e.target.value)} required
-                    className="w-full border border-outline-variant rounded-lg px-3 py-2 text-[14px] bg-white focus:outline-none focus:border-primary">
-                    <option value="" disabled hidden>Chọn nguyên liệu</option>
-                    {materials.map(m => (
-                      <option key={m._id} value={m._id}>{m.sku} - {m.name} ({m.unit})</option>
-                    ))}
-                  </select>
+                  <SearchableSelect
+                    options={materialOptions}
+                    value={item.material_id}
+                    onChange={val => handleItemChange(index, 'material_id', val)}
+                    placeholder="Chọn nguyên liệu"
+                    className="border border-outline-variant bg-white"
+                  />
                 </div>
                 <div className="col-span-2">
                   <input type="number" step="any" min="0.01" value={item.quantity} onChange={e => handleItemChange(index, 'quantity', e.target.value)} required placeholder="Số lượng"
@@ -122,7 +133,7 @@ function ImportModal({ materials, user, onClose, onSave }) {
                   <input type="number" min="0" value={item.total_price} onChange={e => handleItemChange(index, 'total_price', e.target.value)} required placeholder="Tổng tiền (VNĐ)"
                     className="w-full border border-outline-variant rounded-lg px-3 py-2 text-[14px] focus:outline-none focus:border-primary" />
                 </div>
-                <div className="col-span-2 flex flex-col justify-center pt-2">
+                <div className="col-span-2 flex flex-col justify-center">
                   <span className="text-[12px] text-on-surface-variant">Đơn giá mới:</span>
                   <span className="text-[13px] font-semibold text-primary">{formatPrice(unitPrice)}</span>
                 </div>
@@ -256,6 +267,7 @@ const TABS = [
 
 export default function ImportManagement() {
   const { user } = useAuth();
+  const location = useLocation();
   const [tickets, setTickets] = useState([]);
   const [materials, setMaterials] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -264,8 +276,9 @@ export default function ImportManagement() {
   const [filterDate, setFilterDate] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  
+
   const [modalOpen, setModalOpen] = useState(false);
+  const [initialMaterialId, setInitialMaterialId] = useState(null);
   const [detailsTicket, setDetailsTicket] = useState(null);
   const [confirmAction, setConfirmAction] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
@@ -289,6 +302,15 @@ export default function ImportManagement() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (location.state?.autoOpenImport && materials.length > 0) {
+      setInitialMaterialId(location.state.materialId);
+      setModalOpen(true);
+      // Xoá state để không bị mở lại khi refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, materials]);
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
@@ -334,11 +356,11 @@ export default function ImportManagement() {
       t.total_amount,
       `"${(t.note || '').replace(/"/g, '""')}"`
     ]);
-    
-    let csvContent = "data:text/csv;charset=utf-8,\uFEFF" 
-      + headers.join(',') + '\n' 
+
+    let csvContent = "data:text/csv;charset=utf-8,\uFEFF"
+      + headers.join(',') + '\n'
       + rows.map(e => e.join(',')).join('\n');
-      
+
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -374,9 +396,9 @@ export default function ImportManagement() {
         </div>
       )}
 
-      {modalOpen && <ImportModal materials={materials} user={user} onClose={() => setModalOpen(false)} onSave={() => { setModalOpen(false); showToast('Đã tạo phiếu nhập thành công'); fetchData(); }} />}
+      {modalOpen && <ImportModal materials={materials} user={user} onClose={() => { setModalOpen(false); setInitialMaterialId(null); }} onSave={() => { setModalOpen(false); setInitialMaterialId(null); showToast('Đã tạo phiếu nhập thành công'); fetchData(); window.dispatchEvent(new CustomEvent('materialsChanged')); }} initialMaterialId={initialMaterialId} />}
       {detailsTicket && <TicketDetailsModal ticket={detailsTicket} onClose={() => setDetailsTicket(null)} />}
-      
+
       {confirmAction?.type === 'complete' && (
         <ConfirmModal
           title="Xác nhận đẩy hàng"
@@ -427,19 +449,19 @@ export default function ImportManagement() {
               </button>
             ))}
           </div>
-          
+
           <div className="flex items-center gap-3">
             <div className="relative group flex items-center border border-outline-variant rounded-lg overflow-hidden bg-white hover:bg-surface-container-low transition-colors">
               <span className="material-symbols-outlined absolute left-2.5 text-[18px] text-on-surface-variant group-hover:text-primary transition-colors pointer-events-none">calendar_month</span>
-              <input 
-                type="date" 
+              <input
+                type="date"
                 value={filterDate}
                 onChange={(e) => { setFilterDate(e.target.value); setCurrentPage(1); }}
                 className="pl-9 pr-2 py-1.5 text-[13px] font-semibold text-on-surface-variant focus:outline-none bg-transparent cursor-pointer w-[130px]"
                 title="Lọc theo ngày nhập"
               />
             </div>
-            
+
             <button onClick={exportExcel} className="px-4 py-1.5 border border-outline-variant bg-white rounded-lg text-[13px] font-semibold text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors flex items-center gap-2">
               <span className="material-symbols-outlined text-[18px]">download</span>
               Xuất Excel
@@ -451,106 +473,106 @@ export default function ImportManagement() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-            <tr className="bg-surface-container-lowest">
-              <th className="px-lg py-md text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold">Mã phiếu</th>
-              <th className="px-lg py-md text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold">Ngày lập</th>
-              <th className="px-lg py-md text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold">Người nhập</th>
-              <th className="px-lg py-md text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold">Trạng thái</th>
-              <th className="px-lg py-md text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold text-right">Tổng tiền</th>
-              <th className="px-lg py-md text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold text-right">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-outline-variant/30">
-            {loading ? (
-              [...Array(5)].map((_, i) => (
-                <tr key={i}>
-                  {[...Array(6)].map((_, j) => (
-                    <td key={j} className="px-lg py-md">
-                      <div className="h-4 bg-surface-container-high rounded animate-pulse" />
-                    </td>
-                  ))}
-                </tr>
-              ))
-            ) : filteredTickets.length === 0 ? (
-              <tr>
-                <td colSpan="6" className="px-lg py-16 text-center">
-                  <span className="material-symbols-outlined text-[48px] text-on-surface-variant opacity-30 block mb-3">local_shipping</span>
-                  <p className="text-on-surface-variant text-sm">
-                    {tickets.length === 0 ? 'Chưa có phiếu nhập nào' : 'Không tìm thấy phiếu nhập phù hợp'}
-                  </p>
-                  {tickets.length === 0 && (
-                    <button onClick={() => setModalOpen(true)} className="mt-3 text-primary text-sm font-semibold hover:underline">
-                      + Tạo phiếu nhập mới
-                    </button>
-                  )}
-                </td>
+              <tr className="bg-surface-container-lowest">
+                <th className="px-lg py-md text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold">Mã phiếu</th>
+                <th className="px-lg py-md text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold">Ngày lập</th>
+                <th className="px-lg py-md text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold">Người nhập</th>
+                <th className="px-lg py-md text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold">Trạng thái</th>
+                <th className="px-lg py-md text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold text-right">Tổng tiền</th>
+                <th className="px-lg py-md text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold text-right">Thao tác</th>
               </tr>
-            ) : (
-              currentTickets.map(ticket => (
-                <tr key={ticket._id} className="hover:bg-surface-container-low/50 transition-colors">
-                  <td className="px-lg py-md text-[14px] font-semibold">{ticket.code || 'PN-' + parseInt(ticket._id.slice(-6), 16).toString().padStart(7, '0')}</td>
-                  <td className="px-lg py-md text-[14px]">{new Date(ticket.createdAt).toLocaleDateString('vi-VN')}</td>
-                  <td className="px-lg py-md text-[14px]">{ticket.imported_by || 'Admin'}</td>
-                  <td className="px-lg py-md">
-                    <span className={`inline-block px-2.5 py-1 rounded-md text-[12px] font-bold ${ticket.status === 'completed' ? 'bg-primary-container text-primary' : 'bg-surface-container-high text-on-surface-variant'}`}>
-                      {ticket.status === 'completed' ? 'Đã nhập kho' : 'Chờ xác nhận'}
-                    </span>
-                  </td>
-                  <td className="px-lg py-md text-[14px] font-bold text-primary text-right">{formatPrice(ticket.total_amount)}</td>
-                  <td className="px-lg py-md text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button onClick={() => setDetailsTicket(ticket)} className="p-1.5 text-on-surface-variant hover:bg-surface-container rounded transition-colors" title="Chi tiết">
-                        <span className="material-symbols-outlined text-[18px]">visibility</span>
+            </thead>
+            <tbody className="divide-y divide-outline-variant/30">
+              {loading ? (
+                [...Array(5)].map((_, i) => (
+                  <tr key={i}>
+                    {[...Array(6)].map((_, j) => (
+                      <td key={j} className="px-lg py-md">
+                        <div className="h-4 bg-surface-container-high rounded animate-pulse" />
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              ) : filteredTickets.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="px-lg py-16 text-center">
+                    <span className="material-symbols-outlined text-[48px] text-on-surface-variant opacity-30 block mb-3">local_shipping</span>
+                    <p className="text-on-surface-variant text-sm">
+                      {tickets.length === 0 ? 'Chưa có phiếu nhập nào' : 'Không tìm thấy phiếu nhập phù hợp'}
+                    </p>
+                    {tickets.length === 0 && (
+                      <button onClick={() => setModalOpen(true)} className="mt-3 text-primary text-sm font-semibold hover:underline">
+                        + Tạo phiếu nhập mới
                       </button>
-                      {ticket.status === 'pending' && (
-                        <>
-                          <button disabled={actionLoading} onClick={() => setConfirmAction({ type: 'complete', ticket })} className="p-1.5 text-primary hover:bg-primary-container rounded transition-colors disabled:opacity-50" title="Xác nhận đẩy hàng">
-                            <span className="material-symbols-outlined text-[18px]">check_circle</span>
-                          </button>
-                          <button disabled={actionLoading} onClick={() => setConfirmAction({ type: 'delete', ticket })} className="p-1.5 text-error hover:bg-error-container rounded transition-colors disabled:opacity-50" title="Xóa">
-                            <span className="material-symbols-outlined text-[18px]">delete</span>
-                          </button>
-                        </>
-                      )}
-                    </div>
+                    )}
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
+              ) : (
+                currentTickets.map(ticket => (
+                  <tr key={ticket._id} className="hover:bg-surface-container-low/50 transition-colors">
+                    <td className="px-lg py-md text-[14px] font-semibold">{ticket.code || 'PN-' + parseInt(ticket._id.slice(-6), 16).toString().padStart(7, '0')}</td>
+                    <td className="px-lg py-md text-[14px]">{new Date(ticket.createdAt).toLocaleDateString('vi-VN')}</td>
+                    <td className="px-lg py-md text-[14px]">{ticket.imported_by || 'Admin'}</td>
+                    <td className="px-lg py-md">
+                      <span className={`inline-block px-2.5 py-1 rounded-md text-[12px] font-bold ${ticket.status === 'completed' ? 'bg-primary-container text-primary' : 'bg-surface-container-high text-on-surface-variant'}`}>
+                        {ticket.status === 'completed' ? 'Đã nhập kho' : 'Chờ xác nhận'}
+                      </span>
+                    </td>
+                    <td className="px-lg py-md text-[14px] font-bold text-primary text-right">{formatPrice(ticket.total_amount)}</td>
+                    <td className="px-lg py-md text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button onClick={() => setDetailsTicket(ticket)} className="p-1.5 text-on-surface-variant hover:bg-surface-container rounded transition-colors" title="Chi tiết">
+                          <span className="material-symbols-outlined text-[18px]">visibility</span>
+                        </button>
+                        {ticket.status === 'pending' && (
+                          <>
+                            <button disabled={actionLoading} onClick={() => setConfirmAction({ type: 'complete', ticket })} className="p-1.5 text-primary hover:bg-primary-container rounded transition-colors disabled:opacity-50" title="Xác nhận đẩy hàng">
+                              <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                            </button>
+                            <button disabled={actionLoading} onClick={() => setConfirmAction({ type: 'delete', ticket })} className="p-1.5 text-error hover:bg-error-container rounded transition-colors disabled:opacity-50" title="Xóa">
+                              <span className="material-symbols-outlined text-[18px]">delete</span>
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
           </table>
         </div>
 
-      {/* Footer */}
-      {!loading && filteredTickets.length > 0 && (
-        <div className="px-lg py-md border-t border-outline-variant/30 flex flex-col sm:flex-row gap-4 justify-between items-center bg-white">
-          <p className="text-on-surface-variant text-[13px]">
-            Hiển thị <span className="font-bold text-on-surface">{currentTickets.length}</span> / <span className="font-bold text-on-surface">{filteredTickets.length}</span> phiếu nhập
-          </p>
-          
-          {totalPages > 1 && (
-            <div className="flex items-center gap-2">
-              <button 
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))} 
-                disabled={currentPage === 1}
-                className="p-1 rounded hover:bg-surface-container disabled:opacity-50 text-on-surface-variant transition-colors"
-              >
-                <span className="material-symbols-outlined text-[20px]">chevron_left</span>
-              </button>
-              <span className="text-[13px] font-medium text-on-surface">
-                Trang {currentPage} / {totalPages}
-              </span>
-              <button 
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} 
-                disabled={currentPage === totalPages}
-                className="p-1 rounded hover:bg-surface-container disabled:opacity-50 text-on-surface-variant transition-colors"
-              >
-                <span className="material-symbols-outlined text-[20px]">chevron_right</span>
-              </button>
-            </div>
-          )}
-        </div>
-      )}
+        {/* Footer */}
+        {!loading && filteredTickets.length > 0 && (
+          <div className="px-lg py-md border-t border-outline-variant/30 flex flex-col sm:flex-row gap-4 justify-between items-center bg-white">
+            <p className="text-on-surface-variant text-[13px]">
+              Hiển thị <span className="font-bold text-on-surface">{currentTickets.length}</span> / <span className="font-bold text-on-surface">{filteredTickets.length}</span> phiếu nhập
+            </p>
+
+            {totalPages > 1 && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="p-1 rounded hover:bg-surface-container disabled:opacity-50 text-on-surface-variant transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[20px]">chevron_left</span>
+                </button>
+                <span className="text-[13px] font-medium text-on-surface">
+                  Trang {currentPage} / {totalPages}
+                </span>
+                <button
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="p-1 rounded hover:bg-surface-container disabled:opacity-50 text-on-surface-variant transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[20px]">chevron_right</span>
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </Layout>
   );

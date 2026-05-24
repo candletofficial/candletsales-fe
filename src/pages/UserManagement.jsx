@@ -6,9 +6,9 @@ import Layout from '../components/Layout';
 
 const STATUS_TABS = [
   { value: '', label: 'Tất cả' },
-  { value: 'pending', label: '⏳ Chờ duyệt' },
-  { value: 'active', label: '✅ Hoạt động' },
-  { value: 'rejected', label: '❌ Từ chối' },
+  { value: 'pending', icon: 'hourglass_empty', label: 'Chờ duyệt' },
+  { value: 'active', icon: 'check_circle', label: 'Hoạt động' },
+  { value: 'rejected', icon: 'cancel', label: 'Từ chối' },
 ];
 
 const STATUS_BADGE = {
@@ -127,9 +127,10 @@ export default function UserManagement() {
           <button
             id={`tab-${tab.value || 'all'}`}
             key={tab.value}
-            className={`tab-btn ${statusFilter === tab.value ? 'active' : ''}`}
+            className={`tab-btn flex items-center gap-1.5 ${statusFilter === tab.value ? 'active' : ''}`}
             onClick={() => setFilter(tab.value)}
           >
+            {tab.icon && <span className="material-symbols-outlined text-[18px]">{tab.icon}</span>}
             {tab.label}
           </button>
         ))}
@@ -150,7 +151,7 @@ export default function UserManagement() {
           </div>
         ) : users.length === 0 ? (
           <div className="table-empty">
-            <span className="table-empty-icon">🔍</span>
+            <span className="material-symbols-outlined text-[48px] text-outline-variant mb-2">search_off</span>
             <p>Không có tài khoản nào</p>
           </div>
         ) : (
@@ -188,57 +189,60 @@ export default function UserManagement() {
                     </td>
                     <td>
                       {u.isDefaultAdmin ? (
-                        <span className="cell-protected">🛡️ Được bảo vệ</span>
+                        <span className="cell-protected flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[16px] text-error">shield</span> 
+                          Được bảo vệ
+                        </span>
                       ) : (
-                        <div className="action-group">
+                        <div className="action-group flex items-center gap-2">
                           {u.status === 'pending' && (
                             <>
                               <button
                                 id={`approve-${u._id}`}
-                                className="btn-action btn-approve"
+                                className="btn-action btn-approve flex items-center gap-1 hover:bg-[#d1fae5] px-2 py-1 rounded"
                                 disabled={actionLoading === u._id + 'approve'}
                                 onClick={() => handleAction(u._id, 'approve')}
                               >
-                                ✓ Duyệt
+                                <span className="material-symbols-outlined text-[16px]">check</span> Duyệt
                               </button>
                               <button
                                 id={`reject-${u._id}`}
-                                className="btn-action btn-reject"
+                                className="btn-action btn-reject flex items-center gap-1 hover:bg-error-container px-2 py-1 rounded"
                                 disabled={actionLoading === u._id + 'reject'}
                                 onClick={() => handleAction(u._id, 'reject', `Từ chối tài khoản "${u.name}"?`)}
                               >
-                                ✕ Từ chối
+                                <span className="material-symbols-outlined text-[16px]">close</span> Từ chối
                               </button>
                             </>
                           )}
                           {u.status === 'active' && (
                             <button
                               id={`revoke-${u._id}`}
-                              className="btn-action btn-revoke"
+                              className="btn-action btn-revoke flex items-center gap-1 hover:bg-surface-container-high px-2 py-1 rounded"
                               disabled={actionLoading === u._id + 'revoke'}
                               onClick={() => handleAction(u._id, 'revoke', `Thu hồi quyền tài khoản "${u.name}"?`)}
                             >
-                              ⟳ Thu hồi
+                              <span className="material-symbols-outlined text-[16px]">replay</span> Thu hồi
                             </button>
                           )}
                           {u.status === 'rejected' && (
                             <button
                               id={`approve-rej-${u._id}`}
-                              className="btn-action btn-approve"
+                              className="btn-action btn-approve flex items-center gap-1 hover:bg-[#d1fae5] px-2 py-1 rounded"
                               disabled={actionLoading === u._id + 'approve'}
                               onClick={() => handleAction(u._id, 'approve')}
                             >
-                              ✓ Duyệt lại
+                              <span className="material-symbols-outlined text-[16px]">check_circle</span> Duyệt lại
                             </button>
                           )}
                           {currentUser?.isDefaultAdmin && (
                             <button
                               id={`delete-${u._id}`}
-                              className="btn-action btn-delete"
+                              className="btn-action btn-delete flex items-center gap-1 hover:bg-error text-error hover:text-white px-2 py-1 rounded transition-colors"
                               disabled={actionLoading === u._id + 'delete'}
                               onClick={() => handleAction(u._id, 'delete', `Xóa vĩnh viễn tài khoản "${u.name}"? Hành động này không thể hoàn tác!`)}
                             >
-                              🗑
+                              <span className="material-symbols-outlined text-[16px]">delete</span>
                             </button>
                           )}
                         </div>

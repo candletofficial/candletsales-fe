@@ -8,7 +8,7 @@ import {
 } from 'recharts';
 
 // ─── Formatting helpers ───
-const formatCurrency = (n) => (n || 0).toLocaleString('vi-VN') + ' ₫';
+const formatCurrency = (n) => Math.round(n || 0).toLocaleString('vi-VN', { maximumFractionDigits: 0 }) + ' ₫';
 
 const GrowthBadge = ({ value }) => {
   if (value == null || value === 0) return null; // Don't show if 0 or null
@@ -57,7 +57,7 @@ export default function Dashboard() {
 
   return (
     <Layout>
-      <div className="p-lg h-full flex flex-col bg-surface-container-low overflow-y-auto">
+      <div className="h-full flex flex-col bg-surface-container-low overflow-y-auto">
         {/* Header */}
         <div className="flex justify-between items-start mb-lg">
           <div>

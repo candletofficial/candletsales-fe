@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { materialService } from '../services/materialService';
 import { formatPrice } from '../utils/formatPrice';
@@ -188,7 +189,7 @@ function DeleteModal({ material, onClose, onConfirm, loading, error }) {
         <p className={`text-sm text-on-surface-variant ${error ? 'mb-4' : 'mb-6'}`}>
           Bạn có chắc muốn xóa <span className="font-semibold text-on-surface">"{material.name}"</span> không? Hành động này không thể hoàn tác.
         </p>
-        
+
         {error && (
           <div className="w-full bg-error-container/40 text-error border border-error/20 p-3 rounded-lg text-[13px] font-semibold text-left mb-6 flex items-start gap-2">
             <span className="material-symbols-outlined text-[18px] mt-0.5">warning</span>
@@ -221,6 +222,8 @@ export default function MaterialManagement() {
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState('');
   const [toast, setToast] = useState(null);
+  const [searchParams] = useSearchParams();
+  const searchTerm = searchParams.get('q') || '';
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
@@ -273,10 +276,18 @@ export default function MaterialManagement() {
     }, 0),
   };
 
-  // Filter theo tab
+  // Filter theo tab & search
   const filtered = materials.filter((m) => {
-    if (activeTab === 'in_stock') return m.status === 'in_stock';
-    if (activeTab === 'low_stock') return m.status === 'low_stock' || m.status === 'out_of_stock';
+    if (activeTab === 'in_stock' && m.status !== 'in_stock') return false;
+    if (activeTab === 'low_stock' && m.status !== 'low_stock' && m.status !== 'out_of_stock') return false;
+
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      const matchName = m.name?.toLowerCase().includes(term);
+      const matchSku = m.sku?.toLowerCase().includes(term);
+      if (!matchName && !matchSku) return false;
+    }
+
     return true;
   });
 
@@ -311,7 +322,7 @@ export default function MaterialManagement() {
         <DeleteModal material={modal.data} onClose={() => { setModal(null); setActionError(''); }} onConfirm={handleDelete} loading={actionLoading} error={actionError} />
       )}
 
-      <div className="p-lg">
+      <div>
         {/* Header */}
         <div className="flex justify-between items-end mb-lg">
           <div>
@@ -503,11 +514,11 @@ export default function MaterialManagement() {
               <p className="text-on-surface-variant text-[13px]">
                 Hiển thị <span className="font-bold text-on-surface">{currentMaterials.length}</span> / <span className="font-bold text-on-surface">{filtered.length}</span> nguyên liệu
               </p>
-              
+
               {totalPages > 1 && (
                 <div className="flex items-center gap-2">
-                  <button 
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))} 
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                     disabled={currentPage === 1}
                     className="p-1 rounded hover:bg-surface-container disabled:opacity-50 text-on-surface-variant transition-colors"
                   >
@@ -516,8 +527,8 @@ export default function MaterialManagement() {
                   <span className="text-[13px] font-medium text-on-surface">
                     Trang {currentPage} / {totalPages}
                   </span>
-                  <button 
-                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} 
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                     disabled={currentPage === totalPages}
                     className="p-1 rounded hover:bg-surface-container disabled:opacity-50 text-on-surface-variant transition-colors"
                   >
