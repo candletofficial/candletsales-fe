@@ -27,7 +27,7 @@ function InventoryCheckModal({ materials, user, onClose, onSave }) {
       const initialItems = materials.map(m => ({
         material_id: m._id,
         system_stock: m.actualStock,
-        actual_stock: m.actualStock
+        actual_stock: ''
       }));
       setItems(initialItems);
     }
@@ -60,7 +60,8 @@ function InventoryCheckModal({ materials, user, onClose, onSave }) {
 
   const calculateDifference = (system, actual) => {
     if (actual === '' || actual === null) return 0;
-    return Number(actual) - Number(system);
+    const diff = Number(actual) - Number(system);
+    return Math.round(diff * 100) / 100;
   };
 
   const handleSubmit = async (e) => {
@@ -203,7 +204,7 @@ function InventoryCheckModal({ materials, user, onClose, onSave }) {
           <button type="button" onClick={onClose} className="px-5 py-2.5 rounded-lg font-semibold text-on-surface-variant hover:bg-surface-container transition-colors text-[14px]">
             Hủy
           </button>
-          <button type="button" onClick={handleSubmit} disabled={loading || items.length === 0} className="px-5 py-2.5 bg-primary text-white rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2 text-[14px] shadow-sm">
+          <button type="button" onClick={handleSubmit} disabled={loading || items.length === 0 || items.some(item => item.actual_stock === '')} className="px-5 py-2.5 bg-primary text-white rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2 text-[14px] shadow-sm">
             {loading ? <span className="material-symbols-outlined animate-spin">progress_activity</span> : <span className="material-symbols-outlined">save</span>}
             Lưu phiếu kiểm kho
           </button>
@@ -271,7 +272,7 @@ function TicketDetailsModal({ ticket, onClose }) {
                     <td className="px-4 py-3 text-[14px] text-right font-bold text-on-surface">{item.actual_stock} {item.material_id?.unit}</td>
                     <td className="px-4 py-3 text-[14px] text-right font-bold">
                       <span className={item.difference > 0 ? 'text-[#059669]' : item.difference < 0 ? 'text-error' : 'text-on-surface-variant'}>
-                        {item.difference > 0 ? `+${item.difference}` : item.difference}
+                        {item.difference > 0 ? `+${Math.round(item.difference * 100) / 100}` : Math.round(item.difference * 100) / 100}
                       </span>
                     </td>
                   </tr>
