@@ -528,7 +528,7 @@ export default function ProductManagement() {
 
       <div>
         {/* Header */}
-        <div className="flex justify-between items-end mb-lg">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 sm:gap-0 mb-lg">
           <div>
             <h2 className="text-[24px] font-bold text-on-surface">Danh sách Sản phẩm</h2>
             <p className="text-on-surface-variant mt-1 text-[14px]">Quản lý danh mục, công thức và biến thể sản phẩm</p>

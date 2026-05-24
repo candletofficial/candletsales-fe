@@ -28,16 +28,30 @@ export default function Dashboard() {
   const { user } = useAuth();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [filterType, setFilterType] = useState('30'); // '7', '30', '90', 'custom'
+  const [filterType, setFilterType] = useState('this_month');
   const [customDate, setCustomDate] = useState(new Date().toISOString().split('T')[0]);
 
   useEffect(() => {
     setLoading(true);
     let params = { days: 30 };
-    if (filterType === '7') params = { days: 7 };
-    else if (filterType === '30') params = { days: 30 };
-    else if (filterType === '90') params = { days: 90 };
-    else if (filterType === 'custom') params = { days: 1, endDate: customDate };
+    const now = new Date();
+    
+    if (filterType === 'today') {
+      params = { days: 1 };
+    } else if (filterType === 'this_week') {
+      const dayOfWeek = now.getDay(); // 0 = Sunday
+      const days = dayOfWeek === 0 ? 7 : dayOfWeek;
+      params = { days };
+    } else if (filterType === 'this_month') {
+      params = { days: now.getDate() };
+    } else if (filterType === 'this_year') {
+      const startOfYear = new Date(now.getFullYear(), 0, 1);
+      // diff in ms -> days. If today is Jan 1st, diff is 0, days should be 1.
+      const days = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24)) + 1;
+      params = { days };
+    } else if (filterType === 'custom') {
+      params = { days: 1, endDate: customDate };
+    }
 
     adminService.getDashboardStats(params)
       .then(res => setData(res.data.data))
@@ -59,7 +73,7 @@ export default function Dashboard() {
     <Layout>
       <div className="h-full flex flex-col bg-surface-container-low overflow-y-auto">
         {/* Header */}
-        <div className="flex justify-between items-start mb-lg">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 sm:gap-0 mb-lg">
           <div>
             <h1 className="text-[24px] font-bold text-on-surface">Tổng quan hệ thống</h1>
             <p className="text-on-surface-variant text-[14px]">Chào mừng trở lại! Dưới đây là hoạt động kinh doanh hôm nay.</p>
@@ -74,10 +88,11 @@ export default function Dashboard() {
                 onChange={e => setFilterType(e.target.value)}
                 className="bg-transparent py-2 pr-3 text-[13px] font-semibold text-on-surface focus:outline-none cursor-pointer"
               >
-                <option value="7">1 tuần qua</option>
-                <option value="30">1 tháng qua</option>
-                <option value="90">3 tháng qua</option>
-                <option value="custom">Ngày cụ thể...</option>
+                <option value="today">Hôm nay</option>
+                <option value="this_week">Tuần này</option>
+                <option value="this_month">Tháng này</option>
+                <option value="this_year">Năm nay</option>
+                <option value="custom">Tuỳ chỉnh</option>
               </select>
               {filterType === 'custom' && (
                 <input
@@ -186,7 +201,7 @@ export default function Dashboard() {
 
           {/* Bar Chart - So sánh Doanh thu & Chi phí */}
           <div className="flex-[2] bg-white rounded-2xl shadow-sm border border-outline-variant/30 p-6 flex flex-col">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-6">
               <h3 className="text-[16px] font-bold text-on-surface">So sánh Doanh thu & Chi phí</h3>
               <div className="px-3 py-1 bg-surface-container-low border border-outline-variant/50 rounded-lg text-[12px] font-semibold text-on-surface-variant flex items-center gap-1">
                 {filterType === 'custom' ? 'Theo ngày' : `${filterType} ngày qua`}

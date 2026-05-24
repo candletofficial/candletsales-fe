@@ -87,8 +87,8 @@ function ImportModal({ materials, user, onClose, onSave, initialMaterialId }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 animate-[fadeIn_0.2s_ease]">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-[800px] mx-4 flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 sm:p-4 animate-[fadeIn_0.2s_ease]">
+      <div className="bg-white sm:rounded-xl shadow-2xl w-full h-full sm:h-auto max-w-[800px] sm:mx-4 flex flex-col max-h-none sm:max-h-[90vh]">
         <div className="flex items-center justify-between px-6 py-5 border-b border-outline-variant/30 flex-shrink-0">
           <h3 className="text-[20px] font-bold text-on-surface">Tạo Phiếu Nhập Hàng</h3>
           <button onClick={onClose} className="text-on-surface-variant hover:bg-surface-container p-1 rounded-md transition-colors">
@@ -158,7 +158,7 @@ function ImportModal({ materials, user, onClose, onSave, initialMaterialId }) {
           </div>
         </form>
 
-        <div className="px-6 py-4 bg-surface-container-low border-t border-outline-variant/30 flex justify-end items-center gap-3 flex-shrink-0">
+        <div className="px-6 py-4 bg-surface-container-low border-t border-outline-variant/30 flex justify-between sm:justify-end items-center gap-3 flex-shrink-0">
           <button type="button" onClick={onClose} className="px-4 py-2 text-on-surface-variant text-[15px] font-medium hover:bg-surface-container rounded-lg">
             Hủy
           </button>
@@ -173,14 +173,15 @@ function ImportModal({ materials, user, onClose, onSave, initialMaterialId }) {
 
 function TicketDetailsModal({ ticket, onClose }) {
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 animate-[fadeIn_0.2s_ease]">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-[700px] mx-4 flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 sm:p-4 animate-[fadeIn_0.2s_ease-out]">
+      <div className="bg-white sm:rounded-2xl shadow-2xl w-full h-full sm:h-auto max-w-2xl max-h-none sm:max-h-[90vh] flex flex-col overflow-hidden animate-[slideUp_0.3s_ease-out]">
         <div className="flex items-center justify-between px-6 py-5 border-b border-outline-variant/30 flex-shrink-0">
           <h3 className="text-[20px] font-bold text-on-surface">Chi tiết Phiếu Nhập {ticket.code || 'PN-' + parseInt(ticket._id.slice(-6), 16).toString().padStart(7, '0')}</h3>
           <button onClick={onClose} className="text-on-surface-variant hover:bg-surface-container p-1 rounded-md transition-colors">
             <span className="material-symbols-outlined">close</span>
           </button>
         </div>
+
         <div className="p-6 overflow-y-auto">
           <div className="flex justify-between mb-4">
             <div>
@@ -422,7 +423,7 @@ export default function ImportManagement() {
         />
       )}
 
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-6">
         <div>
           <h2 className="text-[24px] font-bold text-on-surface">Quản lý Nhập hàng</h2>
           <p className="text-[14px] text-on-surface-variant mt-1">Tạo phiếu nhập và cập nhật tồn kho, đơn giá nguyên liệu</p>

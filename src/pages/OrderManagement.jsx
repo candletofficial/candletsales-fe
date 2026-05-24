@@ -550,7 +550,7 @@ export default function OrderManagement() {
 
       <div>
         {/* Header */}
-        <div className="flex justify-between items-end mb-lg">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 sm:gap-0 mb-lg">
           <div>
             <h2 className="text-[24px] font-bold text-on-surface">Quản lý Đơn hàng</h2>
             <p className="text-on-surface-variant mt-1 text-[14px]">Tạo và quản lý toàn bộ đơn hàng bán hàng</p>

@@ -94,8 +94,8 @@ function InventoryCheckModal({ materials, user, onClose, onSave }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-[fadeIn_0.2s_ease-out]">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-[slideUp_0.3s_ease-out]">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 sm:p-4 animate-[fadeIn_0.2s_ease-out]">
+      <div className="bg-white sm:rounded-2xl shadow-2xl w-full h-full sm:h-auto max-w-4xl max-h-none sm:max-h-[90vh] flex flex-col overflow-hidden animate-[slideUp_0.3s_ease-out]">
         <div className="px-6 py-4 border-b border-outline-variant/30 flex justify-between items-center bg-surface-container-lowest">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
@@ -125,49 +125,56 @@ function InventoryCheckModal({ materials, user, onClose, onSave }) {
               const diff = calculateDifference(item.system_stock, item.actual_stock);
               const material = materials.find(m => m._id === item.material_id);
               return (
-                <div key={index} className="flex gap-3 items-start bg-surface-container-lowest p-4 rounded-xl border border-outline-variant/30">
-                  <div className="flex-1 min-w-0">
-                    <label className="block text-[12px] font-medium text-on-surface-variant mb-1">Nguyên liệu</label>
-                    <SearchableSelect
-                      options={getOptionsForIndex(index)}
-                      value={item.material_id}
-                      onChange={(val) => handleItemChange(index, 'material_id', val)}
-                      placeholder="Chọn nguyên liệu..."
-                      className="border border-outline-variant bg-white"
-                    />
+                <div key={index} className="flex flex-col sm:flex-row gap-3 sm:items-start bg-surface-container-lowest p-4 rounded-xl border border-outline-variant/30 relative">
+                  <div className="w-full sm:flex-1 min-w-0 flex items-end gap-2">
+                    <div className="flex-1 min-w-0">
+                      <label className="block text-[12px] font-medium text-on-surface-variant mb-1">Nguyên liệu</label>
+                      <SearchableSelect
+                        options={getOptionsForIndex(index)}
+                        value={item.material_id}
+                        onChange={(val) => handleItemChange(index, 'material_id', val)}
+                        placeholder="Chọn nguyên liệu..."
+                        className="border border-outline-variant bg-white"
+                      />
+                    </div>
+                    <button type="button" onClick={() => handleRemoveItem(index)} className="sm:hidden p-2 mb-[1px] text-error hover:bg-error-container rounded-lg transition-colors flex-shrink-0">
+                      <span className="material-symbols-outlined text-[20px]">delete</span>
+                    </button>
                   </div>
 
-                  <div className="w-[120px]">
-                    <label className="block text-[12px] font-medium text-on-surface-variant mb-1">Hệ thống ({material?.unit || ''})</label>
-                    <input
-                      type="number"
-                      value={item.system_stock}
-                      className="w-full px-3 py-2 border border-outline-variant rounded-lg text-[14px] bg-surface-container-low text-on-surface-variant cursor-not-allowed"
-                      disabled
-                    />
-                  </div>
+                  <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
+                    <div className="flex-1 sm:w-[120px] min-w-0">
+                      <label className="block text-[10px] sm:text-[12px] font-bold sm:font-medium text-on-surface-variant mb-1 truncate uppercase sm:normal-case text-center sm:text-left">Hệ thống ({material?.unit || ''})</label>
+                      <input
+                        type="number"
+                        value={item.system_stock}
+                        className="w-full px-2 sm:px-3 py-2 border border-outline-variant rounded-lg text-[14px] bg-surface-container-low text-on-surface-variant cursor-not-allowed text-center sm:text-left"
+                        disabled
+                      />
+                    </div>
 
-                  <div className="w-[120px]">
-                    <label className="block text-[12px] font-medium text-on-surface-variant mb-1">Thực tế ({material?.unit || ''})</label>
-                    <input
-                      type="number"
-                      value={item.actual_stock}
-                      onChange={(e) => handleItemChange(index, 'actual_stock', e.target.value)}
-                      className="w-full px-3 py-2 border border-outline-variant rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-[14px]"
-                      min="0"
-                      placeholder="0"
-                      required
-                    />
-                  </div>
+                    <div className="flex-1 sm:w-[120px] min-w-0">
+                      <label className="block text-[10px] sm:text-[12px] font-bold sm:font-medium text-on-surface-variant mb-1 truncate uppercase sm:normal-case text-center sm:text-left">Thực tế ({material?.unit || ''})</label>
+                      <input
+                        type="number"
+                        value={item.actual_stock}
+                        onChange={(e) => handleItemChange(index, 'actual_stock', e.target.value)}
+                        className="w-full px-2 sm:px-3 py-2 border border-outline-variant rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-[14px] text-center sm:text-left"
+                        min="0"
+                        placeholder="0"
+                        required
+                      />
+                    </div>
 
-                  <div className="w-[100px]">
-                    <label className="block text-[12px] font-medium text-on-surface-variant mb-1">Chênh lệch</label>
-                    <div className={`px-3 py-2 border rounded-lg text-[14px] font-bold text-center ${item.actual_stock === '' ? 'border-outline-variant bg-surface-container-low text-on-surface-variant' : diff > 0 ? 'bg-[#d1fae5] text-[#059669] border-[#059669]/20' : diff < 0 ? 'bg-error-container text-error border-error/20' : 'bg-surface-container-low border-outline-variant text-on-surface-variant'}`}>
-                      {item.actual_stock !== '' ? (diff > 0 ? `+${diff}` : diff) : '-'}
+                    <div className="flex-1 sm:w-[100px] min-w-0">
+                      <label className="block text-[10px] sm:text-[12px] font-bold sm:font-medium text-on-surface-variant mb-1 truncate uppercase sm:normal-case text-center sm:text-left">Chênh lệch</label>
+                      <div className={`px-2 sm:px-3 py-2 border rounded-lg text-[14px] font-bold text-center ${item.actual_stock === '' ? 'border-outline-variant bg-surface-container-low text-on-surface-variant' : diff > 0 ? 'bg-[#d1fae5] text-[#059669] border-[#059669]/20' : diff < 0 ? 'bg-error-container text-error border-error/20' : 'bg-surface-container-low border-outline-variant text-on-surface-variant'}`}>
+                        {item.actual_stock !== '' ? (diff > 0 ? `+${diff}` : diff) : '-'}
+                      </div>
                     </div>
                   </div>
 
-                  <button type="button" onClick={() => handleRemoveItem(index)} className="mt-6 p-2 text-error hover:bg-error-container rounded-lg transition-colors flex-shrink-0">
+                  <button type="button" onClick={() => handleRemoveItem(index)} className="hidden sm:block mt-6 p-2 text-error hover:bg-error-container rounded-lg transition-colors flex-shrink-0">
                     <span className="material-symbols-outlined text-[20px]">delete</span>
                   </button>
                 </div>
@@ -192,7 +199,7 @@ function InventoryCheckModal({ materials, user, onClose, onSave }) {
           </div>
         </div>
 
-        <div className="px-6 py-4 border-t border-outline-variant/30 flex justify-end gap-3 bg-surface-container-lowest">
+        <div className="px-6 py-4 border-t border-outline-variant/30 flex justify-between sm:justify-end gap-3 bg-surface-container-lowest">
           <button type="button" onClick={onClose} className="px-5 py-2.5 rounded-lg font-semibold text-on-surface-variant hover:bg-surface-container transition-colors text-[14px]">
             Hủy
           </button>
@@ -208,8 +215,8 @@ function InventoryCheckModal({ materials, user, onClose, onSave }) {
 
 function TicketDetailsModal({ ticket, onClose }) {
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-[fadeIn_0.2s_ease-out]">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-[slideUp_0.3s_ease-out]">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 sm:p-4 animate-[fadeIn_0.2s_ease-out]">
+      <div className="bg-white sm:rounded-2xl shadow-2xl w-full h-full sm:h-auto max-w-2xl max-h-none sm:max-h-[90vh] flex flex-col overflow-hidden animate-[slideUp_0.3s_ease-out]">
         <div className="px-6 py-4 border-b border-outline-variant/30 flex justify-between items-center bg-surface-container-lowest">
           <div>
             <h3 className="text-[18px] font-bold text-on-surface">Chi tiết Phiếu kiểm kho</h3>
@@ -221,7 +228,7 @@ function TicketDetailsModal({ ticket, onClose }) {
         </div>
 
         <div className="p-6 overflow-y-auto custom-scrollbar">
-          <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
             <div className="bg-surface-container-lowest p-3 rounded-xl border border-outline-variant/30">
               <p className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider mb-1">Ngày kiểm</p>
               <p className="text-[14px] font-semibold text-on-surface">{new Date(ticket.createdAt).toLocaleString('vi-VN')}</p>
@@ -243,8 +250,9 @@ function TicketDetailsModal({ ticket, onClose }) {
             Chi tiết kiểm kê
           </h4>
           <div className="bg-white rounded-xl shadow-sm border border-outline-variant/30 overflow-hidden mb-6">
-            <table className="w-full text-left border-collapse">
-              <thead>
+            <div className="overflow-x-auto custom-scrollbar">
+              <table className="w-full text-left border-collapse min-w-[500px]">
+                <thead>
                 <tr className="bg-surface-container-lowest">
                   <th className="px-4 py-3 text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold">Nguyên liệu</th>
                   <th className="px-4 py-3 text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold text-right">Hệ thống</th>
@@ -270,6 +278,7 @@ function TicketDetailsModal({ ticket, onClose }) {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
 
           {ticket.note && (
@@ -373,7 +382,7 @@ export default function InventoryCheckManagement() {
       {modalOpen && <InventoryCheckModal materials={materials} user={user} onClose={() => setModalOpen(false)} onSave={() => { setModalOpen(false); showToast('Đã lưu phiếu kiểm kho'); fetchData(); window.dispatchEvent(new CustomEvent('materialsChanged')); }} />}
       {detailsTicket && <TicketDetailsModal ticket={detailsTicket} onClose={() => setDetailsTicket(null)} />}
 
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-6">
         <div>
           <h2 className="text-[24px] font-bold text-on-surface">Kiểm kho</h2>
           <p className="text-[14px] text-on-surface-variant mt-1">Quản lý các đợt kiểm kê tồn kho thực tế</p>
@@ -386,7 +395,7 @@ export default function InventoryCheckManagement() {
 
       <div className="bg-white rounded-xl shadow-sm border border-outline-variant/30 overflow-hidden">
         {/* Toolbar */}
-        <div className="px-lg py-md border-b border-outline-variant/30 flex justify-between items-center bg-surface-container-low/50">
+        <div className="px-lg py-md border-b border-outline-variant/30 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center bg-surface-container-low/50">
           <p className="text-[13px] text-on-surface-variant">
 
           </p>
@@ -411,8 +420,8 @@ export default function InventoryCheckManagement() {
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+        <div className="overflow-x-auto custom-scrollbar">
+          <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
               <tr className="bg-surface-container-lowest">
                 <th className="px-lg py-md text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold">Mã phiếu</th>
