@@ -23,6 +23,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete }) {
     order?.ordered_at ? new Date(order.ordered_at).toISOString().split('T')[0] : today()
   );
   const [source, setSource] = useState(order?.source || 'shopee');
+  const [shippingMethod, setShippingMethod] = useState(order?.shippingMethod || 'standard');
   const [autoTotal, setAutoTotal] = useState(!isEdit);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -104,7 +105,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete }) {
     setError('');
     setLoading(true);
     try {
-      const payload = { items, total_price: totalPrice, logistics_cost: logisticsCost, source, note, ordered_at: new Date(orderedAt) };
+      const payload = { items, total_price: totalPrice, logistics_cost: logisticsCost, source, shippingMethod, note, ordered_at: new Date(orderedAt) };
       if (isEdit) {
         await orderService.updateOrder(order._id, payload);
       } else {
@@ -144,7 +145,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete }) {
           {/* Ngày đặt hàng, Nguồn, Phí Ship, Ghi chú */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-              <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Ngày đặt hàng</label>
+              <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Ngày đặt</label>
               <input
                 type="date"
                 value={orderedAt}
@@ -153,7 +154,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete }) {
               />
             </div>
             <div>
-              <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Nguồn đơn hàng</label>
+              <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Nguồn</label>
               <select
                 value={source}
                 onChange={e => setSource(e.target.value)}
@@ -169,6 +170,17 @@ function OrderModal({ order, products, onClose, onSave, onDelete }) {
               </select>
             </div>
             <div>
+              <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Vận chuyển</label>
+              <select
+                value={shippingMethod}
+                onChange={e => setShippingMethod(e.target.value)}
+                className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-[15px] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-white"
+              >
+                <option value="standard">Thường</option>
+                <option value="express">Hỏa tốc</option>
+              </select>
+            </div>
+            <div>
               <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Phí ship (đ)</label>
               <input
                 type="number"
@@ -179,15 +191,16 @@ function OrderModal({ order, products, onClose, onSave, onDelete }) {
                 className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-[15px] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
               />
             </div>
-            <div>
-              <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Ghi chú</label>
-              <input
-                value={note}
-                onChange={e => setNote(e.target.value)}
-                placeholder="Ghi chú đơn hàng..."
-                className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-[15px] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-              />
-            </div>
+          </div>
+          
+          <div>
+            <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Ghi chú</label>
+            <input
+              value={note}
+              onChange={e => setNote(e.target.value)}
+              placeholder="Ghi chú..."
+              className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-[15px] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+            />
           </div>
 
           {/* Danh sách sản phẩm */}
@@ -514,7 +527,7 @@ export default function OrderManagement() {
   // Stats
   const totalRevenue = filteredOrders.reduce((s, o) => s + (o.total_price || 0), 0);
   const totalItems = filteredOrders.reduce((s, o) => s + (o.items?.reduce((a, i) => a + i.quantity, 0) || 0), 0);
-  const totalCost = filteredOrders.reduce((s, o) => s + (o.items?.reduce((a, i) => a + (i.unit_cost || 0) * i.quantity, 0) || 0) + (o.logistics_cost || 0), 0);
+  const totalCost = filteredOrders.reduce((s, o) => s + (o.items?.reduce((a, i) => a + (i.unit_cost || 0) * i.quantity, 0) || 0) + (o.logistics_cost || 0) + (o.packaging_cost || 0), 0);
   const totalProfit = totalRevenue - totalCost;
   const profitMargin = totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(1) : 0;
 
