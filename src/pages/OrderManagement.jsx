@@ -570,6 +570,8 @@ export default function OrderManagement() {
   const [sourceFilter, setSourceFilter] = useState('all');
   // Status filter
   const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'completed' | 'returned'
+  // Search
+  const [searchQuery, setSearchQuery] = useState('');
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
@@ -638,6 +640,9 @@ export default function OrderManagement() {
 
   // Filtered orders theo bộ lọc thời gian & nguồn
   const filteredOrders = orders.filter(o => {
+    // Lọc theo mã đơn hàng
+    if (searchQuery && !((o.orderId || '').toLowerCase().includes(searchQuery.toLowerCase()) || (o._id || '').toLowerCase().includes(searchQuery.toLowerCase()))) return false;
+
     // Lọc theo trạng thái hoàn
     if (statusFilter !== 'all' && (o.status || 'completed') !== statusFilter) return false;
 
@@ -748,9 +753,22 @@ export default function OrderManagement() {
           </div>
         </div>
         {/* Filter bar */}
-        <div className="bg-white rounded-xl shadow-sm border border-outline-variant/30 px-lg py-md mb-lg flex flex-wrap items-center gap-6">
-          {/* Time Filter */}
-          <div className="flex items-center gap-3">
+        <div className="bg-white rounded-xl shadow-sm border border-outline-variant/30 px-lg py-md mb-lg flex flex-col gap-4">
+          <div className="flex flex-wrap items-center gap-6">
+            {/* Search */}
+            <div className="flex items-center bg-surface-container-low px-3 py-1.5 rounded-lg border border-outline-variant/30 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary w-full sm:w-auto">
+              <span className="material-symbols-outlined text-[20px] text-on-surface-variant mr-2">search</span>
+              <input
+                type="text"
+                placeholder="Tìm mã đơn hàng..."
+                value={searchQuery}
+                onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+                className="bg-transparent border-none outline-none text-[13px] font-semibold text-on-surface w-full sm:w-[220px]"
+              />
+            </div>
+
+            {/* Time Filter */}
+            <div className="flex items-center gap-3">
             <span className="text-[13px] font-bold text-on-surface-variant">Lọc theo thời gian:</span>
             <select
               value={datePreset}
@@ -827,6 +845,7 @@ export default function OrderManagement() {
               </button>
             ))}
           </div>
+        </div>
 
           {/* Badge kết quả lọc */}
           <span className="ml-auto text-[12px] text-on-surface-variant bg-surface-container px-4 py-1.5 rounded-full font-bold">
