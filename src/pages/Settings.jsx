@@ -84,6 +84,11 @@ export default function Settings() {
   const [isShippingConfigExpanded, setIsShippingConfigExpanded] = useState(false);
   const [autoConfirmImport, setAutoConfirmImport] = useState(false);
   const [savingAutoConfirm, setSavingAutoConfirm] = useState(false);
+  const defaultPlatforms = ['shopee', 'tiktok', 'facebook', 'instagram', 'youtube', 'google', 'khác'];
+  const [returnCosts, setReturnCosts] = useState(
+    defaultPlatforms.reduce((acc, p) => ({ ...acc, [p]: 0 }), {})
+  );
+  const [savingReturnCost, setSavingReturnCost] = useState(false);
 
   // State lưu cấu hình cho từng phương thức
   const [configs, setConfigs] = useState({
@@ -99,10 +104,11 @@ export default function Settings() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [resMaterials, resConfigs, resAutoConfirm] = await Promise.all([
+      const [resMaterials, resConfigs, resAutoConfirm, resReturnCost] = await Promise.all([
         materialService.getMaterials(),
         shippingConfigService.getAllConfigs(),
-        systemConfigService.getConfig('auto_confirm_out_of_stock_imports')
+        systemConfigService.getConfig('auto_confirm_out_of_stock_imports'),
+        systemConfigService.getConfig('return_cost_per_platform'),
       ]);
 
       if (resMaterials.data.success) {
@@ -125,6 +131,13 @@ export default function Settings() {
       
       if (resAutoConfirm && resAutoConfirm.success) {
         setAutoConfirmImport(resAutoConfirm.data.value || false);
+      }
+
+      if (resReturnCost && resReturnCost.success && resReturnCost.data.value) {
+        try {
+          const parsed = JSON.parse(resReturnCost.data.value);
+          setReturnCosts(prev => ({ ...prev, ...parsed }));
+        } catch (e) { console.error('Lỗi parse return_cost_per_platform'); }
       }
     } catch (err) {
       console.error(err);
@@ -194,6 +207,19 @@ export default function Settings() {
       showToast('Lỗi khi lưu cấu hình', 'error');
     } finally {
       setSavingAutoConfirm(false);
+    }
+  };
+
+  const handleSaveReturnCost = async () => {
+    setSavingReturnCost(true);
+    try {
+      await systemConfigService.updateConfig('return_cost_per_platform', JSON.stringify(returnCosts));
+      showToast('Đã lưu cấu hình chi phí hoàn hàng');
+    } catch (err) {
+      console.error(err);
+      showToast('Lỗi khi lưu cấu hình', 'error');
+    } finally {
+      setSavingReturnCost(false);
     }
   };
 
@@ -325,6 +351,78 @@ export default function Settings() {
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Section: Chi phí hoàn hàng */}
+          <div className="bg-white rounded-xl shadow-sm border border-outline-variant/30 overflow-hidden">
+            <div className="w-full flex items-center justify-between p-4 bg-surface-container-low/50">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-[#fee2e2] flex items-center justify-center flex-shrink-0">
+                  <span className="material-symbols-outlined text-[#dc2626] text-[24px]">assignment_return</span>
+                </div>
+                <div className="text-left">
+                  <h2 className="text-[17px] font-bold text-on-surface m-0">Cấu hình chi phí hoàn hàng</h2>
+                  <p className="text-[13px] text-on-surface-variant m-0 mt-0.5">Mức phí cố định tính cho mỗi đơn hàng bị hoàn trả</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="p-6 border-t border-outline-variant/30 bg-surface-container-lowest">
+              <div className="bg-white rounded-xl shadow-sm border border-outline-variant/30 p-5">
+                <div className="flex items-start gap-6">
+                  <div className="flex-1">
+                    <h3 className="text-[15px] font-bold text-on-surface">Chi phí hoàn theo nguồn đơn</h3>
+                    <p className="text-[13px] text-on-surface-variant mt-1">
+                      Nhập số tiền sẽ được tính thêm vào chi phí khi đơn hàng bị hoàn cho từng nền tảng. 
+                      Khoản này phản ánh phí vận chuyển hoàn, phí phạt sàn, v.v.
+                    </p>
+                  </div>
+                  <div className="flex-shrink-0">
+                    <button
+                      onClick={handleSaveReturnCost}
+                      disabled={savingReturnCost}
+                      className="px-5 py-2.5 bg-[#dc2626] text-white text-[13px] font-bold rounded-lg hover:opacity-90 disabled:opacity-60 transition-opacity flex items-center gap-2 whitespace-nowrap"
+                    >
+                      {savingReturnCost && <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+                      Lưu cấu hình
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {defaultPlatforms.map(platform => (
+                    <div key={platform} className="bg-surface-container-lowest border border-outline-variant/50 rounded-lg p-3 flex flex-col gap-2">
+                      <label className="text-[12px] font-bold text-on-surface-variant uppercase flex items-center gap-1.5">
+                        {platform !== 'khác' && (
+                          <span
+                            className="w-[14px] h-[14px] bg-current inline-block opacity-80"
+                            style={{
+                              maskImage: `url(https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/${platform}.svg)`,
+                              maskSize: 'contain', maskRepeat: 'no-repeat', maskPosition: 'center',
+                              WebkitMaskImage: `url(https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/${platform}.svg)`,
+                              WebkitMaskSize: 'contain', WebkitMaskRepeat: 'no-repeat', WebkitMaskPosition: 'center'
+                            }}
+                          />
+                        )}
+                        {platform}
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          min="0"
+                          step="1000"
+                          value={returnCosts[platform]}
+                          onChange={(e) => setReturnCosts(prev => ({ ...prev, [platform]: Number(e.target.value) }))}
+                          className="w-full border border-outline-variant rounded-md px-3 py-2 text-[14px] font-bold text-right focus:outline-none focus:border-[#dc2626] focus:ring-1 focus:ring-[#dc2626] pr-8"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[12px] font-bold text-on-surface-variant">đ</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+              </div>
+            </div>
           </div>
 
           {/* Section: Tự động hóa */}

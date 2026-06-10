@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Layout from '../components/Layout';
 import { orderService } from '../services/orderService';
 import { productService } from '../services/productService';
+import systemConfigService from '../services/systemConfigService';
 
 // ── Helpers ────────────────────────────────────────────────────────
 const formatPrice = (n) =>
@@ -13,7 +14,7 @@ const formatDate = (d) =>
 const today = () => new Date().toISOString().split('T')[0];
 
 // ── Modal Tạo / Chỉnh sửa đơn hàng ───────────────────────────────
-function OrderModal({ order, products, onClose, onSave, onDelete }) {
+function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, isReplacementMode = false }) {
   const isEdit = !!order;
   const [items, setItems] = useState(order?.items?.map(i => ({ ...i })) || []);
   const [totalPrice, setTotalPrice] = useState(order?.total_price ?? 0);
@@ -24,7 +25,9 @@ function OrderModal({ order, products, onClose, onSave, onDelete }) {
   );
   const [source, setSource] = useState(order?.source || 'shopee');
   const [shippingMethod, setShippingMethod] = useState(order?.shippingMethod || 'standard');
+  const [orderId, setOrderId] = useState('');
   const [autoTotal, setAutoTotal] = useState(!isEdit);
+  const [isReplacement, setIsReplacement] = useState(isReplacementMode || order?.is_replacement || false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showProductPicker, setShowProductPicker] = useState(false);
@@ -105,11 +108,11 @@ function OrderModal({ order, products, onClose, onSave, onDelete }) {
     setError('');
     setLoading(true);
     try {
-      const payload = { items, total_price: totalPrice, logistics_cost: logisticsCost, source, shippingMethod, note, ordered_at: new Date(orderedAt) };
+      const payload = { items, total_price: isReplacement ? 0 : totalPrice, logistics_cost: logisticsCost, source, shippingMethod, note, ordered_at: new Date(orderedAt), is_replacement: isReplacement };
       if (isEdit) {
         await orderService.updateOrder(order._id, payload);
       } else {
-        await orderService.createOrder(payload);
+        await orderService.createOrder({ ...payload, orderId: orderId.trim() || undefined });
       }
       onSave();
     } catch (err) {
@@ -126,10 +129,18 @@ function OrderModal({ order, products, onClose, onSave, onDelete }) {
         {/* Header */}
         <div className="px-6 py-4 border-b border-outline-variant/30 bg-surface-container-low/50 rounded-t-2xl flex items-center justify-between flex-shrink-0">
           <div>
-            <h2 className="text-[17px] font-bold text-on-surface">
-              {isEdit ? `Chỉnh sửa đơn hàng` : 'Tạo đơn hàng mới'}
+            <h2 className="text-[17px] font-bold text-on-surface flex items-center gap-2">
+              {isReplacementMode && <span className="material-symbols-outlined text-error">local_shipping</span>}
+              {isEdit ? (isReplacementMode ? 'Chỉnh sửa đơn giao bù' : 'Chỉnh sửa đơn hàng') : (isReplacementMode ? 'Tạo đơn giao bù' : 'Tạo đơn hàng mới')}
             </h2>
-            {isEdit && <p className="text-[12px] text-on-surface-variant font-mono">{order.orderId}</p>}
+            {isEdit && (
+              <div className="flex items-center gap-2 mt-0.5">
+                <p className="text-[12px] text-on-surface-variant font-mono">{order.orderId}</p>
+                {order.status === 'returned' && (
+                  <span className="text-[10px] font-bold bg-[#fef3c7] text-[#d97706] border border-[#fde68a] px-2 py-0.5 rounded-full">✕ Bị hoàn</span>
+                )}
+              </div>
+            )}
           </div>
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-surface-container transition-colors">
             <span className="material-symbols-outlined text-[20px] text-on-surface-variant">close</span>
@@ -140,6 +151,25 @@ function OrderModal({ order, products, onClose, onSave, onDelete }) {
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {error && (
             <div className="p-3 bg-error-container text-error rounded-lg text-sm font-medium">{error}</div>
+          )}
+
+          {/* Mã đơn hàng (chỉ hiển thị khi tạo mới) */}
+          {!isEdit && (
+            <div>
+              <label className="block text-[13px] font-bold text-on-surface-variant mb-2">
+                Mã đơn hàng
+                <span className="ml-2 text-[11px] font-normal text-on-surface-variant">(để trống để tự sinh)</span>
+              </label>
+              <input
+                type="text"
+                value={orderId}
+                onChange={e => setOrderId(e.target.value.toUpperCase())}
+                placeholder="Tự động sinh nếu để trống..."
+                maxLength={30}
+                className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-[15px] font-mono font-semibold focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary placeholder:font-normal placeholder:text-on-surface-variant/40"
+              />
+              <p className="text-[11px] text-on-surface-variant mt-1">Nhập mã từ sàn (VD: DH-1234567) hoặc để trống — hệ thống sẽ tự tạo mã ngẫu nhiên</p>
+            </div>
           )}
 
           {/* Ngày đặt hàng, Nguồn, Phí Ship, Ghi chú */}
@@ -235,7 +265,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete }) {
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-[14px] text-on-surface truncate">{item.product_name}</p>
                       <p className="text-[11px] text-on-surface-variant">
-                        {item.sku_label || 'Mặc định'} · {formatPrice(item.unit_price)}/cái
+                        {item.sku_label || 'Mặc định'} · {formatPrice(isReplacementMode ? (item.unit_cost || 0) : item.unit_price)}/cái {isReplacementMode && <span className="text-error font-semibold">(Giá vốn)</span>}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
@@ -253,8 +283,8 @@ function OrderModal({ order, products, onClose, onSave, onDelete }) {
                         <span className="material-symbols-outlined text-[16px]">add</span>
                       </button>
                     </div>
-                    <p className="w-28 text-right font-bold text-[14px] text-primary font-mono">
-                      {formatPrice(item.unit_price * item.quantity)}
+                    <p className={`w-28 text-right font-bold text-[14px] font-mono ${isReplacementMode ? 'text-error' : 'text-primary'}`}>
+                      {formatPrice((isReplacementMode ? (item.unit_cost || 0) : item.unit_price) * item.quantity)}
                     </p>
                     <button onClick={() => handleRemoveItem(idx)} className="p-1.5 text-error hover:bg-error-container rounded-lg transition-colors">
                       <span className="material-symbols-outlined text-[18px]">delete</span>
@@ -266,18 +296,21 @@ function OrderModal({ order, products, onClose, onSave, onDelete }) {
           </div>
 
           {/* Tổng tiền */}
+          {!isReplacementMode ? (
           <div className="bg-primary-container/20 rounded-xl p-4 border border-primary/20">
             <div className="flex items-center justify-between mb-3">
               <span className="font-bold text-[14px] text-on-surface">Tổng tiền đơn hàng</span>
-              <label className="flex items-center gap-2 text-[13px] text-on-surface-variant cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={autoTotal}
-                  onChange={e => setAutoTotal(e.target.checked)}
-                  className="rounded"
-                />
-                Tính tự động
-              </label>
+              <div className="flex items-center gap-4">
+                <label className="flex items-center gap-2 text-[13px] text-on-surface-variant cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={autoTotal}
+                    onChange={e => setAutoTotal(e.target.checked)}
+                    className="rounded"
+                  />
+                  Tính tự động
+                </label>
+              </div>
             </div>
             <input
               type="number"
@@ -291,30 +324,54 @@ function OrderModal({ order, products, onClose, onSave, onDelete }) {
               <p className="text-[11px] text-on-surface-variant mt-1 text-right">Tổng tự động tính từ sản phẩm</p>
             )}
           </div>
+          ) : (
+            <div className="bg-error-container/20 rounded-xl p-4 border border-error/20 flex items-start gap-3 text-error">
+              <span className="material-symbols-outlined text-[24px]">info</span>
+              <div>
+                <p className="text-[14px] font-bold">Đây là Đơn Giao Bù</p>
+                <p className="text-[12px] opacity-90 mt-0.5">Doanh thu sẽ không được tính (0đ) nhưng hệ thống vẫn trừ kho và tính chi phí đóng gói, giao hàng như bình thường.</p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Footer */}
         <div className="px-6 py-4 bg-surface-container-low border-t border-outline-variant/30 flex justify-between items-center rounded-b-2xl flex-shrink-0">
-          <div>
+          <div className="flex items-center gap-2">
             {isEdit && (
-              <button
-                type="button"
-                onClick={onDelete}
-                className="px-4 py-2 bg-error-container text-error rounded-lg text-[14px] font-semibold hover:bg-error hover:text-white transition-colors"
-              >
-                Xóa đơn hàng
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={onDelete}
+                  className="px-4 py-2 bg-[#fee2e2] text-[#dc2626] border border-[#fca5a5] rounded-lg text-[14px] font-semibold hover:bg-[#dc2626] hover:text-white transition-colors flex items-center gap-1.5"
+                >
+                  <span className="material-symbols-outlined text-[17px]">delete</span>
+                  Xóa đơn hàng
+                </button>
+                {order.status !== 'returned' && !isReplacementMode && (
+                  <button
+                    type="button"
+                    onClick={onMarkReturn}
+                    className="px-4 py-2 bg-[#fef3c7] text-[#d97706] border border-[#fde68a] rounded-lg text-[14px] font-semibold hover:bg-[#d97706] hover:text-white transition-colors flex items-center gap-1.5"
+                  >
+                    <span className="material-symbols-outlined text-[17px]">assignment_return</span>
+                    Đánh dấu bị hoàn
+                  </button>
+                )}
+              </>
             )}
           </div>
           <div className="flex items-center gap-3">
             <button type="button" onClick={onClose} className="px-4 py-2 text-on-surface-variant text-[14px] font-medium hover:bg-surface-container rounded-lg transition-colors">
               Hủy
             </button>
-            <button onClick={handleSubmit} disabled={loading || items.length === 0}
-              className="px-6 py-2.5 bg-primary text-white text-[14px] font-semibold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-60 flex items-center gap-2 shadow-sm">
-              {loading && <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
-              {isEdit ? 'Lưu thay đổi' : 'Tạo đơn hàng'}
-            </button>
+            {(!isEdit || order.status !== 'returned') && (
+              <button onClick={handleSubmit} disabled={loading || items.length === 0}
+                className="px-6 py-2.5 bg-primary text-white text-[14px] font-semibold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-60 flex items-center gap-2 shadow-sm">
+                {loading && <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+                {isEdit ? 'Lưu thay đổi' : 'Tạo đơn hàng'}
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -402,7 +459,8 @@ function OrderModal({ order, products, onClose, onSave, onDelete }) {
 
 // ── Modal Xác nhận xóa ────────────────────────────────────────────
 function DeleteModal({ order, onClose, onConfirm, loading }) {
-  const [restoreStock, setRestoreStock] = useState(true);
+  const isReturned = order.status === 'returned';
+  const [restoreStock, setRestoreStock] = useState(!isReturned); // đơn hoàn: mặc định false vì kho đã hoàn rồi
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -415,21 +473,78 @@ function DeleteModal({ order, onClose, onConfirm, loading }) {
           Bạn có chắc muốn xóa đơn hàng <span className="font-semibold text-on-surface">"{order.orderId}"</span> không? Hành động này không thể hoàn tác.
         </p>
 
-        <label className="flex items-center gap-2 text-sm text-on-surface-variant mb-6 cursor-pointer bg-surface-container-low px-4 py-2.5 rounded-lg border border-outline-variant/30 w-full hover:bg-surface-container transition-colors">
-          <input
-            type="checkbox"
-            checked={restoreStock}
-            onChange={(e) => setRestoreStock(e.target.checked)}
-            className="rounded text-primary focus:ring-primary w-4 h-4 cursor-pointer"
-          />
-          <span className="flex-1 text-left font-medium">Khôi phục lại nguyên liệu vào kho</span>
-        </label>
+        {isReturned ? (
+          /* Đơn đã hoàn — kho đã được hoàn khi markAsReturned, không cần hoàn thêm */
+          <div className="flex items-start gap-2.5 text-sm bg-[#fef9c3] text-[#854d0e] px-4 py-3 rounded-lg border border-[#fde68a] w-full mb-6 text-left">
+            <span className="material-symbols-outlined text-[17px] flex-shrink-0 mt-0.5">info</span>
+            <span>Đơn hàng này đã bị hoàn — nguyên liệu đã được <strong>hoàn vào kho</strong> trước đó. Xóa đơn sẽ không thay đổi tồn kho.</span>
+          </div>
+        ) : (
+          /* Đơn hoàn thành — cho phép chọn hoàn kho hay không */
+          <label className="flex items-center gap-2 text-sm text-on-surface-variant mb-6 cursor-pointer bg-surface-container-low px-4 py-2.5 rounded-lg border border-outline-variant/30 w-full hover:bg-surface-container transition-colors">
+            <input
+              type="checkbox"
+              checked={restoreStock}
+              onChange={(e) => setRestoreStock(e.target.checked)}
+              className="rounded text-primary focus:ring-primary w-4 h-4 cursor-pointer"
+            />
+            <span className="flex-1 text-left font-medium">Khôi phục lại nguyên liệu vào kho</span>
+          </label>
+        )}
 
         <div className="flex justify-center gap-3 w-full">
           <button onClick={onClose} className="px-5 py-2 rounded-lg border border-outline-variant text-on-surface-variant text-sm font-semibold hover:bg-surface-container flex-1">Hủy</button>
-          <button onClick={() => onConfirm(restoreStock)} disabled={loading} className="px-5 py-2 rounded-lg bg-error text-white text-sm font-semibold hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2 flex-1">
+          <button onClick={() => onConfirm(isReturned ? false : restoreStock)} disabled={loading} className="px-5 py-2 rounded-lg bg-error text-white text-sm font-semibold hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2 flex-1">
             {loading && <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
             Xóa đơn hàng
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Modal Xác nhận đánh dấu đơn hoàn ────────────────────────────────
+function ReturnModal({ order, returnCost, onClose, onConfirm, loading }) {
+  return (
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[440px] p-6 flex flex-col items-center text-center">
+        <div className="w-14 h-14 rounded-full bg-[#fef3c7] flex items-center justify-center mb-4">
+          <span className="material-symbols-outlined text-[#d97706] text-[28px]">assignment_return</span>
+        </div>
+        <h3 className="text-[17px] font-bold text-on-surface mb-1">Xác nhận đơn hàng bị hoàn</h3>
+        <p className="text-sm text-on-surface-variant mb-5">
+          Đơn hàng <span className="font-semibold text-on-surface">"{order.orderId}"</span> sẽ bị đánh dấu là <strong>Bị hoàn</strong>.
+          Nguyên liệu sẽ được hoàn trả vào kho.
+        </p>
+
+        <div className="w-full space-y-2 mb-6">
+          <div className="flex items-center justify-between bg-surface-container-low px-4 py-3 rounded-lg border border-outline-variant/30">
+            <span className="text-[13px] text-on-surface-variant font-medium">Doanh thu đơn hàng</span>
+            <span className="text-[14px] font-bold text-on-surface font-mono">{formatPrice(order.total_price)}</span>
+          </div>
+          <div className="flex items-center justify-between bg-[#fef3c7] px-4 py-3 rounded-lg border border-[#fde68a]">
+            <span className="text-[13px] text-[#92400e] font-medium flex items-center gap-1">
+              <span className="material-symbols-outlined text-[15px]">payments</span>
+              Chi phí hoàn hàng
+            </span>
+            <span className="text-[14px] font-bold text-[#d97706] font-mono">{formatPrice(returnCost)}</span>
+          </div>
+          <div className="flex items-center justify-between bg-[#fee2e2] px-4 py-3 rounded-lg border border-[#fca5a5]">
+            <span className="text-[13px] text-[#991b1b] font-semibold">Tổng thiệt hại</span>
+            <span className="text-[15px] font-bold text-[#dc2626] font-mono">{formatPrice(order.total_price + returnCost)}</span>
+          </div>
+        </div>
+
+        <div className="flex justify-center gap-3 w-full">
+          <button onClick={onClose} className="px-5 py-2 rounded-lg border border-outline-variant text-on-surface-variant text-sm font-semibold hover:bg-surface-container flex-1">Hủy</button>
+          <button
+            onClick={onConfirm}
+            disabled={loading}
+            className="px-5 py-2 rounded-lg bg-[#d97706] text-white text-sm font-semibold hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2 flex-1"
+          >
+            {loading && <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+            Xác nhận hoàn đơn
           </button>
         </div>
       </div>
@@ -443,15 +558,18 @@ export default function OrderManagement() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [modal, setModal] = useState(null); // null | { type: 'add'|'edit'|'delete', data? }
+  const [modal, setModal] = useState(null); // null | { type: 'add'|'edit'|'delete'|'return', data? }
   const [actionLoading, setActionLoading] = useState(false);
   const [toast, setToast] = useState(null);
+  const [returnCostConfig, setReturnCostConfig] = useState({});
   // Date filter
-  const [datePreset, setDatePreset] = useState('thisMonth'); // 'all' | 'today' | 'thisWeek' | 'thisMonth' | 'thisYear' | 'custom'
+  const [datePreset, setDatePreset] = useState('thisMonth');
   const [customFrom, setCustomFrom] = useState('');
   const [customTo, setCustomTo] = useState('');
   // Source filter
-  const [sourceFilter, setSourceFilter] = useState('all'); // 'all' | 'shopee' | 'tiktok' | ...
+  const [sourceFilter, setSourceFilter] = useState('all');
+  // Status filter
+  const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'completed' | 'returned'
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
@@ -461,12 +579,20 @@ export default function OrderManagement() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [resOrders, resProducts] = await Promise.all([
+      const [resOrders, resProducts, resReturnCost] = await Promise.all([
         orderService.getOrders(),
         productService.getProducts(),
+        systemConfigService.getConfig('return_cost_per_platform'),
       ]);
       setOrders(resOrders.data.data);
       if (resProducts.data.success) setProducts(resProducts.data.data);
+      if (resReturnCost && resReturnCost.success && resReturnCost.data.value) {
+        try {
+          setReturnCostConfig(JSON.parse(resReturnCost.data.value));
+        } catch(e) {
+          setReturnCostConfig({});
+        }
+      }
     } catch {
       showToast('Không thể tải dữ liệu', 'error');
     } finally {
@@ -496,8 +622,25 @@ export default function OrderManagement() {
     }
   };
 
+  const handleReturn = async () => {
+    setActionLoading(true);
+    try {
+      const res = await orderService.markAsReturned(modal.data._id);
+      showToast(res.data?.message || 'Đã đánh dấu đơn hàng bị hoàn');
+      setModal(null);
+      fetchData();
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Thất bại', 'error');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   // Filtered orders theo bộ lọc thời gian & nguồn
   const filteredOrders = orders.filter(o => {
+    // Lọc theo trạng thái hoàn
+    if (statusFilter !== 'all' && (o.status || 'completed') !== statusFilter) return false;
+
     // Lọc theo nguồn
     const orderSource = o.source || 'khác';
     if (sourceFilter !== 'all' && orderSource !== sourceFilter) return false;
@@ -524,12 +667,17 @@ export default function OrderManagement() {
     return true; // 'all'
   });
 
-  // Stats
-  const totalRevenue = filteredOrders.reduce((s, o) => s + (o.total_price || 0), 0);
-  const totalItems = filteredOrders.reduce((s, o) => s + (o.items?.reduce((a, i) => a + i.quantity, 0) || 0), 0);
-  const totalCost = filteredOrders.reduce((s, o) => s + (o.items?.reduce((a, i) => a + (i.unit_cost || 0) * i.quantity, 0) || 0) + (o.logistics_cost || 0) + (o.packaging_cost || 0), 0);
-  const totalProfit = totalRevenue - totalCost;
+  // Stats — chỉ tính đơn hoàn thành (không tính đơn bị hoàn vào doanh thu)
+  const completedOrders = filteredOrders.filter(o => (o.status || 'completed') === 'completed');
+  const normalCompletedOrders = completedOrders.filter(o => !o.is_replacement);
+  const returnedOrders  = filteredOrders.filter(o => o.status === 'returned');
+  const totalRevenue = normalCompletedOrders.reduce((s, o) => s + (o.total_price || 0), 0);
+  const totalItems   = normalCompletedOrders.reduce((s, o) => s + (o.items?.reduce((a, i) => a + i.quantity, 0) || 0), 0);
+  const totalCost    = completedOrders.reduce((s, o) => s + (o.items?.reduce((a, i) => a + (i.unit_cost || 0) * i.quantity, 0) || 0) + (o.logistics_cost || 0) + (o.packaging_cost || 0), 0)
+                     + returnedOrders.reduce((s, o) => s + (o.return_cost || 0), 0); // thêm chi phí hoàn
+  const totalProfit  = totalRevenue - totalCost;
   const profitMargin = totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(1) : 0;
+  const totalReturned = returnedOrders.length;
 
   const ITEMS_PER_PAGE = 10;
   const totalPages = Math.ceil(filteredOrders.length / ITEMS_PER_PAGE);
@@ -548,6 +696,9 @@ export default function OrderManagement() {
       {modal?.type === 'add' && (
         <OrderModal products={products} onClose={() => setModal(null)} onSave={handleSave} />
       )}
+      {modal?.type === 'add_replacement' && (
+        <OrderModal products={products} onClose={() => setModal(null)} onSave={handleSave} isReplacementMode={true} />
+      )}
       {modal?.type === 'edit' && (
         <OrderModal
           order={modal.data}
@@ -555,10 +706,21 @@ export default function OrderManagement() {
           onClose={() => setModal(null)}
           onSave={handleSave}
           onDelete={() => setModal({ type: 'delete', data: modal.data })}
+          onMarkReturn={() => setModal({ type: 'return', data: modal.data })}
+          isReplacementMode={modal.data?.is_replacement}
         />
       )}
       {modal?.type === 'delete' && (
         <DeleteModal order={modal.data} onClose={() => setModal(null)} onConfirm={handleDelete} loading={actionLoading} />
+      )}
+      {modal?.type === 'return' && (
+        <ReturnModal
+          order={modal.data}
+          returnCost={returnCostConfig[modal.data.source || 'khác'] || 0}
+          onClose={() => setModal(null)}
+          onConfirm={handleReturn}
+          loading={actionLoading}
+        />
       )}
 
       <div>
@@ -568,13 +730,22 @@ export default function OrderManagement() {
             <h2 className="text-[24px] font-bold text-on-surface">Quản lý Đơn hàng</h2>
             <p className="text-on-surface-variant mt-1 text-[14px]">Tạo và quản lý toàn bộ đơn hàng bán hàng</p>
           </div>
-          <button
-            onClick={() => setModal({ type: 'add' })}
-            className="flex items-center gap-xs px-lg py-sm bg-primary text-white rounded-lg hover:opacity-90 transition-all shadow-sm font-semibold text-sm"
-          >
-            <span className="material-symbols-outlined text-[20px]">add</span>
-            <span>Tạo đơn hàng mới</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setModal({ type: 'add_replacement' })}
+              className="flex items-center gap-xs px-lg py-sm bg-error-container text-error rounded-lg hover:opacity-90 transition-all shadow-sm font-semibold text-sm border border-error/20"
+            >
+              <span className="material-symbols-outlined text-[20px]">local_shipping</span>
+              <span>Tạo đơn giao bù</span>
+            </button>
+            <button
+              onClick={() => setModal({ type: 'add' })}
+              className="flex items-center gap-xs px-lg py-sm bg-primary text-white rounded-lg hover:opacity-90 transition-all shadow-sm font-semibold text-sm"
+            >
+              <span className="material-symbols-outlined text-[20px]">add</span>
+              <span>Tạo đơn hàng mới</span>
+            </button>
+          </div>
         </div>
         {/* Filter bar */}
         <div className="bg-white rounded-xl shadow-sm border border-outline-variant/30 px-lg py-md mb-lg flex flex-wrap items-center gap-6">
@@ -633,6 +804,30 @@ export default function OrderManagement() {
             </select>
           </div>
 
+          {/* Status Filter */}
+          <div className="flex items-center gap-2">
+            {[['all', 'Tất cả', ''], ['completed', 'Hoàn thành', 'text-[#059669]'], ['returned', 'Bị hoàn', 'text-[#d97706]']].map(([val, label, color]) => (
+              <button
+                key={val}
+                onClick={() => { setStatusFilter(val); setCurrentPage(1); }}
+                className={`px-3 py-1.5 rounded-lg text-[12px] font-bold border transition-colors ${
+                  statusFilter === val
+                    ? val === 'returned'
+                      ? 'bg-[#fef3c7] border-[#fde68a] text-[#d97706]'
+                      : val === 'completed'
+                        ? 'bg-[#d1fae5] border-[#6ee7b7] text-[#059669]'
+                        : 'bg-primary-container border-primary/30 text-primary'
+                    : 'bg-white border-outline-variant/50 text-on-surface-variant hover:bg-surface-container'
+                }`}
+              >
+                {label}
+                {val === 'returned' && orders.filter(o => o.status === 'returned').length > 0 && (
+                  <span className="ml-1 bg-[#d97706] text-white text-[10px] px-1.5 py-0.5 rounded-full">{orders.filter(o => o.status === 'returned').length}</span>
+                )}
+              </button>
+            ))}
+          </div>
+
           {/* Badge kết quả lọc */}
           <span className="ml-auto text-[12px] text-on-surface-variant bg-surface-container px-4 py-1.5 rounded-full font-bold">
             {filteredOrders.length} / {orders.length} đơn hàng
@@ -641,10 +836,10 @@ export default function OrderManagement() {
 
         <div className="grid grid-cols-4 gap-md mb-lg">
           {[
-            { label: 'Tổng đơn hàng', value: loading ? null : orders.length, icon: 'receipt_long', color: 'text-primary', bg: 'bg-primary-container' },
+            { label: 'Tổng đơn hàng', value: loading ? null : filteredOrders.length, icon: 'receipt_long', color: 'text-primary', bg: 'bg-primary-container' },
             { label: 'Sản phẩm bán ra', value: loading ? null : totalItems.toLocaleString('vi-VN'), icon: 'inventory_2', color: 'text-[#059669]', bg: 'bg-[#d1fae5]' },
-            { label: 'Tổng doanh thu', value: loading ? null : formatPrice(totalRevenue), icon: 'payments', color: 'text-[#d97706]', bg: 'bg-[#fef3c7]' },
-            { label: 'Biên lợi nhuận', value: loading ? null : formatPrice(totalProfit), sub: loading ? null : `${profitMargin}% biên`, icon: 'trending_up', color: totalProfit >= 0 ? 'text-[#059669]' : 'text-error', bg: totalProfit >= 0 ? 'bg-[#d1fae5]' : 'bg-error-container' },
+            { label: 'Doanh thu thực', value: loading ? null : formatPrice(totalRevenue), sub: loading ? null : `${totalReturned} đơn hoàn`, icon: 'payments', color: 'text-[#d97706]', bg: 'bg-[#fef3c7]' },
+            { label: 'Lợi nhuận', value: loading ? null : formatPrice(totalProfit), sub: loading ? null : `${profitMargin}% biên`, icon: 'trending_up', color: totalProfit >= 0 ? 'text-[#059669]' : 'text-error', bg: totalProfit >= 0 ? 'bg-[#d1fae5]' : 'bg-error-container' },
           ].map(card => (
             <div key={card.label} className="bg-white rounded-xl p-lg shadow-sm border border-outline-variant/30 flex items-center justify-between">
               <div>
@@ -706,13 +901,28 @@ export default function OrderManagement() {
                       <tr
                         key={order._id}
                         onClick={() => setModal({ type: 'edit', data: order })}
-                        className="hover:bg-surface-container-lowest transition-colors cursor-pointer group"
+                        className={`transition-colors cursor-pointer group ${
+                          order.status === 'returned'
+                            ? 'bg-[#fefce8] hover:bg-[#fef9c3]'
+                            : 'hover:bg-surface-container-lowest'
+                        }`}
                       >
                         <td className="px-lg py-md">
                           <div className="flex flex-col gap-1 items-start">
                             <span className="font-mono text-[13px] font-semibold text-on-surface bg-surface-container-high px-2 py-1 rounded border border-outline-variant/30">
                               {order.orderId}
                             </span>
+                            {order.status === 'returned' && (
+                              <span className="flex items-center gap-1 text-[10px] uppercase font-bold px-1.5 py-0.5 rounded w-max bg-[#fef3c7] text-[#d97706] border border-[#fde68a]">
+                                <span className="material-symbols-outlined text-[11px]">assignment_return</span>
+                                Hoàn
+                              </span>
+                            )}
+                            {order.is_replacement && (
+                              <span className="flex items-center gap-1 text-[10px] uppercase font-bold px-1.5 py-0.5 rounded w-max bg-[#fee2e2] text-[#dc2626] border border-[#fca5a5]">
+                                Giao bù
+                              </span>
+                            )}
                             {order.source && order.source !== 'khác' && (
                               <span className={`flex items-center gap-1 text-[10px] uppercase font-bold px-1.5 py-0.5 rounded w-max ${{
                                   shopee: 'bg-[#ee4d2d]/10 text-[#ee4d2d] border border-[#ee4d2d]/20',
