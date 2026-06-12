@@ -17,7 +17,7 @@ const getEmptyForm = () => ({
   skus: []
 });
 
-function ProductModal({ product, materials, onClose, onSave, onDelete }) {
+function ProductModal({ product, materials, onClose, onSave, onDelete, onDuplicate }) {
   const materialOptions = useMemo(() => materials.map(m => ({
     value: m._id,
     label: `${m.name} (${formatPrice(m.price)} / ${m.unit})`
@@ -82,10 +82,39 @@ function ProductModal({ product, materials, onClose, onSave, onDelete }) {
     }
 
     const newSkus = combinations.map(combo => {
-      // Check if this combo already exists to preserve extra_ingredients
-      const existingSku = form.skus.find(s => JSON.stringify(s.combination) === JSON.stringify(combo));
+      // 1. Try exact match (order-independent)
+      let existingSku = form.skus.find(s => {
+        if (!s.combination) return false;
+        if (s.combination.length !== combo.length) return false;
+        const sortedS = [...s.combination].sort();
+        const sortedC = [...combo].sort();
+        return JSON.stringify(sortedS) === JSON.stringify(sortedC);
+      });
+      
       if (existingSku) return existingSku;
 
+      // 2. If no exact match, find the best partial match (highest intersection)
+      let bestMatch = null;
+      let maxIntersection = 0;
+      for (const oldSku of form.skus) {
+        if (!oldSku.combination) continue;
+        const intersection = oldSku.combination.filter(c => combo.includes(c)).length;
+        if (intersection > maxIntersection && intersection > 0) {
+          maxIntersection = intersection;
+          bestMatch = oldSku;
+        }
+      }
+
+      if (bestMatch) {
+        return {
+          id: `V${Math.floor(1000 + Math.random() * 9000)}`,
+          price: bestMatch.price,
+          combination: combo,
+          extra_ingredients: JSON.parse(JSON.stringify(bestMatch.extra_ingredients))
+        };
+      }
+
+      // 3. Fallback to empty SKU
       return {
         id: `V${Math.floor(1000 + Math.random() * 9000)}`,
         price: form.base_price || 0,
@@ -113,7 +142,7 @@ function ProductModal({ product, materials, onClose, onSave, onDelete }) {
         <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant/30 bg-surface-container-low/50 rounded-t-2xl">
           <div>
             <h2 className="text-xl font-bold text-on-surface flex items-center gap-2">
-              {product ? 'Chỉnh sửa Sản phẩm' : 'Thêm Sản phẩm mới'}
+              {product && product._id ? 'Chỉnh sửa Sản phẩm' : 'Thêm Sản phẩm mới'}
               <span className="text-[13px] font-mono bg-surface-container-high px-2 py-1 rounded text-on-surface-variant font-normal">
                 {form.productId}
               </span>
@@ -382,11 +411,18 @@ function ProductModal({ product, materials, onClose, onSave, onDelete }) {
 
         {/* Footer */}
         <div className="px-6 py-4 border-t border-outline-variant/30 bg-surface-container-low/50 flex justify-between items-center rounded-b-2xl">
-          <div>
-            {product && (
+          <div className="flex gap-2">
+            {product && product._id && (
               <button onClick={onDelete} type="button"
                 className="px-4 py-2 bg-error-container text-error rounded-lg text-sm font-bold hover:bg-error hover:text-white transition-colors">
-                Xoá Sản Phẩm
+                Xoá
+              </button>
+            )}
+            {product && product._id && (
+              <button onClick={() => onDuplicate(form)} type="button"
+                className="px-4 py-2 bg-surface-container-high text-on-surface-variant border border-outline-variant/30 rounded-lg text-sm font-bold hover:bg-surface-container transition-colors flex items-center gap-1">
+                <span className="material-symbols-outlined text-[18px]">content_copy</span>
+                Nhân bản
               </button>
             )}
           </div>
@@ -506,7 +542,27 @@ export default function ProductManagement() {
 
       {/* Modals */}
       {(modal?.type === 'add' || modal?.type === 'edit') && (
-        <ProductModal product={modal.data} materials={materials} onClose={() => setModal(null)} onSave={handleSave} onDelete={() => setModal({ type: 'delete', data: modal.data })} />
+        <ProductModal 
+          key={modal.data?.productId || modal.type}
+          product={modal.data} 
+          materials={materials} 
+          onClose={() => setModal(null)} 
+          onSave={handleSave} 
+          onDelete={() => setModal({ type: 'delete', data: modal.data })} 
+          onDuplicate={(form) => {
+            const newForm = JSON.parse(JSON.stringify(form));
+            delete newForm._id;
+            delete newForm.createdAt;
+            delete newForm.updatedAt;
+            delete newForm.__v;
+            newForm.productId = `SP-${Math.floor(1000000 + Math.random() * 9000000)}`;
+            newForm.name = newForm.name + ' (Copy)';
+            newForm.skus = newForm.skus.map(sku => ({ ...sku, id: `V${Math.floor(1000 + Math.random() * 9000)}` }));
+            // Set modal to add with new data
+            setModal({ type: 'add', data: newForm });
+            showToast('Đã nhân bản dữ liệu, vui lòng lưu để hoàn tất!', 'success');
+          }}
+        />
       )}
 
       {modal?.type === 'delete' && (

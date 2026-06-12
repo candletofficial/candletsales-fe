@@ -73,14 +73,22 @@ function MarginBar({ value, max, color }) {
 }
 
 function ProductTable({ products, sortKey }) {
+  const [expandedKeys, setExpandedKeys] = useState({});
+  const toggleExpand = (key) => setExpandedKeys(prev => ({...prev, [key]: !prev[key]}));
+
   const maxRevenue = Math.max(...products.map(p => p.totalRevenue), 1);
   const maxGrossMargin = Math.max(...products.map(p => p.grossMargin), 1);
   const maxNetMargin = Math.max(...products.map(p => Math.abs(p.netMargin)), 1);
 
   return (
     <div className="space-y-3">
-      {products.map((p, idx) => (
-        <div key={p.productId || idx} className="bg-white rounded-2xl p-5 border border-outline-variant/30 transition-all duration-300">
+      {products.map((p, idx) => {
+        const itemKey = p.productId || idx;
+        const isExpanded = !!expandedKeys[itemKey];
+        const hasVariants = p.variants && p.variants.length > 0 && (p.variants.length > 1 || p.variants[0].sku_id);
+
+        return (
+        <div key={itemKey} className="bg-white rounded-2xl p-5 border border-outline-variant/30 transition-all duration-300">
           <div className="flex flex-col md:flex-row md:items-center gap-4">
             <div className="flex items-center gap-4 min-w-[280px]">
               {/* Rank */}
@@ -109,7 +117,20 @@ function ProductTable({ products, sortKey }) {
               {/* Info */}
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-[15px] text-on-surface line-clamp-2 leading-tight">{p.product_name}</p>
-                <p className="text-[12px] text-on-surface-variant font-mono mt-1 bg-surface-container-low w-fit px-2 py-0.5 rounded-md">{p.productId}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <p className="text-[12px] text-on-surface-variant font-mono bg-surface-container-low w-fit px-2 py-0.5 rounded-md">{p.productId}</p>
+                  {hasVariants && (
+                    <button 
+                      onClick={() => toggleExpand(itemKey)}
+                      className="text-[11px] font-bold text-primary bg-primary/10 hover:bg-primary/20 px-2 py-0.5 rounded-md transition-colors flex items-center gap-1"
+                    >
+                      {isExpanded ? 'Thu gọn phân loại' : `Xem ${p.variants.length} phân loại`}
+                      <span className="material-symbols-outlined text-[14px]">
+                        {isExpanded ? 'expand_less' : 'expand_more'}
+                      </span>
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
             
@@ -153,8 +174,51 @@ function ProductTable({ products, sortKey }) {
               </div>
             </div>
           </div>
+          
+          {/* Variants Expansion */}
+          {isExpanded && hasVariants && (
+            <div className="mt-4 pt-4 border-t border-outline-variant/20 md:pl-12">
+               <h4 className="text-[12px] font-bold text-on-surface-variant mb-3 uppercase tracking-wider flex items-center gap-1.5">
+                 <span className="material-symbols-outlined text-[16px]">category</span> Chi tiết phân loại
+               </h4>
+               <div className="space-y-2">
+                 {p.variants.map((v, i) => (
+                    <div key={v.sku_id || i} className="flex flex-col md:flex-row md:items-center justify-between p-3 bg-surface-container-low/40 rounded-xl border border-outline-variant/30 gap-3">
+                      <div className="flex-1 min-w-[150px]">
+                        <p className="font-bold text-[14px] text-on-surface">{v.sku_label || 'Mặc định'}</p>
+                        {v.sku_id && <p className="text-[11px] text-on-surface-variant font-mono mt-0.5">{v.sku_id}</p>}
+                      </div>
+                      <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4 md:text-right">
+                        <div className="text-left md:text-right">
+                          <p className="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider mb-0.5">Doanh thu</p>
+                          <p className="font-black text-[13px] text-primary">{fmt(v.totalRevenue)}</p>
+                        </div>
+                        <div className="text-left md:text-right">
+                          <p className="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider mb-0.5">SL Bán</p>
+                          <p className="font-bold text-[13px] text-on-surface">{fmtNum(v.totalQty)}</p>
+                        </div>
+                        <div className="text-left md:text-right">
+                          <p className="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider mb-0.5">Lãi Gộp</p>
+                          <p className={`font-black text-[13px] ${v.grossMargin >= 30 ? 'text-[#059669]' : v.grossMargin >= 15 ? 'text-[#d97706]' : 'text-error'}`}>{fmtPct(v.grossMargin)}</p>
+                        </div>
+                        <div className="text-left md:text-right">
+                          <p className="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider mb-0.5">Sau Ads</p>
+                          <p className={`font-black text-[13px] ${v.netMargin >= 0 ? 'text-[#059669]' : 'text-error'}`}>{fmtPct(v.netMargin)}</p>
+                        </div>
+                      </div>
+                      {v.returnedQty > 0 && (
+                        <div className="md:ml-4 md:w-16 text-left md:text-right border-t md:border-t-0 md:border-l border-outline-variant/30 pt-2 md:pt-0 pl-0 md:pl-4 mt-1 md:mt-0">
+                          <p className="text-[10px] text-error uppercase font-bold tracking-wider mb-0.5">Hoàn</p>
+                          <p className="font-bold text-[13px] text-error">{fmtNum(v.returnedQty)}</p>
+                        </div>
+                      )}
+                    </div>
+                 ))}
+               </div>
+            </div>
+          )}
         </div>
-      ))}
+      )})}
     </div>
   );
 }

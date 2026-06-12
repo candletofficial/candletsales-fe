@@ -7,13 +7,19 @@ import SearchableSelect from '../components/SearchableSelect';
 import { formatPrice } from '../utils/formatPrice';
 import { useAuth } from '../hooks/useAuth';
 
-function ImportModal({ materials, user, onClose, onSave, initialMaterialId }) {
+function ImportModal({ materials, user, onClose, onSave, initialMaterialId, editTicket }) {
   const [items, setItems] = useState(
-    initialMaterialId 
-      ? [{ material_id: initialMaterialId, quantity: '', total_price: '' }] 
-      : []
+    editTicket
+      ? editTicket.items.map(i => ({
+          material_id: i.material_id._id || i.material_id,
+          quantity: i.quantity,
+          total_price: i.total_price
+        }))
+      : initialMaterialId 
+        ? [{ material_id: initialMaterialId, quantity: '', total_price: '' }] 
+        : []
   );
-  const [note, setNote] = useState('');
+  const [note, setNote] = useState(editTicket?.note || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -77,7 +83,11 @@ function ImportModal({ materials, user, onClose, onSave, initialMaterialId }) {
         note,
         imported_by: user?.name || 'Admin'
       };
-      await importService.createImportTicket(payload);
+      if (editTicket) {
+        await importService.updateImportTicket(editTicket._id, payload);
+      } else {
+        await importService.createImportTicket(payload);
+      }
       onSave();
     } catch (err) {
       setError(err.response?.data?.message || 'Có lỗi xảy ra');
@@ -90,7 +100,7 @@ function ImportModal({ materials, user, onClose, onSave, initialMaterialId }) {
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 sm:p-4 animate-[fadeIn_0.2s_ease]">
       <div className="bg-white sm:rounded-xl shadow-2xl w-full h-full sm:h-auto max-w-[800px] sm:mx-4 flex flex-col max-h-none sm:max-h-[90vh]">
         <div className="flex items-center justify-between px-6 py-5 border-b border-outline-variant/30 flex-shrink-0">
-          <h3 className="text-[20px] font-bold text-on-surface">Tạo Phiếu Nhập Hàng</h3>
+          <h3 className="text-[20px] font-bold text-on-surface">{editTicket ? `Sửa Phiếu Nhập ${editTicket.code || ''}` : 'Tạo Phiếu Nhập Hàng'}</h3>
           <button onClick={onClose} className="text-on-surface-variant hover:bg-surface-container p-1 rounded-md transition-colors">
             <span className="material-symbols-outlined">close</span>
           </button>
@@ -163,7 +173,7 @@ function ImportModal({ materials, user, onClose, onSave, initialMaterialId }) {
             Hủy
           </button>
           <button type="submit" form="import-form" disabled={loading} className="px-5 py-2 bg-primary text-white text-[15px] font-semibold rounded-lg hover:opacity-90 disabled:opacity-60">
-            {loading ? 'Đang lưu...' : 'Tạo phiếu nhập'}
+            {loading ? 'Đang lưu...' : (editTicket ? 'Lưu thay đổi' : 'Tạo phiếu nhập')}
           </button>
         </div>
       </div>
@@ -281,6 +291,7 @@ export default function ImportManagement() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [initialMaterialId, setInitialMaterialId] = useState(null);
+  const [editTicket, setEditTicket] = useState(null);
   const [detailsTicket, setDetailsTicket] = useState(null);
   const [confirmAction, setConfirmAction] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
@@ -398,7 +409,7 @@ export default function ImportManagement() {
         </div>
       )}
 
-      {modalOpen && <ImportModal materials={materials} user={user} onClose={() => { setModalOpen(false); setInitialMaterialId(null); }} onSave={() => { setModalOpen(false); setInitialMaterialId(null); showToast('Đã tạo phiếu nhập thành công'); fetchData(); window.dispatchEvent(new CustomEvent('materialsChanged')); }} initialMaterialId={initialMaterialId} />}
+      {modalOpen && <ImportModal materials={materials} user={user} onClose={() => { setModalOpen(false); setInitialMaterialId(null); setEditTicket(null); }} onSave={() => { setModalOpen(false); setInitialMaterialId(null); setEditTicket(null); showToast(editTicket ? 'Đã cập nhật phiếu nhập' : 'Đã tạo phiếu nhập thành công'); fetchData(); window.dispatchEvent(new CustomEvent('materialsChanged')); }} initialMaterialId={initialMaterialId} editTicket={editTicket} />}
       {detailsTicket && <TicketDetailsModal ticket={detailsTicket} onClose={() => setDetailsTicket(null)} />}
 
       {confirmAction?.type === 'complete' && (
@@ -428,7 +439,7 @@ export default function ImportManagement() {
           <h2 className="text-[24px] font-bold text-on-surface">Quản lý Nhập hàng</h2>
           <p className="text-[14px] text-on-surface-variant mt-1">Tạo phiếu nhập và cập nhật tồn kho, đơn giá nguyên liệu</p>
         </div>
-        <button onClick={() => setModalOpen(true)} className="px-5 py-2.5 bg-primary text-white text-[14px] font-semibold rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2 shadow-sm">
+        <button onClick={() => { setEditTicket(null); setModalOpen(true); }} className="px-5 py-2.5 bg-primary text-white text-[14px] font-semibold rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2 shadow-sm">
           <span className="material-symbols-outlined text-[18px]">add</span>
           Tạo phiếu nhập
         </button>
@@ -503,7 +514,7 @@ export default function ImportManagement() {
                       {tickets.length === 0 ? 'Chưa có phiếu nhập nào' : 'Không tìm thấy phiếu nhập phù hợp'}
                     </p>
                     {tickets.length === 0 && (
-                      <button onClick={() => setModalOpen(true)} className="mt-3 text-primary text-sm font-semibold hover:underline">
+                      <button onClick={() => { setEditTicket(null); setModalOpen(true); }} className="mt-3 text-primary text-sm font-semibold hover:underline">
                         + Tạo phiếu nhập mới
                       </button>
                     )}
@@ -511,8 +522,34 @@ export default function ImportManagement() {
                 </tr>
               ) : (
                 currentTickets.map(ticket => (
-                  <tr key={ticket._id} className="hover:bg-surface-container-low/50 transition-colors">
-                    <td className="px-lg py-md text-[14px] font-semibold">{ticket.code || 'PN-' + parseInt(ticket._id.slice(-6), 16).toString().padStart(7, '0')}</td>
+                  <tr 
+                    key={ticket._id} 
+                    className="group hover:bg-surface-container-low/50 transition-colors cursor-pointer"
+                    onClick={() => {
+                      if (ticket.status === 'pending') {
+                        setEditTicket(ticket);
+                        setModalOpen(true);
+                      } else {
+                        setDetailsTicket(ticket);
+                      }
+                    }}
+                  >
+                    <td className="px-lg py-md text-[14px] font-semibold relative">
+                      <div className="flex items-center gap-2">
+                        <span>{ticket.code || 'PN-' + parseInt(ticket._id.slice(-6), 16).toString().padStart(7, '0')}</span>
+                      </div>
+                      
+                      {/* Tooltip cố định */}
+                      {ticket.note && (
+                        <div className="absolute left-[70%] top-1/2 -translate-y-1/2 ml-4 hidden group-hover:block z-[50] pointer-events-none">
+                          <div className="relative bg-gray-800/95 backdrop-blur-sm text-white text-[13px] p-3 rounded-xl shadow-2xl break-words font-medium whitespace-pre-wrap w-max max-w-[300px] border border-white/10">
+                            {ticket.note}
+                            {/* Arrow */}
+                            <div className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-3 bg-gray-800/95 rotate-45 border-l border-b border-white/10"></div>
+                          </div>
+                        </div>
+                      )}
+                    </td>
                     <td className="px-lg py-md text-[14px]">{new Date(ticket.createdAt).toLocaleDateString('vi-VN')}</td>
                     <td className="px-lg py-md text-[14px]">{ticket.imported_by || 'Admin'}</td>
                     <td className="px-lg py-md">
@@ -523,15 +560,17 @@ export default function ImportManagement() {
                     <td className="px-lg py-md text-[14px] font-bold text-primary text-right">{formatPrice(ticket.total_amount)}</td>
                     <td className="px-lg py-md text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => setDetailsTicket(ticket)} className="p-1.5 text-on-surface-variant hover:bg-surface-container rounded transition-colors" title="Chi tiết">
-                          <span className="material-symbols-outlined text-[18px]">visibility</span>
-                        </button>
+                        {ticket.status === 'completed' && (
+                          <button onClick={(e) => { e.stopPropagation(); setDetailsTicket(ticket); }} className="p-1.5 text-on-surface-variant hover:bg-surface-container rounded transition-colors" title="Chi tiết">
+                            <span className="material-symbols-outlined text-[18px]">visibility</span>
+                          </button>
+                        )}
                         {ticket.status === 'pending' && (
                           <>
-                            <button disabled={actionLoading} onClick={() => setConfirmAction({ type: 'complete', ticket })} className="p-1.5 text-primary hover:bg-primary-container rounded transition-colors disabled:opacity-50" title="Xác nhận đẩy hàng">
+                            <button disabled={actionLoading} onClick={(e) => { e.stopPropagation(); setConfirmAction({ type: 'complete', ticket }); }} className="p-1.5 text-primary hover:bg-primary-container rounded transition-colors disabled:opacity-50" title="Xác nhận đẩy hàng">
                               <span className="material-symbols-outlined text-[18px]">check_circle</span>
                             </button>
-                            <button disabled={actionLoading} onClick={() => setConfirmAction({ type: 'delete', ticket })} className="p-1.5 text-error hover:bg-error-container rounded transition-colors disabled:opacity-50" title="Xóa">
+                            <button disabled={actionLoading} onClick={(e) => { e.stopPropagation(); setConfirmAction({ type: 'delete', ticket }); }} className="p-1.5 text-error hover:bg-error-container rounded transition-colors disabled:opacity-50" title="Xóa">
                               <span className="material-symbols-outlined text-[18px]">delete</span>
                             </button>
                           </>

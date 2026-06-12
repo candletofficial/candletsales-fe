@@ -109,7 +109,14 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
     setError('');
     setLoading(true);
     try {
-      const payload = { items, total_price: isReplacement ? 0 : totalPrice, logistics_cost: logisticsCost, source, shippingMethod, note, ordered_at: new Date(orderedAt), is_replacement: isReplacement };
+      let finalOrderedAt = new Date(orderedAt);
+      if (isEdit && order.ordered_at && orderedAt === new Date(order.ordered_at).toISOString().split('T')[0]) {
+        finalOrderedAt = new Date(order.ordered_at);
+      } else if (!isEdit && orderedAt === today()) {
+        finalOrderedAt = new Date();
+      }
+
+      const payload = { items, total_price: isReplacement ? 0 : totalPrice, logistics_cost: logisticsCost, source, shippingMethod, note, ordered_at: finalOrderedAt, is_replacement: isReplacement };
       if (isEdit) {
         await orderService.updateOrder(order._id, payload);
       } else {

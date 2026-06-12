@@ -36,6 +36,7 @@ export default function Dashboard() {
   const [isExporting, setIsExporting] = useState(false);
   const [showAnalysis, setShowAnalysis] = useState(false);
   const [showOrderAnalysis, setShowOrderAnalysis] = useState(false);
+  const [refreshingActivities, setRefreshingActivities] = useState(false);
 
   const getPeriodLabel = () => {
     if (filterType === 'today') return 'Hôm nay';
@@ -46,7 +47,7 @@ export default function Dashboard() {
     return 'Tùy chỉnh';
   };
 
-  useEffect(() => {
+  const fetchData = React.useCallback(() => {
     setLoading(true);
     let params = { days: 30 };
     const now = new Date();
@@ -73,6 +74,24 @@ export default function Dashboard() {
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [filterType, customDate]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const handleRefreshActivities = () => {
+    setRefreshingActivities(true);
+    adminService.getRecentActivities()
+      .then(res => {
+        setData(prev => ({
+          ...prev,
+          recentActivities: res.data.data.recentActivities,
+          recentOrders: res.data.data.recentOrders
+        }));
+      })
+      .catch(console.error)
+      .finally(() => setRefreshingActivities(false));
+  };
 
   const pieData = useMemo(() => {
     if (!data) return [];
@@ -346,10 +365,11 @@ export default function Dashboard() {
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-[16px] font-bold text-on-surface">Hoạt động gần đây</h3>
               <button 
-                onClick={() => setFilterType(filterType)} // Dummy refresh
-                className="text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center w-8 h-8 rounded-full hover:bg-surface-container"
+                onClick={handleRefreshActivities}
+                disabled={refreshingActivities}
+                className="text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center w-8 h-8 rounded-full hover:bg-surface-container disabled:opacity-50"
               >
-                <span className="material-symbols-outlined text-[20px]">refresh</span>
+                <span className={`material-symbols-outlined text-[20px] ${refreshingActivities ? 'animate-spin' : ''}`}>refresh</span>
               </button>
             </div>
             <div className="flex-1 overflow-y-auto pr-2 space-y-6">
@@ -372,8 +392,12 @@ export default function Dashboard() {
                     icon = 'shopping_cart'; color = '#1e40af'; bgColor = '#eff6ff'; // primary blue
                   } else if (act.type === 'import') {
                     icon = 'inventory_2'; color = '#059669'; bgColor = '#ecfdf5'; // emerald
+                  } else if (act.type === 'inventory_check') {
+                    icon = 'fact_check'; color = '#8b5cf6'; bgColor = '#f5f3ff'; // purple
+                  } else if (act.type === 'out_of_stock') {
+                    icon = 'error'; color = '#dc2626'; bgColor = '#fef2f2'; // red
                   } else {
-                    icon = 'warning'; color = '#dc2626'; bgColor = '#fef2f2'; // red
+                    icon = 'warning'; color = '#d97706'; bgColor = '#fef3c7'; // amber
                   }
 
                   return (
@@ -389,7 +413,7 @@ export default function Dashboard() {
                         <p className="text-[13px] text-on-surface-variant mt-0.5">{act.subtitle}</p>
                         {act.detail && <p className="text-[13px] font-bold mt-0.5">{act.detail}</p>}
                         <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mt-1.5">
-                          {new Date(act.time).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })}
+                          {new Date(act.time).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit', day: '2-digit', month: '2-digit' })}
                         </p>
                       </div>
                     </div>
@@ -444,7 +468,7 @@ export default function Dashboard() {
                         </td>
                         <td className="py-4 px-4">
                           <span className="text-[13px] text-on-surface-variant">
-                            {new Date(o.ordered_at).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })}
+                            {new Date(o.ordered_at).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit', day: '2-digit', month: '2-digit' })}
                           </span>
                         </td>
                         <td className="py-4 px-4">
