@@ -74,6 +74,13 @@ const NAV_ITEMS = [
     label: 'Chi phí Quảng cáo',
   },
   {
+    to: '/coupons',
+    icon: (
+      <span className="material-symbols-outlined text-[20px]">local_offer</span>
+    ),
+    label: 'Khuyến mãi',
+  },
+  {
     label: 'Công cụ tính',
     isGroup: true,
     icon: (

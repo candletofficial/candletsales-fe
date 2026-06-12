@@ -3,7 +3,9 @@ import { useSearchParams } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { orderService } from '../services/orderService';
 import { productService } from '../services/productService';
+import { couponService } from '../services/couponService';
 import systemConfigService from '../services/systemConfigService';
+import { printInvoice } from '../utils/printInvoice';
 
 // ── Helpers ────────────────────────────────────────────────────────
 const formatPrice = (n) =>
@@ -18,7 +20,7 @@ const today = () => new Date().toISOString().split('T')[0];
 function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, isReplacementMode = false }) {
   const isEdit = !!order;
   const [items, setItems] = useState(order?.items?.map(i => ({ ...i })) || []);
-  const [totalPrice, setTotalPrice] = useState(order?.total_price ?? 0);
+  const [totalPrice, setTotalPrice] = useState(order ? (order.total_price - (order.logistics_cost || 0) + (order.discount_amount || 0)) : 0);
   const [logisticsCost, setLogisticsCost] = useState(order?.logistics_cost ?? 0);
   const [note, setNote] = useState(order?.note || '');
   const [orderedAt, setOrderedAt] = useState(
@@ -33,6 +35,28 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
   const [error, setError] = useState('');
   const [showProductPicker, setShowProductPicker] = useState(false);
   const [productSearch, setProductSearch] = useState('');
+
+  // Discount states
+  const [discountCodeInput, setDiscountCodeInput] = useState(order?.discount_code || '');
+  const [appliedDiscount, setAppliedDiscount] = useState({
+    code: order?.discount_code || null,
+    amount: order?.discount_amount || 0
+  });
+  const [couponError, setCouponError] = useState('');
+  const [validatingCoupon, setValidatingCoupon] = useState(false);
+  const [availableCoupons, setAvailableCoupons] = useState([]);
+
+  useEffect(() => {
+    couponService.getCoupons().then(res => {
+      // Chỉ lấy những mã đang active và còn hạn, còn lượt
+      const valid = res.data.data.filter(c => 
+        c.is_active && 
+        new Date() <= new Date(c.end_date) && 
+        c.used_count < c.quantity
+      );
+      setAvailableCoupons(valid);
+    }).catch(err => console.error('Failed to load coupons', err));
+  }, []);
 
   // Tính tổng tự động
   const calcTotal = useCallback(() => {
@@ -97,10 +121,32 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
     const newItems = [...items];
     newItems[idx].quantity = Math.max(1, Number(val));
     setItems(newItems);
+    setAppliedDiscount({ code: null, amount: 0 }); // Reset discount when changing items
   };
 
   const handleRemoveItem = (idx) => {
     setItems(items.filter((_, i) => i !== idx));
+    setAppliedDiscount({ code: null, amount: 0 });
+  };
+
+  const handleApplyCoupon = async () => {
+    if (!discountCodeInput.trim()) {
+      setAppliedDiscount({ code: null, amount: 0 });
+      setCouponError('');
+      return;
+    }
+    setValidatingCoupon(true);
+    setCouponError('');
+    try {
+      const res = await couponService.validateCoupon(discountCodeInput, items, totalPrice);
+      const data = res.data.data;
+      setAppliedDiscount({ code: data.code, amount: data.discount_amount });
+    } catch (err) {
+      setCouponError(err.response?.data?.message || 'Mã giảm giá không hợp lệ');
+      setAppliedDiscount({ code: null, amount: 0 });
+    } finally {
+      setValidatingCoupon(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -116,7 +162,21 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
         finalOrderedAt = new Date();
       }
 
-      const payload = { items, total_price: isReplacement ? 0 : totalPrice, logistics_cost: logisticsCost, source, shippingMethod, note, ordered_at: finalOrderedAt, is_replacement: isReplacement };
+      const finalPrice = isReplacement ? 0 : Math.max(0, totalPrice + logisticsCost - appliedDiscount.amount);
+
+      const payload = { 
+        items, 
+        total_price: finalPrice, 
+        logistics_cost: logisticsCost, 
+        source, 
+        shippingMethod, 
+        note, 
+        ordered_at: finalOrderedAt, 
+        is_replacement: isReplacement,
+        discount_amount: appliedDiscount.amount,
+        discount_code: appliedDiscount.code
+      };
+      
       if (isEdit) {
         await orderService.updateOrder(order._id, payload);
       } else {
@@ -324,12 +384,59 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
               type="number"
               min="0"
               value={totalPrice}
-              onChange={e => { setAutoTotal(false); setTotalPrice(Number(e.target.value)); }}
+              onChange={e => { 
+                setAutoTotal(false); 
+                setTotalPrice(Number(e.target.value)); 
+                setAppliedDiscount({ code: null, amount: 0 }); 
+              }}
               disabled={autoTotal && items.length > 0}
               className="w-full border border-primary/30 rounded-lg px-4 py-3 text-[20px] font-bold text-primary text-right focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 bg-white disabled:bg-surface-container-low"
             />
             {autoTotal && items.length > 0 && (
               <p className="text-[11px] text-on-surface-variant mt-1 text-right">Tổng tự động tính từ sản phẩm</p>
+            )}
+
+            {!isReplacementMode && (
+              <div className="mt-4 pt-4 border-t border-primary/20">
+                <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Mã giảm giá</label>
+                <div className="flex gap-2">
+                  <select
+                    value={discountCodeInput}
+                    onChange={e => setDiscountCodeInput(e.target.value)}
+                    className="flex-1 border border-outline-variant rounded-lg px-4 py-2 text-[14px] focus:border-primary focus:ring-1 focus:ring-primary bg-white"
+                  >
+                    <option value="">-- Chọn mã ưu đãi --</option>
+                    {availableCoupons.map(c => (
+                      <option key={c._id} value={c.code}>
+                        {c.code} - {c.name} ({c.type === 'percent' ? `Giảm ${c.value}%` : `Giảm ${formatPrice(c.value)}`})
+                      </option>
+                    ))}
+                    {discountCodeInput && !availableCoupons.find(c => c.code === discountCodeInput) && (
+                      <option value={discountCodeInput}>{discountCodeInput} (Đã dùng)</option>
+                    )}
+                  </select>
+                  <button 
+                    type="button" 
+                    onClick={handleApplyCoupon} 
+                    disabled={validatingCoupon || items.length === 0 || !discountCodeInput}
+                    className="px-4 py-2 bg-primary text-white rounded-lg text-[13px] font-bold disabled:opacity-50"
+                  >
+                    {validatingCoupon ? 'Đang kiểm tra...' : 'Áp dụng'}
+                  </button>
+                </div>
+                {couponError && <p className="text-error text-[12px] mt-1 font-medium">{couponError}</p>}
+                {appliedDiscount.code && (
+                  <div className="mt-2 text-[13px] text-[#059669] font-bold flex justify-between items-center bg-[#d1fae5]/50 px-3 py-2 rounded-lg border border-[#34d399]/30">
+                    <span>Mã {appliedDiscount.code}</span>
+                    <span>- {formatPrice(appliedDiscount.amount)}</span>
+                  </div>
+                )}
+                
+                <div className="flex justify-between items-center mt-3 text-[16px] font-bold text-on-surface">
+                  <span>Khách phải trả:</span>
+                  <span>{formatPrice(Math.max(0, totalPrice + logisticsCost - appliedDiscount.amount))}</span>
+                </div>
+              </div>
             )}
           </div>
           ) : (
@@ -350,22 +457,34 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
               <>
                 <button
                   type="button"
-                  onClick={onDelete}
-                  className="px-4 py-2 bg-[#fee2e2] text-[#dc2626] border border-[#fca5a5] rounded-lg text-[14px] font-semibold hover:bg-[#dc2626] hover:text-white transition-colors flex items-center gap-1.5"
+                  onClick={() => printInvoice(order)}
+                  className="px-3 py-2 text-primary hover:bg-primary/10 rounded-lg text-[14px] font-semibold transition-colors flex items-center gap-1.5"
                 >
-                  <span className="material-symbols-outlined text-[17px]">delete</span>
-                  Xóa đơn hàng
+                  <span className="material-symbols-outlined text-[18px]">print</span>
+                  In Hóa Đơn
                 </button>
+
+                <div className="w-[1px] h-4 bg-outline-variant/50 mx-1"></div>
+
                 {order.status !== 'returned' && !isReplacementMode && (
                   <button
                     type="button"
                     onClick={onMarkReturn}
-                    className="px-4 py-2 bg-[#fef3c7] text-[#d97706] border border-[#fde68a] rounded-lg text-[14px] font-semibold hover:bg-[#d97706] hover:text-white transition-colors flex items-center gap-1.5"
+                    className="px-3 py-2 text-[#d97706] hover:bg-[#d97706]/10 rounded-lg text-[14px] font-semibold transition-colors flex items-center gap-1.5"
                   >
-                    <span className="material-symbols-outlined text-[17px]">assignment_return</span>
-                    Đánh dấu bị hoàn
+                    <span className="material-symbols-outlined text-[18px]">assignment_return</span>
+                    Đánh dấu hoàn
                   </button>
                 )}
+                
+                <button
+                  type="button"
+                  onClick={onDelete}
+                  className="px-3 py-2 text-error hover:bg-error/10 rounded-lg text-[14px] font-semibold transition-colors flex items-center gap-1.5"
+                >
+                  <span className="material-symbols-outlined text-[18px]">delete</span>
+                  Xóa
+                </button>
               </>
             )}
           </div>

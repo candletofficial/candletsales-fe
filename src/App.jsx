@@ -14,6 +14,7 @@ import ImportManagement from './pages/ImportManagement';
 import InventoryCheckManagement from './pages/InventoryCheckManagement';
 import ShopeeCalculator from './pages/ShopeeCalculator';
 import TiktokCalculator from './pages/TiktokCalculator';
+import CouponManagement from './pages/CouponManagement';
 
 export default function App() {
   return (
@@ -31,6 +32,7 @@ export default function App() {
           <Route path="/products" element={<ProtectedRoute><ProductManagement /></ProtectedRoute>} />
           <Route path="/orders" element={<ProtectedRoute><OrderManagement /></ProtectedRoute>} />
           <Route path="/ad-costs" element={<ProtectedRoute><AdCostManagement /></ProtectedRoute>} />
+          <Route path="/coupons" element={<ProtectedRoute><CouponManagement /></ProtectedRoute>} />
           <Route path="/tools/shopee" element={<ProtectedRoute><ShopeeCalculator /></ProtectedRoute>} />
           <Route path="/tools/tiktok" element={<ProtectedRoute><TiktokCalculator /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/login" replace />} />

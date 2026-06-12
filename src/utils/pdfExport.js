@@ -34,7 +34,7 @@ export const exportDashboardToPDF = async (data, periodLabel) => {
   doc.setFont('Roboto', 'normal');
   doc.setFontSize(11);
   doc.setTextColor(107, 114, 128); // Gray-500
-  doc.text(`Handmade Scented Candle Store - Ngày xuất: ${new Date().toLocaleDateString('vi-VN')}`, pageWidth / 2, currentY, { align: 'center' });
+  doc.text(`Candlet Shop - Ngày xuất: ${new Date().toLocaleDateString('vi-VN')}`, pageWidth / 2, currentY, { align: 'center' });
   
   currentY += 5;
   doc.text(`Kỳ báo cáo: ${periodLabel}`, pageWidth / 2, currentY, { align: 'center' });
