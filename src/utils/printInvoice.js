@@ -6,6 +6,10 @@ export const printInvoice = (order) => {
     d ? new Date(d).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
 
   const printWindow = window.open('', '_blank');
+  if (!printWindow) {
+    alert('Trình duyệt của bạn đã chặn tính năng mở tab mới (Pop-up). Vui lòng cho phép Pop-up cho trang web này để có thể in hóa đơn.');
+    return;
+  }
   
   const itemsHtml = (order.items || []).map((item) => `
     <tr>
