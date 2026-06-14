@@ -17,7 +17,7 @@ const formatDate = (d) =>
 const today = () => new Date().toISOString().split('T')[0];
 
 // ── Modal Tạo / Chỉnh sửa đơn hàng ───────────────────────────────
-function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, isReplacementMode = false }) {
+function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, isReplacementMode = false, isSeedingMode = false }) {
   const isEdit = !!order;
   const [items, setItems] = useState(order?.items?.map(i => ({ ...i })) || []);
   const [totalPrice, setTotalPrice] = useState(order ? (order.total_price - (order.logistics_cost || 0) + (order.discount_amount || 0)) : 0);
@@ -31,6 +31,8 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
   const [orderId, setOrderId] = useState('');
   const [autoTotal, setAutoTotal] = useState(!isEdit);
   const [isReplacement, setIsReplacement] = useState(isReplacementMode || order?.is_replacement || false);
+  const [isSeeding, setIsSeeding] = useState(isSeedingMode || order?.is_seeding || false);
+  const [seedingCost, setSeedingCost] = useState(order?.seeding_cost || 0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showProductPicker, setShowProductPicker] = useState(false);
@@ -151,7 +153,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (items.length === 0) { setError('Vui lòng thêm ít nhất 1 sản phẩm'); return; }
+    if (!isSeeding && items.length === 0) { setError('Vui lòng thêm ít nhất 1 sản phẩm'); return; }
     setError('');
     setLoading(true);
     try {
@@ -162,7 +164,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
         finalOrderedAt = new Date();
       }
 
-      const finalPrice = isReplacement ? 0 : Math.max(0, totalPrice + logisticsCost - appliedDiscount.amount);
+      const finalPrice = (isReplacement || isSeeding) ? 0 : Math.max(0, totalPrice + logisticsCost - appliedDiscount.amount);
 
       const payload = { 
         items, 
@@ -173,6 +175,8 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
         note, 
         ordered_at: finalOrderedAt, 
         is_replacement: isReplacement,
+        is_seeding: isSeeding,
+        seeding_cost: seedingCost,
         discount_amount: appliedDiscount.amount,
         discount_code: appliedDiscount.code
       };
@@ -199,7 +203,8 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
           <div>
             <h2 className="text-[17px] font-bold text-on-surface flex items-center gap-2">
               {isReplacementMode && <span className="material-symbols-outlined text-error">local_shipping</span>}
-              {isEdit ? (isReplacementMode ? 'Chỉnh sửa đơn giao bù' : 'Chỉnh sửa đơn hàng') : (isReplacementMode ? 'Tạo đơn giao bù' : 'Tạo đơn hàng mới')}
+              {isSeedingMode && <span className="material-symbols-outlined text-[#8b5cf6]">campaign</span>}
+              {isEdit ? (isReplacementMode ? 'Chỉnh sửa đơn giao bù' : isSeedingMode ? 'Chỉnh sửa đơn Seeding' : 'Chỉnh sửa đơn hàng') : (isReplacementMode ? 'Tạo đơn giao bù' : isSeedingMode ? 'Tạo đơn Seeding' : 'Tạo đơn hàng mới')}
             </h2>
             {isEdit && (
               <div className="flex items-center gap-2 mt-0.5">
@@ -301,6 +306,20 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
             />
           </div>
 
+          {isSeedingMode && (
+            <div>
+              <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Chi phí Seeding (trả KOL, Marketing...) (đ)</label>
+              <input
+                type="number"
+                min="0"
+                value={seedingCost}
+                onChange={e => setSeedingCost(Number(e.target.value))}
+                placeholder="0"
+                className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-[15px] focus:outline-none focus:border-[#8b5cf6] focus:ring-1 focus:ring-[#8b5cf6]"
+              />
+            </div>
+          )}
+
           {/* Danh sách sản phẩm */}
           <div>
             <div className="flex justify-between items-center mb-3">
@@ -364,7 +383,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
           </div>
 
           {/* Tổng tiền */}
-          {!isReplacementMode ? (
+          {!isReplacementMode && !isSeedingMode ? (
           <div className="bg-primary-container/20 rounded-xl p-4 border border-primary/20">
             <div className="flex items-center justify-between mb-3">
               <span className="font-bold text-[14px] text-on-surface">Tổng tiền đơn hàng</span>
@@ -439,12 +458,20 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
               </div>
             )}
           </div>
-          ) : (
+          ) : isReplacementMode ? (
             <div className="bg-error-container/20 rounded-xl p-4 border border-error/20 flex items-start gap-3 text-error">
               <span className="material-symbols-outlined text-[24px]">info</span>
               <div>
                 <p className="text-[14px] font-bold">Đây là Đơn Giao Bù</p>
                 <p className="text-[12px] opacity-90 mt-0.5">Doanh thu sẽ không được tính (0đ) nhưng hệ thống vẫn trừ kho và tính chi phí đóng gói, giao hàng như bình thường.</p>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-[#f5f3ff] rounded-xl p-4 border border-[#ddd6fe] flex items-start gap-3 text-[#7c3aed]">
+              <span className="material-symbols-outlined text-[24px]">campaign</span>
+              <div>
+                <p className="text-[14px] font-bold">Đây là Đơn Seeding</p>
+                <p className="text-[12px] opacity-90 mt-0.5">Doanh thu sẽ không được tính (0đ). Bạn có thể không cần chọn sản phẩm nếu chỉ muốn ghi nhận chi phí trả cho KOL.</p>
               </div>
             </div>
           )}
@@ -466,7 +493,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
 
                 <div className="w-[1px] h-4 bg-outline-variant/50 mx-1"></div>
 
-                {order.status !== 'returned' && !isReplacementMode && (
+                {order.status !== 'returned' && !isReplacementMode && !isSeedingMode && (
                   <button
                     type="button"
                     onClick={onMarkReturn}
@@ -493,7 +520,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
               Hủy
             </button>
             {(!isEdit || order.status !== 'returned') && (
-              <button onClick={handleSubmit} disabled={loading || items.length === 0}
+              <button onClick={handleSubmit} disabled={loading || (!isSeeding && items.length === 0)}
                 className="px-6 py-2.5 bg-primary text-white text-[14px] font-semibold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-60 flex items-center gap-2 shadow-sm">
                 {loading && <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
                 {isEdit ? 'Lưu thay đổi' : 'Tạo đơn hàng'}
@@ -802,11 +829,11 @@ export default function OrderManagement() {
 
   // Stats — chỉ tính đơn hoàn thành (không tính đơn bị hoàn vào doanh thu)
   const completedOrders = filteredOrders.filter(o => (o.status || 'completed') === 'completed');
-  const normalCompletedOrders = completedOrders.filter(o => !o.is_replacement);
+  const normalCompletedOrders = completedOrders.filter(o => !o.is_replacement && !o.is_seeding);
   const returnedOrders  = filteredOrders.filter(o => o.status === 'returned');
   const totalRevenue = normalCompletedOrders.reduce((s, o) => s + (o.total_price || 0), 0);
   const totalItems   = normalCompletedOrders.reduce((s, o) => s + (o.items?.reduce((a, i) => a + i.quantity, 0) || 0), 0);
-  const totalCost    = completedOrders.reduce((s, o) => s + (o.items?.reduce((a, i) => a + (i.unit_cost || 0) * i.quantity, 0) || 0) + (o.logistics_cost || 0) + (o.packaging_cost || 0), 0)
+  const totalCost    = completedOrders.reduce((s, o) => s + (o.seeding_cost || 0) + (o.items?.reduce((a, i) => a + (i.unit_cost || 0) * i.quantity, 0) || 0) + (o.logistics_cost || 0) + (o.packaging_cost || 0), 0)
                      + returnedOrders.reduce((s, o) => s + (o.return_cost || 0), 0); // thêm chi phí hoàn
   const totalProfit  = totalRevenue - totalCost;
   const profitMargin = totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(1) : 0;
@@ -832,6 +859,9 @@ export default function OrderManagement() {
       {modal?.type === 'add_replacement' && (
         <OrderModal products={products} onClose={() => setModal(null)} onSave={handleSave} isReplacementMode={true} />
       )}
+      {modal?.type === 'add_seeding' && (
+        <OrderModal products={products} onClose={() => setModal(null)} onSave={handleSave} isSeedingMode={true} />
+      )}
       {modal?.type === 'edit' && (
         <OrderModal
           order={modal.data}
@@ -841,6 +871,7 @@ export default function OrderManagement() {
           onDelete={() => setModal({ type: 'delete', data: modal.data })}
           onMarkReturn={() => setModal({ type: 'return', data: modal.data })}
           isReplacementMode={modal.data?.is_replacement}
+          isSeedingMode={modal.data?.is_seeding}
         />
       )}
       {modal?.type === 'delete' && (
@@ -864,6 +895,13 @@ export default function OrderManagement() {
             <p className="text-on-surface-variant mt-1 text-[14px]">Tạo và quản lý toàn bộ đơn hàng bán hàng</p>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setModal({ type: 'add_seeding' })}
+              className="flex items-center gap-xs px-lg py-sm bg-[#f5f3ff] text-[#7c3aed] rounded-lg hover:opacity-90 transition-all shadow-sm font-semibold text-sm border border-[#ddd6fe]"
+            >
+              <span className="material-symbols-outlined text-[20px]">campaign</span>
+              <span className="hidden sm:inline">Tạo đơn seeding</span>
+            </button>
             <button
               onClick={() => setModal({ type: 'add_replacement' })}
               className="flex items-center gap-xs px-lg py-sm bg-error-container text-error rounded-lg hover:opacity-90 transition-all shadow-sm font-semibold text-sm border border-error/20"
@@ -1058,6 +1096,11 @@ export default function OrderManagement() {
                                 Giao bù
                               </span>
                             )}
+                            {order.is_seeding && (
+                              <span className="flex items-center gap-1 text-[10px] uppercase font-bold px-1.5 py-0.5 rounded w-max bg-[#f5f3ff] text-[#7c3aed] border border-[#ddd6fe]">
+                                Seeding
+                              </span>
+                            )}
                             {order.source && order.source !== 'khác' && (
                               <span className={`flex items-center gap-1 text-[10px] uppercase font-bold px-1.5 py-0.5 rounded w-max ${{
                                   shopee: 'bg-[#ee4d2d]/10 text-[#ee4d2d] border border-[#ee4d2d]/20',
@@ -1088,24 +1131,30 @@ export default function OrderManagement() {
                         </td>
                         <td className="px-lg py-md">
                           <div className="space-y-1">
-                            {order.items?.slice(0, 2).map((item, idx) => (
-                              <div key={idx} className="flex items-center gap-2">
-                                {item.product_image ? (
-                                  <img src={item.product_image} alt={item.product_name} className="w-6 h-6 rounded object-cover border border-outline-variant/20 flex-shrink-0" />
-                                ) : (
-                                  <div className="w-6 h-6 rounded bg-primary-container flex items-center justify-center text-primary text-[10px] font-bold flex-shrink-0">
-                                    {item.product_name?.charAt(0)}
+                            {!order.items || order.items.length === 0 ? (
+                              <span className="text-[13px] italic text-on-surface-variant opacity-70">Không kèm sản phẩm</span>
+                            ) : (
+                              <>
+                                {order.items.slice(0, 2).map((item, idx) => (
+                                  <div key={idx} className="flex items-center gap-2">
+                                    {item.product_image ? (
+                                      <img src={item.product_image} alt={item.product_name} className="w-6 h-6 rounded object-cover border border-outline-variant/20 flex-shrink-0" />
+                                    ) : (
+                                      <div className="w-6 h-6 rounded bg-primary-container flex items-center justify-center text-primary text-[10px] font-bold flex-shrink-0">
+                                        {item.product_name?.charAt(0)}
+                                      </div>
+                                    )}
+                                    <span className="text-[13px] text-on-surface truncate max-w-[200px]">
+                                      {item.product_name}
+                                      {item.sku_label ? <span className="text-on-surface-variant"> · {item.sku_label}</span> : ''}
+                                      <span className="font-bold text-on-surface-variant"> ×{item.quantity}</span>
+                                    </span>
                                   </div>
+                                ))}
+                                {order.items.length > 2 && (
+                                  <p className="text-[11px] text-on-surface-variant pl-8">+{order.items.length - 2} sản phẩm khác</p>
                                 )}
-                                <span className="text-[13px] text-on-surface truncate max-w-[200px]">
-                                  {item.product_name}
-                                  {item.sku_label ? <span className="text-on-surface-variant"> · {item.sku_label}</span> : ''}
-                                  <span className="font-bold text-on-surface-variant"> ×{item.quantity}</span>
-                                </span>
-                              </div>
-                            ))}
-                            {(order.items?.length || 0) > 2 && (
-                              <p className="text-[11px] text-on-surface-variant pl-8">+{order.items.length - 2} sản phẩm khác</p>
+                              </>
                             )}
                           </div>
                         </td>

@@ -255,7 +255,6 @@ export default function Dashboard() {
               </h3>
             </div>
           </div>
-
         </div>
 
         {/* Charts Row */}

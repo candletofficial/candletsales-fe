@@ -30,6 +30,7 @@ export default function DetailedAnalysisModal({ isOpen, onClose, data, periodLab
   const logisticsCost = data.logisticsCost || 0;
   const replacementCost = data.replacementCost || 0;
   const replacementOrders = data.replacementOrders || 0;
+  const seedingCost = data.seedingCost || 0;
   const realProfit = data.realProfit || 0;
   
   // Margin
@@ -132,6 +133,13 @@ export default function DetailedAnalysisModal({ isOpen, onClose, data, periodLab
                   </p>
                   <p className="text-[15px] font-black text-error">{formatCurrency(replacementCost)}</p>
                 </div>
+                <div className="flex justify-between items-center border-t border-outline-variant/30 pt-3">
+                  <p className="text-[13px] text-[#7c3aed] font-bold flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[14px]">campaign</span> 
+                    Chi phí Đơn Seeding
+                  </p>
+                  <p className="text-[15px] font-black text-[#7c3aed]">{formatCurrency(seedingCost)}</p>
+                </div>
               </div>
 
               <div className="bg-white rounded-xl p-4 shadow-sm border border-outline-variant/30 bg-error-container/20 border-error/20">
@@ -179,8 +187,8 @@ export default function DetailedAnalysisModal({ isOpen, onClose, data, periodLab
               <span className="material-symbols-outlined text-[16px]">info</span> Ghi chú thuật toán:
             </h4>
             <ul className="list-disc list-inside space-y-1.5 opacity-80">
-              <li><strong>Doanh thu</strong>: Chỉ cộng dồn từ những đơn hàng có trạng thái "Hoàn thành". Đơn bị hoàn và Đơn giao bù không được tính vào doanh thu.</li>
-              <li><strong>Lợi nhuận ròng</strong>: Bằng Doanh thu trừ đi toàn bộ Cấu trúc chi phí (Giá trị xuất kho + Quảng cáo + Phí ship + Hoàn hàng + Đơn giao bù).</li>
+              <li><strong>Doanh thu</strong>: Chỉ cộng dồn từ những đơn hàng có trạng thái "Hoàn thành". Đơn bị hoàn, Đơn giao bù và Đơn Seeding không được tính vào doanh thu.</li>
+              <li><strong>Lợi nhuận ròng</strong>: Bằng Doanh thu trừ đi toàn bộ Cấu trúc chi phí (Giá trị xuất kho + Quảng cáo + Phí ship + Hoàn hàng + Đơn giao bù + Đơn Seeding).</li>
               <li><strong>AOV (Average Order Value)</strong>: Giá trị trung bình mang lại trên mỗi đơn hàng giao thành công.</li>
               <li><strong>CP Quảng cáo / Đơn</strong>: Giúp đo lường chi phí Marketing trung bình bỏ ra để chốt được 1 đơn hàng trong kỳ.</li>
             </ul>
