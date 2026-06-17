@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import Layout from '../components/Layout';
 import { adCostService } from '../services/adCostService';
 import { orderService } from '../services/orderService';
+import { useAuth } from '../hooks/useAuth';
 
 // ─── Platform config ───────────────────────────────────────────────
 const PLATFORMS = [
@@ -20,13 +21,6 @@ const getPlatform = (key) => PLATFORMS.find(p => p.key === key) || PLATFORMS[0];
 const formatPrice = (n) =>
   Math.round(n ?? 0).toLocaleString('vi-VN', { maximumFractionDigits: 0 }) + ' ₫';
 
-const formatShortPrice = (n) => {
-  if (!n) return '0';
-  if (n >= 1_000_000) return (n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1) + 'M';
-  if (n >= 1_000) return (n / 1_000).toFixed(n % 1_000 === 0 ? 0 : 0) + 'k';
-  return Math.round(n).toString();
-};
-
 const VI_DAYS = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
 const VI_MONTHS = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
   'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
@@ -38,6 +32,91 @@ function getFirstDayOfWeek(year, month) {
   return new Date(year, month, 1).getDay(); // 0=Sun
 }
 
+const getVatForPlatform = (plat) => plat === 'shopee' ? 8 : 10;
+
+// ─── Modal Nạp tiền ────────────────────────────────────────────────
+function TopupModal({ platform, onClose, onSuccess, user }) {
+  const [amount, setAmount] = useState('');
+  const [vatPct, setVatPct] = useState(getVatForPlatform(platform));
+  const [note, setNote] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const platInfo = getPlatform(platform);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!amount || amount <= 0) return setError('Số tiền nạp phải lớn hơn 0');
+    setError(''); setLoading(true);
+    
+    const feeAmount = (Number(amount) * Number(vatPct)) / 100;
+    
+    try {
+      await adCostService.topupPlatform({
+        platform,
+        amount: Number(amount),
+        fee: feeAmount,
+        note,
+        created_by: user?.name || 'Admin'
+      });
+      onSuccess();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Lỗi nạp tiền');
+    } finally { setLoading(false); }
+  };
+
+  const totalDeduct = amount ? Number(amount) + (Number(amount) * Number(vatPct)) / 100 : 0;
+
+  return createPortal(
+    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+      <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)' }} onClick={onClose} />
+      <div style={{ position: 'relative', background: 'white', borderRadius: '16px', boxShadow: '0 25px 50px rgba(0,0,0,0.2)', width: '400px', maxWidth: '100%', zIndex: 1 }}>
+        <div className="px-6 py-4 border-b border-outline-variant/30 flex justify-between items-center bg-surface-container-low/50 rounded-t-2xl">
+          <h3 className="font-bold text-[16px] text-on-surface">Nạp tiền {platInfo.label}</h3>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-surface-container">
+            <span className="material-symbols-outlined text-[20px] text-on-surface-variant">close</span>
+          </button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {error && <div className="p-3 bg-error-container text-error rounded-lg text-sm">{error}</div>}
+          
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Số tiền nạp (VNĐ) *</label>
+              <input type="number" value={amount} onChange={e => setAmount(e.target.value)} required min="1"
+                className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-[16px] font-bold focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+            </div>
+            <div className="w-[100px]">
+              <label className="block text-[13px] font-bold text-on-surface-variant mb-2">VAT (%)</label>
+              <input type="number" value={vatPct} onChange={e => setVatPct(e.target.value)} min="0" max="100"
+                className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-[15px] font-bold text-center focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+            </div>
+          </div>
+          {totalDeduct > 0 && (
+            <div className="bg-error-container/30 px-4 py-3 rounded-lg border border-error/20 flex justify-between items-center">
+              <span className="text-[13px] font-bold text-error">Sẽ trừ Tài sản chung (Gốc + VAT):</span>
+              <span className="text-[16px] font-bold text-error">{formatPrice(totalDeduct)}</span>
+            </div>
+          )}
+          <div>
+            <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Ghi chú</label>
+            <input value={note} onChange={e => setNote(e.target.value)} placeholder="Tùy chọn"
+              className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-[14px] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+          </div>
+          <div className="flex gap-3 pt-2">
+            <button type="button" onClick={onClose} className="flex-1 py-2 text-on-surface-variant text-[13px] font-medium border border-outline-variant hover:bg-surface-container rounded-lg">Hủy</button>
+            <button type="submit" disabled={loading} className="flex-1 py-2 bg-primary text-white text-[13px] font-semibold rounded-lg hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2 shadow-sm">
+              {loading && <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+              Xác nhận nạp
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
 // ─── Modal thêm / sửa chi phí ─────────────────────────────────────
 function AdCostModal({ record, defaultDate, onClose, onSave, onDelete }) {
   const isEdit = !!record;
@@ -46,7 +125,6 @@ function AdCostModal({ record, defaultDate, onClose, onSave, onDelete }) {
       ? new Date(record.date).toISOString().split('T')[0]
       : (defaultDate || new Date().toISOString().split('T')[0])
   );
-  const getVatForPlatform = (plat) => plat === 'shopee' ? 8 : 10;
 
   const isOldRecord = record && record.base_amount == null;
   const initialVat = isOldRecord ? getVatForPlatform(record.platform) : (record?.vat ?? getVatForPlatform(record?.platform || 'shopee'));
@@ -189,13 +267,16 @@ function AdCostModal({ record, defaultDate, onClose, onSave, onDelete }) {
 
 // ─── Main Component ────────────────────────────────────────────────
 export default function AdCostManagement() {
+  const { user } = useAuth();
   const now = new Date();
   const [viewYear, setViewYear] = useState(now.getFullYear());
   const [viewMonth, setViewMonth] = useState(now.getMonth()); // 0-indexed
   const [records, setRecords] = useState([]);
+  const [balances, setBalances] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedDay, setSelectedDay] = useState(now.getDate());
   const [modal, setModal] = useState(null); // null | { type: 'add'|'edit', data?, defaultDate? }
+  const [topupPlatform, setTopupPlatform] = useState(null);
   const [toast, setToast] = useState(null);
   const [filterPlatform, setFilterPlatform] = useState('all');
   const [orders, setOrders] = useState([]);
@@ -208,11 +289,22 @@ export default function AdCostManagement() {
   const fetchRecords = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await adCostService.getAdCosts(viewYear, viewMonth + 1);
+      const [res, balRes] = await Promise.all([
+        adCostService.getAdCosts(viewYear, viewMonth + 1),
+        adCostService.getBalances()
+      ]);
       setRecords(res.data.data);
+      setBalances(balRes.data.data);
     } catch { showToast('Không thể tải dữ liệu', 'error'); }
     finally { setLoading(false); }
   }, [viewYear, viewMonth]);
+
+  const fetchBalancesOnly = async () => {
+    try {
+      const balRes = await adCostService.getBalances();
+      setBalances(balRes.data.data);
+    } catch {}
+  };
 
   useEffect(() => { fetchRecords(); }, [fetchRecords]);
 
@@ -325,12 +417,12 @@ export default function AdCostManagement() {
         <AdCostModal record={modal.data} onClose={() => setModal(null)} onSave={handleSave} onDelete={handleDelete} />
       )}
 
-      <div className="h-full flex flex-col">
+      <div className="flex flex-col pb-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 sm:gap-0 mb-lg">
           <div>
             <h2 className="text-[24px] font-bold text-on-surface">Chi phí Quảng cáo</h2>
-            <p className="text-on-surface-variant mt-1 text-[14px]">Theo dõi chi phí quảng cáo theo từng ngày và nền tảng</p>
+            <p className="text-on-surface-variant mt-1 text-[14px]">Theo dõi chi phí quảng cáo và số dư từng nền tảng</p>
           </div>
           <button onClick={() => setModal({ type: 'add', defaultDate: `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}` })}
             className="flex items-center gap-xs px-lg py-sm bg-primary text-white rounded-lg hover:opacity-90 shadow-sm font-semibold text-sm">
@@ -339,8 +431,33 @@ export default function AdCostManagement() {
           </button>
         </div>
 
+        {/* Ad Balances */}
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
+          {PLATFORMS.map(p => {
+            const bal = balances.find(b => b.platform === p.key)?.balance || 0;
+            return (
+              <div key={p.key} className="bg-white rounded-xl shadow-sm border border-outline-variant/30 p-3 flex flex-col justify-between group">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <div className="w-5 h-5 rounded flex items-center justify-center font-bold text-[9px]" style={{ backgroundColor: p.bg, color: p.textColor }}>{p.short}</div>
+                  <span className="text-[12px] font-bold text-on-surface">{p.label}</span>
+                </div>
+                <div className="text-[15px] font-black" style={{ color: bal > 0 ? '#059669' : '#dc2626' }}>
+                  {formatPrice(bal)}
+                </div>
+                <button onClick={() => setTopupPlatform(p.key)} className="mt-2 w-full py-1 text-[10px] font-bold bg-surface-container hover:bg-surface-container-high rounded text-on-surface-variant transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100">
+                  Nạp tiền
+                </button>
+              </div>
+            );
+          })}
+        </div>
+        
+        {topupPlatform && (
+          <TopupModal platform={topupPlatform} user={user} onClose={() => setTopupPlatform(null)} onSuccess={() => { setTopupPlatform(null); showToast('Nạp tiền thành công'); fetchBalancesOnly(); }} />
+        )}
+
         {/* Main 2-col layout */}
-        <div className="flex gap-lg flex-1 min-h-0">
+        <div className="flex gap-lg items-start">
 
           {/* ── Left: Calendar ── */}
           <div className="flex-1 min-w-0 bg-white rounded-xl shadow-sm border border-outline-variant/30 flex flex-col overflow-hidden">
@@ -369,7 +486,7 @@ export default function AdCostManagement() {
             </div>
 
             {/* Calendar grid */}
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1">
               {Array.from({ length: rows }).map((_, rowIdx) => (
                 <div key={rowIdx} className="grid grid-cols-7 divide-x divide-outline-variant/20 border-b border-outline-variant/20 last:border-b-0" style={{ minHeight: '90px' }}>
                   {Array.from({ length: 7 }).map((_, colIdx) => {
@@ -385,6 +502,12 @@ export default function AdCostManagement() {
                     return (
                       <div key={colIdx}
                         onClick={() => isValid && setSelectedDay(day)}
+                        onDoubleClick={() => {
+                          if (isValid) {
+                            setSelectedDay(day);
+                            setModal({ type: 'add', defaultDate: `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}` });
+                          }
+                        }}
                         className={`p-2 transition-colors relative ${isValid ? 'cursor-pointer hover:bg-surface-container-low/50' : 'bg-surface-container-low'} ${isSelected ? 'bg-primary-container/25 ring-1 ring-primary/40 ring-inset' : ''}`}
                       >
                         {isValid && (
@@ -407,7 +530,7 @@ export default function AdCostManagement() {
                                     style={{ backgroundColor: p.bg, color: p.textColor }}
                                     className="text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center justify-between gap-1 truncate">
                                     <span>{p.short}</span>
-                                    <span className="opacity-80">{formatShortPrice(r.amount)}</span>
+                                    <span className="opacity-80">{formatPrice(r.amount)}</span>
                                   </div>
                                 );
                               })}
@@ -419,7 +542,7 @@ export default function AdCostManagement() {
                             {/* Day total */}
                             {dayTotal > 0 && (
                               <div className="mt-1 text-[10px] font-bold text-on-surface-variant">
-                                Σ {formatShortPrice(dayTotal)}
+                                Σ {formatPrice(dayTotal)}
                               </div>
                             )}
                           </>
@@ -433,7 +556,7 @@ export default function AdCostManagement() {
           </div>
 
           {/* ── Right: Detail Panel ── */}
-          <div className="w-[320px] flex-shrink-0 flex flex-col gap-md overflow-y-auto">
+          <div className="w-[320px] flex-shrink-0 flex flex-col gap-md">
 
             {/* Day detail card */}
             <div className="bg-white rounded-xl shadow-sm border border-outline-variant/30 flex flex-col overflow-hidden">
@@ -467,7 +590,7 @@ export default function AdCostManagement() {
               </div>
 
               {/* Records list */}
-              <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-2 max-h-[280px]">
+              <div className="px-4 pb-4 space-y-2">
                 {loading ? (
                   Array.from({ length: 3 }).map((_, i) => (
                     <div key={i} className="h-14 bg-surface-container rounded-xl animate-pulse" />
@@ -494,7 +617,7 @@ export default function AdCostManagement() {
                         </div>
                         <div className="text-right">
                           <p className="font-bold text-[13px]" style={{ color: p.textColor }}>
-                            {formatShortPrice(r.amount)}
+                            {formatPrice(r.amount)}
                           </p>
                         </div>
                         <span className="material-symbols-outlined text-[16px] text-outline-variant opacity-0 group-hover:opacity-100 transition-opacity">edit</span>
@@ -563,7 +686,7 @@ export default function AdCostManagement() {
                               style={{ backgroundColor: p.bg, color: p.textColor }}>{p.short}</span>
                             <span className="text-[13px] font-semibold text-on-surface">{p.label} ({pct}%)</span>
                           </div>
-                          <span className="text-[12px] font-bold text-on-surface-variant">{formatShortPrice(total)}</span>
+                          <span className="text-[12px] font-bold text-on-surface-variant">{formatPrice(total)}</span>
                         </div>
                         <div className="h-2 bg-surface-container-high rounded-full overflow-hidden">
                           <div className="h-full rounded-full transition-all duration-500"

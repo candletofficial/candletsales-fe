@@ -6,4 +6,5 @@ export const importService = {
   updateImportTicket: (id, data) => api.put(`/imports/${id}`, data),
   completeImportTicket: (id) => api.put(`/imports/${id}/complete`),
   deleteImportTicket: (id) => api.delete(`/imports/${id}`),
+  settleImportTicket: (id) => api.put(`/imports/${id}/settle`),
 };

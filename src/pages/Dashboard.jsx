@@ -395,6 +395,16 @@ export default function Dashboard() {
                     icon = 'fact_check'; color = '#8b5cf6'; bgColor = '#f5f3ff'; // purple
                   } else if (act.type === 'out_of_stock') {
                     icon = 'error'; color = '#dc2626'; bgColor = '#fef2f2'; // red
+                  } else if (act.type === 'deposit') {
+                    icon = 'account_balance_wallet'; color = '#059669'; bgColor = '#ecfdf5'; // emerald
+                  } else if (act.type === 'withdraw') {
+                    icon = 'payments'; color = '#2563eb'; bgColor = '#dbeafe'; // blue
+                  } else if (act.type === 'payment') {
+                    icon = 'receipt_long'; color = '#dc2626'; bgColor = '#fef2f2'; // red
+                  } else if (act.type === 'expense') {
+                    icon = 'local_atm'; color = '#ea580c'; bgColor = '#ffedd5'; // orange
+                  } else if (act.type === 'fund') {
+                    icon = 'sync'; color = '#4f46e5'; bgColor = '#e0e7ff'; // indigo
                   } else {
                     icon = 'warning'; color = '#d97706'; bgColor = '#fef3c7'; // amber
                   }

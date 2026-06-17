@@ -227,3 +227,19 @@
 .auth-link a:hover { text-decoration: underline; }
 .alert-error { background: var(--color-error-container); color: var(--color-error); border: 1px solid rgba(220,38,38,0.3); }
 .alert-success { background: #d1fae5; color: #059669; border: 1px solid rgba(16,185,129,0.3); }
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-outline-variant);
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--color-surface-container-highest);
+}

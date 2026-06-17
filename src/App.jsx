@@ -15,6 +15,8 @@ import InventoryCheckManagement from './pages/InventoryCheckManagement';
 import ShopeeCalculator from './pages/ShopeeCalculator';
 import TiktokCalculator from './pages/TiktokCalculator';
 import CouponManagement from './pages/CouponManagement';
+import FundManagement from './pages/FundManagement';
+import ExpenseManagement from './pages/ExpenseManagement';
 
 export default function App() {
   return (
@@ -33,6 +35,8 @@ export default function App() {
           <Route path="/orders" element={<ProtectedRoute><OrderManagement /></ProtectedRoute>} />
           <Route path="/ad-costs" element={<ProtectedRoute><AdCostManagement /></ProtectedRoute>} />
           <Route path="/coupons" element={<ProtectedRoute><CouponManagement /></ProtectedRoute>} />
+          <Route path="/fund" element={<ProtectedRoute><FundManagement /></ProtectedRoute>} />
+          <Route path="/expenses" element={<ProtectedRoute><ExpenseManagement /></ProtectedRoute>} />
           <Route path="/tools/shopee" element={<ProtectedRoute><ShopeeCalculator /></ProtectedRoute>} />
           <Route path="/tools/tiktok" element={<ProtectedRoute><TiktokCalculator /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/login" replace />} />

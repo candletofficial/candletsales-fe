@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { importService } from '../services/importService';
 import { materialService } from '../services/materialService';
+import { fundService } from '../services/fundService';
 import SearchableSelect from '../components/SearchableSelect';
 import { formatPrice } from '../utils/formatPrice';
 import { useAuth } from '../hooks/useAuth';
@@ -243,6 +244,25 @@ function TicketDetailsModal({ ticket, onClose }) {
   );
 }
 
+function AlertModal({ title, message, onClose, type = 'error' }) {
+  const isError = type === 'error';
+  return (
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-[fadeIn_0.2s_ease]">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[400px] p-6 flex flex-col items-center text-center animate-[slideUp_0.3s_ease]">
+        <div className={`w-14 h-14 rounded-full flex items-center justify-center mb-5 ${isError ? 'bg-error-container text-error' : 'bg-primary-container text-primary'}`}>
+          <span className="material-symbols-outlined text-[28px]">{isError ? 'gpp_bad' : 'info'}</span>
+        </div>
+        <h3 className="text-[18px] font-bold text-on-surface mb-2">{title}</h3>
+        <p className="text-[14px] text-on-surface-variant mb-6 leading-relaxed">{message}</p>
+        <button onClick={onClose}
+          className={`w-full py-2.5 rounded-xl text-white text-[15px] font-bold shadow-sm hover:opacity-90 transition-opacity ${isError ? 'bg-error' : 'bg-primary'}`}>
+          Đã hiểu
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function ConfirmModal({ title, message, onConfirm, onClose, loading, confirmText = 'Xác nhận', isDanger = false }) {
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -270,6 +290,189 @@ function ConfirmModal({ title, message, onConfirm, onClose, loading, confirmText
   );
 }
 
+function EmployeeStatsModal({ employeeStats, onClose }) {
+  const totalImportAll = employeeStats.reduce((sum, st) => sum + st.total, 0);
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[100] p-4 sm:p-6 animate-[fadeIn_0.2s_ease]">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl flex flex-col max-h-[90vh] overflow-hidden">
+        {/* Header */}
+        <div className="bg-surface-container-lowest px-6 py-5 border-b border-outline-variant/30 flex justify-between items-center sticky top-0 z-10 shrink-0">
+          <div>
+            <h3 className="text-xl font-bold text-on-surface">Báo cáo năng suất nhân viên</h3>
+            <p className="text-sm text-on-surface-variant mt-1">Tổng quan hoạt động nhập hàng và tình trạng công nợ</p>
+          </div>
+          <button onClick={onClose} className="p-2 rounded-full hover:bg-surface-container transition-colors text-on-surface-variant">
+            <span className="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 overflow-y-auto custom-scrollbar bg-surface-container-lowest flex-1">
+          {employeeStats.length === 0 ? (
+            <div className="text-center py-12">
+              <span className="material-symbols-outlined text-[48px] text-outline-variant mb-4 block">analytics</span>
+              <p className="text-on-surface-variant font-medium">Chưa có dữ liệu thống kê trong khoảng thời gian này.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {employeeStats.map(stat => {
+                const settledPercent = stat.total > 0 ? (stat.settledAmount / stat.total * 100) : 0;
+                
+                return (
+                  <div key={stat.name} className="bg-white border border-outline-variant/40 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+                    {/* Decorative background element */}
+                    <div className="absolute -right-6 -top-6 w-24 h-24 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors pointer-events-none"></div>
+
+                    {/* Header: Avatar & Name */}
+                    <div className="flex items-center gap-4 mb-5 relative z-10">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-container to-primary/20 text-primary flex items-center justify-center font-bold text-xl shadow-inner border border-primary/10 shrink-0">
+                        {stat.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-[17px] font-bold text-on-surface truncate">{stat.name}</h4>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-surface-container-high text-on-surface-variant tracking-wide">
+                            {stat.contribution}% TỔNG NHẬP
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Stats Grid */}
+                    <div className="grid grid-cols-2 gap-4 mb-5 relative z-10">
+                      <div className="bg-surface-container-low/50 rounded-xl p-3 border border-outline-variant/30">
+                        <p className="text-xs text-on-surface-variant mb-1.5 font-medium">Khối lượng phiếu</p>
+                        <div className="flex items-end gap-1.5">
+                          <span className="text-2xl font-bold text-on-surface leading-none">{stat.count}</span>
+                        </div>
+                        <p className="text-[11px] text-on-surface-variant mt-2 flex items-center gap-1.5 font-medium">
+                          <span className="w-2 h-2 rounded-full bg-primary block"></span>
+                          {stat.completedCount} kho / {stat.pendingCount} chờ
+                        </p>
+                      </div>
+
+                      <div className="bg-surface-container-low/50 rounded-xl p-3 border border-outline-variant/30">
+                        <p className="text-xs text-on-surface-variant mb-1.5 font-medium">Giá trị nhập hàng</p>
+                        <div className="flex items-end gap-1.5">
+                          <span className="text-[17px] font-bold text-primary leading-none">{formatPrice(stat.total)}</span>
+                        </div>
+                        <p className="text-[11px] text-on-surface-variant mt-2 flex items-center gap-1.5 font-medium">
+                          <span className="material-symbols-outlined text-[14px]">inventory_2</span>
+                          {stat.itemsCount} mặt hàng
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Progress Bar for Payment */}
+                    <div className="mt-4 pt-5 border-t border-outline-variant/30 relative z-10">
+                      <div className="flex justify-between text-xs mb-2.5">
+                        <span className="font-bold text-on-surface-variant">Tiến độ thanh toán</span>
+                        <span className="font-bold text-[#059669]">{settledPercent.toFixed(1)}%</span>
+                      </div>
+                      
+                      {/* Bar */}
+                      <div className="h-2.5 w-full bg-[#fee2e2] rounded-full overflow-hidden flex">
+                        <div 
+                          className="h-full bg-[#10b981] transition-all duration-1000 ease-out" 
+                          style={{ width: `${settledPercent}%` }}
+                        ></div>
+                      </div>
+
+                      {/* Amounts breakdown */}
+                      <div className="flex justify-between mt-3 text-[13px]">
+                        <div>
+                          <p className="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold mb-1">Đã tất toán</p>
+                          <p className="font-bold text-[#059669]">{formatPrice(stat.settledAmount)}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold mb-1">Còn nợ</p>
+                          <p className="font-bold text-[#dc2626]">{formatPrice(stat.unsettledAmount)}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+        
+        {/* Footer */}
+        {employeeStats.length > 0 && (
+          <div className="bg-surface-container px-6 py-4 border-t border-outline-variant/30 flex justify-between items-center shrink-0 shadow-inner">
+            <p className="text-sm font-semibold text-on-surface-variant">Tổng giá trị nhập hệ thống:</p>
+            <p className="text-xl font-black text-primary">{formatPrice(totalImportAll)}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Modal Nạp tiền nhanh vào Tài sản chung ────────────────────────
+function DepositModal({ requiredAmount, onClose, onSuccess }) {
+  const [amount, setAmount] = useState(requiredAmount || '');
+  const [note, setNote] = useState('Nạp tiền tất toán phiếu nhập');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!amount || amount <= 0) return setError('Số tiền nạp phải lớn hơn 0');
+    setError('');
+    setLoading(true);
+    try {
+      await fundService.deposit({ amount: Number(amount), note });
+      onSuccess();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Có lỗi xảy ra khi nạp tiền');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[400px] p-0 overflow-hidden animate-[slideUp_0.3s_ease]">
+        <div className="bg-primary-container px-5 py-4 flex items-center justify-between">
+          <h3 className="text-[16px] font-bold text-on-surface flex items-center gap-2">
+            <span className="material-symbols-outlined text-primary">account_balance_wallet</span>
+            Nạp tiền vào Tài sản chung
+          </h3>
+          <button onClick={onClose} className="p-1 rounded-md hover:bg-surface-container text-on-surface-variant transition-colors">
+            <span className="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+          <p className="text-[13px] text-on-surface-variant">
+            Tài sản chung hiện không đủ tiền để tất toán phiếu nhập này. Vui lòng nạp thêm tối thiểu <span className="font-bold text-error">{formatPrice(requiredAmount)}</span> để tiếp tục.
+          </p>
+          {error && <div className="p-3 bg-error-container text-error rounded-lg text-[13px] font-medium">{error}</div>}
+          <div>
+            <label className="block text-[12px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider">Số tiền nạp (VNĐ)</label>
+            <input
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-[15px] font-bold text-primary focus:outline-none focus:border-primary transition-colors bg-surface-container-lowest"
+              required
+              min={requiredAmount || 1}
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-2.5 rounded-lg bg-primary text-white text-[14px] font-bold hover:opacity-90 disabled:opacity-60 transition-opacity flex items-center justify-center gap-2 mt-2"
+          >
+            {loading ? <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> : 'Xác nhận Nạp tiền & Tất toán'}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 const TABS = [
   { key: 'all', label: 'Tất cả' },
   { key: 'pending', label: 'Chờ xử lý' },
@@ -285,16 +488,22 @@ export default function ImportManagement() {
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
   const [activeTab, setActiveTab] = useState('all');
+  const [paymentFilter, setPaymentFilter] = useState('all');
   const [filterDate, setFilterDate] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 25;
 
   const [modalOpen, setModalOpen] = useState(false);
+  const [statsModalOpen, setStatsModalOpen] = useState(false);
   const [initialMaterialId, setInitialMaterialId] = useState(null);
   const [editTicket, setEditTicket] = useState(null);
   const [detailsTicket, setDetailsTicket] = useState(null);
   const [confirmAction, setConfirmAction] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [showDepositModal, setShowDepositModal] = useState(false);
+  const [requiredDepositAmount, setRequiredDepositAmount] = useState(0);
+  const [pendingSettleTicket, setPendingSettleTicket] = useState(null);
+  const [alertInfo, setAlertInfo] = useState(null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -358,6 +567,35 @@ export default function ImportManagement() {
     }
   };
 
+  const executeSettle = async (ticket) => {
+    setActionLoading(true);
+    try {
+      await importService.settleImportTicket(ticket._id);
+      showToast('Đã tất toán phiếu nhập!');
+      fetchData();
+      setConfirmAction(null);
+    } catch (err) {
+      if (err.response?.data?.code === 'INSUFFICIENT_FUND') {
+        setRequiredDepositAmount(err.response.data.requiredAmount || 0);
+        setPendingSettleTicket(ticket);
+        setShowDepositModal(true);
+        setConfirmAction(null);
+      } else {
+        showToast(err.response?.data?.message || 'Lỗi khi tất toán', 'error');
+      }
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDepositSuccess = () => {
+    setShowDepositModal(false);
+    if (pendingSettleTicket) {
+      executeSettle(pendingSettleTicket);
+      setPendingSettleTicket(null);
+    }
+  };
+
   const exportExcel = () => {
     const headers = ['Mã phiếu', 'Ngày lập', 'Người nhập', 'Trạng thái', 'Số nguyên liệu', 'Tổng tiền (VNĐ)', 'Ghi chú'];
     const rows = filteredTickets.map(t => [
@@ -384,7 +622,7 @@ export default function ImportManagement() {
     showToast('Đã xuất file Excel');
   };
 
-  const filteredTickets = useMemo(() => {
+  const statsTickets = useMemo(() => {
     let result = tickets;
     if (activeTab !== 'all') {
       result = result.filter(t => t.status === activeTab);
@@ -398,19 +636,85 @@ export default function ImportManagement() {
     return result;
   }, [tickets, activeTab, filterDate]);
 
+  const filteredTickets = useMemo(() => {
+    let result = statsTickets;
+    if (paymentFilter !== 'all') {
+      result = result.filter(t => (t.payment_status || 'unsettled') === paymentFilter);
+    }
+    return result;
+  }, [statsTickets, paymentFilter]);
+
+  const employeeStats = useMemo(() => {
+    const stats = {};
+    let globalTotal = 0;
+
+    statsTickets.forEach(t => {
+      const name = t.imported_by || 'Admin';
+      if (!stats[name]) stats[name] = { 
+        name, 
+        count: 0, 
+        total: 0, 
+        settledAmount: 0, 
+        unsettledAmount: 0,
+        settledCount: 0,
+        unsettledCount: 0,
+        completedCount: 0,
+        pendingCount: 0,
+        itemsCount: 0
+      };
+      
+      const st = stats[name];
+      st.count += 1;
+      st.total += t.total_amount || 0;
+      st.itemsCount += t.items?.length || 0;
+      globalTotal += t.total_amount || 0;
+
+      if ((t.payment_status || 'unsettled') === 'settled') {
+        st.settledAmount += t.total_amount || 0;
+        st.settledCount += 1;
+      } else {
+        st.unsettledAmount += t.total_amount || 0;
+        st.unsettledCount += 1;
+      }
+
+      if (t.status === 'completed') {
+        st.completedCount += 1;
+      } else {
+        st.pendingCount += 1;
+      }
+    });
+
+    return Object.values(stats)
+      .sort((a, b) => b.total - a.total)
+      .map(st => ({
+        ...st,
+        contribution: globalTotal > 0 ? ((st.total / globalTotal) * 100).toFixed(1) : 0
+      }));
+  }, [statsTickets]);
+
   const totalPages = Math.ceil(filteredTickets.length / itemsPerPage);
   const currentTickets = filteredTickets.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
     <Layout>
+      <div className="flex flex-col h-full">
       {toast && (
         <div className={`fixed bottom-6 right-6 px-5 py-3 rounded-xl shadow-lg text-sm font-semibold z-50 animate-[toastIn_0.3s_ease] ${toast.type === 'error' ? 'bg-error-container text-error' : 'bg-[#d1fae5] text-[#059669]'}`}>
           {toast.message}
         </div>
       )}
 
+      {showDepositModal && (
+        <DepositModal 
+          requiredAmount={requiredDepositAmount} 
+          onClose={() => setShowDepositModal(false)} 
+          onSuccess={handleDepositSuccess} 
+        />
+      )}
+
       {modalOpen && <ImportModal materials={materials} user={user} onClose={() => { setModalOpen(false); setInitialMaterialId(null); setEditTicket(null); }} onSave={() => { setModalOpen(false); setInitialMaterialId(null); setEditTicket(null); showToast(editTicket ? 'Đã cập nhật phiếu nhập' : 'Đã tạo phiếu nhập thành công'); fetchData(); window.dispatchEvent(new CustomEvent('materialsChanged')); }} initialMaterialId={initialMaterialId} editTicket={editTicket} />}
       {detailsTicket && <TicketDetailsModal ticket={detailsTicket} onClose={() => setDetailsTicket(null)} />}
+      {statsModalOpen && <EmployeeStatsModal employeeStats={employeeStats} onClose={() => setStatsModalOpen(false)} />}
 
       {confirmAction?.type === 'complete' && (
         <ConfirmModal
@@ -433,19 +737,35 @@ export default function ImportManagement() {
           confirmText="Xóa phiếu nhập"
         />
       )}
+      {confirmAction?.type === 'settle' && (
+        <ConfirmModal
+          title="Xác nhận tất toán"
+          message={`Xác nhận đã thanh toán xong cho phiếu nhập ${confirmAction.ticket.code || '#' + confirmAction.ticket._id.slice(-6).toUpperCase()}?`}
+          onClose={() => setConfirmAction(null)}
+          onConfirm={() => executeSettle(confirmAction.ticket)}
+          loading={actionLoading}
+          confirmText="Đã tất toán"
+        />
+      )}
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-6">
         <div>
           <h2 className="text-[24px] font-bold text-on-surface">Quản lý Nhập hàng</h2>
           <p className="text-[14px] text-on-surface-variant mt-1">Tạo phiếu nhập và cập nhật tồn kho, đơn giá nguyên liệu</p>
         </div>
-        <button onClick={() => { setEditTicket(null); setModalOpen(true); }} className="px-5 py-2.5 bg-primary text-white text-[14px] font-semibold rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2 shadow-sm">
-          <span className="material-symbols-outlined text-[18px]">add</span>
-          Tạo phiếu nhập
-        </button>
+        <div className="flex gap-3">
+          <button onClick={() => setStatsModalOpen(true)} className="px-5 py-2.5 bg-surface-container text-on-surface text-[14px] font-semibold rounded-lg hover:bg-surface-container-high transition-colors flex items-center gap-2 shadow-sm border border-outline-variant/30">
+            <span className="material-symbols-outlined text-[18px]">bar_chart</span>
+            Thống kê
+          </button>
+          <button onClick={() => { setEditTicket(null); setModalOpen(true); }} className="px-5 py-2.5 bg-primary text-white text-[14px] font-semibold rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2 shadow-sm">
+            <span className="material-symbols-outlined text-[18px]">add</span>
+            Tạo phiếu nhập
+          </button>
+        </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-outline-variant/30 overflow-hidden">
+      <div className="bg-white rounded-xl shadow-sm border border-outline-variant/30 overflow-hidden flex flex-col flex-1 min-h-0">
         {/* Toolbar */}
         <div className="px-lg py-md border-b border-outline-variant/30 flex justify-between items-center bg-surface-container-low/50">
           <div className="flex items-center border border-outline-variant rounded-lg overflow-hidden bg-white">
@@ -464,6 +784,16 @@ export default function ImportManagement() {
           </div>
 
           <div className="flex items-center gap-3">
+            <select
+              value={paymentFilter}
+              onChange={e => { setPaymentFilter(e.target.value); setCurrentPage(1); }}
+              className="px-3 py-1.5 border border-outline-variant rounded-lg text-[13px] font-semibold text-on-surface-variant focus:outline-none bg-white hover:bg-surface-container-low transition-colors"
+            >
+              <option value="all">Tất cả thanh toán</option>
+              <option value="unsettled">Chưa tất toán</option>
+              <option value="settled">Đã tất toán</option>
+            </select>
+
             <div className="relative group flex items-center border border-outline-variant rounded-lg overflow-hidden bg-white hover:bg-surface-container-low transition-colors">
               <span className="material-symbols-outlined absolute left-2.5 text-[18px] text-on-surface-variant group-hover:text-primary transition-colors pointer-events-none">calendar_month</span>
               <input
@@ -483,16 +813,18 @@ export default function ImportManagement() {
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto">
+        <div className="overflow-auto flex-1 relative custom-scrollbar">
           <table className="w-full text-left border-collapse">
-            <thead>
+            <thead className="sticky top-0 z-10 shadow-sm">
               <tr className="bg-surface-container-lowest">
-                <th className="px-lg py-md text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold">Mã phiếu</th>
-                <th className="px-lg py-md text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold">Ngày lập</th>
-                <th className="px-lg py-md text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold">Người nhập</th>
-                <th className="px-lg py-md text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold">Trạng thái</th>
-                <th className="px-lg py-md text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold text-right">Tổng tiền</th>
-                <th className="px-lg py-md text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold text-right">Thao tác</th>
+                <th className="px-lg py-md text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold bg-surface-container-lowest">Mã phiếu</th>
+                <th className="px-lg py-md text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold bg-surface-container-lowest">Nguyên liệu nhập</th>
+                <th className="px-lg py-md text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold bg-surface-container-lowest">Ngày lập</th>
+                <th className="px-lg py-md text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold bg-surface-container-lowest">Người nhập</th>
+                <th className="px-lg py-md text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold bg-surface-container-lowest">Trạng thái</th>
+                <th className="px-lg py-md text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold bg-surface-container-lowest">Thanh toán</th>
+                <th className="px-lg py-md text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold text-right bg-surface-container-lowest">Tổng tiền</th>
+                <th className="px-lg py-md text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold text-right bg-surface-container-lowest">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-outline-variant/30">
@@ -508,7 +840,7 @@ export default function ImportManagement() {
                 ))
               ) : filteredTickets.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-lg py-16 text-center">
+                  <td colSpan="8" className="px-lg py-16 text-center">
                     <span className="material-symbols-outlined text-[48px] text-on-surface-variant opacity-30 block mb-3">local_shipping</span>
                     <p className="text-on-surface-variant text-sm">
                       {tickets.length === 0 ? 'Chưa có phiếu nhập nào' : 'Không tìm thấy phiếu nhập phù hợp'}
@@ -538,28 +870,56 @@ export default function ImportManagement() {
                       <div className="flex items-center gap-2">
                         <span>{ticket.code || 'PN-' + parseInt(ticket._id.slice(-6), 16).toString().padStart(7, '0')}</span>
                       </div>
-                      
-                      {/* Tooltip cố định */}
-                      {ticket.note && (
-                        <div className="absolute left-[70%] top-1/2 -translate-y-1/2 ml-4 hidden group-hover:block z-[50] pointer-events-none">
-                          <div className="relative bg-gray-800/95 backdrop-blur-sm text-white text-[13px] p-3 rounded-xl shadow-2xl break-words font-medium whitespace-pre-wrap w-max max-w-[300px] border border-white/10">
-                            {ticket.note}
-                            {/* Arrow */}
-                            <div className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-3 bg-gray-800/95 rotate-45 border-l border-b border-white/10"></div>
-                          </div>
-                        </div>
-                      )}
+                    </td>
+                    <td className="px-lg py-md text-[13px] text-on-surface max-w-[200px]">
+                      <div className="truncate" title={ticket.items?.map(i => i.material_id?.name || 'Nguyên liệu').join(', ')}>
+                        {ticket.items && ticket.items.length > 0 
+                          ? ticket.items.map(i => i.material_id?.name || 'Nguyên liệu').join(', ')
+                          : '-'}
+                      </div>
                     </td>
                     <td className="px-lg py-md text-[14px]">{new Date(ticket.createdAt).toLocaleDateString('vi-VN')}</td>
-                    <td className="px-lg py-md text-[14px]">{ticket.imported_by || 'Admin'}</td>
+                    <td className="px-lg py-md">
+                      <div className="relative group/avatar inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-primary-container to-primary/20 text-primary font-bold text-[14px] shadow-inner border border-primary/10 cursor-help">
+                        {(ticket.imported_by || 'Admin').charAt(0).toUpperCase()}
+                        
+                        <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1.5 hidden group-hover/avatar:block z-[60] pointer-events-none">
+                          <div className="bg-gray-800/95 backdrop-blur-sm text-white text-[12px] px-3 py-1.5 rounded-lg shadow-xl whitespace-nowrap font-medium">
+                            {ticket.imported_by || 'Admin'}
+                            <div className="absolute left-1/2 -translate-x-1/2 top-full w-2 h-2 bg-gray-800/95 rotate-45 -mt-1"></div>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
                     <td className="px-lg py-md">
                       <span className={`inline-block px-2.5 py-1 rounded-md text-[12px] font-bold ${ticket.status === 'completed' ? 'bg-primary-container text-primary' : 'bg-surface-container-high text-on-surface-variant'}`}>
                         {ticket.status === 'completed' ? 'Đã nhập kho' : 'Chờ xác nhận'}
                       </span>
                     </td>
+                    <td className="px-lg py-md">
+                      <span className={`inline-block px-2.5 py-1 rounded-md text-[12px] font-bold ${(ticket.payment_status || 'unsettled') === 'settled' ? 'bg-[#d1fae5] text-[#059669]' : 'bg-[#fee2e2] text-[#dc2626]'}`}>
+                        {(ticket.payment_status || 'unsettled') === 'settled' ? 'Đã tất toán' : 'Chưa tất toán'}
+                      </span>
+                    </td>
                     <td className="px-lg py-md text-[14px] font-bold text-primary text-right">{formatPrice(ticket.total_amount)}</td>
                     <td className="px-lg py-md text-right">
                       <div className="flex items-center justify-end gap-2">
+                        {(ticket.payment_status || 'unsettled') === 'unsettled' && (
+                          <button disabled={actionLoading} onClick={(e) => {
+                            e.stopPropagation();
+                            if (ticket.imported_by && user?.name && ticket.imported_by !== user.name && ticket.imported_by !== 'Admin') {
+                              setAlertInfo({
+                                title: 'Quyền truy cập bị từ chối',
+                                message: 'Chỉ người tạo phiếu mới có quyền thực hiện tất toán cho phiếu nhập này nhằm đảm bảo tính minh bạch.',
+                                type: 'error'
+                              });
+                              return;
+                            }
+                            setConfirmAction({ type: 'settle', ticket });
+                          }} className="p-1.5 text-[#059669] hover:bg-[#d1fae5] rounded transition-colors disabled:opacity-50" title="Đánh dấu đã tất toán">
+                            <span className="material-symbols-outlined text-[18px]">payments</span>
+                          </button>
+                        )}
                         {ticket.status === 'completed' && (
                           <button onClick={(e) => { e.stopPropagation(); setDetailsTicket(ticket); }} className="p-1.5 text-on-surface-variant hover:bg-surface-container rounded transition-colors" title="Chi tiết">
                             <span className="material-symbols-outlined text-[18px]">visibility</span>
@@ -613,6 +973,15 @@ export default function ImportManagement() {
               </div>
             )}
           </div>
+        )}
+      </div>
+        {alertInfo && (
+          <AlertModal
+            title={alertInfo.title}
+            message={alertInfo.message}
+            type={alertInfo.type}
+            onClose={() => setAlertInfo(null)}
+          />
         )}
       </div>
     </Layout>

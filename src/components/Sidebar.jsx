@@ -65,6 +65,20 @@ const NAV_ITEMS = [
     label: 'Đơn hàng',
   },
   {
+    to: '/fund',
+    icon: (
+      <span className="material-symbols-outlined text-[20px]">account_balance</span>
+    ),
+    label: 'Tài sản chung',
+  },
+  {
+    to: '/expenses',
+    icon: (
+      <span className="material-symbols-outlined text-[20px]">receipt_long</span>
+    ),
+    label: 'Chi tiêu',
+  },
+  {
     to: '/ad-costs',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

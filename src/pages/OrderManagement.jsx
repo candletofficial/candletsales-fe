@@ -5,6 +5,7 @@ import { orderService } from '../services/orderService';
 import { productService } from '../services/productService';
 import { couponService } from '../services/couponService';
 import systemConfigService from '../services/systemConfigService';
+import { fundService } from '../services/fundService';
 import { printInvoice } from '../utils/printInvoice';
 
 // ── Helpers ────────────────────────────────────────────────────────
@@ -37,6 +38,8 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
   const [error, setError] = useState('');
   const [showProductPicker, setShowProductPicker] = useState(false);
   const [productSearch, setProductSearch] = useState('');
+  const [showDepositModal, setShowDepositModal] = useState(false);
+  const [requiredDepositAmount, setRequiredDepositAmount] = useState(0);
 
   // Discount states
   const [discountCodeInput, setDiscountCodeInput] = useState(order?.discount_code || '');
@@ -164,7 +167,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
         finalOrderedAt = new Date();
       }
 
-      const finalPrice = (isReplacement || isSeeding) ? 0 : Math.max(0, totalPrice + logisticsCost - appliedDiscount.amount);
+      const finalPrice = isReplacement ? 0 : isSeeding ? totalPrice : Math.max(0, totalPrice + logisticsCost - appliedDiscount.amount);
 
       const payload = { 
         items, 
@@ -188,10 +191,23 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
       }
       onSave();
     } catch (err) {
-      setError(err.response?.data?.message || 'Có lỗi xảy ra');
+      if (err.response?.data?.code === 'INSUFFICIENT_FUND') {
+        const amt = err.response.data.requiredAmount || 0;
+        setRequiredDepositAmount(amt);
+        setShowDepositModal(true);
+      } else {
+        setError(err.response?.data?.message || 'Có lỗi xảy ra');
+      }
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDepositSuccess = () => {
+    setShowDepositModal(false);
+    setError('');
+    // Automatically submit again after successful deposit
+    handleSubmit(new Event('submit'));
   };
 
   return (
@@ -307,16 +323,29 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
           </div>
 
           {isSeedingMode && (
-            <div>
-              <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Chi phí Seeding (trả KOL, Marketing...) (đ)</label>
-              <input
-                type="number"
-                min="0"
-                value={seedingCost}
-                onChange={e => setSeedingCost(Number(e.target.value))}
-                placeholder="0"
-                className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-[15px] focus:outline-none focus:border-[#8b5cf6] focus:ring-1 focus:ring-[#8b5cf6]"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Doanh thu ảo (cộng vào doanh thu nền tảng) (đ)</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={totalPrice}
+                  onChange={e => { setAutoTotal(false); setTotalPrice(Number(e.target.value)); }}
+                  placeholder="0"
+                  className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-[15px] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                />
+              </div>
+              <div>
+                <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Tổng tiền phải trả (trừ vào Tài sản chung) (đ)</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={seedingCost}
+                  onChange={e => setSeedingCost(Number(e.target.value))}
+                  placeholder="0"
+                  className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-[15px] focus:outline-none focus:border-[#8b5cf6] focus:ring-1 focus:ring-[#8b5cf6]"
+                />
+              </div>
             </div>
           )}
 
@@ -471,7 +500,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
               <span className="material-symbols-outlined text-[24px]">campaign</span>
               <div>
                 <p className="text-[14px] font-bold">Đây là Đơn Seeding</p>
-                <p className="text-[12px] opacity-90 mt-0.5">Doanh thu sẽ không được tính (0đ). Bạn có thể không cần chọn sản phẩm nếu chỉ muốn ghi nhận chi phí trả cho KOL.</p>
+                <p className="text-[12px] opacity-90 mt-0.5">Bạn có thể nhập Doanh thu ảo để tính vào nền tảng. Có thể tạo đơn không cần chọn sản phẩm nếu chỉ muốn ghi nhận chi phí seeding.</p>
               </div>
             </div>
           )}
@@ -607,6 +636,15 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
           </div>
         </div>
       )}
+
+      {/* Deposit Fund Sub-modal */}
+      {showDepositModal && (
+        <DepositModal 
+          requiredAmount={requiredDepositAmount} 
+          onClose={() => setShowDepositModal(false)} 
+          onSuccess={handleDepositSuccess} 
+        />
+      )}
     </div>
   );
 }
@@ -701,6 +739,69 @@ function ReturnModal({ order, returnCost, onClose, onConfirm, loading }) {
             Xác nhận hoàn đơn
           </button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Modal Nạp tiền nhanh vào Tài sản chung ────────────────────────
+function DepositModal({ requiredAmount, onClose, onSuccess }) {
+  const [amount, setAmount] = useState(requiredAmount || '');
+  const [note, setNote] = useState('Nạp tiền trả phí đơn hàng');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!amount || amount <= 0) return setError('Số tiền nạp phải lớn hơn 0');
+    setError('');
+    setLoading(true);
+    try {
+      await fundService.deposit({ amount: Number(amount), note });
+      onSuccess();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Có lỗi xảy ra khi nạp tiền');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-[400px] flex flex-col animate-[fadeIn_0.15s_ease]">
+        <div className="px-5 py-4 border-b border-outline-variant/30 flex items-center justify-between bg-error-container/20 rounded-t-2xl">
+          <h3 className="font-bold text-[16px] text-error flex items-center gap-2">
+            <span className="material-symbols-outlined text-[20px]">account_balance_wallet</span>
+            Số dư không đủ!
+          </h3>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-surface-container transition-colors">
+            <span className="material-symbols-outlined text-[20px] text-on-surface-variant">close</span>
+          </button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+          <p className="text-[13px] text-on-surface-variant">
+            Tài sản chung hiện không đủ để trả chi phí của đơn hàng này. Vui lòng nạp thêm tối thiểu <span className="font-bold text-error">{formatPrice(requiredAmount)}</span> để tiếp tục lưu đơn.
+          </p>
+          {error && <div className="p-3 bg-error-container text-error rounded-lg text-[13px] font-medium">{error}</div>}
+          <div>
+            <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Số tiền nạp (đ) *</label>
+            <input type="number" value={amount} onChange={e => setAmount(e.target.value)} required min="1"
+              className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-[15px] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary font-mono font-bold" />
+          </div>
+          <div>
+            <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Ghi chú</label>
+            <input type="text" value={note} onChange={e => setNote(e.target.value)}
+              className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-[14px] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+          </div>
+          <div className="flex justify-end gap-3 pt-2">
+            <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-on-surface-variant text-[13px] font-bold hover:bg-surface-container">Hủy bỏ</button>
+            <button type="submit" disabled={loading} className="px-5 py-2 rounded-lg bg-primary text-white text-[13px] font-bold hover:opacity-90 disabled:opacity-50 flex items-center gap-2">
+              {loading && <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+              Nạp tiền & Lưu đơn
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
