@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import SmartAlerts from './SmartAlerts';
 
 export default function Layout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -19,6 +20,9 @@ export default function Layout({ children }) {
         <Header onMenuClick={() => setSidebarOpen(true)} />
         <main className="main-content">{children}</main>
       </div>
+      
+      {/* Global AI Smart Alerts */}
+      <SmartAlerts />
     </div>
   );
 }

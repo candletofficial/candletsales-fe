@@ -9,6 +9,7 @@ import {
   PieChart, Pie, Cell
 } from 'recharts';
 import { exportDashboardToPDF } from '../utils/pdfExport';
+import AIAssistant from '../components/AIAssistant';
 
 // ─── Formatting helpers ───
 const formatCurrency = (n) => Math.round(n || 0).toLocaleString('vi-VN', { maximumFractionDigits: 0 }) + ' ₫';
@@ -301,7 +302,7 @@ export default function Dashboard() {
           <div className="flex-1 flex flex-col pl-4">
             <h3 className="text-[16px] font-bold text-on-surface mb-2">Cơ cấu chi phí</h3>
 
-            <div className="flex-1 min-h-0 relative flex items-center justify-center">
+            <div className="flex-1 min-h-[200px] relative flex items-center justify-center">
               {loading ? (
                 <span className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
               ) : (
@@ -506,6 +507,7 @@ export default function Dashboard() {
           
         </div>
       </div>
+      <AIAssistant periodLabel={getPeriodLabel()} />
     </Layout>
   );
 }

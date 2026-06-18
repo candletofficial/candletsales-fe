@@ -28,6 +28,11 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
     order?.ordered_at ? new Date(order.ordered_at).toISOString().split('T')[0] : today()
   );
   const [source, setSource] = useState(order?.source || 'shopee');
+  const [posMode, setPosMode] = useState(order?.pos_mode || 'offline');
+  const [customerName, setCustomerName] = useState(order?.customer_name || '');
+  const [customerPhone, setCustomerPhone] = useState(order?.customer_phone || '');
+  const [customerAddress, setCustomerAddress] = useState(order?.customer_address || '');
+  const [paymentMethod, setPaymentMethod] = useState(order?.payment_method || 'cash');
   const [shippingMethod, setShippingMethod] = useState(order?.shippingMethod || 'standard');
   const [orderId, setOrderId] = useState('');
   const [autoTotal, setAutoTotal] = useState(!isEdit);
@@ -174,6 +179,11 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
         total_price: finalPrice, 
         logistics_cost: logisticsCost, 
         source, 
+        pos_mode: source === 'pos' ? posMode : undefined,
+        customer_name: source === 'pos' ? customerName : undefined,
+        customer_phone: source === 'pos' ? customerPhone : undefined,
+        customer_address: source === 'pos' ? customerAddress : undefined,
+        payment_method: source === 'pos' ? paymentMethod : undefined,
         shippingMethod, 
         note, 
         ordered_at: finalOrderedAt, 
@@ -280,6 +290,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                 className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-[15px] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-white"
               >
                 <option value="khác">Khác</option>
+                <option value="pos">POS (Bán tại quầy)</option>
                 <option value="shopee">Shopee</option>
                 <option value="tiktok">TikTok</option>
                 <option value="facebook">Facebook</option>
@@ -312,6 +323,74 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
             </div>
           </div>
           
+          {/* POS Fields */}
+          {source === 'pos' && (
+            <div className="bg-surface-container-low p-4 rounded-xl border border-outline-variant/30 space-y-4">
+              <h3 className="text-[14px] font-bold text-primary flex items-center gap-2">
+                <span className="material-symbols-outlined text-[18px]">point_of_sale</span>
+                Thông tin bán tại quầy (POS)
+              </h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Chế độ bán</label>
+                  <select
+                    value={posMode}
+                    onChange={e => setPosMode(e.target.value)}
+                    className="w-full border border-outline-variant rounded-lg px-4 py-2 text-[14px] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-white"
+                  >
+                    <option value="offline">Offline (Khách mua trực tiếp)</option>
+                    <option value="online">Online (Giao hàng tận nơi)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Thanh toán</label>
+                  <select
+                    value={paymentMethod}
+                    onChange={e => setPaymentMethod(e.target.value)}
+                    className="w-full border border-outline-variant rounded-lg px-4 py-2 text-[14px] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-white"
+                  >
+                    <option value="cash">Tiền mặt</option>
+                    <option value="transfer">Chuyển khoản</option>
+                  </select>
+                </div>
+              </div>
+              {posMode === 'online' && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-outline-variant/30 pt-4">
+                  <div>
+                    <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Tên khách hàng *</label>
+                    <input
+                      required
+                      value={customerName}
+                      onChange={e => setCustomerName(e.target.value)}
+                      placeholder="Nguyễn Văn A"
+                      className="w-full border border-outline-variant rounded-lg px-4 py-2 text-[14px] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Số điện thoại *</label>
+                    <input
+                      required
+                      value={customerPhone}
+                      onChange={e => setCustomerPhone(e.target.value)}
+                      placeholder="09..."
+                      className="w-full border border-outline-variant rounded-lg px-4 py-2 text-[14px] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Địa chỉ giao hàng *</label>
+                    <input
+                      required
+                      value={customerAddress}
+                      onChange={e => setCustomerAddress(e.target.value)}
+                      placeholder="Số nhà, đường, quận..."
+                      className="w-full border border-outline-variant rounded-lg px-4 py-2 text-[14px] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           <div>
             <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Ghi chú</label>
             <input
@@ -1073,6 +1152,7 @@ export default function OrderManagement() {
               <option value="instagram">Instagram</option>
               <option value="youtube">YouTube</option>
               <option value="google">Google</option>
+              <option value="pos">POS</option>
               <option value="khác">Khác</option>
             </select>
           </div>
@@ -1192,6 +1272,12 @@ export default function OrderManagement() {
                                 Hoàn
                               </span>
                             )}
+                            {order.source === 'pos' && (
+                              <span className="flex items-center gap-1 text-[10px] uppercase font-bold px-1.5 py-0.5 rounded w-max bg-[#e0f2fe] text-[#0369a1] border border-[#bae6fd]">
+                                <span className="material-symbols-outlined text-[11px]">{order.pos_mode === 'online' ? 'public' : 'storefront'}</span>
+                                {order.pos_mode === 'online' ? 'Online' : 'Offline'} • {order.payment_method === 'transfer' ? 'CK' : 'Tiền mặt'}
+                              </span>
+                            )}
                             {order.is_replacement && (
                               <span className="flex items-center gap-1 text-[10px] uppercase font-bold px-1.5 py-0.5 rounded w-max bg-[#fee2e2] text-[#dc2626] border border-[#fca5a5]">
                                 Giao bù
@@ -1209,7 +1295,8 @@ export default function OrderManagement() {
                                   facebook: 'bg-[#1877f2]/10 text-[#1877f2] border border-[#1877f2]/20',
                                   instagram: 'bg-[#e1306c]/10 text-[#e1306c] border border-[#e1306c]/20',
                                   youtube: 'bg-[#ff0000]/10 text-[#ff0000] border border-[#ff0000]/20',
-                                  google: 'bg-[#4285f4]/10 text-[#4285f4] border border-[#4285f4]/20'
+                                  google: 'bg-[#4285f4]/10 text-[#4285f4] border border-[#4285f4]/20',
+                                  pos: 'bg-[#10b981]/10 text-[#10b981] border border-[#10b981]/20'
                                 }[order.source] || 'bg-primary/10 text-primary'
                                 }`}>
                                 <span

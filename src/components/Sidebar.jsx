@@ -4,6 +4,10 @@ import { useAuth } from '../hooks/useAuth';
 
 const NAV_ITEMS = [
   {
+    isSection: true,
+    label: 'Tổng quan',
+  },
+  {
     to: '/dashboard',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -14,6 +18,10 @@ const NAV_ITEMS = [
       </svg>
     ),
     label: 'Dashboard',
+  },
+  {
+    isSection: true,
+    label: 'Quản lý Kho',
   },
   {
     to: '/materials',
@@ -41,6 +49,10 @@ const NAV_ITEMS = [
     label: 'Kiểm kho',
   },
   {
+    isSection: true,
+    label: 'Bán hàng',
+  },
+  {
     to: '/products',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -53,6 +65,13 @@ const NAV_ITEMS = [
     label: 'Sản phẩm',
   },
   {
+    to: '/pos',
+    icon: (
+      <span className="material-symbols-outlined text-[20px]">point_of_sale</span>
+    ),
+    label: 'POS Bán hàng',
+  },
+  {
     to: '/orders',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -63,6 +82,10 @@ const NAV_ITEMS = [
       </svg>
     ),
     label: 'Đơn hàng',
+  },
+  {
+    isSection: true,
+    label: 'Tài chính & Marketing',
   },
   {
     to: '/fund',
@@ -95,6 +118,10 @@ const NAV_ITEMS = [
     label: 'Khuyến mãi',
   },
   {
+    isSection: true,
+    label: 'Công cụ',
+  },
+  {
     label: 'Công cụ tính',
     isGroup: true,
     icon: (
@@ -124,6 +151,10 @@ const NAV_ITEMS = [
         comingSoon: true,
       },
     ],
+  },
+  {
+    isSection: true,
+    label: 'Hệ thống',
   },
   {
     to: '/users',
@@ -161,8 +192,15 @@ export default function Sidebar({ isOpen, onClose }) {
         <img src="/logo.png" alt="Candlet Shop" className="h-[48px] w-auto object-contain drop-shadow-sm" />
       </div>
 
-      <nav className="sidebar-nav">
-        {NAV_ITEMS.map((item) => {
+      <nav className="sidebar-nav overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-gray-300">
+        {NAV_ITEMS.map((item, idx) => {
+          if (item.isSection) {
+            return (
+              <div key={`sec-${idx}`} className="px-4 pt-5 pb-2 first:pt-2">
+                <p className="text-[11px] font-bold text-gray-400 tracking-wider uppercase">{item.label}</p>
+              </div>
+            );
+          }
           if (item.isGroup) {
             const isOpen = !!openGroups[item.label];
             const isChildActive = item.children.some(c => location.pathname === c.to);

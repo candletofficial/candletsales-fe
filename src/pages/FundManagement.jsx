@@ -63,6 +63,73 @@ function DepositModal({ onClose, onSuccess, user }) {
   );
 }
 
+function WithdrawCapitalModal({ onClose, onSuccess, user, maxAmount }) {
+  const [amount, setAmount] = useState('');
+  const [note, setNote] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    const numAmount = Number(amount);
+    if (!numAmount || numAmount <= 0) return setError('Số tiền phải lớn hơn 0');
+    if (numAmount > maxAmount) return setError('Số tiền rút vượt quá tài sản chung hiện tại');
+    
+    setLoading(true);
+    try {
+      await fundService.withdrawCapital({ 
+        amount: numAmount, 
+        note, 
+        created_by: user?.name || 'Admin' 
+      });
+      onSuccess();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Lỗi khi rút vốn');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[400px] p-6 animate-[slideUp_0.3s_ease]">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-[20px] font-bold text-on-surface">Rút vốn khỏi quỹ</h3>
+          <button onClick={onClose} className="p-1 rounded-md hover:bg-surface-container text-on-surface-variant">
+            <span className="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <form onSubmit={handleSubmit}>
+          {error && <div className="mb-4 p-3 bg-error-container text-error rounded-lg text-sm">{error}</div>}
+          
+          <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-3 mb-4 flex justify-between items-center">
+            <span className="text-sm font-semibold text-on-surface-variant">Tài sản chung hiện tại:</span>
+            <span className="font-bold text-primary text-lg">{formatPrice(maxAmount)}</span>
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-sm font-bold text-on-surface-variant mb-1">Số tiền rút (VNĐ) *</label>
+            <input type="number" value={amount} onChange={e => setAmount(e.target.value)} required min="1" max={maxAmount}
+              className="w-full border border-outline-variant rounded-lg px-4 py-2 text-lg font-bold focus:outline-none focus:border-primary" />
+          </div>
+          <div className="mb-6">
+            <label className="block text-sm font-bold text-on-surface-variant mb-1">Ghi chú</label>
+            <textarea value={note} onChange={e => setNote(e.target.value)} rows="3"
+              className="w-full border border-outline-variant rounded-lg px-4 py-2 focus:outline-none focus:border-primary" placeholder="VD: Admin rút lại vốn đầu tư ban đầu"></textarea>
+          </div>
+          <div className="flex gap-3">
+            <button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-lg border border-outline-variant font-semibold text-on-surface-variant hover:bg-surface-container">Hủy</button>
+            <button type="submit" disabled={loading} className="flex-1 py-2.5 rounded-lg bg-error text-white font-semibold hover:opacity-90 disabled:opacity-60">
+              {loading ? 'Đang xử lý...' : 'Rút vốn'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 function WithdrawModal({ platform, maxAmount, onClose, onSuccess, user }) {
   const [amount, setAmount] = useState(maxAmount);
   const [fee, setFee] = useState(platform === 'shopee' ? 10800 : 0);
@@ -151,6 +218,7 @@ export default function FundManagement() {
   const [filterType, setFilterType] = useState('all');
   
   const [showDeposit, setShowDeposit] = useState(false);
+  const [showWithdrawCapital, setShowWithdrawCapital] = useState(false);
   const [withdrawPlatform, setWithdrawPlatform] = useState(null);
 
   const fetchData = async () => {
@@ -180,6 +248,7 @@ export default function FundManagement() {
 
   const handleSuccess = (msg) => {
     setShowDeposit(false);
+    setShowWithdrawCapital(false);
     setWithdrawPlatform(null);
     showToast(msg);
     fetchData();
@@ -188,6 +257,7 @@ export default function FundManagement() {
   const getTypeLabel = (type) => {
     switch(type) {
       case 'admin_deposit': return { label: 'Góp vốn', color: 'bg-[#d1fae5] text-[#059669]' };
+      case 'admin_withdrawal': return { label: 'Rút vốn', color: 'bg-[#fee2e2] text-[#dc2626]' };
       case 'revenue_withdrawal': return { label: 'Rút doanh thu', color: 'bg-[#dbeafe] text-[#2563eb]' };
       case 'import_payment': return { label: 'Thanh toán PN', color: 'bg-[#fee2e2] text-[#dc2626]' };
       case 'expense_payment': return { label: 'Chi tiêu', color: 'bg-orange-100 text-orange-700' };
@@ -205,6 +275,7 @@ export default function FundManagement() {
       )}
 
       {showDeposit && <DepositModal user={user} onClose={() => setShowDeposit(false)} onSuccess={() => handleSuccess('Góp vốn thành công')} />}
+      {showWithdrawCapital && <WithdrawCapitalModal user={user} maxAmount={summary.totalFundBalance} onClose={() => setShowWithdrawCapital(false)} onSuccess={() => handleSuccess('Rút vốn thành công')} />}
       {withdrawPlatform && <WithdrawModal user={user} platform={withdrawPlatform.platform} maxAmount={withdrawPlatform.availableBalance} onClose={() => setWithdrawPlatform(null)} onSuccess={() => handleSuccess('Rút tiền thành công')} />}
 
       <div className="flex flex-col pb-8">
@@ -226,10 +297,14 @@ export default function FundManagement() {
                 Dự kiến: <strong className="text-white">{formatPrice(expectedFund)}</strong>
               </p>
             </div>
-            <div className="relative z-10 mt-6">
-              <button onClick={() => setShowDeposit(true)} className="w-full bg-white/20 hover:bg-white/30 transition-colors py-3 rounded-xl font-bold text-white flex items-center justify-center gap-2 backdrop-blur-sm">
+            <div className="relative z-10 mt-6 flex gap-3">
+              <button onClick={() => setShowDeposit(true)} className="flex-1 bg-white/20 hover:bg-white/30 transition-colors py-3 rounded-xl font-bold text-white flex items-center justify-center gap-2 backdrop-blur-sm">
                 <span className="material-symbols-outlined text-[20px]">add_circle</span>
                 Góp vốn
+              </button>
+              <button onClick={() => setShowWithdrawCapital(true)} disabled={summary.totalFundBalance <= 0} className="flex-1 bg-white/10 hover:bg-white/20 transition-colors py-3 rounded-xl font-bold text-white flex items-center justify-center gap-2 backdrop-blur-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                <span className="material-symbols-outlined text-[20px]">remove_circle</span>
+                Rút vốn
               </button>
             </div>
           </div>
@@ -271,20 +346,26 @@ export default function FundManagement() {
             </h3>
             <div className="space-y-5">
               {summary.adminDeposits.map(d => {
-                const totalAll = summary.adminDeposits.reduce((s, a) => s + a.totalDeposit, 0);
-                const percent = totalAll > 0 ? (d.totalDeposit / totalAll * 100).toFixed(1) : 0;
+                const totalAll = summary.adminDeposits.reduce((s, a) => s + a.netDeposit, 0);
+                const percent = totalAll > 0 ? (d.netDeposit / totalAll * 100).toFixed(1) : 0;
                 return (
                   <div key={d.admin}>
-                    <div className="flex justify-between items-end mb-2">
-                      <span className="font-bold text-on-surface text-[15px]">{d.admin}</span>
+                    <div className="flex justify-between items-end mb-1">
+                      <div>
+                        <span className="font-bold text-on-surface text-[15px] block">{d.admin}</span>
+                        <div className="text-[12px] text-on-surface-variant flex gap-3 mt-1">
+                          <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[14px] text-[#059669]">arrow_upward</span> Đã góp: {formatPrice(d.totalDeposit || 0)}</span>
+                          <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[14px] text-[#dc2626]">arrow_downward</span> Đã rút: {formatPrice(d.totalWithdrawal || 0)}</span>
+                        </div>
+                      </div>
                       <div className="text-right leading-none">
-                        <span className="font-black text-primary text-[15px] mr-2">{formatPrice(d.totalDeposit)}</span>
+                        <span className="font-black text-primary text-[15px] mr-2">{formatPrice(d.netDeposit)}</span>
                         <span className="text-on-surface-variant font-bold text-[13px] bg-surface-container px-2 py-0.5 rounded">
                           {percent}%
                         </span>
                       </div>
                     </div>
-                    <div className="h-2.5 w-full bg-surface-container rounded-full overflow-hidden flex">
+                    <div className="h-2.5 w-full bg-surface-container rounded-full overflow-hidden flex mt-2">
                       <div className="h-full bg-gradient-to-r from-primary to-[#4f46e5] transition-all duration-1000 ease-out" style={{ width: `${percent}%` }}></div>
                     </div>
                   </div>
@@ -305,6 +386,7 @@ export default function FundManagement() {
             >
               <option value="all">Tất cả giao dịch</option>
               <option value="admin_deposit">Góp vốn</option>
+              <option value="admin_withdrawal">Rút vốn</option>
               <option value="revenue_withdrawal">Rút doanh thu</option>
               <option value="import_payment">Thanh toán PN</option>
               <option value="seeding_payment">Chi phí Seeding</option>
