@@ -776,7 +776,9 @@ function DeleteModal({ order, onClose, onConfirm, loading }) {
 }
 
 // ── Modal Xác nhận đánh dấu đơn hoàn ────────────────────────────────
-function ReturnModal({ order, returnCost, onClose, onConfirm, loading }) {
+function ReturnModal({ order, defaultReturnCost, onClose, onConfirm, loading }) {
+  const [localReturnCost, setLocalReturnCost] = useState(defaultReturnCost || 0);
+
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[440px] p-6 flex flex-col items-center text-center">
@@ -799,18 +801,27 @@ function ReturnModal({ order, returnCost, onClose, onConfirm, loading }) {
               <span className="material-symbols-outlined text-[15px]">payments</span>
               Chi phí hoàn hàng
             </span>
-            <span className="text-[14px] font-bold text-[#d97706] font-mono">{formatPrice(returnCost)}</span>
+            <div className="flex items-center gap-1">
+              <input
+                type="number"
+                min="0"
+                value={localReturnCost}
+                onChange={(e) => setLocalReturnCost(Number(e.target.value))}
+                className="w-24 text-right bg-transparent border-b border-[#d97706]/30 text-[#d97706] font-bold font-mono focus:outline-none focus:border-[#d97706] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              />
+              <span className="text-[14px] font-bold text-[#d97706] font-mono">đ</span>
+            </div>
           </div>
           <div className="flex items-center justify-between bg-[#fee2e2] px-4 py-3 rounded-lg border border-[#fca5a5]">
             <span className="text-[13px] text-[#991b1b] font-semibold">Tổng thiệt hại</span>
-            <span className="text-[15px] font-bold text-[#dc2626] font-mono">{formatPrice(order.total_price + returnCost)}</span>
+            <span className="text-[15px] font-bold text-[#dc2626] font-mono">{formatPrice(order.total_price + localReturnCost)}</span>
           </div>
         </div>
 
         <div className="flex justify-center gap-3 w-full">
           <button onClick={onClose} className="px-5 py-2 rounded-lg border border-outline-variant text-on-surface-variant text-sm font-semibold hover:bg-surface-container flex-1">Hủy</button>
           <button
-            onClick={onConfirm}
+            onClick={() => onConfirm(localReturnCost)}
             disabled={loading}
             className="px-5 py-2 rounded-lg bg-[#d97706] text-white text-sm font-semibold hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2 flex-1"
           >
@@ -959,10 +970,10 @@ export default function OrderManagement() {
     }
   };
 
-  const handleReturn = async () => {
+  const handleReturn = async (returnCostValue) => {
     setActionLoading(true);
     try {
-      const res = await orderService.markAsReturned(modal.data._id);
+      const res = await orderService.markAsReturned(modal.data._id, returnCostValue);
       showToast(res.data?.message || 'Đã đánh dấu đơn hàng bị hoàn');
       setModal(null);
       fetchData();
@@ -1060,7 +1071,7 @@ export default function OrderManagement() {
       {modal?.type === 'return' && (
         <ReturnModal
           order={modal.data}
-          returnCost={returnCostConfig[modal.data.source || 'khác'] || 0}
+          defaultReturnCost={returnCostConfig[modal.data.source || 'khác'] || 0}
           onClose={() => setModal(null)}
           onConfirm={handleReturn}
           loading={actionLoading}

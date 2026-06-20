@@ -6,5 +6,5 @@ export const orderService = {
   createOrder: (data) => api.post('/orders', data),
   updateOrder: (id, data) => api.put(`/orders/${id}`, data),
   deleteOrder: (id, restoreStock = false) => api.delete(`/orders/${id}?restoreStock=${restoreStock}`),
-  markAsReturned: (id) => api.patch(`/orders/${id}/return`),
+  markAsReturned: (id, returnCost) => api.patch(`/orders/${id}/return`, { returnCost }),
 };
