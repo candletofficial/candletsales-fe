@@ -38,11 +38,13 @@ const getVatForPlatform = (plat) => plat === 'shopee' ? 8 : 10;
 function TopupModal({ platform, onClose, onSuccess, user }) {
   const [amount, setAmount] = useState('');
   const [vatPct, setVatPct] = useState(getVatForPlatform(platform));
+  const [fundingSource, setFundingSource] = useState('common');
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const platInfo = getPlatform(platform);
+  const isFbOrIg = platform === 'facebook' || platform === 'instagram';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -57,6 +59,7 @@ function TopupModal({ platform, onClose, onSuccess, user }) {
         amount: Number(amount),
         fee: feeAmount,
         note,
+        fundingSource: isFbOrIg ? 'common' : fundingSource,
         created_by: user?.name || 'Admin'
       });
       onSuccess();
@@ -92,9 +95,25 @@ function TopupModal({ platform, onClose, onSuccess, user }) {
                 className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-[15px] font-bold text-center focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
             </div>
           </div>
+          {!isFbOrIg && (
+            <div>
+              <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Nguồn tiền nạp</label>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="fundingSource" value="common" checked={fundingSource === 'common'} onChange={() => setFundingSource('common')} className="text-primary focus:ring-primary" />
+                  <span className="text-[14px]">Tài sản chung</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="fundingSource" value="platform" checked={fundingSource === 'platform'} onChange={() => setFundingSource('platform')} className="text-primary focus:ring-primary" />
+                  <span className="text-[14px]">Tài sản riêng của {platInfo.label}</span>
+                </label>
+              </div>
+            </div>
+          )}
+          
           {totalDeduct > 0 && (
             <div className="bg-error-container/30 px-4 py-3 rounded-lg border border-error/20 flex justify-between items-center">
-              <span className="text-[13px] font-bold text-error">Sẽ trừ Tài sản chung (Gốc + VAT):</span>
+              <span className="text-[13px] font-bold text-error">Sẽ trừ {(isFbOrIg || fundingSource === 'common') ? 'Tài sản chung' : `Tài sản ${platInfo.label}`} (Gốc + VAT):</span>
               <span className="text-[16px] font-bold text-error">{formatPrice(totalDeduct)}</span>
             </div>
           )}
