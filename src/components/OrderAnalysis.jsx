@@ -10,7 +10,7 @@ const PLATFORM_META = {
   facebook:  { label: 'Facebook',  color: '#1877f2', bg: '#eef4ff', icon: '📘' },
   instagram: { label: 'Instagram', color: '#e1306c', bg: '#fff0f5', icon: '📸' },
   youtube:   { label: 'YouTube',   color: '#ff0000', bg: '#fff0f0', icon: '▶️' },
-  google:    { label: 'Google',    color: '#4285f4', bg: '#f0f5ff', icon: '🔍' },
+  website:    { label: 'Website',    color: '#4285f4', bg: '#f0f5ff', icon: '🌐' },
   'khác':    { label: 'Khác',      color: '#6b7280', bg: '#f3f4f6', icon: '📦' },
 };
 

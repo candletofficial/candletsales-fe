@@ -296,7 +296,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                 <option value="facebook">Facebook</option>
                 <option value="instagram">Instagram</option>
                 <option value="youtube">YouTube</option>
-                <option value="google">Google</option>
+                <option value="website">Website</option>
               </select>
             </div>
             <div>
@@ -1162,7 +1162,7 @@ export default function OrderManagement() {
               <option value="facebook">Facebook</option>
               <option value="instagram">Instagram</option>
               <option value="youtube">YouTube</option>
-              <option value="google">Google</option>
+              <option value="website">Website</option>
               <option value="pos">POS</option>
               <option value="khác">Khác</option>
             </select>
@@ -1306,7 +1306,7 @@ export default function OrderManagement() {
                                   facebook: 'bg-[#1877f2]/10 text-[#1877f2] border border-[#1877f2]/20',
                                   instagram: 'bg-[#e1306c]/10 text-[#e1306c] border border-[#e1306c]/20',
                                   youtube: 'bg-[#ff0000]/10 text-[#ff0000] border border-[#ff0000]/20',
-                                  google: 'bg-[#4285f4]/10 text-[#4285f4] border border-[#4285f4]/20',
+                                  website: 'bg-[#4285f4]/10 text-[#4285f4] border border-[#4285f4]/20',
                                   pos: 'bg-[#10b981]/10 text-[#10b981] border border-[#10b981]/20'
                                 }[order.source] || 'bg-primary/10 text-primary'
                                 }`}>

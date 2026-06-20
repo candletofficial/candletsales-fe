@@ -84,7 +84,7 @@ export default function Settings() {
   const [isShippingConfigExpanded, setIsShippingConfigExpanded] = useState(false);
   const [autoConfirmImport, setAutoConfirmImport] = useState(false);
   const [savingAutoConfirm, setSavingAutoConfirm] = useState(false);
-  const defaultPlatforms = ['shopee', 'tiktok', 'facebook', 'instagram', 'youtube', 'google', 'khác'];
+  const defaultPlatforms = ['shopee', 'tiktok', 'facebook', 'instagram', 'youtube', 'website', 'khác'];
   const [returnCosts, setReturnCosts] = useState(
     defaultPlatforms.reduce((acc, p) => ({ ...acc, [p]: 0 }), {})
   );

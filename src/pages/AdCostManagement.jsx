@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import Layout from '../components/Layout';
 import { adCostService } from '../services/adCostService';
 import { orderService } from '../services/orderService';
+import { fundService } from '../services/fundService';
 import { useAuth } from '../hooks/useAuth';
 
 // ─── Platform config ───────────────────────────────────────────────
@@ -10,7 +11,7 @@ const PLATFORMS = [
   { key: 'shopee', label: 'Shopee', short: 'SP', color: '#EE4D2D', bg: '#fdf0ed', textColor: '#EE4D2D' },
   { key: 'facebook', label: 'Facebook', short: 'FB', color: '#1877F2', bg: '#e7f0fd', textColor: '#1877F2' },
   { key: 'tiktok', label: 'TikTok', short: 'TT', color: '#010101', bg: '#f0f0f0', textColor: '#010101' },
-  { key: 'google', label: 'Google', short: 'GG', color: '#34A853', bg: '#e8f5e9', textColor: '#34A853' },
+  { key: 'website', label: 'Website', short: 'WEB', color: '#34A853', bg: '#e8f5e9', textColor: '#34A853' },
   { key: 'instagram', label: 'Instagram', short: 'IG', color: '#C13584', bg: '#fce8f5', textColor: '#C13584' },
   { key: 'youtube', label: 'YouTube', short: 'YT', color: '#FF0000', bg: '#ffe8e8', textColor: '#FF0000' },
 ];
@@ -37,18 +38,26 @@ const getVatForPlatform = (plat) => plat === 'shopee' ? 8 : 10;
 // ─── Modal Nạp tiền ────────────────────────────────────────────────
 function TopupModal({ platform, onClose, onSuccess, user }) {
   const [amount, setAmount] = useState('');
+  const isFbOrIg = platform === 'facebook' || platform === 'instagram';
   const [vatPct, setVatPct] = useState(getVatForPlatform(platform));
-  const [fundingSource, setFundingSource] = useState('common');
+  const [fundingSource, setFundingSource] = useState(isFbOrIg ? 'common' : '');
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [fundSummary, setFundSummary] = useState(null);
+
+  useEffect(() => {
+    fundService.getSummary()
+      .then(res => setFundSummary(res.data.data))
+      .catch(console.error);
+  }, []);
 
   const platInfo = getPlatform(platform);
-  const isFbOrIg = platform === 'facebook' || platform === 'instagram';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!amount || amount <= 0) return setError('Số tiền nạp phải lớn hơn 0');
+    if (!isFbOrIg && !fundingSource) return setError('Vui lòng chọn nguồn tiền nạp');
     setError(''); setLoading(true);
     
     const feeAmount = (Number(amount) * Number(vatPct)) / 100;
@@ -95,25 +104,31 @@ function TopupModal({ platform, onClose, onSuccess, user }) {
                 className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-[15px] font-bold text-center focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
             </div>
           </div>
-          {!isFbOrIg && (
-            <div>
-              <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Nguồn tiền nạp</label>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="fundingSource" value="common" checked={fundingSource === 'common'} onChange={() => setFundingSource('common')} className="text-primary focus:ring-primary" />
-                  <span className="text-[14px]">Tài sản chung</span>
+          <div>
+            <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Nguồn tiền nạp</label>
+            <div className="flex gap-6">
+              <label className="flex items-start gap-2 cursor-pointer">
+                <input type="radio" name="fundingSource" value="common" checked={fundingSource === 'common'} onChange={() => setFundingSource('common')} className="mt-0.5 text-primary focus:ring-primary" />
+                <div className="flex flex-col leading-tight">
+                  <span className="text-[14px] text-on-surface">Tài khoản chung</span>
+                  <span className="text-[13px] font-bold text-[#059669]">({fundSummary ? formatPrice(fundSummary.totalFundBalance || 0) : '...'})</span>
+                </div>
+              </label>
+              {!isFbOrIg && (
+                <label className="flex items-start gap-2 cursor-pointer">
+                  <input type="radio" name="fundingSource" value="platform" checked={fundingSource === 'platform'} onChange={() => setFundingSource('platform')} className="mt-0.5 text-primary focus:ring-primary" />
+                  <div className="flex flex-col leading-tight">
+                    <span className="text-[14px] text-on-surface">Tài khoản {platInfo.label}</span>
+                    <span className="text-[13px] font-bold text-[#059669]">({fundSummary ? formatPrice(fundSummary.platformBalances?.find(p => p.platform === platform)?.availableBalance || 0) : '...'})</span>
+                  </div>
                 </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="fundingSource" value="platform" checked={fundingSource === 'platform'} onChange={() => setFundingSource('platform')} className="text-primary focus:ring-primary" />
-                  <span className="text-[14px]">Tài sản riêng của {platInfo.label}</span>
-                </label>
-              </div>
+              )}
             </div>
-          )}
+          </div>
           
           {totalDeduct > 0 && (
             <div className="bg-error-container/30 px-4 py-3 rounded-lg border border-error/20 flex justify-between items-center">
-              <span className="text-[13px] font-bold text-error">Sẽ trừ {(isFbOrIg || fundingSource === 'common') ? 'Tài sản chung' : `Tài sản ${platInfo.label}`} (Gốc + VAT):</span>
+              <span className="text-[13px] font-bold text-error">Sẽ trừ {(isFbOrIg || fundingSource === 'common') ? `Tài khoản chung (${fundSummary ? formatPrice(fundSummary.totalFundBalance || 0) : '...'})` : (fundingSource === 'platform' ? `Tài khoản ${platInfo.label} (${fundSummary ? formatPrice(fundSummary.platformBalances?.find(p => p.platform === platform)?.availableBalance || 0) : '...'})` : '...') } (Gốc + VAT):</span>
               <span className="text-[16px] font-bold text-error">{formatPrice(totalDeduct)}</span>
             </div>
           )}
