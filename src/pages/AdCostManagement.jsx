@@ -299,6 +299,60 @@ function AdCostModal({ record, defaultDate, onClose, onSave, onDelete }) {
   );
 }
 
+// ─── Modal Affiliate Fee ──────────────────────────────────────────
+function AffiliateFeeModal({ year, month, affiliateFees, onClose, onSave }) {
+  const [shopeeFee, setShopeeFee] = useState(affiliateFees.find(f => f.platform === 'shopee')?.amount || '');
+  const [tiktokFee, setTiktokFee] = useState(affiliateFees.find(f => f.platform === 'tiktok')?.amount || '');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      await Promise.all([
+        adCostService.saveAffiliateFee({ year, month, platform: 'shopee', amount: Number(shopeeFee) || 0 }),
+        adCostService.saveAffiliateFee({ year, month, platform: 'tiktok', amount: Number(tiktokFee) || 0 })
+      ]);
+      onSave();
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Có lỗi xảy ra');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return createPortal(
+    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+      <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)' }} onClick={onClose} />
+      <div style={{ position: 'relative', background: 'white', borderRadius: '16px', boxShadow: '0 25px 50px rgba(0,0,0,0.2)', width: '400px', maxWidth: '100%', zIndex: 1 }}>
+        <div className="px-6 py-4 border-b border-outline-variant/30 flex justify-between items-center bg-surface-container-low/50 rounded-t-2xl">
+          <h3 className="font-bold text-[16px] text-on-surface">Cập nhật Phí Affiliate tháng {month}/{year}</h3>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-surface-container"><span className="material-symbols-outlined text-[20px] text-on-surface-variant">close</span></button>
+        </div>
+        <div className="p-6 space-y-4">
+          {error && <div className="p-3 bg-error-container text-error rounded-lg text-sm">{error}</div>}
+          <div>
+            <label className="block text-[13px] font-bold text-on-surface-variant mb-2 flex items-center gap-2"><span className="w-4 h-4 rounded-full bg-[#ee4d2d]" />Shopee (VNĐ)</label>
+            <input type="number" min="0" value={shopeeFee} onChange={e => setShopeeFee(e.target.value)} placeholder="Nhập phí tháng..." className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-[15px] focus:outline-none focus:border-[#ee4d2d]" />
+          </div>
+          <div>
+            <label className="block text-[13px] font-bold text-on-surface-variant mb-2 flex items-center gap-2"><span className="w-4 h-4 rounded-full bg-black" />TikTok (VNĐ)</label>
+            <input type="number" min="0" value={tiktokFee} onChange={e => setTiktokFee(e.target.value)} placeholder="Nhập phí tháng..." className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-[15px] focus:outline-none focus:border-black" />
+          </div>
+        </div>
+        <div className="px-6 py-4 bg-[#f8f9fa] rounded-b-2xl border-t border-outline-variant/30 flex justify-end gap-3">
+          <button onClick={onClose} className="px-4 py-2 text-on-surface-variant text-[13px] font-medium hover:bg-surface-container rounded-lg">Hủy</button>
+          <button onClick={handleSubmit} disabled={loading} className="px-5 py-2 bg-primary text-white text-[13px] font-semibold rounded-lg hover:opacity-90 disabled:opacity-60 flex items-center gap-2 shadow-sm">
+            {loading && <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+            Lưu phí
+          </button>
+        </div>
+      </div>
+    </div>, document.body
+  );
+}
+
 // ─── Main Component ────────────────────────────────────────────────
 export default function AdCostManagement() {
   const { user } = useAuth();
@@ -310,10 +364,12 @@ export default function AdCostManagement() {
   const [loading, setLoading] = useState(true);
   const [selectedDay, setSelectedDay] = useState(now.getDate());
   const [modal, setModal] = useState(null); // null | { type: 'add'|'edit', data?, defaultDate? }
+  const [affiliateModal, setAffiliateModal] = useState(false);
   const [topupPlatform, setTopupPlatform] = useState(null);
   const [toast, setToast] = useState(null);
   const [filterPlatform, setFilterPlatform] = useState('all');
   const [orders, setOrders] = useState([]);
+  const [affiliateFees, setAffiliateFees] = useState([]);
 
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type });
@@ -323,13 +379,18 @@ export default function AdCostManagement() {
   const fetchRecords = useCallback(async () => {
     setLoading(true);
     try {
-      const [res, balRes] = await Promise.all([
+      const [res, balRes, affRes] = await Promise.all([
         adCostService.getAdCosts(viewYear, viewMonth + 1),
-        adCostService.getBalances()
+        adCostService.getBalances(),
+        adCostService.getAffiliateFees(viewYear, viewMonth + 1)
       ]);
       setRecords(res.data.data);
       setBalances(balRes.data.data);
-    } catch { showToast('Không thể tải dữ liệu', 'error'); }
+      setAffiliateFees(affRes.data.data);
+    } catch (error) { 
+      console.error('fetchRecords error:', error);
+      showToast('Không thể tải dữ liệu', 'error'); 
+    }
     finally { setLoading(false); }
   }, [viewYear, viewMonth]);
 
@@ -450,6 +511,9 @@ export default function AdCostManagement() {
       {modal?.type === 'edit' && (
         <AdCostModal record={modal.data} onClose={() => setModal(null)} onSave={handleSave} onDelete={handleDelete} />
       )}
+      {affiliateModal && (
+        <AffiliateFeeModal year={viewYear} month={viewMonth + 1} affiliateFees={affiliateFees} onClose={() => setAffiliateModal(false)} onSave={() => { setAffiliateModal(false); fetchRecords(); showToast('Đã cập nhật phí Affiliate'); }} />
+      )}
 
       <div className="flex flex-col pb-8">
         {/* Header */}
@@ -458,11 +522,18 @@ export default function AdCostManagement() {
             <h2 className="text-[24px] font-bold text-on-surface">Chi phí Quảng cáo</h2>
             <p className="text-on-surface-variant mt-1 text-[14px]">Theo dõi chi phí quảng cáo và số dư từng nền tảng</p>
           </div>
-          <button onClick={() => setModal({ type: 'add', defaultDate: `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}` })}
-            className="flex items-center gap-xs px-lg py-sm bg-primary text-white rounded-lg hover:opacity-90 shadow-sm font-semibold text-sm">
-            <span className="material-symbols-outlined text-[20px]">add</span>
-            <span>Thêm chi phí</span>
-          </button>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setAffiliateModal(true)}
+              className="flex items-center gap-xs px-lg py-sm bg-[#ffedd5] text-[#d97706] rounded-lg hover:opacity-90 shadow-sm font-semibold text-sm">
+              <span className="material-symbols-outlined text-[20px]">monetization_on</span>
+              <span>Phí Affiliate</span>
+            </button>
+            <button onClick={() => setModal({ type: 'add', defaultDate: `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}` })}
+              className="flex items-center gap-xs px-lg py-sm bg-primary text-white rounded-lg hover:opacity-90 shadow-sm font-semibold text-sm">
+              <span className="material-symbols-outlined text-[20px]">add</span>
+              <span>Thêm chi phí</span>
+            </button>
+          </div>
         </div>
 
         {/* Ad Balances */}

@@ -39,6 +39,11 @@ function PlatformBar({ platform, maxRevenue }) {
               {fmtNum(platform.replacements)} bù
             </span>
           )}
+          {platform.affiliate_fee > 0 && (
+            <span className="bg-[#ffedd5] text-[#d97706] px-2 py-0.5 rounded-full font-bold">
+              Affiliate: {fmt(platform.affiliate_fee)}
+            </span>
+          )}
         </div>
       </div>
       <div className="flex items-center gap-3">

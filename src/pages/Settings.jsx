@@ -3,6 +3,8 @@ import Layout from '../components/Layout';
 import { shippingConfigService } from '../services/shippingConfigService';
 import { materialService } from '../services/materialService';
 import systemConfigService from '../services/systemConfigService';
+import { fundService } from '../services/fundService';
+import { adCostService } from '../services/adCostService';
 
 const SearchableSelect = ({ value, options, onChange, placeholder = "-- Chọn --" }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -90,6 +92,18 @@ export default function Settings() {
   );
   const [savingReturnCost, setSavingReturnCost] = useState(false);
 
+  const [fundSummary, setFundSummary] = useState(null);
+  const [syncValues, setSyncValues] = useState({});
+  const [syncingTarget, setSyncingTarget] = useState(null);
+
+  const [isReturnCostExpanded, setIsReturnCostExpanded] = useState(false);
+  const [isFundSyncExpanded, setIsFundSyncExpanded] = useState(false);
+  const [isAutoConfirmExpanded, setIsAutoConfirmExpanded] = useState(false);
+
+  const [adBalances, setAdBalances] = useState([]);
+  const [adSyncValues, setAdSyncValues] = useState({});
+  const [syncingAdTarget, setSyncingAdTarget] = useState(null);
+
   // State lưu cấu hình cho từng phương thức
   const [configs, setConfigs] = useState({
     standard: [],
@@ -104,11 +118,13 @@ export default function Settings() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [resMaterials, resConfigs, resAutoConfirm, resReturnCost] = await Promise.all([
+      const [resMaterials, resConfigs, resAutoConfirm, resReturnCost, resFund, resAd] = await Promise.all([
         materialService.getMaterials(),
         shippingConfigService.getAllConfigs(),
         systemConfigService.getConfig('auto_confirm_out_of_stock_imports'),
         systemConfigService.getConfig('return_cost_per_platform'),
+        fundService.getSummary(),
+        adCostService.getBalances()
       ]);
 
       if (resMaterials.data.success) {
@@ -138,6 +154,22 @@ export default function Settings() {
           const parsed = JSON.parse(resReturnCost.data.value);
           setReturnCosts(prev => ({ ...prev, ...parsed }));
         } catch (e) { console.error('Lỗi parse return_cost_per_platform'); }
+      }
+
+      if (resFund && resFund.data.success) {
+        setFundSummary(resFund.data.data);
+        const initSync = { total_fund: resFund.data.data.totalFundBalance };
+        resFund.data.data.platformBalances.forEach(p => {
+          initSync[p.platform] = p.availableBalance;
+        });
+        setSyncValues(initSync);
+      }
+
+      if (resAd && resAd.data.success) {
+        setAdBalances(resAd.data.data);
+        const initialAdSync = {};
+        resAd.data.data.forEach(p => initialAdSync[p.platform] = p.balance);
+        setAdSyncValues(initialAdSync);
       }
     } catch (err) {
       console.error(err);
@@ -220,6 +252,47 @@ export default function Settings() {
       showToast('Lỗi khi lưu cấu hình', 'error');
     } finally {
       setSavingReturnCost(false);
+    }
+  };
+
+  const handleSyncFund = async (target) => {
+    const newAmount = syncValues[target];
+    if (newAmount === undefined || newAmount < 0) {
+      return showToast('Số tiền không hợp lệ', 'error');
+    }
+    setSyncingTarget(target);
+    try {
+      await fundService.syncFund({
+        target,
+        newAmount: Number(newAmount),
+        note: target === 'total_fund' ? 'Đồng bộ hệ thống (Tổng tài sản)' : `Đồng bộ hệ thống (Quỹ ${target})`,
+        created_by: 'Admin'
+      });
+      showToast('Đồng bộ thành công');
+      fetchData(); // reload all data including fund
+    } catch (err) {
+      console.error(err);
+      showToast(err.response?.data?.message || 'Lỗi khi đồng bộ tài sản', 'error');
+    } finally {
+      setSyncingTarget(null);
+    }
+  };
+
+  const handleSyncAd = async (platform) => {
+    const val = Number(adSyncValues[platform]);
+    if (isNaN(val) || val < 0) {
+      showToast('Số tiền không hợp lệ', 'error');
+      return;
+    }
+    setSyncingAdTarget(platform);
+    try {
+      const res = await adCostService.syncAdCost({ platform, actualBalance: val });
+      showToast(res.data?.message || 'Đồng bộ thành công');
+      fetchData();
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Lỗi khi đồng bộ', 'error');
+    } finally {
+      setSyncingAdTarget(null);
     }
   };
 
@@ -355,7 +428,10 @@ export default function Settings() {
 
           {/* Section: Chi phí hoàn hàng */}
           <div className="bg-white rounded-xl shadow-sm border border-outline-variant/30 overflow-hidden">
-            <div className="w-full flex items-center justify-between p-4 bg-surface-container-low/50">
+            <button
+              onClick={() => setIsReturnCostExpanded(!isReturnCostExpanded)}
+              className="w-full flex items-center justify-between p-4 bg-surface-container-low/50 hover:bg-surface-container-low transition-colors"
+            >
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-[#fee2e2] flex items-center justify-center flex-shrink-0">
                   <span className="material-symbols-outlined text-[#dc2626] text-[24px]">assignment_return</span>
@@ -365,8 +441,12 @@ export default function Settings() {
                   <p className="text-[13px] text-on-surface-variant m-0 mt-0.5">Mức phí cố định tính cho mỗi đơn hàng bị hoàn trả</p>
                 </div>
               </div>
-            </div>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-transform ${isReturnCostExpanded ? 'rotate-180 bg-surface-container-high' : 'bg-surface-container'}`}>
+                <span className="material-symbols-outlined text-on-surface-variant text-[20px]">expand_more</span>
+              </div>
+            </button>
             
+            {isReturnCostExpanded && (
             <div className="p-6 border-t border-outline-variant/30 bg-surface-container-lowest">
               <div className="bg-white rounded-xl shadow-sm border border-outline-variant/30 p-5">
                 <div className="flex items-start gap-6">
@@ -423,11 +503,168 @@ export default function Settings() {
 
               </div>
             </div>
+            )}
+          </div>
+
+          {/* Section: Đồng bộ tài sản */}
+          <div className="bg-white rounded-xl shadow-sm border border-outline-variant/30 overflow-hidden">
+            <button
+              onClick={() => setIsFundSyncExpanded(!isFundSyncExpanded)}
+              className="w-full flex items-center justify-between p-4 bg-surface-container-low/50 hover:bg-surface-container-low transition-colors"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-[#e0e7ff] flex items-center justify-center flex-shrink-0">
+                  <span className="material-symbols-outlined text-[#4f46e5] text-[24px]">account_balance</span>
+                </div>
+                <div className="text-left">
+                  <h2 className="text-[17px] font-bold text-on-surface m-0">Đồng bộ tài sản & quỹ quảng cáo</h2>
+                  <p className="text-[13px] text-on-surface-variant m-0 mt-0.5">Chỉnh sửa và đồng bộ số dư hệ thống cho khớp với số tiền thực tế</p>
+                </div>
+              </div>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-transform ${isFundSyncExpanded ? 'rotate-180 bg-surface-container-high' : 'bg-surface-container'}`}>
+                <span className="material-symbols-outlined text-on-surface-variant text-[20px]">expand_more</span>
+              </div>
+            </button>
+            
+            {isFundSyncExpanded && (
+            <div className="p-6 border-t border-outline-variant/30 bg-surface-container-lowest">
+              {fundSummary ? (
+                <div className="space-y-6">
+                  {/* Total Fund */}
+                  <div className="bg-white rounded-xl shadow-sm border border-outline-variant/30 p-5">
+                    <div className="flex items-start gap-6 flex-col md:flex-row">
+                      <div className="flex-1">
+                        <h3 className="text-[15px] font-bold text-on-surface text-primary">Tổng tài sản chung</h3>
+                        <p className="text-[13px] text-on-surface-variant mt-1">
+                          Số dư hệ thống hiện tại: <strong className="text-[#059669]">{(fundSummary.totalFundBalance || 0).toLocaleString('vi-VN')}đ</strong>
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3 w-full md:w-auto">
+                        <div className="relative w-full md:w-[200px]">
+                          <input
+                            type="number"
+                            min="0"
+                            step="1000"
+                            value={syncValues['total_fund'] ?? ''}
+                            onChange={(e) => setSyncValues(prev => ({ ...prev, total_fund: e.target.value }))}
+                            className="w-full border border-outline-variant rounded-md px-3 py-2 text-[14px] font-bold text-right focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary pr-8"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[12px] font-bold text-on-surface-variant">đ</span>
+                        </div>
+                        <button
+                          onClick={() => handleSyncFund('total_fund')}
+                          disabled={syncingTarget === 'total_fund'}
+                          className="px-4 py-2 bg-primary text-white text-[13px] font-bold rounded-lg hover:opacity-90 disabled:opacity-60 transition-opacity flex items-center gap-2 whitespace-nowrap"
+                        >
+                          {syncingTarget === 'total_fund' ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <span className="material-symbols-outlined text-[18px]">sync</span>}
+                          Đồng bộ
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Platforms */}
+                  <div className="bg-white rounded-xl shadow-sm border border-outline-variant/30 p-5">
+                    <h3 className="text-[15px] font-bold text-on-surface mb-4">Quỹ khả dụng các nền tảng</h3>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5">
+                      {fundSummary.platformBalances.map(p => {
+                        const adP = adBalances.find(a => a.platform === p.platform);
+                        return (
+                        <div key={p.platform} className="flex flex-col gap-3 p-4 border border-outline-variant/50 rounded-xl bg-surface-container-lowest shadow-sm">
+                           <div className="flex justify-between items-center border-b border-outline-variant/30 pb-2">
+                             <label className="text-[14px] font-bold text-on-surface uppercase flex items-center gap-2">
+                               {p.platform !== 'khác' && (
+                                <span
+                                  className="w-[18px] h-[18px] bg-current inline-block opacity-80"
+                                  style={{
+                                    maskImage: `url(https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/${p.platform}.svg)`,
+                                    maskSize: 'contain', maskRepeat: 'no-repeat', maskPosition: 'center',
+                                    WebkitMaskImage: `url(https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/${p.platform}.svg)`,
+                                    WebkitMaskSize: 'contain', WebkitMaskRepeat: 'no-repeat', WebkitMaskPosition: 'center'
+                                  }}
+                                />
+                               )}
+                               {p.platform}
+                             </label>
+                           </div>
+                           
+                           {/* Quỹ khả dụng */}
+                           <div className="flex flex-col gap-1.5">
+                             <div className="flex justify-between items-center">
+                               <span className="text-[13px] font-bold text-on-surface-variant">Quỹ khả dụng</span>
+                               <span className="text-[13px] text-on-surface-variant">Hệ thống: <strong className="text-[#059669]">{p.availableBalance.toLocaleString('vi-VN')}đ</strong></span>
+                             </div>
+                             <div className="flex items-center gap-2">
+                               <div className="relative flex-1">
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    step="1000"
+                                    value={syncValues[p.platform] ?? ''}
+                                    onChange={(e) => setSyncValues(prev => ({ ...prev, [p.platform]: e.target.value }))}
+                                    className="w-full border border-outline-variant rounded-md px-3 py-1.5 text-[14px] font-bold text-right focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary pr-8"
+                                  />
+                                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[12px] font-bold text-on-surface-variant">đ</span>
+                               </div>
+                               <button
+                                  onClick={() => handleSyncFund(p.platform)}
+                                  disabled={syncingTarget === p.platform}
+                                  className="px-3 py-1.5 bg-surface-container text-on-surface text-[13px] font-bold rounded-lg hover:bg-surface-container-high disabled:opacity-60 transition-colors flex items-center gap-1.5 whitespace-nowrap"
+                                >
+                                  {syncingTarget === p.platform ? <span className="w-3.5 h-3.5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" /> : <span className="material-symbols-outlined text-[16px]">sync</span>}
+                                  Đồng bộ
+                                </button>
+                             </div>
+                           </div>
+
+                           {/* Quỹ quảng cáo */}
+                           {adP && (
+                           <div className="flex flex-col gap-1.5 pt-3 mt-1 border-t border-outline-variant/30">
+                             <div className="flex justify-between items-center">
+                               <span className="text-[13px] font-bold text-[#db2777]">Quỹ quảng cáo</span>
+                               <span className="text-[13px] text-on-surface-variant">Hệ thống: <strong className="text-[#db2777]">{adP.balance.toLocaleString('vi-VN')}đ</strong></span>
+                             </div>
+                             <div className="flex items-center gap-2">
+                               <div className="relative flex-1">
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    step="1000"
+                                    value={adSyncValues[p.platform] ?? ''}
+                                    onChange={(e) => setAdSyncValues(prev => ({ ...prev, [p.platform]: e.target.value }))}
+                                    className="w-full border border-outline-variant rounded-md px-3 py-1.5 text-[14px] font-bold text-right focus:outline-none focus:border-[#db2777] focus:ring-1 focus:ring-[#db2777] pr-8"
+                                  />
+                                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[12px] font-bold text-on-surface-variant">đ</span>
+                               </div>
+                               <button
+                                  onClick={() => handleSyncAd(p.platform)}
+                                  disabled={syncingAdTarget === p.platform}
+                                  className="px-3 py-1.5 bg-[#fce7f3] text-[#db2777] text-[13px] font-bold rounded-lg hover:bg-[#fbcfe8] disabled:opacity-60 transition-colors flex items-center gap-1.5 whitespace-nowrap"
+                                >
+                                  {syncingAdTarget === p.platform ? <span className="w-3.5 h-3.5 border-2 border-[#db2777]/30 border-t-[#db2777] rounded-full animate-spin" /> : <span className="material-symbols-outlined text-[16px]">sync</span>}
+                                  Đồng bộ
+                                </button>
+                             </div>
+                           </div>
+                           )}
+                        </div>
+                      )})}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-6 text-[13px] text-on-surface-variant">Đang tải dữ liệu quỹ...</div>
+              )}
+            </div>
+            )}
           </div>
 
           {/* Section: Tự động hóa */}
           <div className="bg-white rounded-xl shadow-sm border border-outline-variant/30 overflow-hidden">
-            <div className="w-full flex items-center justify-between p-4 bg-surface-container-low/50">
+            <button
+              onClick={() => setIsAutoConfirmExpanded(!isAutoConfirmExpanded)}
+              className="w-full flex items-center justify-between p-4 bg-surface-container-low/50 hover:bg-surface-container-low transition-colors"
+            >
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center flex-shrink-0">
                   <span className="material-symbols-outlined text-primary text-[24px]">precision_manufacturing</span>
@@ -437,7 +674,11 @@ export default function Settings() {
                   <p className="text-[13px] text-on-surface-variant m-0 mt-0.5">Quản lý các luồng xử lý tự động của hệ thống</p>
                 </div>
               </div>
-            </div>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-transform ${isAutoConfirmExpanded ? 'rotate-180 bg-surface-container-high' : 'bg-surface-container'}`}>
+                <span className="material-symbols-outlined text-on-surface-variant text-[20px]">expand_more</span>
+              </div>
+            </button>
+            {isAutoConfirmExpanded && (
             <div className="p-6 border-t border-outline-variant/30 bg-surface-container-lowest">
               <div className="flex items-center justify-between bg-white rounded-xl shadow-sm border border-outline-variant/30 p-5">
                 <div>
@@ -460,7 +701,10 @@ export default function Settings() {
                 </button>
               </div>
             </div>
+            )}
           </div>
+
+
         </div>
       )}
     </Layout>

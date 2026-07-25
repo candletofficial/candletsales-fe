@@ -984,13 +984,10 @@ export default function OrderManagement() {
     }
   };
 
-  // Filtered orders theo bộ lọc thời gian & nguồn
-  const filteredOrders = orders.filter(o => {
+  // Filtered orders theo bộ lọc tìm kiếm, thời gian & nguồn (KHÔNG lọc theo trạng thái)
+  const baseFilteredOrders = orders.filter(o => {
     // Lọc theo mã đơn hàng
     if (searchQuery && !((o.orderId || '').toLowerCase().includes(searchQuery.toLowerCase()) || (o._id || '').toLowerCase().includes(searchQuery.toLowerCase()))) return false;
-
-    // Lọc theo trạng thái hoàn
-    if (statusFilter !== 'all' && (o.status || 'completed') !== statusFilter) return false;
 
     // Lọc theo nguồn
     const orderSource = o.source || 'khác';
@@ -1007,6 +1004,11 @@ export default function OrderManagement() {
       return d >= startOfWeek;
     }
     if (datePreset === 'thisMonth') return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    if (datePreset === 'lastMonth') {
+      const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+      return d >= startOfLastMonth && d <= endOfLastMonth;
+    }
     if (datePreset === 'thisYear') return d.getFullYear() === now.getFullYear();
     if (datePreset === 'custom') {
       const from = customFrom ? new Date(customFrom) : null;
@@ -1018,10 +1020,16 @@ export default function OrderManagement() {
     return true; // 'all'
   });
 
-  // Stats — chỉ tính đơn hoàn thành (không tính đơn bị hoàn vào doanh thu)
-  const completedOrders = filteredOrders.filter(o => (o.status || 'completed') === 'completed');
+  // Lọc thêm theo trạng thái để hiển thị trên bảng
+  const filteredOrders = baseFilteredOrders.filter(o => {
+    if (statusFilter !== 'all' && (o.status || 'completed') !== statusFilter) return false;
+    return true;
+  });
+
+  // Stats — tính trên baseFilteredOrders (không bị ảnh hưởng bởi tab trạng thái)
+  const completedOrders = baseFilteredOrders.filter(o => (o.status || 'completed') === 'completed');
   const normalCompletedOrders = completedOrders.filter(o => !o.is_replacement && !o.is_seeding);
-  const returnedOrders  = filteredOrders.filter(o => o.status === 'returned');
+  const returnedOrders  = baseFilteredOrders.filter(o => o.status === 'returned');
   const totalRevenue = normalCompletedOrders.reduce((s, o) => s + (o.total_price || 0), 0);
   const totalItems   = normalCompletedOrders.reduce((s, o) => s + (o.items?.reduce((a, i) => a + i.quantity, 0) || 0), 0);
   const totalCost    = completedOrders.reduce((s, o) => s + (o.seeding_cost || 0) + (o.items?.reduce((a, i) => a + (i.unit_cost || 0) * i.quantity, 0) || 0) + (o.logistics_cost || 0) + (o.packaging_cost || 0), 0)
@@ -1124,6 +1132,7 @@ export default function OrderManagement() {
               <option value="today">Hôm nay</option>
               <option value="thisWeek">Tuần này</option>
               <option value="thisMonth">Tháng này</option>
+              <option value="lastMonth">Tháng trước</option>
               <option value="thisYear">Năm nay</option>
               <option value="custom">Tuỳ chỉnh...</option>
             </select>
@@ -1185,8 +1194,8 @@ export default function OrderManagement() {
                 }`}
               >
                 {label}
-                {val === 'returned' && orders.filter(o => o.status === 'returned').length > 0 && (
-                  <span className="ml-1 bg-[#d97706] text-white text-[10px] px-1.5 py-0.5 rounded-full">{orders.filter(o => o.status === 'returned').length}</span>
+                {val === 'returned' && baseFilteredOrders.filter(o => o.status === 'returned').length > 0 && (
+                  <span className="ml-1 bg-[#d97706] text-white text-[10px] px-1.5 py-0.5 rounded-full">{baseFilteredOrders.filter(o => o.status === 'returned').length}</span>
                 )}
               </button>
             ))}

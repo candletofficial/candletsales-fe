@@ -216,6 +216,9 @@ export default function FundManagement() {
   const expectedFund = summary.totalFundBalance + (summary.platformBalances || []).reduce((sum, p) => sum + p.availableBalance, 0);
   
   const [filterType, setFilterType] = useState('all');
+  const [dateFilter, setDateFilter] = useState('this_month');
+  const [customStartDate, setCustomStartDate] = useState('');
+  const [customEndDate, setCustomEndDate] = useState('');
   
   const [showDeposit, setShowDeposit] = useState(false);
   const [showWithdrawCapital, setShowWithdrawCapital] = useState(false);
@@ -224,9 +227,28 @@ export default function FundManagement() {
   const fetchData = async () => {
     setLoading(true);
     try {
+      let sd = '';
+      let ed = '';
+      if (dateFilter === 'this_month') {
+        const now = new Date();
+        sd = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+        ed = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
+      } else if (dateFilter === 'last_month') {
+        const now = new Date();
+        sd = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
+        ed = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59).toISOString();
+      } else if (dateFilter === 'custom') {
+        if (customStartDate) sd = new Date(customStartDate).toISOString();
+        if (customEndDate) {
+          const edDate = new Date(customEndDate);
+          edDate.setHours(23, 59, 59, 999);
+          ed = edDate.toISOString();
+        }
+      }
+
       const [sumRes, transRes] = await Promise.all([
         fundService.getSummary(),
-        fundService.getTransactions(1, 0, filterType)
+        fundService.getTransactions(1, 0, filterType, sd, ed)
       ]);
       setSummary(sumRes.data.data);
       setTransactions(transRes.data.data.transactions);
@@ -239,7 +261,7 @@ export default function FundManagement() {
 
   useEffect(() => {
     fetchData();
-  }, [filterType]);
+  }, [filterType, dateFilter, customStartDate, customEndDate]);
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
@@ -252,6 +274,18 @@ export default function FundManagement() {
     setWithdrawPlatform(null);
     showToast(msg);
     fetchData();
+  };
+
+  const handleDeleteAllTransactions = async () => {
+    if (window.confirm('CẢNH BÁO NGUY HIỂM: Hành động này sẽ xoá toàn bộ lịch sử giao dịch và RESET TẤT CẢ SỐ DƯ VỀ 0. Bạn chắc chắn muốn tiếp tục chứ?')) {
+      try {
+        await fundService.deleteAllTransactions();
+        showToast('Đã xoá lịch sử giao dịch và reset số dư');
+        fetchData();
+      } catch (error) {
+        showToast(error.response?.data?.message || 'Lỗi khi xoá lịch sử giao dịch', 'error');
+      }
+    }
   };
 
   const getTypeLabel = (type) => {
@@ -379,20 +413,59 @@ export default function FundManagement() {
         <div className="bg-white rounded-2xl shadow-sm border border-outline-variant/30 flex flex-col overflow-hidden">
           <div className="px-6 py-4 border-b border-outline-variant/30 bg-surface-container-lowest flex justify-between items-center gap-4 flex-wrap">
             <h3 className="font-bold text-on-surface text-[16px]">Lịch sử giao dịch</h3>
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              className="border border-outline-variant rounded-lg px-4 py-1.5 text-[13px] font-semibold text-on-surface-variant focus:outline-none focus:border-primary bg-white min-w-[180px]"
-            >
-              <option value="all">Tất cả giao dịch</option>
-              <option value="admin_deposit">Góp vốn</option>
-              <option value="admin_withdrawal">Rút vốn</option>
-              <option value="revenue_withdrawal">Rút doanh thu</option>
-              <option value="import_payment">Thanh toán PN</option>
-              <option value="seeding_payment">Chi phí Seeding</option>
-              <option value="shipping_payment">Phí Ship</option>
-              <option value="system_adjustment">Đồng bộ hệ thống</option>
-            </select>
+            <div className="flex items-center gap-3 flex-wrap">
+              <select
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value)}
+                className="border border-outline-variant rounded-lg px-4 py-1.5 text-[13px] font-semibold text-on-surface-variant focus:outline-none focus:border-primary bg-white min-w-[140px]"
+              >
+                <option value="all">Mọi thời gian</option>
+                <option value="this_month">Tháng này</option>
+                <option value="last_month">Tháng trước</option>
+                <option value="custom">Tuỳ chỉnh</option>
+              </select>
+
+              {dateFilter === 'custom' && (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="date"
+                    value={customStartDate}
+                    onChange={(e) => setCustomStartDate(e.target.value)}
+                    className="border border-outline-variant rounded-lg px-3 py-1.5 text-[13px] font-semibold text-on-surface-variant focus:outline-none focus:border-primary bg-white"
+                  />
+                  <span className="text-on-surface-variant">-</span>
+                  <input
+                    type="date"
+                    value={customEndDate}
+                    onChange={(e) => setCustomEndDate(e.target.value)}
+                    className="border border-outline-variant rounded-lg px-3 py-1.5 text-[13px] font-semibold text-on-surface-variant focus:outline-none focus:border-primary bg-white"
+                  />
+                </div>
+              )}
+
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+                className="border border-outline-variant rounded-lg px-4 py-1.5 text-[13px] font-semibold text-on-surface-variant focus:outline-none focus:border-primary bg-white min-w-[180px]"
+              >
+                <option value="all">Tất cả giao dịch</option>
+                <option value="admin_deposit">Góp vốn</option>
+                <option value="admin_withdrawal">Rút vốn</option>
+                <option value="revenue_withdrawal">Rút doanh thu</option>
+                <option value="import_payment">Thanh toán PN</option>
+                <option value="seeding_payment">Chi phí Seeding</option>
+                <option value="shipping_payment">Phí Ship</option>
+                <option value="system_adjustment">Đồng bộ hệ thống</option>
+                <option value="platform_adjustment">Đồng bộ quỹ nền tảng</option>
+              </select>
+              <button 
+                onClick={handleDeleteAllTransactions}
+                className="px-4 py-1.5 bg-error text-white text-[13px] font-bold rounded-lg hover:opacity-90 transition-opacity flex items-center gap-1"
+              >
+                <span className="material-symbols-outlined text-[16px]">delete_forever</span>
+                Xóa tất cả
+              </button>
+            </div>
           </div>
           
           <div className="overflow-x-auto">
