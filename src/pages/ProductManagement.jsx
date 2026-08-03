@@ -143,9 +143,6 @@ function ProductModal({ product, materials, onClose, onSave, onDelete, onDuplica
           <div>
             <h2 className="text-xl font-bold text-on-surface flex items-center gap-2">
               {product && product._id ? 'Chỉnh sửa Sản phẩm' : 'Thêm Sản phẩm mới'}
-              <span className="text-[13px] font-mono bg-surface-container-high px-2 py-1 rounded text-on-surface-variant font-normal">
-                {form.productId}
-              </span>
             </h2>
             <p className="text-[13px] text-on-surface-variant mt-1">
               Giá vốn gốc (Base Cost): <span className="font-bold text-primary">{formatPrice(currentBaseCost)}</span>
@@ -175,11 +172,17 @@ function ProductModal({ product, materials, onClose, onSave, onDelete, onDuplica
         <div className="flex-1 overflow-y-auto p-6 bg-surface-container-low">
           {activeTab === 'basic' && (
             <div className="grid grid-cols-2 gap-6">
-              <div className="col-span-2">
+              <div className="col-span-1">
                 <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Tên sản phẩm *</label>
                 <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required
                   className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-[15px] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                   placeholder="Ví dụ: Nến thơm tinh dầu hoa hồng" />
+              </div>
+              <div className="col-span-1">
+                <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Mã sản phẩm (SKU) *</label>
+                <input value={form.productId} onChange={e => setForm({ ...form, productId: e.target.value })} required
+                  className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-[15px] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary font-mono uppercase"
+                  placeholder="VD: CANDMAT" />
               </div>
               <div className="col-span-1">
                 <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Giá bán cơ bản (VNĐ) *</label>
@@ -206,7 +209,7 @@ function ProductModal({ product, materials, onClose, onSave, onDelete, onDuplica
             <div>
               <div className="flex justify-between items-center mb-4 sticky -top-6 bg-surface-container-low z-10 py-3 -mx-6 px-6 border-b border-outline-variant/30 shadow-sm">
                 <p className="text-sm text-on-surface-variant">Công thức này sẽ được áp dụng chung cho TẤT CẢ các phân loại.</p>
-                <button type="button" onClick={() => setForm({ ...form, base_ingredients: [...form.base_ingredients, { ingredient_id: '', quantity: 1 }] })}
+                <button type="button" onClick={() => setForm({ ...form, base_ingredients: [{ ingredient_id: '', quantity: 1 }, ...form.base_ingredients] })}
                   className="text-primary text-sm font-bold flex items-center gap-1 hover:bg-primary-container/30 px-3 py-1.5 rounded-lg transition-colors">
                   <span className="material-symbols-outlined text-[18px]">add</span> Thêm nguyên liệu
                 </button>
@@ -217,7 +220,7 @@ function ProductModal({ product, materials, onClose, onSave, onDelete, onDuplica
                   <div key={idx} className="flex gap-4 items-center bg-white p-3 rounded-lg border border-outline-variant/50 shadow-sm">
                     <div className="flex-1 min-w-0">
                       <SearchableSelect
-                        options={materialOptions}
+                        options={materialOptions.filter(m => m.value === item.ingredient_id || !form.base_ingredients.some(b => b.ingredient_id === m.value))}
                         value={item.ingredient_id}
                         onChange={(val) => {
                           const newArr = [...form.base_ingredients];
@@ -332,7 +335,16 @@ function ProductModal({ product, materials, onClose, onSave, onDelete, onDuplica
                   <div key={sIdx} className="bg-white border border-outline-variant/50 rounded-xl shadow-sm">
                     <div className="bg-surface-container-low px-4 py-2 border-b border-outline-variant/50 flex justify-between items-center rounded-t-xl">
                       <div className="flex items-center gap-3">
-                        <span className="font-mono text-sm font-bold text-on-surface">{sku.id}</span>
+                        <input 
+                          value={sku.id} 
+                          onChange={e => {
+                            const newSkus = [...form.skus];
+                            newSkus[sIdx].id = e.target.value.toUpperCase();
+                            setForm({ ...form, skus: newSkus });
+                          }}
+                          className="font-mono text-sm font-bold text-on-surface border border-outline-variant rounded px-2 py-0.5 focus:border-primary focus:outline-none w-[120px]" 
+                          placeholder="Mã SKU"
+                        />
                         <div className="flex gap-1">
                           {sku.combination.map(c => (
                             <span key={c} className="bg-surface-container-high px-2 py-0.5 rounded text-[11px] font-semibold text-on-surface-variant">{c}</span>
@@ -365,7 +377,7 @@ function ProductModal({ product, materials, onClose, onSave, onDelete, onDuplica
                         <div key={idx} className="flex gap-3 items-center mb-2">
                           <div className="flex-1 min-w-[250px]">
                             <SearchableSelect
-                              options={materialOptions}
+                              options={materialOptions.filter(m => m.value === item.ingredient_id || (!form.base_ingredients.some(b => b.ingredient_id === m.value) && !sku.extra_ingredients.some(e => e.ingredient_id === m.value)))}
                               value={item.ingredient_id}
                               onChange={(val) => {
                                 const newSkus = [...form.skus];
@@ -450,6 +462,7 @@ export default function ProductManagement() {
   const [currentPage, setCurrentPage] = useState(1);
   const [modal, setModal] = useState(null); // { type: 'add' | 'edit' | 'delete', data?: any }
   const [toast, setToast] = useState(null);
+  const [expandedProducts, setExpandedProducts] = useState({});
   const [searchParams] = useSearchParams();
   const searchTerm = searchParams.get('q') || '';
 
@@ -476,6 +489,14 @@ export default function ProductManagement() {
   const showToast = (msg, type = 'success') => {
     setToast({ message: msg, type });
     setTimeout(() => setToast(null), 3000);
+  };
+
+  const toggleExpand = (e, productId) => {
+    e.stopPropagation();
+    setExpandedProducts(prev => ({
+      ...prev,
+      [productId]: !prev[productId]
+    }));
   };
 
   const handleSave = async (form) => {
@@ -654,7 +675,20 @@ export default function ProductManagement() {
                               )}
                               <div>
                                 <p className="font-bold text-[14px] text-on-surface">{p.name}</p>
-                                <p className="text-[12px] text-on-surface-variant line-clamp-1">{p.description || 'Không có mô tả'}</p>
+                                {p.skus?.length > 0 && (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => toggleExpand(e, p._id)}
+                                    className="flex items-center gap-1 mt-0.5 text-[12px] font-semibold text-primary transition-all group/btn"
+                                  >
+                                    <span className="group-hover/btn:underline underline-offset-2">
+                                      {expandedProducts[p._id] ? 'Thu gọn' : `Xem chi tiết ${p.skus.length} phân loại`}
+                                    </span>
+                                    <span className={`material-symbols-outlined text-[16px] transition-transform duration-300 ${expandedProducts[p._id] ? 'rotate-180' : ''}`}>
+                                      expand_more
+                                    </span>
+                                  </button>
+                                )}
                               </div>
                             </div>
                           </td>
@@ -671,8 +705,10 @@ export default function ProductManagement() {
                           </td>
                         </tr>
 
+                        {/* SKUs toggle row removed - moved inline */}
+
                         {/* SKUs nested rows */}
-                        {p.skus?.map(sku => {
+                        {expandedProducts[p._id] && p.skus?.map(sku => {
                           const comboLabel = sku.combination?.map(optId => {
                             for (const g of p.variant_groups || []) {
                               const opt = g.options.find(o => o.id === optId);

@@ -43,6 +43,7 @@ export default function Dashboard() {
     if (filterType === 'today') return 'Hôm nay';
     if (filterType === 'this_week') return 'Tuần này';
     if (filterType === 'this_month') return 'Tháng này';
+    if (filterType === 'last_month') return 'Tháng trước';
     if (filterType === 'this_year') return 'Năm nay';
     if (filterType === 'custom') return `Ngày ${new Date(customDate || Date.now()).toLocaleDateString('vi-VN')}`;
     return 'Tùy chỉnh';
@@ -61,6 +62,18 @@ export default function Dashboard() {
       params = { days };
     } else if (filterType === 'this_month') {
       params = { days: now.getDate() };
+    } else if (filterType === 'last_month') {
+      const firstDayOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const lastDayOfLastMonth = new Date(firstDayOfThisMonth.getTime() - 1);
+      
+      const year = lastDayOfLastMonth.getFullYear();
+      const month = String(lastDayOfLastMonth.getMonth() + 1).padStart(2, '0');
+      const date = String(lastDayOfLastMonth.getDate()).padStart(2, '0');
+      
+      params = { 
+        days: lastDayOfLastMonth.getDate(), 
+        endDate: `${year}-${month}-${date}` 
+      };
     } else if (filterType === 'this_year') {
       const startOfYear = new Date(now.getFullYear(), 0, 1);
       // diff in ms -> days. If today is Jan 1st, diff is 0, days should be 1.
@@ -125,6 +138,7 @@ export default function Dashboard() {
                 <option value="today">Hôm nay</option>
                 <option value="this_week">Tuần này</option>
                 <option value="this_month">Tháng này</option>
+                <option value="last_month">Tháng trước</option>
                 <option value="this_year">Năm nay</option>
                 <option value="custom">Tuỳ chỉnh</option>
               </select>

@@ -221,7 +221,7 @@ export default function POS() {
       {selectedProduct && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setSelectedProduct(null)} />
-          <div className="relative bg-white rounded-2xl shadow-xl w-[90vw] max-w-[400px] p-6 animate-[fadeIn_0.15s_ease]">
+          <div className="relative bg-white rounded-2xl shadow-xl w-fit min-w-[320px] sm:min-w-[400px] max-w-[95vw] sm:max-w-[90vw] p-6 animate-[fadeIn_0.15s_ease]">
             <h3 className="text-lg font-bold text-on-surface mb-4">Chọn phân loại cho {selectedProduct.name}</h3>
             <div className="space-y-2 max-h-[60vh] overflow-y-auto pr-2">
               {selectedProduct.skus.map(sku => {

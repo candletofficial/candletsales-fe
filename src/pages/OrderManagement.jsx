@@ -13,9 +13,12 @@ const formatPrice = (n) =>
   Math.round(n ?? 0).toLocaleString('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 });
 
 const formatDate = (d) =>
-  d ? new Date(d).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—';
+  d ? new Date(d).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
 
-const today = () => new Date().toISOString().split('T')[0];
+const today = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
 
 // ── Modal Tạo / Chỉnh sửa đơn hàng ───────────────────────────────
 function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, isReplacementMode = false, isSeedingMode = false }) {
@@ -24,9 +27,13 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
   const [totalPrice, setTotalPrice] = useState(order ? (order.total_price - (order.logistics_cost || 0) + (order.discount_amount || 0)) : 0);
   const [logisticsCost, setLogisticsCost] = useState(order?.logistics_cost ?? 0);
   const [note, setNote] = useState(order?.note || '');
-  const [orderedAt, setOrderedAt] = useState(
-    order?.ordered_at ? new Date(order.ordered_at).toISOString().split('T')[0] : today()
-  );
+  const [orderedAt, setOrderedAt] = useState(() => {
+    if (order && order.ordered_at) {
+      const d = new Date(order.ordered_at);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+    return today();
+  });
   const [source, setSource] = useState(order?.source || 'shopee');
   const [posMode, setPosMode] = useState(order?.pos_mode || 'offline');
   const [customerName, setCustomerName] = useState(order?.customer_name || '');
@@ -1094,13 +1101,13 @@ export default function OrderManagement() {
             <p className="text-on-surface-variant mt-1 text-[14px]">Tạo và quản lý toàn bộ đơn hàng bán hàng</p>
           </div>
           <div className="flex items-center gap-2">
-            <button
+            {/* <button
               onClick={() => setModal({ type: 'add_seeding' })}
               className="flex items-center gap-xs px-lg py-sm bg-[#f5f3ff] text-[#7c3aed] rounded-lg hover:opacity-90 transition-all shadow-sm font-semibold text-sm border border-[#ddd6fe]"
             >
               <span className="material-symbols-outlined text-[20px]">campaign</span>
               <span className="hidden sm:inline">Tạo đơn seeding</span>
-            </button>
+            </button> */}
             <button
               onClick={() => setModal({ type: 'add_replacement' })}
               className="flex items-center gap-xs px-lg py-sm bg-error-container text-error rounded-lg hover:opacity-90 transition-all shadow-sm font-semibold text-sm border border-error/20"
@@ -1266,6 +1273,13 @@ export default function OrderManagement() {
                       <button onClick={() => setModal({ type: 'add' })} className="mt-3 text-primary text-sm font-semibold hover:underline">
                         + Tạo đơn hàng đầu tiên
                       </button>
+                    </td>
+                  </tr>
+                ) : filteredOrders.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-lg py-16 text-center">
+                      <span className="material-symbols-outlined text-[48px] text-on-surface-variant opacity-30 block mb-3">search_off</span>
+                      <p className="text-on-surface-variant text-sm">Không tìm thấy đơn hàng nào phù hợp với bộ lọc</p>
                     </td>
                   </tr>
                 ) : (
