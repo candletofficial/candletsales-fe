@@ -46,6 +46,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
   const [isReplacement, setIsReplacement] = useState(isReplacementMode || order?.is_replacement || false);
   const [isSeeding, setIsSeeding] = useState(isSeedingMode || order?.is_seeding || false);
   const [seedingCost, setSeedingCost] = useState(order?.seeding_cost || 0);
+  const [returnCost, setReturnCost] = useState(order?.return_cost || 0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showProductPicker, setShowProductPicker] = useState(false);
@@ -198,7 +199,8 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
         is_seeding: isSeeding,
         seeding_cost: seedingCost,
         discount_amount: appliedDiscount.amount,
-        discount_code: appliedDiscount.code
+        discount_code: appliedDiscount.code,
+        return_cost: (isEdit && order?.status === 'returned') ? returnCost : undefined
       };
       
       if (isEdit) {
@@ -407,6 +409,27 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
               className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-[15px] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             />
           </div>
+            {order?.status === 'returned' && (
+              <div className="mt-4 p-4 bg-[#fefce8] border border-[#fde68a] rounded-xl">
+                <label className="block text-[13px] font-bold text-[#d97706] mb-2">Phí hoàn trả thực tế (VNĐ)</label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="number"
+                    value={returnCost}
+                    onChange={e => setReturnCost(Number(e.target.value))}
+                    className="flex-1 border border-[#fde68a] rounded-lg px-4 py-2.5 text-[15px] focus:outline-none focus:border-[#d97706] focus:ring-1 focus:ring-[#d97706] bg-white text-[#d97706] font-bold font-mono"
+                  />
+                  <button 
+                    onClick={handleSubmit} 
+                    disabled={loading || (returnCost === (order.return_cost || 0) && note === (order.note || ''))}
+                    className="px-6 py-2.5 bg-[#d97706] text-white text-[14px] font-semibold rounded-lg hover:bg-[#b45309] transition-colors disabled:opacity-60 flex items-center gap-2 shadow-sm whitespace-nowrap"
+                  >
+                    {loading && <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+                    Lưu
+                  </button>
+                </div>
+              </div>
+            )}
 
           {isSeedingMode && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1034,12 +1057,12 @@ export default function OrderManagement() {
   });
 
   // Stats — tính trên baseFilteredOrders (không bị ảnh hưởng bởi tab trạng thái)
-  const completedOrders = baseFilteredOrders.filter(o => (o.status || 'completed') === 'completed');
-  const normalCompletedOrders = completedOrders.filter(o => !o.is_replacement && !o.is_seeding);
+  const activeOrders = baseFilteredOrders.filter(o => o.status !== 'returned');
+  const normalActiveOrders = activeOrders.filter(o => !o.is_replacement && !o.is_seeding);
   const returnedOrders  = baseFilteredOrders.filter(o => o.status === 'returned');
-  const totalRevenue = normalCompletedOrders.reduce((s, o) => s + (o.total_price || 0), 0);
-  const totalItems   = normalCompletedOrders.reduce((s, o) => s + (o.items?.reduce((a, i) => a + i.quantity, 0) || 0), 0);
-  const totalCost    = completedOrders.reduce((s, o) => s + (o.seeding_cost || 0) + (o.items?.reduce((a, i) => a + (i.unit_cost || 0) * i.quantity, 0) || 0) + (o.logistics_cost || 0) + (o.packaging_cost || 0), 0)
+  const totalRevenue = normalActiveOrders.reduce((s, o) => s + (o.total_price || 0), 0);
+  const totalItems   = normalActiveOrders.reduce((s, o) => s + (o.items?.reduce((a, i) => a + i.quantity, 0) || 0), 0);
+  const totalCost    = activeOrders.reduce((s, o) => s + (o.seeding_cost || 0) + (o.items?.reduce((a, i) => a + (i.unit_cost || 0) * i.quantity, 0) || 0) + (o.logistics_cost || 0) + (o.packaging_cost || 0), 0)
                      + returnedOrders.reduce((s, o) => s + (o.return_cost || 0), 0); // thêm chi phí hoàn
   const totalProfit  = totalRevenue - totalCost;
   const profitMargin = totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(1) : 0;
@@ -1186,7 +1209,7 @@ export default function OrderManagement() {
 
           {/* Status Filter */}
           <div className="flex items-center gap-2">
-            {[['all', 'Tất cả', ''], ['completed', 'Hoàn thành', 'text-[#059669]'], ['returned', 'Bị hoàn', 'text-[#d97706]']].map(([val, label, color]) => (
+            {[['all', 'Tất cả', ''], ['pending', 'Chờ thu tiền', 'text-[#b45309]'], ['completed', 'Hoàn thành', 'text-[#059669]'], ['returned', 'Bị hoàn', 'text-[#d97706]']].map(([val, label, color]) => (
               <button
                 key={val}
                 onClick={() => { setStatusFilter(val); setCurrentPage(1); }}
@@ -1196,13 +1219,18 @@ export default function OrderManagement() {
                       ? 'bg-[#fef3c7] border-[#fde68a] text-[#d97706]'
                       : val === 'completed'
                         ? 'bg-[#d1fae5] border-[#6ee7b7] text-[#059669]'
-                        : 'bg-primary-container border-primary/30 text-primary'
+                        : val === 'pending'
+                          ? 'bg-[#fef3c7] border-[#fcd34d] text-[#b45309]'
+                          : 'bg-primary-container border-primary/30 text-primary'
                     : 'bg-white border-outline-variant/50 text-on-surface-variant hover:bg-surface-container'
                 }`}
               >
                 {label}
                 {val === 'returned' && baseFilteredOrders.filter(o => o.status === 'returned').length > 0 && (
                   <span className="ml-1 bg-[#d97706] text-white text-[10px] px-1.5 py-0.5 rounded-full">{baseFilteredOrders.filter(o => o.status === 'returned').length}</span>
+                )}
+                {val === 'pending' && baseFilteredOrders.filter(o => o.status === 'pending').length > 0 && (
+                  <span className="ml-1 bg-[#b45309] text-white text-[10px] px-1.5 py-0.5 rounded-full">{baseFilteredOrders.filter(o => o.status === 'pending').length}</span>
                 )}
               </button>
             ))}
@@ -1252,13 +1280,14 @@ export default function OrderManagement() {
                   <th className="px-lg py-md text-[12px] font-bold text-on-surface-variant uppercase tracking-wider text-center">Tổng SL</th>
                   <th className="px-lg py-md text-[12px] font-bold text-on-surface-variant uppercase tracking-wider text-right">Tổng tiền</th>
                   <th className="px-lg py-md text-[12px] font-bold text-on-surface-variant uppercase tracking-wider text-center">Ngày đặt</th>
+                  <th className="px-lg py-md text-[12px] font-bold text-on-surface-variant uppercase tracking-wider text-center">Trạng thái</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant/20">
                 {loading ? (
                   Array.from({ length: 5 }).map((_, i) => (
                     <tr key={i} className="animate-pulse">
-                      {[...Array(5)].map((_, j) => (
+                      {[...Array(6)].map((_, j) => (
                         <td key={j} className="px-lg py-md">
                           <div className="h-4 bg-surface-container-high rounded" />
                         </td>
@@ -1267,7 +1296,7 @@ export default function OrderManagement() {
                   ))
                 ) : orders.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-lg py-16 text-center">
+                    <td colSpan={6} className="px-lg py-16 text-center">
                       <span className="material-symbols-outlined text-[48px] text-on-surface-variant opacity-30 block mb-3">receipt_long</span>
                       <p className="text-on-surface-variant text-sm">Chưa có đơn hàng nào</p>
                       <button onClick={() => setModal({ type: 'add' })} className="mt-3 text-primary text-sm font-semibold hover:underline">
@@ -1277,7 +1306,7 @@ export default function OrderManagement() {
                   </tr>
                 ) : filteredOrders.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-lg py-16 text-center">
+                    <td colSpan={6} className="px-lg py-16 text-center">
                       <span className="material-symbols-outlined text-[48px] text-on-surface-variant opacity-30 block mb-3">search_off</span>
                       <p className="text-on-surface-variant text-sm">Không tìm thấy đơn hàng nào phù hợp với bộ lọc</p>
                     </td>
@@ -1300,55 +1329,43 @@ export default function OrderManagement() {
                             <span className="font-mono text-[13px] font-semibold text-on-surface bg-surface-container-high px-2 py-1 rounded border border-outline-variant/30">
                               {order.orderId}
                             </span>
-                            {order.status === 'returned' && (
-                              <span className="flex items-center gap-1 text-[10px] uppercase font-bold px-1.5 py-0.5 rounded w-max bg-[#fef3c7] text-[#d97706] border border-[#fde68a]">
-                                <span className="material-symbols-outlined text-[11px]">assignment_return</span>
-                                Hoàn
-                              </span>
-                            )}
-                            {order.source === 'pos' && (
-                              <span className="flex items-center gap-1 text-[10px] uppercase font-bold px-1.5 py-0.5 rounded w-max bg-[#e0f2fe] text-[#0369a1] border border-[#bae6fd]">
-                                <span className="material-symbols-outlined text-[11px]">{order.pos_mode === 'online' ? 'public' : 'storefront'}</span>
-                                {order.pos_mode === 'online' ? 'Online' : 'Offline'} • {order.payment_method === 'transfer' ? 'CK' : 'Tiền mặt'}
-                              </span>
-                            )}
-                            {order.is_replacement && (
-                              <span className="flex items-center gap-1 text-[10px] uppercase font-bold px-1.5 py-0.5 rounded w-max bg-[#fee2e2] text-[#dc2626] border border-[#fca5a5]">
-                                Giao bù
-                              </span>
-                            )}
-                            {order.is_seeding && (
-                              <span className="flex items-center gap-1 text-[10px] uppercase font-bold px-1.5 py-0.5 rounded w-max bg-[#f5f3ff] text-[#7c3aed] border border-[#ddd6fe]">
-                                Seeding
-                              </span>
-                            )}
-                            {order.source && order.source !== 'khác' && (
-                              <span className={`flex items-center gap-1 text-[10px] uppercase font-bold px-1.5 py-0.5 rounded w-max ${{
-                                  shopee: 'bg-[#ee4d2d]/10 text-[#ee4d2d] border border-[#ee4d2d]/20',
-                                  tiktok: 'bg-black text-white border border-black/20',
-                                  facebook: 'bg-[#1877f2]/10 text-[#1877f2] border border-[#1877f2]/20',
-                                  instagram: 'bg-[#e1306c]/10 text-[#e1306c] border border-[#e1306c]/20',
-                                  youtube: 'bg-[#ff0000]/10 text-[#ff0000] border border-[#ff0000]/20',
-                                  website: 'bg-[#4285f4]/10 text-[#4285f4] border border-[#4285f4]/20',
-                                  pos: 'bg-[#10b981]/10 text-[#10b981] border border-[#10b981]/20'
-                                }[order.source] || 'bg-primary/10 text-primary'
-                                }`}>
-                                <span
-                                  className="w-[11px] h-[11px] bg-current inline-block opacity-90"
-                                  style={{
-                                    maskImage: `url(https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/${order.source}.svg)`,
-                                    maskSize: 'contain',
-                                    maskRepeat: 'no-repeat',
-                                    maskPosition: 'center',
-                                    WebkitMaskImage: `url(https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/${order.source}.svg)`,
-                                    WebkitMaskSize: 'contain',
-                                    WebkitMaskRepeat: 'no-repeat',
-                                    WebkitMaskPosition: 'center'
-                                  }}
-                                />
-                                {order.source}
-                              </span>
-                            )}
+
+                            <div className="flex items-center gap-1.5">
+                              {order.source && order.source !== 'khác' && (
+                                <span className={`flex items-center justify-center gap-1 text-[10px] uppercase font-bold rounded h-[20px] min-w-[72px] px-1.5 ${{
+                                    shopee: 'bg-[#ee4d2d]/10 text-[#ee4d2d] border border-[#ee4d2d]/20',
+                                    tiktok: 'bg-black text-white border border-black/20',
+                                    facebook: 'bg-[#1877f2]/10 text-[#1877f2] border border-[#1877f2]/20',
+                                    instagram: 'bg-[#e1306c]/10 text-[#e1306c] border border-[#e1306c]/20',
+                                    youtube: 'bg-[#ff0000]/10 text-[#ff0000] border border-[#ff0000]/20',
+                                    website: 'bg-[#4285f4]/10 text-[#4285f4] border border-[#4285f4]/20',
+                                    pos: 'bg-[#10b981]/10 text-[#10b981] border border-[#10b981]/20'
+                                  }[order.source] || 'bg-primary/10 text-primary'
+                                  }`}>
+                                  <span
+                                    className="w-[11px] h-[11px] bg-current inline-block opacity-90"
+                                    style={{
+                                      maskImage: `url(https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/${order.source}.svg)`,
+                                      maskSize: 'contain',
+                                      maskRepeat: 'no-repeat',
+                                      maskPosition: 'center',
+                                      WebkitMaskImage: `url(https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/${order.source}.svg)`,
+                                      WebkitMaskSize: 'contain',
+                                      WebkitMaskRepeat: 'no-repeat',
+                                      WebkitMaskPosition: 'center'
+                                    }}
+                                  />
+                                  {order.source}
+                                </span>
+                              )}
+                              
+                              {order.pancake_order_id && (
+                                <span title="Đơn hàng được đồng bộ tự động từ Pancake" className="flex items-center justify-center gap-1 text-[10px] uppercase font-bold rounded bg-[#f3e8ff] text-[#9333ea] border border-[#d8b4fe] h-[20px] w-[72px]">
+                                  <svg className="w-[11px] h-[11px] fill-current opacity-90" viewBox="0 0 24 24"><path d="M11 21h-1l1-7H7.5c-.58 0-.57-.32-.38-.66.19-.34.05-.08.07-.12C8.48 10.94 10.42 7.54 13 3h1l-1 7h3.5c.49 0 .56.33.47.51l-.07.15C12.96 17.55 11 21 11 21z"/></svg>
+                                  Auto
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </td>
                         <td className="px-lg py-md">
@@ -1390,6 +1407,44 @@ export default function OrderManagement() {
                         </td>
                         <td className="px-lg py-md text-center text-[13px] text-on-surface-variant">
                           {formatDate(order.ordered_at)}
+                        </td>
+                        <td className="px-lg py-md">
+                          <div className="flex flex-col gap-1 items-center">
+                            {order.status === 'returned' && (
+                              <span className="flex items-center gap-1 text-[10px] uppercase font-bold px-1.5 py-0.5 rounded w-max bg-[#fef3c7] text-[#d97706] border border-[#fde68a]">
+                                <span className="material-symbols-outlined text-[11px]">assignment_return</span>
+                                Hoàn
+                              </span>
+                            )}
+                            {order.status === 'pending' && (
+                              <span className="flex items-center gap-1 text-[10px] uppercase font-bold px-1.5 py-0.5 rounded w-max bg-[#fef3c7] text-[#b45309] border border-[#fcd34d]">
+                                <span className="material-symbols-outlined text-[11px]">hourglass_empty</span>
+                                Chờ thu tiền
+                              </span>
+                            )}
+                            {(order.status === 'completed' || !order.status) && (
+                              <span className="flex items-center gap-1 text-[10px] uppercase font-bold px-1.5 py-0.5 rounded w-max bg-[#d1fae5] text-[#059669] border border-[#6ee7b7]">
+                                <span className="material-symbols-outlined text-[11px]">check_circle</span>
+                                Đã thu tiền
+                              </span>
+                            )}
+                            {order.source === 'pos' && (
+                              <span className="flex items-center gap-1 text-[10px] uppercase font-bold px-1.5 py-0.5 rounded w-max bg-[#e0f2fe] text-[#0369a1] border border-[#bae6fd]">
+                                <span className="material-symbols-outlined text-[11px]">{order.pos_mode === 'online' ? 'public' : 'storefront'}</span>
+                                {order.pos_mode === 'online' ? 'Online' : 'Offline'} • {order.payment_method === 'transfer' ? 'CK' : 'Tiền mặt'}
+                              </span>
+                            )}
+                            {order.is_replacement && (
+                              <span className="flex items-center gap-1 text-[10px] uppercase font-bold px-1.5 py-0.5 rounded w-max bg-[#fee2e2] text-[#dc2626] border border-[#fca5a5]">
+                                Giao bù
+                              </span>
+                            )}
+                            {order.is_seeding && (
+                              <span className="flex items-center gap-1 text-[10px] uppercase font-bold px-1.5 py-0.5 rounded w-max bg-[#f5f3ff] text-[#7c3aed] border border-[#ddd6fe]">
+                                Seeding
+                              </span>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     );

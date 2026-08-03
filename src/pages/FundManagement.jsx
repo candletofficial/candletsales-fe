@@ -296,6 +296,7 @@ export default function FundManagement() {
       case 'import_payment': return { label: 'Thanh toán PN', color: 'bg-[#fee2e2] text-[#dc2626]' };
       case 'expense_payment': return { label: 'Chi tiêu', color: 'bg-orange-100 text-orange-700' };
       case 'system_adjustment': return { label: 'Đồng bộ hệ thống', color: 'bg-surface-container-high text-on-surface-variant' };
+      case 'order_revenue': return { label: 'Doanh thu đơn hàng', color: 'bg-[#dcfce7] text-[#166534]' };
       default: return { label: 'Khác', color: 'bg-gray-100 text-gray-700' };
     }
   };
@@ -457,6 +458,7 @@ export default function FundManagement() {
                 <option value="shipping_payment">Phí Ship</option>
                 <option value="system_adjustment">Đồng bộ hệ thống</option>
                 <option value="platform_adjustment">Đồng bộ quỹ nền tảng</option>
+                <option value="order_revenue">Doanh thu đơn hàng</option>
               </select>
               <button 
                 onClick={handleDeleteAllTransactions}
@@ -496,6 +498,12 @@ export default function FundManagement() {
                 ) : (
                   transactions.map(t => {
                     const typeInfo = getTypeLabel(t.type);
+                    const displayChange = t.fund_change !== 0 
+                      ? t.fund_change 
+                      : (t.platform_change !== 0 
+                          ? t.platform_change 
+                          : (t.type === 'revenue_withdrawal' ? -t.amount : (t.type === 'order_revenue' ? t.amount : 0)));
+
                     return (
                       <tr key={t._id} className="hover:bg-surface-container-low/50 transition-colors">
                         <td className="px-6 py-3 text-[13px] text-on-surface-variant whitespace-nowrap">
@@ -507,8 +515,8 @@ export default function FundManagement() {
                           </span>
                         </td>
                         <td className="px-6 py-3">
-                          <span className={`font-bold text-[14px] ${t.fund_change >= 0 ? 'text-[#059669]' : 'text-[#dc2626]'}`}>
-                            {t.fund_change >= 0 ? '+' : ''}{formatPrice(t.fund_change)}
+                          <span className={`font-bold text-[14px] ${displayChange >= 0 ? 'text-[#059669]' : 'text-[#dc2626]'}`}>
+                            {displayChange > 0 ? '+' : ''}{formatPrice(displayChange)}
                           </span>
                         </td>
                         <td className="px-6 py-3 text-[13px] text-on-surface-variant font-medium">

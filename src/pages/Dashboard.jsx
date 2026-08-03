@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { adminService } from '../services/adminService';
+import { fundService } from '../services/fundService';
 import DetailedAnalysisModal from '../components/DetailedAnalysis';
 import OrderAnalysisModal from '../components/OrderAnalysis';
 import { useAuth } from '../hooks/useAuth';
@@ -13,6 +14,18 @@ import AIAssistant from '../components/AIAssistant';
 
 // ─── Formatting helpers ───
 const formatCurrency = (n) => Math.round(n || 0).toLocaleString('vi-VN', { maximumFractionDigits: 0 }) + ' ₫';
+
+const formatCompactCurrency = (n) => {
+  if (!n) return '0 ₫';
+  const num = Math.abs(n);
+  if (num >= 1e9) {
+    return (n / 1e9).toFixed(1).replace(/\.0$/, '').replace('.', ',') + 'B ₫';
+  }
+  if (num >= 1e6) {
+    return (n / 1e6).toFixed(1).replace(/\.0$/, '').replace('.', ',') + 'M ₫';
+  }
+  return Math.round(n).toLocaleString('vi-VN') + ' ₫';
+};
 
 const GrowthBadge = ({ value }) => {
   if (value == null || value === 0) return null; // Don't show if 0 or null
@@ -33,11 +46,13 @@ export default function Dashboard() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState('this_month');
-  const [customDate, setCustomDate] = useState(new Date().toISOString().split('T')[0]);
+  const [customStartDate, setCustomStartDate] = useState(new Date().toISOString().split('T')[0]);
+  const [customEndDate, setCustomEndDate] = useState(new Date().toISOString().split('T')[0]);
   const [isExporting, setIsExporting] = useState(false);
   const [showAnalysis, setShowAnalysis] = useState(false);
   const [showOrderAnalysis, setShowOrderAnalysis] = useState(false);
   const [refreshingActivities, setRefreshingActivities] = useState(false);
+  const [fundSummary, setFundSummary] = useState(null);
 
   const getPeriodLabel = () => {
     if (filterType === 'today') return 'Hôm nay';
@@ -45,7 +60,7 @@ export default function Dashboard() {
     if (filterType === 'this_month') return 'Tháng này';
     if (filterType === 'last_month') return 'Tháng trước';
     if (filterType === 'this_year') return 'Năm nay';
-    if (filterType === 'custom') return `Ngày ${new Date(customDate || Date.now()).toLocaleDateString('vi-VN')}`;
+    if (filterType === 'custom') return `${new Date(customStartDate || Date.now()).toLocaleDateString('vi-VN')} - ${new Date(customEndDate || Date.now()).toLocaleDateString('vi-VN')}`;
     return 'Tùy chỉnh';
   };
 
@@ -80,18 +95,33 @@ export default function Dashboard() {
       const days = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24)) + 1;
       params = { days };
     } else if (filterType === 'custom') {
-      params = { days: 1, endDate: customDate };
+      const start = new Date(customStartDate);
+      const end = new Date(customEndDate);
+      if (start <= end) {
+        const diffTime = Math.abs(end - start);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        params = { days: diffDays, endDate: customEndDate };
+      } else {
+        params = { days: 1, endDate: customEndDate };
+      }
     }
 
     adminService.getDashboardStats(params)
       .then(res => setData(res.data.data))
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [filterType, customDate]);
+  }, [filterType, customStartDate, customEndDate]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // Fetch fund summary separately (not dependent on date filter)
+  useEffect(() => {
+    fundService.getSummary()
+      .then(res => setFundSummary(res.data.data))
+      .catch(console.error);
+  }, []);
 
   const handleRefreshActivities = () => {
     setRefreshingActivities(true);
@@ -143,13 +173,24 @@ export default function Dashboard() {
                 <option value="custom">Tuỳ chỉnh</option>
               </select>
               {filterType === 'custom' && (
-                <input
-                  type="date"
-                  value={customDate}
-                  onChange={e => setCustomDate(e.target.value)}
-                  max={new Date().toISOString().split('T')[0]}
-                  className="bg-transparent py-1.5 pr-3 text-[13px] font-semibold text-on-surface focus:outline-none border-l border-outline-variant/30 pl-3 ml-1"
-                />
+                <div className="flex items-center ml-2 border-l border-outline-variant/30 pl-2">
+                  <input
+                    type="date"
+                    value={customStartDate}
+                    onChange={e => setCustomStartDate(e.target.value)}
+                    max={customEndDate}
+                    className="bg-transparent py-2 px-1 text-[13px] font-semibold text-on-surface focus:outline-none cursor-pointer"
+                  />
+                  <span className="text-on-surface-variant text-[13px] font-bold mx-1">-</span>
+                  <input
+                    type="date"
+                    value={customEndDate}
+                    onChange={e => setCustomEndDate(e.target.value)}
+                    min={customStartDate}
+                    max={new Date().toISOString().split('T')[0]}
+                    className="bg-transparent py-2 px-1 text-[13px] font-semibold text-on-surface focus:outline-none cursor-pointer"
+                  />
+                </div>
               )}
             </div>
             <button
@@ -201,73 +242,107 @@ export default function Dashboard() {
           periodLabel={getPeriodLabel()}
         />
 
-        {/* 4 Stat Cards - 1 row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-md mb-lg">
-          {/* Doanh thu */}
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-outline-variant/30 flex flex-col justify-between">
-            <div className="flex justify-between items-start mb-4">
-              <div className="w-10 h-10 rounded-xl bg-primary-container text-primary flex items-center justify-center">
-                <span className="material-symbols-outlined">payments</span>
+        {/* Stat Cards: 1 large left + 2x2 right */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-md mb-lg">
+          {/* LEFT: Tổng tài sản chung - large card */}
+          <div className="lg:col-span-1 bg-gradient-to-br from-[#1e3a5f] to-[#2563eb] rounded-2xl p-6 shadow-sm flex flex-col justify-between relative overflow-hidden">
+            <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/5" />
+            <div className="absolute -right-4 -bottom-10 w-56 h-56 rounded-full bg-white/5" />
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-white text-[20px]">account_balance_wallet</span>
+                </div>
+                <p className="text-white/80 text-[13px] font-bold uppercase tracking-wider">Tổng tài sản chung</p>
               </div>
-              {!loading && <GrowthBadge value={data?.revenueGrowth} />}
+              <h2 className="text-[32px] font-black text-white mt-2 leading-tight">
+                {fundSummary == null
+                  ? <div className="h-9 w-44 bg-white/20 rounded animate-pulse" />
+                  : formatCurrency(fundSummary.totalFundBalance)}
+              </h2>
+              <p className="text-white/60 text-[12px] mt-1">Số dư quỹ hiện tại</p>
             </div>
-            <div>
-              <p className="text-[12px] font-bold text-on-surface-variant uppercase tracking-wider mb-1">Tổng Doanh Thu</p>
-              <h3 className="text-[24px] font-black text-on-surface">
-                {loading ? <div className="h-8 w-32 bg-surface-container rounded animate-pulse" /> : formatCurrency(data?.totalRevenue)}
-              </h3>
+            <div className="relative z-10 mt-6 pt-4 border-t border-white/20">
+              <p className="text-white/70 text-[12px] font-semibold mb-2">Doanh thu chưa rút</p>
+              <div className="grid grid-cols-3 gap-2">
+                {fundSummary?.platformBalances?.map(p => (
+                  <div key={p.platform} className="bg-white/10 rounded-lg px-3 py-2">
+                    <p className="text-white/60 text-[10px] font-bold capitalize">{p.platform}</p>
+                    <p className="text-white text-[13px] font-bold">{formatCompactCurrency(p.availableBalance)}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Đơn hàng mới */}
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-outline-variant/30 flex flex-col justify-between">
-            <div className="flex justify-between items-start mb-4">
-              <div className="w-10 h-10 rounded-xl bg-secondary-container text-secondary flex items-center justify-center">
-                <span className="material-symbols-outlined">shopping_bag</span>
+          {/* RIGHT: 2x2 stat cards */}
+          <div className="lg:col-span-2 grid grid-cols-2 gap-md">
+            {/* Doanh thu */}
+            <div className="bg-white rounded-2xl p-5 shadow-sm border border-outline-variant/30 flex flex-col justify-between">
+              <div className="flex justify-between items-start mb-4">
+                <div className="w-10 h-10 rounded-xl bg-primary-container text-primary flex items-center justify-center">
+                  <span className="material-symbols-outlined">payments</span>
+                </div>
+                {!loading && <GrowthBadge value={data?.revenueGrowth} />}
               </div>
-              {!loading && <GrowthBadge value={data?.ordersGrowth} />}
+              <div>
+                <p className="text-[12px] font-bold text-on-surface-variant uppercase tracking-wider mb-1">Tổng Doanh Thu</p>
+                <h3 className="text-[22px] font-black text-on-surface">
+                  {loading ? <div className="h-7 w-28 bg-surface-container rounded animate-pulse" /> : formatCurrency(data?.totalRevenue)}
+                </h3>
+              </div>
             </div>
-            <div>
-              <p className="text-[12px] font-bold text-on-surface-variant uppercase tracking-wider mb-1">Số đơn hàng mới</p>
-              <h3 className="text-[24px] font-black text-on-surface">
-                {loading ? <div className="h-8 w-20 bg-surface-container rounded animate-pulse" /> : `${data?.newOrders} đơn`}
-              </h3>
-            </div>
-          </div>
 
-          {/* Đơn hàng bị hoàn */}
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-outline-variant/30 flex flex-col justify-between">
-            <div className="flex justify-between items-start mb-4">
-              <div className="w-10 h-10 rounded-xl bg-[#fef3c7] text-[#d97706] flex items-center justify-center">
-                <span className="material-symbols-outlined">assignment_return</span>
+            {/* Số đơn hàng */}
+            <div className="bg-white rounded-2xl p-5 shadow-sm border border-outline-variant/30 flex flex-col justify-between">
+              <div className="flex justify-between items-start mb-4">
+                <div className="w-10 h-10 rounded-xl bg-secondary-container text-secondary flex items-center justify-center">
+                  <span className="material-symbols-outlined">shopping_bag</span>
+                </div>
+                {!loading && <GrowthBadge value={data?.ordersGrowth} />}
+              </div>
+              <div>
+                <p className="text-[12px] font-bold text-on-surface-variant uppercase tracking-wider mb-1">Số đơn hàng mới</p>
+                <h3 className="text-[22px] font-black text-on-surface">
+                  {loading ? <div className="h-7 w-16 bg-surface-container rounded animate-pulse" /> : `${data?.newOrders} đơn`}
+                </h3>
               </div>
             </div>
-            <div>
-              <p className="text-[12px] font-bold text-on-surface-variant uppercase tracking-wider mb-1">Đơn bị hoàn</p>
-              <h3 className="text-[24px] font-black text-[#d97706]">
-                {loading ? <div className="h-8 w-20 bg-surface-container rounded animate-pulse" /> : `${data?.returnedOrders || 0} đơn`}
-              </h3>
-              {!loading && (
-                <p className="text-[12px] font-bold text-on-surface-variant mt-1">
-                  Tỉ lệ: {data?.returnRate || 0}% · Phí: {formatCurrency(data?.returnCost || 0)}
-                </p>
-              )}
-            </div>
-          </div>
 
-          {/* Lợi nhuận thực tế */}
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-outline-variant/30 flex flex-col justify-between">
-            <div className="flex justify-between items-start mb-4">
-              <div className="w-10 h-10 rounded-xl bg-secondary-container text-secondary flex items-center justify-center">
-                <span className="material-symbols-outlined">savings</span>
+            {/* Đơn bị hoàn */}
+            <div className="bg-white rounded-2xl p-5 shadow-sm border border-outline-variant/30 flex flex-col justify-between">
+              <div className="flex justify-between items-start mb-4">
+                <div className="w-10 h-10 rounded-xl bg-[#fef3c7] text-[#d97706] flex items-center justify-center">
+                  <span className="material-symbols-outlined">assignment_return</span>
+                </div>
               </div>
-              {!loading && <GrowthBadge value={data?.realProfitGrowth} />}
+              <div>
+                <p className="text-[12px] font-bold text-on-surface-variant uppercase tracking-wider mb-1">Đơn bị hoàn</p>
+                <h3 className="text-[22px] font-black text-[#d97706]">
+                  {loading ? <div className="h-7 w-16 bg-surface-container rounded animate-pulse" /> : `${data?.returnedOrders || 0} đơn`}
+                </h3>
+                {!loading && (
+                  <p className="text-[11px] font-bold text-on-surface-variant mt-1">
+                    Tỉ lệ: {data?.returnRate || 0}% · Phí: {formatCurrency(data?.returnCost || 0)}
+                  </p>
+                )}
+              </div>
             </div>
-            <div>
-              <p className="text-[12px] font-bold text-on-surface-variant uppercase tracking-wider mb-1">Lợi nhuận thực tế</p>
-              <h3 className="text-[24px] font-black text-on-surface" style={{ color: data?.realProfit < 0 ? '#dc2626' : undefined }}>
-                {loading ? <div className="h-8 w-32 bg-surface-container rounded animate-pulse" /> : formatCurrency(data?.realProfit)}
-              </h3>
+
+            {/* Lợi nhuận thực tế */}
+            <div className="bg-white rounded-2xl p-5 shadow-sm border border-outline-variant/30 flex flex-col justify-between">
+              <div className="flex justify-between items-start mb-4">
+                <div className="w-10 h-10 rounded-xl bg-secondary-container text-secondary flex items-center justify-center">
+                  <span className="material-symbols-outlined">savings</span>
+                </div>
+                {!loading && <GrowthBadge value={data?.realProfitGrowth} />}
+              </div>
+              <div>
+                <p className="text-[12px] font-bold text-on-surface-variant uppercase tracking-wider mb-1">Lợi nhuận thực tế</p>
+                <h3 className="text-[22px] font-black" style={{ color: data?.realProfit < 0 ? '#dc2626' : '#059669' }}>
+                  {loading ? <div className="h-7 w-28 bg-surface-container rounded animate-pulse" /> : formatCurrency(data?.realProfit)}
+                </h3>
+              </div>
             </div>
           </div>
         </div>

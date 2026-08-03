@@ -120,14 +120,18 @@ export default function Header({ onMenuClick }) {
                     lowStockMaterials.map(m => (
                       <div key={m._id} className="px-4 py-3 border-b border-outline-variant/20 hover:bg-surface-container-low transition-colors cursor-pointer" onClick={() => { setShowNotifications(false); navigate('/imports', { state: { autoOpenImport: true, materialId: m._id } }); }}>
                         <div className="flex gap-3 items-start">
-                          <div className={`w-8 h-8 mt-0.5 rounded-full flex items-center justify-center flex-shrink-0 ${m.status === 'out_of_stock' || m.actualStock === 0 ? 'bg-error-container text-error' : 'bg-[#fef3c7] text-[#d97706]'}`}>
+                          <div className={`w-8 h-8 mt-0.5 rounded-full flex items-center justify-center flex-shrink-0 ${m.status === 'out_of_stock' || m.actualStock <= 0 ? 'bg-error-container text-error' : 'bg-[#fef3c7] text-[#d97706]'}`}>
                             <span className="material-symbols-outlined text-[20px]">
-                              {m.status === 'out_of_stock' || m.actualStock === 0 ? 'remove_shopping_cart' : 'warning'}
+                              {m.status === 'out_of_stock' || m.actualStock <= 0 ? 'error' : 'warning'}
                             </span>
                           </div>
                           <div>
                             <p className="text-[13px] font-semibold text-on-surface leading-tight mb-1">{m.name}</p>
-                            <p className="text-[12px] text-on-surface-variant">Tồn kho: <span className={`font-bold ${m.status === 'out_of_stock' || m.actualStock === 0 ? 'text-error' : 'text-[#d97706]'}`}>{m.actualStock} {m.unit}</span> (Tối thiểu: {m.minStock})</p>
+                            <p className="text-[12px] text-on-surface-variant">
+                              Tồn kho: <span className={`font-bold ${m.status === 'out_of_stock' || m.actualStock <= 0 ? 'text-error' : 'text-[#d97706]'}`}>
+                                {m.actualStock < 0 ? `Âm kho (${m.actualStock} ${m.unit})` : `${m.actualStock} ${m.unit}`}
+                              </span> (Tối thiểu: {m.minStock})
+                            </p>
                           </div>
                         </div>
                       </div>

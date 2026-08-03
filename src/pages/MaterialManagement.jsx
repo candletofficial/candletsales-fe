@@ -9,6 +9,7 @@ const STATUS_MAP = {
   in_stock: { label: 'Còn hàng', className: 'bg-primary-container text-on-primary-container' },
   low_stock: { label: 'Sắp hết', className: 'bg-error-container text-on-error-container' },
   out_of_stock: { label: 'Hết hàng', className: 'bg-surface-container-highest text-on-surface-variant' },
+  negative_stock: { label: 'Âm kho', className: 'bg-error text-white font-bold' },
 };
 
 const UNIT_ICON_MAP = {
@@ -465,7 +466,9 @@ export default function MaterialManagement() {
                   </tr>
                 ) : (
                   currentMaterials.map((m) => {
-                    const statusInfo = STATUS_MAP[m.status] || STATUS_MAP.in_stock;
+                    const actualStock = m.actualStock !== null && m.actualStock !== undefined ? m.actualStock : m.stock;
+                    const mStatus = actualStock < 0 ? 'negative_stock' : m.status;
+                    const statusInfo = STATUS_MAP[mStatus] || STATUS_MAP.in_stock;
                     return (
                       <tr key={m._id} onClick={() => setModal({ type: 'edit', data: m })} className="hover:bg-surface-container-lowest transition-colors group cursor-pointer">
                         <td className="px-lg py-md">

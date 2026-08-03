@@ -59,9 +59,9 @@ function TopupModal({ platform, onClose, onSuccess, user }) {
     if (!amount || amount <= 0) return setError('Số tiền nạp phải lớn hơn 0');
     if (!isFbOrIg && !fundingSource) return setError('Vui lòng chọn nguồn tiền nạp');
     setError(''); setLoading(true);
-    
+
     const feeAmount = (Number(amount) * Number(vatPct)) / 100;
-    
+
     try {
       await adCostService.topupPlatform({
         platform,
@@ -91,7 +91,7 @@ function TopupModal({ platform, onClose, onSuccess, user }) {
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {error && <div className="p-3 bg-error-container text-error rounded-lg text-sm">{error}</div>}
-          
+
           <div className="flex gap-4">
             <div className="flex-1">
               <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Số tiền nạp (VNĐ) *</label>
@@ -125,10 +125,10 @@ function TopupModal({ platform, onClose, onSuccess, user }) {
               )}
             </div>
           </div>
-          
+
           {totalDeduct > 0 && (
             <div className="bg-error-container/30 px-4 py-3 rounded-lg border border-error/20 flex justify-between items-center">
-              <span className="text-[13px] font-bold text-error">Sẽ trừ {(isFbOrIg || fundingSource === 'common') ? `Tài khoản chung (${fundSummary ? formatPrice(fundSummary.totalFundBalance || 0) : '...'})` : (fundingSource === 'platform' ? `Tài khoản ${platInfo.label} (${fundSummary ? formatPrice(fundSummary.platformBalances?.find(p => p.platform === platform)?.availableBalance || 0) : '...'})` : '...') } (Gốc + VAT):</span>
+              <span className="text-[13px] font-bold text-error">Sẽ trừ {(isFbOrIg || fundingSource === 'common') ? `Tài khoản chung (${fundSummary ? formatPrice(fundSummary.totalFundBalance || 0) : '...'})` : (fundingSource === 'platform' ? `Tài khoản ${platInfo.label} (${fundSummary ? formatPrice(fundSummary.platformBalances?.find(p => p.platform === platform)?.availableBalance || 0) : '...'})` : '...')} (Gốc + VAT):</span>
               <span className="text-[16px] font-bold text-error">{formatPrice(totalDeduct)}</span>
             </div>
           )}
@@ -162,7 +162,7 @@ function AdCostModal({ record, defaultDate, onClose, onSave, onDelete }) {
 
   const isOldRecord = record && record.base_amount == null;
   const initialVat = isOldRecord ? getVatForPlatform(record.platform) : (record?.vat ?? getVatForPlatform(record?.platform || 'shopee'));
-  
+
   let initialBaseAmount = record?.base_amount ?? '';
   if (isOldRecord && record?.amount) {
     initialBaseAmount = Number((record.amount / (1 + initialVat / 100)).toFixed(2));
@@ -191,13 +191,13 @@ function AdCostModal({ record, defaultDate, onClose, onSave, onDelete }) {
     if (!baseAmount || Number(baseAmount) < 0) { setError('Vui lòng nhập chi phí hợp lệ'); return; }
     setError(''); setLoading(true);
     try {
-      const payload = { 
-        date: new Date(date), 
-        platform, 
+      const payload = {
+        date: new Date(date),
+        platform,
         base_amount: Number(baseAmount),
         vat: Number(vat),
-        amount: amount, 
-        note 
+        amount: amount,
+        note
       };
       if (isEdit) await adCostService.updateAdCost(record._id, payload);
       else await adCostService.createAdCost(payload);
@@ -387,9 +387,9 @@ export default function AdCostManagement() {
       setRecords(res.data.data);
       setBalances(balRes.data.data);
       setAffiliateFees(affRes.data.data);
-    } catch (error) { 
+    } catch (error) {
       console.error('fetchRecords error:', error);
-      showToast('Không thể tải dữ liệu', 'error'); 
+      showToast('Không thể tải dữ liệu', 'error');
     }
     finally { setLoading(false); }
   }, [viewYear, viewMonth]);
@@ -398,7 +398,7 @@ export default function AdCostManagement() {
     try {
       const balRes = await adCostService.getBalances();
       setBalances(balRes.data.data);
-    } catch {}
+    } catch { }
   };
 
   useEffect(() => { fetchRecords(); }, [fetchRecords]);
@@ -523,7 +523,7 @@ export default function AdCostManagement() {
             <p className="text-on-surface-variant mt-1 text-[14px]">Theo dõi chi phí quảng cáo và số dư từng nền tảng</p>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={() => setAffiliateModal(true)}
+            <button style={{ display: 'none' }} onClick={() => setAffiliateModal(true)}
               className="flex items-center gap-xs px-lg py-sm bg-[#ffedd5] text-[#d97706] rounded-lg hover:opacity-90 shadow-sm font-semibold text-sm">
               <span className="material-symbols-outlined text-[20px]">monetization_on</span>
               <span>Phí Affiliate</span>
@@ -556,7 +556,7 @@ export default function AdCostManagement() {
             );
           })}
         </div>
-        
+
         {topupPlatform && (
           <TopupModal platform={topupPlatform} user={user} onClose={() => setTopupPlatform(null)} onSuccess={() => { setTopupPlatform(null); showToast('Nạp tiền thành công'); fetchBalancesOnly(); }} />
         )}
