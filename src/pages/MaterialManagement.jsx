@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { materialService } from '../services/materialService';
+import { inventoryCheckService } from '../services/inventoryCheckService';
+import { inventorySyncService } from '../services/inventorySyncService';
 import { formatPrice } from '../utils/formatPrice';
 
 // ── Helpers ────────────────────────────────────────────────────────
@@ -27,11 +29,12 @@ const UNIT_ICON_MAP = {
   'Túi': 'shopping_bag',
 };
 
-const EMPTY_FORM = { name: '', sku: '', unit: '', price: '', supplier: '', stock: '', minStock: '10' };
+const EMPTY_FORM = { name: '', sku: '', category: '', unit: '', price: '', supplier: '', stock: '', minStock: '10' };
 
 // ── Modal Thêm/Sửa ────────────────────────────────────────────────
-function MaterialModal({ material, onClose, onSave, onDelete }) {
-  const [form, setForm] = useState(material ? { ...material, price: material.price, stock: material.stock, minStock: material.minStock || 10 } : { ...EMPTY_FORM });
+function MaterialModal({ material, categories, onClose, onSave, onDelete, onCategoryDeleted }) {
+  const [form, setForm] = useState(material ? { ...material, price: material.price, stock: material.stock, minStock: material.minStock || 10, category: material.category || '' } : { ...EMPTY_FORM });
+  const [isNewCategory, setIsNewCategory] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const isEdit = !!material;
@@ -54,6 +57,20 @@ function MaterialModal({ material, onClose, onSave, onDelete }) {
       setError(err.response?.data?.message || 'Có lỗi xảy ra');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteCategory = async () => {
+    if (!form.category || !categories.includes(form.category)) return;
+
+    if (window.confirm(`Xác nhận xóa phân loại "${form.category}" khỏi toàn bộ hệ thống?\nLưu ý: Các nguyên vật liệu đang dùng phân loại này sẽ bị trống mục Phân loại.`)) {
+      try {
+        await materialService.deleteCategory(form.category);
+        setForm(f => ({ ...f, category: '' }));
+        if (onCategoryDeleted) onCategoryDeleted();
+      } catch (err) {
+        setError(err.response?.data?.message || 'Có lỗi xảy ra khi xóa phân loại');
+      }
     }
   };
 
@@ -92,6 +109,64 @@ function MaterialModal({ material, onClose, onSave, onDelete }) {
 
             {/* Row 2 */}
             <div>
+              <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Phân loại</label>
+              {isNewCategory ? (
+                <div className="flex gap-2">
+                  <input name="category" value={form.category} onChange={handleChange} autoFocus
+                    className="flex-1 border border-outline-variant rounded-lg px-4 py-2.5 text-[15px] text-on-surface placeholder-on-surface-variant/50 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary min-w-0"
+                    placeholder="Nhập tên phân loại..." />
+                  <button type="button" onClick={() => { setIsNewCategory(false); setForm(f => ({ ...f, category: '' })); }}
+                    className="px-4 py-2 bg-surface-container hover:bg-surface-container-high rounded-lg text-[14px] font-semibold text-on-surface-variant transition-colors whitespace-nowrap">
+                    Hủy
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <select name="category" value={form.category}
+                      onChange={(e) => {
+                        if (e.target.value === '___NEW___') {
+                          setIsNewCategory(true);
+                          setForm(f => ({ ...f, category: '' }));
+                        } else {
+                          handleChange(e);
+                        }
+                      }}
+                      className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-[15px] text-on-surface bg-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary appearance-none truncate">
+                      <option value="" disabled hidden>Chọn phân loại</option>
+                      {categories?.map((cat) => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                      <option value="___NEW___" className="font-bold text-primary">
+                        + Thêm phân loại mới...
+                      </option>
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                    </div>
+                  </div>
+                  {form.category && categories.includes(form.category) && (
+                    <button type="button" onClick={handleDeleteCategory}
+                      className="px-3 border border-error/30 text-error hover:bg-error-container hover:border-error rounded-lg transition-colors flex items-center justify-center"
+                      title="Xóa phân loại này">
+                      <span className="material-symbols-outlined text-[20px]">delete</span>
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Nhà cung cấp</label>
+              <input name="supplier" value={form.supplier} onChange={handleChange} required
+                className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-[15px] text-on-surface placeholder-on-surface-variant/50 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                placeholder="Nhập tên nhà cung cấp" />
+            </div>
+
+            {/* Row 3 */}
+            <div>
               <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Đơn vị tính</label>
               <div className="relative">
                 <select name="unit" value={form.unit} onChange={handleChange} required
@@ -117,6 +192,7 @@ function MaterialModal({ material, onClose, onSave, onDelete }) {
                 </div>
               </div>
             </div>
+
             <div>
               <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Đơn giá nhập</label>
               <div className="relative">
@@ -127,14 +203,6 @@ function MaterialModal({ material, onClose, onSave, onDelete }) {
               </div>
             </div>
 
-            {/* Row 3 */}
-            <div className="col-span-2">
-              <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Nhà cung cấp</label>
-              <input name="supplier" value={form.supplier} onChange={handleChange} required
-                className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-[15px] text-on-surface placeholder-on-surface-variant/50 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                placeholder="Nhập tên nhà cung cấp" />
-            </div>
-
             {/* Row 4 */}
             <div>
               <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Số lượng tồn ban đầu</label>
@@ -142,6 +210,7 @@ function MaterialModal({ material, onClose, onSave, onDelete }) {
                 className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-[15px] text-on-surface placeholder-on-surface-variant/50 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 placeholder="0" />
             </div>
+
             <div>
               <label className="block text-[13px] font-bold text-on-surface-variant mb-2">Mức nhắc tồn (Tối thiểu)</label>
               <input name="minStock" type="number" step="any" value={form.minStock} onChange={handleChange} required min="0"
@@ -213,12 +282,181 @@ function DeleteModal({ material, onClose, onConfirm, loading, error }) {
   );
 }
 
+// ── Modal Xác nhận Cân bằng kho ───────────────────────────────────
+function SyncConfirmModal({ onClose, onConfirm, loading }) {
+  return (
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[400px] p-6 flex flex-col items-center text-center">
+        <div className="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center mb-4">
+          <span className="material-symbols-outlined text-primary">balance</span>
+        </div>
+        <h3 className="text-[17px] font-bold text-on-surface mb-1">Xác nhận cân bằng kho</h3>
+        <p className="text-sm text-on-surface-variant mb-6">
+          Bạn có chắc muốn cân bằng kho? Tồn kho hệ thống sẽ được cập nhật bằng với tồn kho thực tế của <span className="font-semibold text-on-surface">tất cả</span> các nguyên liệu đang bị lệch.
+        </p>
+
+        <div className="flex justify-center gap-3 w-full mt-2">
+          <button onClick={onClose}
+            className="px-5 py-2 rounded-lg border border-outline-variant text-on-surface-variant text-sm font-semibold hover:bg-surface-container">
+            Hủy
+          </button>
+          <button onClick={onConfirm} disabled={loading}
+            className="px-5 py-2 rounded-lg bg-primary text-white text-sm font-semibold hover:opacity-90 disabled:opacity-50 flex items-center gap-2">
+            {loading && <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+            Xác nhận
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Modal Lịch sử kiểm kho ─────────────────────────────────────────
+function InventoryHistoryModal({ onClose }) {
+  const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [expandedItems, setExpandedItems] = useState({});
+
+  const toggleExpand = (id) => {
+    setExpandedItems(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  useEffect(() => {
+    inventorySyncService.getSyncHistory()
+      .then(res => setHistory(res))
+      .catch(err => setError(err.message || 'Lỗi khi tải lịch sử'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const totalDiscrepancyHistory = history.reduce((sum, ticket) => sum + (ticket.total_discrepancy_value || 0), 0);
+
+  return (
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[800px] flex flex-col max-h-[90vh]">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-outline-variant/30 flex-shrink-0">
+          <div>
+            <h3 className="text-[20px] font-bold text-on-surface">Lịch sử cân bằng kho</h3>
+            <p className="text-[13px] text-on-surface-variant mt-1">Danh sách các lần điều chỉnh tồn kho do sai lệch</p>
+          </div>
+          <button onClick={onClose} className="text-on-surface-variant hover:bg-surface-container p-1 rounded-md transition-colors">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div className="p-6 overflow-y-auto bg-surface-container-lowest">
+          {!loading && !error && (
+            <div className="mb-6 bg-primary-container/30 border border-primary/20 rounded-xl p-4 flex items-center justify-between">
+              <div>
+                <p className="text-sm text-on-surface-variant font-medium">Tổng giá trị đã lệch (từ trước đến nay)</p>
+                <p className="text-xs text-on-surface-variant mt-1">Tính dựa trên đơn giá tại thời điểm cân bằng</p>
+              </div>
+              <div className={`text-[24px] font-bold ${totalDiscrepancyHistory > 0 ? 'text-[#059669]' : totalDiscrepancyHistory < 0 ? 'text-error' : 'text-on-surface'}`}>
+                {totalDiscrepancyHistory > 0 ? '+' : ''}{formatPrice(totalDiscrepancyHistory)}
+              </div>
+            </div>
+          )}
+
+          {loading ? (
+            <div className="flex justify-center items-center py-12">
+              <span className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></span>
+            </div>
+          ) : error ? (
+            <div className="text-center py-8 text-error">{error}</div>
+          ) : history.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-surface-container rounded-full flex items-center justify-center mx-auto mb-3">
+                <span className="material-symbols-outlined text-[32px] text-on-surface-variant">history</span>
+              </div>
+              <p className="text-on-surface-variant font-medium">Chưa có lịch sử kiểm kho nào</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {history.map((ticket) => {
+                const ticketTotalDiff = ticket.total_discrepancy_value || 0;
+                return (
+                  <div key={ticket._id} className="bg-white border border-outline-variant/50 rounded-xl p-4 shadow-sm">
+                    <div className="flex justify-between items-start mb-4 pb-3 border-b border-outline-variant/30">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-bold text-on-surface text-[15px]">{ticket.code}</span>
+                          <span className="px-2 py-0.5 bg-surface-container text-on-surface-variant text-[11px] font-bold rounded">
+                            {new Date(ticket.createdAt).toLocaleString('vi-VN')}
+                          </span>
+                        </div>
+                        <p className="text-[13px] text-on-surface-variant">Người thực hiện: <span className="font-semibold">{ticket.synced_by || 'Admin'}</span></p>
+                        {ticket.note && <p className="text-[13px] text-on-surface-variant mt-1">Ghi chú: {ticket.note}</p>}
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[12px] text-on-surface-variant mb-0.5">Giá trị lệch</p>
+                        <p className={`font-bold text-[16px] ${ticketTotalDiff > 0 ? 'text-[#059669]' : ticketTotalDiff < 0 ? 'text-error' : 'text-on-surface'}`}>
+                          {ticketTotalDiff > 0 ? '+' : ''}{formatPrice(ticketTotalDiff)}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 mt-3">
+                      <button
+                        onClick={() => toggleExpand(ticket._id)}
+                        className="flex items-center gap-1 w-full text-left outline-none group"
+                      >
+                        <p className="text-[12px] font-bold text-on-surface-variant group-hover:text-primary transition-colors">
+                          CHI TIẾT ({ticket.items.length} hạng mục)
+                        </p>
+                        <span className={`material-symbols-outlined text-[16px] text-on-surface-variant group-hover:text-primary transition-transform duration-200 ${expandedItems[ticket._id] ? 'rotate-180' : ''}`}>
+                          expand_more
+                        </span>
+                      </button>
+
+                      {expandedItems[ticket._id] && (
+                        <div className="bg-surface-container-lowest rounded-lg border border-outline-variant/30 overflow-hidden animate-[fadeIn_0.2s_ease]">
+                          <table className="w-full text-left">
+                            <thead className="bg-surface-container-low/50">
+                              <tr>
+                                <th className="px-3 py-2 text-[11px] font-semibold text-on-surface-variant">SKU</th>
+                                <th className="px-3 py-2 text-[11px] font-semibold text-on-surface-variant">Tên nguyên liệu</th>
+                                <th className="px-3 py-2 text-[11px] font-semibold text-on-surface-variant text-right">Lệch</th>
+                                <th className="px-3 py-2 text-[11px] font-semibold text-on-surface-variant text-right">Đơn giá</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-outline-variant/20">
+                              {ticket.items.map((item, idx) => (
+                                <tr key={idx}>
+                                  <td className="px-3 py-2 text-[12px] text-on-surface-variant">{item.material_id?.sku || 'N/A'}</td>
+                                  <td className="px-3 py-2 text-[12px] font-medium text-on-surface">{item.material_id?.name || 'N/A'}</td>
+                                  <td className={`px-3 py-2 text-[12px] font-bold text-right ${item.difference > 0 ? 'text-[#059669]' : item.difference < 0 ? 'text-error' : ''}`}>
+                                    {item.difference > 0 ? '+' : ''}{item.difference}
+                                  </td>
+                                  <td className="px-3 py-2 text-[12px] text-on-surface-variant text-right">{formatPrice(item.price)}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Component chính ───────────────────────────────────────────────
 export default function MaterialManagement() {
   const [materials, setMaterials] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [modal, setModal] = useState(null); // null | { type: 'add' | 'edit' | 'delete', data?: {} }
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState('');
@@ -238,6 +476,63 @@ export default function MaterialManagement() {
       .catch(() => showToast('Không thể tải dữ liệu nguyên liệu', 'error'))
       .finally(() => setLoading(false));
   }, []);
+
+  const exportToExcel = () => {
+    // Dùng BOM để Excel nhận diện được UTF-8
+    const bom = '\uFEFF';
+
+    // Header CSV
+    const headers = ['Mã SKU', 'Tên nguyên liệu', 'Phân loại', 'Đơn vị', 'Đơn giá nhập', 'Nhà cung cấp', 'Tồn kho', 'Trạng thái'];
+
+    // Rows
+    const rows = filtered.map(m => {
+      const actualStock = m.actualStock !== null && m.actualStock !== undefined ? m.actualStock : m.stock;
+      const mStatus = actualStock < 0 ? 'negative_stock' : m.status;
+      const statusLabel = STATUS_MAP[mStatus]?.label || 'Không xác định';
+
+      return [
+        m.sku || '',
+        `"${m.name?.replace(/"/g, '""') || ''}"`,
+        `"${m.category || ''}"`,
+        m.unit || '',
+        m.price || 0,
+        `"${m.supplier?.replace(/"/g, '""') || ''}"`,
+        actualStock || 0,
+        statusLabel
+      ].join(',');
+    });
+
+    const csvContent = bom + [headers.join(','), ...rows].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `Nguyen_Vat_Lieu_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    showToast('Đã xuất file Excel');
+  };
+
+  const handleSyncInventoryClick = () => {
+    setModal({ type: 'sync' });
+  };
+
+  const confirmSyncInventory = async () => {
+    setActionLoading(true);
+    try {
+      await inventorySyncService.syncInventory({ checked_by: 'Admin' });
+      showToast('Đã cân bằng kho thành công');
+      fetchMaterials();
+      setModal(null);
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Lỗi khi cân bằng kho', 'error');
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
   useEffect(() => { fetchMaterials(); }, [fetchMaterials]);
 
@@ -289,6 +584,10 @@ export default function MaterialManagement() {
       if (!matchName && !matchSku) return false;
     }
 
+    if (selectedCategory !== 'all' && m.category !== selectedCategory) {
+      return false;
+    }
+
     return true;
   });
 
@@ -297,6 +596,8 @@ export default function MaterialManagement() {
     { key: 'in_stock', label: 'Còn hàng' },
     { key: 'low_stock', label: 'Sắp hết' },
   ];
+
+  const uniqueCategories = [...new Set(materials.map(m => m.category).filter(Boolean))];
 
   const ITEMS_PER_PAGE = 25;
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
@@ -314,13 +615,19 @@ export default function MaterialManagement() {
 
       {/* Modals */}
       {modal?.type === 'add' && (
-        <MaterialModal onClose={() => { setModal(null); setActionError(''); }} onSave={handleSave} />
+        <MaterialModal categories={uniqueCategories} onClose={() => { setModal(null); setActionError(''); }} onSave={handleSave} onCategoryDeleted={fetchMaterials} />
       )}
       {modal?.type === 'edit' && (
-        <MaterialModal material={modal.data} onClose={() => { setModal(null); setActionError(''); }} onSave={handleSave} onDelete={() => { setModal({ type: 'delete', data: modal.data }); setActionError(''); }} />
+        <MaterialModal material={modal.data} categories={uniqueCategories} onClose={() => { setModal(null); setActionError(''); }} onSave={handleSave} onDelete={() => { setModal({ type: 'delete', data: modal.data }); setActionError(''); }} onCategoryDeleted={fetchMaterials} />
       )}
       {modal?.type === 'delete' && (
         <DeleteModal material={modal.data} onClose={() => { setModal(null); setActionError(''); }} onConfirm={handleDelete} loading={actionLoading} error={actionError} />
+      )}
+      {modal?.type === 'sync' && (
+        <SyncConfirmModal onClose={() => setModal(null)} onConfirm={confirmSyncInventory} loading={actionLoading} />
+      )}
+      {showHistoryModal && (
+        <InventoryHistoryModal onClose={() => setShowHistoryModal(false)} />
       )}
 
       <div>
@@ -329,12 +636,26 @@ export default function MaterialManagement() {
           <div>
             <h2 className="text-[24px] font-bold text-on-surface">Danh sách Nguyên vật liệu</h2>
           </div>
-          <button
-            onClick={() => setModal({ type: 'add' })}
-            className="flex items-center gap-xs px-lg py-sm bg-primary text-white rounded-lg hover:opacity-90 transition-all shadow-sm font-semibold text-sm">
-            <span className="material-symbols-outlined text-[20px]">add</span>
-            <span>Tạo mới nguyên liệu</span>
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setShowHistoryModal(true)}
+              className="flex items-center gap-xs px-lg py-sm bg-surface-container text-on-surface rounded-lg hover:bg-surface-container-high transition-all shadow-sm font-semibold text-sm">
+              <span className="material-symbols-outlined text-[20px]">history</span>
+              <span>Lịch sử cân bằng</span>
+            </button>
+            <button
+              onClick={exportToExcel}
+              className="flex items-center gap-xs px-lg py-sm bg-surface-container-high text-on-surface rounded-lg hover:bg-surface-container-highest transition-all shadow-sm font-semibold text-sm">
+              <span className="material-symbols-outlined text-[20px]">download</span>
+              <span>Xuất Excel</span>
+            </button>
+            <button
+              onClick={() => setModal({ type: 'add' })}
+              className="flex items-center gap-xs px-lg py-sm bg-primary text-white rounded-lg hover:opacity-90 transition-all shadow-sm font-semibold text-sm">
+              <span className="material-symbols-outlined text-[20px]">add</span>
+              <span>Tạo mới nguyên liệu</span>
+            </button>
+          </div>
         </div>
 
         {/* Stats Cards */}
@@ -383,27 +704,38 @@ export default function MaterialManagement() {
             </div>
           </div>
 
-          <div className="col-span-12 md:col-span-3 bg-white p-lg rounded-xl shadow-sm border border-outline-variant/30 flex items-center justify-between">
-            <div>
-              <p className="text-on-surface-variant text-sm mb-xs">Giá trị lệch kho</p>
-              <h3 className={`text-[24px] font-bold leading-none ${stats.discrepancyValue > 0 ? 'text-[#059669]' :
-                stats.discrepancyValue < 0 ? 'text-error' :
-                  'text-on-surface-variant'
+          <div className="col-span-12 md:col-span-3 bg-white p-lg rounded-xl shadow-sm border border-outline-variant/30 flex flex-col justify-between">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-on-surface-variant text-sm mb-xs">Giá trị lệch kho</p>
+                <h3 className={`text-[24px] font-bold leading-none ${stats.discrepancyValue > 0 ? 'text-[#059669]' :
+                  stats.discrepancyValue < 0 ? 'text-error' :
+                    'text-on-surface-variant'
+                  }`}>
+                  {loading
+                    ? <span className="inline-block w-24 h-8 bg-surface-container-high rounded animate-pulse" />
+                    : `${stats.discrepancyValue >= 0 && stats.discrepancyValue !== 0 ? '+' : ''}${formatPrice(stats.discrepancyValue)}`}
+                </h3>
+              </div>
+              <div className={`w-12 h-12 flex-shrink-0 rounded-full flex items-center justify-center ${stats.discrepancyValue > 0 ? 'bg-[#d1fae5]' :
+                stats.discrepancyValue < 0 ? 'bg-error-container' :
+                  'bg-surface-container'
                 }`}>
-                {loading
-                  ? <span className="inline-block w-24 h-8 bg-surface-container-high rounded animate-pulse" />
-                  : `${stats.discrepancyValue >= 0 ? '+' : ''}${formatPrice(stats.discrepancyValue)}`}
-              </h3>
-              <p className="text-on-surface-variant text-[12px] mt-sm">Đơn giá × Số lượng tồn kho chênh lệch</p>
+                <span className={`material-symbols-outlined text-[24px] ${stats.discrepancyValue > 0 ? 'text-[#059669]' :
+                  stats.discrepancyValue < 0 ? 'text-error' :
+                    'text-on-surface-variant'
+                  }`}>balance</span>
+              </div>
             </div>
-            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${stats.discrepancyValue > 0 ? 'bg-[#d1fae5]' :
-              stats.discrepancyValue < 0 ? 'bg-error-container' :
-                'bg-surface-container'
-              }`}>
-              <span className={`material-symbols-outlined text-[24px] ${stats.discrepancyValue > 0 ? 'text-[#059669]' :
-                stats.discrepancyValue < 0 ? 'text-error' :
-                  'text-on-surface-variant'
-                }`}>balance</span>
+            <div className="flex items-end justify-between mt-sm gap-2">
+              <p className="text-on-surface-variant text-[11px] leading-tight">Đơn giá × Số lượng tồn kho chênh lệch</p>
+              <button
+                onClick={handleSyncInventoryClick}
+                disabled={stats.discrepancyValue === 0 || actionLoading}
+                className="text-[12px] font-bold bg-primary text-white px-3 py-1.5 rounded-lg shadow-sm hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed transition-opacity whitespace-nowrap"
+              >
+                Cân bằng kho
+              </button>
             </div>
           </div>
         </div>
@@ -412,20 +744,41 @@ export default function MaterialManagement() {
         <div className="bg-white rounded-xl shadow-sm border border-outline-variant/30 overflow-hidden">
           {/* Toolbar */}
           <div className="px-lg py-md border-b border-outline-variant/30 flex justify-between items-center bg-surface-container-low/50">
-            <div className="flex items-center border border-outline-variant rounded-lg overflow-hidden bg-white">
-              {TABS.map((tab, i) => (
-                <button
-                  key={tab.key}
-                  onClick={() => { setActiveTab(tab.key); setCurrentPage(1); }}
-                  className={`px-md py-sm text-sm font-semibold transition-colors ${i < TABS.length - 1 ? 'border-r border-outline-variant' : ''
-                    } ${activeTab === tab.key
-                      ? 'bg-primary text-white'
-                      : 'hover:bg-surface-container-low text-on-surface-variant'}`}
+            <div className="flex items-center gap-4">
+              <div className="flex items-center border border-outline-variant rounded-lg overflow-hidden bg-white h-9">
+                {TABS.map((tab, i) => (
+                  <button
+                    key={tab.key}
+                    onClick={() => { setActiveTab(tab.key); setCurrentPage(1); }}
+                    className={`px-md h-full text-sm font-semibold transition-colors ${i < TABS.length - 1 ? 'border-r border-outline-variant' : ''
+                      } ${activeTab === tab.key
+                        ? 'bg-primary text-white'
+                        : 'hover:bg-surface-container-low text-on-surface-variant'}`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="relative h-9">
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => { setSelectedCategory(e.target.value); setCurrentPage(1); }}
+                  className="appearance-none bg-white border border-outline-variant rounded-lg px-4 h-full pr-10 text-sm font-medium text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary min-w-[160px]"
                 >
-                  {tab.label}
-                </button>
-              ))}
+                  <option value="all">Tất cả phân loại</option>
+                  {uniqueCategories.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </div>
+              </div>
             </div>
+
             <p className="text-[13px] text-on-surface-variant">
               Hiển thị <span className="font-bold text-on-surface">{filtered.length}</span> trong <span className="font-bold text-on-surface">{materials.length}</span> nguyên liệu
             </p>
@@ -436,7 +789,7 @@ export default function MaterialManagement() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-surface-container-lowest">
-                  {['Nguyên liệu', 'Đơn vị', 'Đơn giá nhập', 'Nhà cung cấp', 'Tồn kho', 'Trạng thái'].map((h) => (
+                  {['Nguyên liệu', 'Phân loại', 'Đơn vị', 'Đơn giá nhập', 'Nhà cung cấp', 'Tồn kho', 'Trạng thái'].map((h) => (
                     <th key={h} className="px-lg py-md text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold">
                       {h}
                     </th>
@@ -447,7 +800,7 @@ export default function MaterialManagement() {
                 {loading ? (
                   [...Array(5)].map((_, i) => (
                     <tr key={i}>
-                      {[...Array(6)].map((_, j) => (
+                      {[...Array(7)].map((_, j) => (
                         <td key={j} className="px-lg py-md">
                           <div className="h-4 bg-surface-container-high rounded animate-pulse" />
                         </td>
@@ -456,7 +809,7 @@ export default function MaterialManagement() {
                   ))
                 ) : filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-lg py-16 text-center">
+                    <td colSpan={7} className="px-lg py-16 text-center">
                       <span className="material-symbols-outlined text-[48px] text-on-surface-variant opacity-30 block mb-3">inventory_2</span>
                       <p className="text-on-surface-variant text-sm">Chưa có nguyên liệu nào</p>
                       <button onClick={() => setModal({ type: 'add' })} className="mt-3 text-primary text-sm font-semibold hover:underline">
@@ -484,6 +837,7 @@ export default function MaterialManagement() {
                             </div>
                           </div>
                         </td>
+                        <td className="px-lg py-md text-sm text-on-surface-variant">{m.category || '---'}</td>
                         <td className="px-lg py-md text-sm text-on-surface-variant">{m.unit}</td>
                         <td className="px-lg py-md text-sm font-bold text-on-surface">{formatPrice(m.price)}</td>
                         <td className="px-lg py-md text-sm text-on-surface-variant">{m.supplier}</td>

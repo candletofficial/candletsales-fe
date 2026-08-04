@@ -10,51 +10,43 @@ function InventoryCheckModal({ materials, user, onClose, onSave }) {
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [expandedCategories, setExpandedCategories] = useState({});
 
-  const materialOptions = useMemo(() => materials.map(m => ({
-    value: m._id,
-    label: `${m.name} (Hệ thống: ${m.actualStock} ${m.unit})`
-  })), [materials]);
-
-  const getOptionsForIndex = (index) => {
-    return materialOptions.filter(opt => 
-      !items.some((i, idx) => i.material_id === opt.value && idx !== index)
-    );
+  const toggleCategory = (category) => {
+    setExpandedCategories(prev => ({
+      ...prev,
+      [category]: !prev[category]
+    }));
   };
 
   useEffect(() => {
     if (materials && materials.length > 0) {
-      const initialItems = materials.map(m => ({
+      // Sắp xếp nguyên liệu theo phân loại
+      const sortedMaterials = [...materials].sort((a, b) => {
+        const catA = a.category || 'Khác';
+        const catB = b.category || 'Khác';
+        if (catA < catB) return -1;
+        if (catA > catB) return 1;
+        return (a.name || '').localeCompare(b.name || '');
+      });
+      
+      const initialItems = sortedMaterials.map(m => ({
         material_id: m._id,
         system_stock: m.actualStock,
         actual_stock: ''
       }));
       setItems(initialItems);
+
+      // Mở mặc định nhóm đầu tiên
+      const firstCategory = sortedMaterials[0]?.category || 'Chưa phân loại';
+      setExpandedCategories({ [firstCategory]: true });
     }
   }, [materials]);
-
-  const handleAddItem = () => {
-    setItems([...items, { material_id: '', system_stock: 0, actual_stock: '' }]);
-  };
-
-  const handleRemoveItem = (index) => {
-    setItems(items.filter((_, i) => i !== index));
-  };
 
   const handleItemChange = (index, field, value) => {
     const newItems = [...items];
     newItems[index][field] = value;
-
-    // Tự động điền system_stock nếu chọn nguyên liệu
-    if (field === 'material_id') {
-      const selectedMaterial = materials.find(m => m._id === value);
-      if (selectedMaterial) {
-        newItems[index].system_stock = selectedMaterial.actualStock;
-      } else {
-        newItems[index].system_stock = 0;
-      }
-    }
-
     setItems(newItems);
   };
 
@@ -66,17 +58,21 @@ function InventoryCheckModal({ materials, user, onClose, onSave }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (items.length === 0) {
-      setError('Vui lòng chọn ít nhất 1 nguyên liệu để kiểm kho');
+    
+    const checkedItems = items.filter(item => item.actual_stock !== '');
+
+    if (checkedItems.length === 0) {
+      setError('Vui lòng nhập số lượng cho ít nhất 1 nguyên liệu');
       return;
     }
-    for (let item of items) {
+
+    for (let item of checkedItems) {
       if (!item.material_id) {
-        setError('Vui lòng chọn đầy đủ nguyên liệu');
+        setError('Nguyên liệu không hợp lệ');
         return;
       }
-      if (item.actual_stock === '' || Number(item.actual_stock) < 0) {
-        setError('Tồn kho thực tế không hợp lệ');
+      if (Number(item.actual_stock) < 0) {
+        setError('Tồn kho thực tế không hợp lệ (không được nhỏ hơn 0)');
         return;
       }
     }
@@ -85,7 +81,7 @@ function InventoryCheckModal({ materials, user, onClose, onSave }) {
     setError('');
 
     try {
-      await inventoryCheckService.createTicket({ items, note, checked_by: user?.name || 'Admin' });
+      await inventoryCheckService.createTicket({ items: checkedItems, note, checked_by: user?.name || 'Admin' });
       onSave();
     } catch (err) {
       setError(err.response?.data?.message || 'Có lỗi xảy ra khi lưu phiếu kiểm kho');
@@ -121,71 +117,115 @@ function InventoryCheckModal({ materials, user, onClose, onSave }) {
           )}
 
           <div className="space-y-4 mb-6">
-            <label className="block text-[14px] font-semibold text-on-surface">Danh sách nguyên liệu kiểm kê</label>
-            {items.map((item, index) => {
-              const diff = calculateDifference(item.system_stock, item.actual_stock);
-              const material = materials.find(m => m._id === item.material_id);
-              return (
-                <div key={index} className="flex flex-col sm:flex-row gap-3 sm:items-start bg-surface-container-lowest p-4 rounded-xl border border-outline-variant/30 relative">
-                  <div className="w-full sm:flex-1 min-w-0 flex items-end gap-2">
-                    <div className="flex-1 min-w-0">
-                      <label className="block text-[12px] font-medium text-on-surface-variant mb-1">Nguyên liệu</label>
-                      <SearchableSelect
-                        options={getOptionsForIndex(index)}
-                        value={item.material_id}
-                        onChange={(val) => handleItemChange(index, 'material_id', val)}
-                        placeholder="Chọn nguyên liệu..."
-                        className="border border-outline-variant bg-white"
-                      />
-                    </div>
-                    <button type="button" onClick={() => handleRemoveItem(index)} className="sm:hidden p-2 mb-[1px] text-error hover:bg-error-container rounded-lg transition-colors flex-shrink-0">
-                      <span className="material-symbols-outlined text-[20px]">delete</span>
-                    </button>
-                  </div>
-
-                  <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
-                    <div className="flex-1 sm:w-[120px] min-w-0">
-                      <label className="block text-[10px] sm:text-[12px] font-bold sm:font-medium text-on-surface-variant mb-1 truncate uppercase sm:normal-case text-center sm:text-left">Hệ thống ({material?.unit || ''})</label>
-                      <input
-                        type="number"
-                        value={item.system_stock}
-                        className="w-full px-2 sm:px-3 py-2 border border-outline-variant rounded-lg text-[14px] bg-surface-container-low text-on-surface-variant cursor-not-allowed text-center sm:text-left"
-                        disabled
-                      />
-                    </div>
-
-                    <div className="flex-1 sm:w-[120px] min-w-0">
-                      <label className="block text-[10px] sm:text-[12px] font-bold sm:font-medium text-on-surface-variant mb-1 truncate uppercase sm:normal-case text-center sm:text-left">Thực tế ({material?.unit || ''})</label>
-                      <input
-                        type="number"
-                        value={item.actual_stock}
-                        onChange={(e) => handleItemChange(index, 'actual_stock', e.target.value)}
-                        className="w-full px-2 sm:px-3 py-2 border border-outline-variant rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-[14px] text-center sm:text-left"
-                        min="0"
-                        placeholder="0"
-                        required
-                      />
-                    </div>
-
-                    <div className="flex-1 sm:w-[100px] min-w-0">
-                      <label className="block text-[10px] sm:text-[12px] font-bold sm:font-medium text-on-surface-variant mb-1 truncate uppercase sm:normal-case text-center sm:text-left">Chênh lệch</label>
-                      <div className={`px-2 sm:px-3 py-2 border rounded-lg text-[14px] font-bold text-center ${item.actual_stock === '' ? 'border-outline-variant bg-surface-container-low text-on-surface-variant' : diff > 0 ? 'bg-[#d1fae5] text-[#059669] border-[#059669]/20' : diff < 0 ? 'bg-error-container text-error border-error/20' : 'bg-surface-container-low border-outline-variant text-on-surface-variant'}`}>
-                        {item.actual_stock !== '' ? (diff > 0 ? `+${diff}` : diff) : '-'}
-                      </div>
-                    </div>
-                  </div>
-
-                  <button type="button" onClick={() => handleRemoveItem(index)} className="hidden sm:block mt-6 p-2 text-error hover:bg-error-container rounded-lg transition-colors flex-shrink-0">
-                    <span className="material-symbols-outlined text-[20px]">delete</span>
-                  </button>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <label className="block text-[14px] font-semibold text-on-surface">Danh sách nguyên liệu kiểm kê</label>
+              <div className="relative w-full sm:w-80 group">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                  <span className="material-symbols-outlined text-[20px] text-on-surface-variant group-focus-within:text-primary transition-colors">search</span>
                 </div>
-              );
-            })}
+                <input
+                  type="text"
+                  placeholder="Tìm nguyên liệu, SKU..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-11 pr-10 py-2.5 bg-surface-container-lowest border border-outline-variant/60 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/15 text-[14px] shadow-sm transition-all placeholder:text-on-surface-variant/60"
+                />
+                {searchTerm && (
+                  <button 
+                    type="button"
+                    onClick={() => setSearchTerm('')}
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-on-surface-variant hover:text-error transition-colors outline-none"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">close</span>
+                  </button>
+                )}
+              </div>
+            </div>
+            {(() => {
+              const itemsByCategory = {};
+              items.forEach((item, index) => {
+                const material = materials.find(m => m._id === item.material_id);
+                if (searchTerm) {
+                  const term = searchTerm.toLowerCase();
+                  const matchesName = material?.name?.toLowerCase().includes(term);
+                  const matchesSku = material?.sku?.toLowerCase().includes(term);
+                  if (!matchesName && !matchesSku) return;
+                }
+                const category = material?.category || 'Chưa phân loại';
+                if (!itemsByCategory[category]) itemsByCategory[category] = [];
+                itemsByCategory[category].push({ item, index, material });
+              });
 
-            <button type="button" onClick={handleAddItem} className="w-full py-3 border-2 border-dashed border-primary/30 text-primary rounded-xl hover:bg-primary/5 hover:border-primary/50 transition-colors font-semibold text-[14px] flex items-center justify-center gap-2">
-              <span className="material-symbols-outlined">add_circle</span>
-              Thêm nguyên liệu
-            </button>
+              return Object.entries(itemsByCategory).map(([category, groupItems]) => {
+                const isExpanded = searchTerm ? true : expandedCategories[category];
+                return (
+                  <div key={category} className="mb-6 last:mb-0 bg-white border border-outline-variant/40 rounded-2xl overflow-hidden shadow-sm">
+                    <button 
+                      type="button" 
+                      onClick={() => toggleCategory(category)}
+                      className="flex justify-between items-center w-full px-5 py-4 bg-surface-container-lowest hover:bg-surface-container-low transition-colors group outline-none"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-105 transition-transform">
+                          <span className="material-symbols-outlined">inventory_2</span>
+                        </div>
+                        <div className="text-left">
+                          <h4 className="font-bold text-[15px] text-on-surface uppercase tracking-wide">{category}</h4>
+                          <p className="text-[12px] text-on-surface-variant font-medium mt-0.5">{groupItems.length} nguyên liệu</p>
+                        </div>
+                      </div>
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center bg-surface-container text-on-surface-variant transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
+                        <span className="material-symbols-outlined text-[20px]">expand_more</span>
+                      </div>
+                    </button>
+
+                    {isExpanded && (
+                      <div className="p-5 border-t border-outline-variant/30 space-y-4 bg-surface-container-lowest/30 animate-[fadeIn_0.2s_ease-out]">
+                        {groupItems.map(({ item, index, material }) => {
+                          const diff = calculateDifference(item.system_stock, item.actual_stock);
+                          const isChecked = item.actual_stock !== '';
+                          return (
+                            <div key={index} className={`flex flex-row items-center justify-between gap-3 p-3 sm:p-4 rounded-xl border transition-all shadow-sm relative ${isChecked ? 'bg-primary/5 border-primary/30 shadow-primary/10' : 'bg-white border-outline-variant/40 hover:border-primary/30'}`}>
+                              <div className="w-full sm:flex-1 min-w-0 flex flex-col justify-center gap-0.5">
+                                <div className={`text-[14px] sm:text-[15px] font-bold truncate flex items-center gap-1.5 ${isChecked ? 'text-primary' : 'text-on-surface'}`}>
+                                  {material?.name || 'Nguyên liệu không xác định'}
+                                  {isChecked && <span className="material-symbols-outlined text-[16px]">check_circle</span>}
+                                </div>
+                                <div className="text-[12px] text-on-surface-variant mb-1">
+                                  SKU: {material?.sku || 'N/A'}
+                                </div>
+                                <div className="flex items-center gap-2 text-[12px]">
+                                  <span className="text-on-surface-variant font-medium">
+                                    Hệ thống: {item.system_stock} {material?.unit}
+                                  </span>
+                                  {isChecked && (
+                                    <span className={`font-bold px-1.5 py-0.5 rounded-md ${diff > 0 ? 'bg-[#d1fae5] text-[#059669]' : diff < 0 ? 'bg-error-container text-error' : 'bg-primary/20 text-primary'}`}>
+                                      {diff > 0 ? `+${diff}` : diff}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className="w-[90px] sm:w-[120px] flex-shrink-0">
+                                <label className={`block text-[10px] font-bold uppercase mb-1 text-center transition-colors ${isChecked ? 'text-primary' : 'text-on-surface-variant'}`}>Thực tế</label>
+                                <input
+                                  type="number"
+                                  value={item.actual_stock}
+                                  onChange={(e) => handleItemChange(index, 'actual_stock', e.target.value)}
+                                  className={`w-full px-3 py-2.5 sm:py-2 border rounded-lg focus:outline-none focus:ring-1 text-[15px] sm:text-[14px] font-bold text-center shadow-inner transition-colors ${isChecked ? 'border-primary/50 focus:border-primary focus:ring-primary bg-white text-primary' : 'border-outline-variant focus:border-primary focus:ring-primary bg-surface-container-lowest text-on-surface'}`}
+                                  min="0"
+                                  placeholder="0"
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              });
+            })()}
           </div>
 
           <div>
@@ -204,7 +244,7 @@ function InventoryCheckModal({ materials, user, onClose, onSave }) {
           <button type="button" onClick={onClose} className="px-5 py-2.5 rounded-lg font-semibold text-on-surface-variant hover:bg-surface-container transition-colors text-[14px]">
             Hủy
           </button>
-          <button type="button" onClick={handleSubmit} disabled={loading || items.length === 0 || items.some(item => item.actual_stock === '')} className="px-5 py-2.5 bg-primary text-white rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2 text-[14px] shadow-sm">
+          <button type="button" onClick={handleSubmit} disabled={loading || items.every(item => item.actual_stock === '')} className="px-5 py-2.5 bg-primary text-white rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2 text-[14px] shadow-sm">
             {loading ? <span className="material-symbols-outlined animate-spin">progress_activity</span> : <span className="material-symbols-outlined">save</span>}
             Lưu phiếu kiểm kho
           </button>
