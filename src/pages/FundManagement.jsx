@@ -326,31 +326,43 @@ export default function FundManagement() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           {/* Main Fund Card */}
-          <div className="lg:col-span-1 bg-gradient-to-br from-primary to-[#4f46e5] rounded-3xl p-6 text-white shadow-xl relative overflow-hidden flex flex-col justify-between min-h-[200px]">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+          <div className="lg:col-span-1 bg-gradient-to-br from-[#1e3a5f] to-[#2563eb] rounded-2xl p-6 shadow-sm flex flex-col justify-between relative overflow-hidden">
+            <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/5" />
+            <div className="absolute -right-4 -bottom-10 w-56 h-56 rounded-full bg-white/5" />
+            
             <div className="relative z-10">
-              <p className="text-white/80 font-medium text-sm uppercase tracking-widest mb-2">Tổng tài sản chung</p>
-              <h3 className="text-4xl font-black">{formatPrice(summary.totalFundBalance)}</h3>
-              <div className="flex flex-wrap gap-2 mt-3">
-                <p className="text-white/90 text-[13px] font-medium bg-white/10 inline-flex items-center gap-1 px-3 py-1 rounded-full backdrop-blur-sm border border-white/20">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-white text-[20px]">account_balance_wallet</span>
+                </div>
+                <p className="text-white/80 text-[13px] font-bold uppercase tracking-wider">Tổng tài sản chung</p>
+              </div>
+              <h2 className="text-[32px] font-black text-white mt-2 leading-tight">
+                {formatPrice(summary.totalFundBalance)}
+              </h2>
+              <p className="text-white/60 text-[12px] mt-1 mb-3">Số dư quỹ hiện tại</p>
+
+              <div className="flex flex-wrap gap-2 mt-2">
+                <p className="text-white/90 text-[12px] font-medium bg-white/10 inline-flex items-center gap-1 px-3 py-1 rounded-full backdrop-blur-sm border border-white/20">
                   <span className="material-symbols-outlined text-[14px]">trending_up</span>
                   Dự kiến: <strong className="text-white">{formatPrice(expectedFund)}</strong>
                 </p>
                 {(summary.totalImportDebt || 0) > 0 && (
-                  <p className="text-white/90 text-[13px] font-medium bg-red-500/30 inline-flex items-center gap-1 px-3 py-1 rounded-full backdrop-blur-sm border border-red-300/30">
+                  <p className="text-white/90 text-[12px] font-medium bg-red-500/30 inline-flex items-center gap-1 px-3 py-1 rounded-full backdrop-blur-sm border border-red-300/30">
                     <span className="material-symbols-outlined text-[14px]">receipt_long</span>
                     Nợ kho: <strong className="text-red-200">{formatPrice(summary.totalImportDebt)}</strong>
                   </p>
                 )}
               </div>
             </div>
-            <div className="relative z-10 mt-6 flex gap-3">
-              <button onClick={() => setShowDeposit(true)} className="flex-1 bg-white/20 hover:bg-white/30 transition-colors py-3 rounded-xl font-bold text-white flex items-center justify-center gap-2 backdrop-blur-sm">
-                <span className="material-symbols-outlined text-[20px]">add_circle</span>
+
+            <div className="relative z-10 mt-6 flex gap-3 pt-4 border-t border-white/20">
+              <button onClick={() => setShowDeposit(true)} className="flex-1 bg-white/20 hover:bg-white/30 transition-colors py-2.5 rounded-xl text-[13px] font-bold text-white flex items-center justify-center gap-2 backdrop-blur-sm">
+                <span className="material-symbols-outlined text-[18px]">add_circle</span>
                 Góp vốn
               </button>
-              <button onClick={() => setShowWithdrawCapital(true)} disabled={summary.totalFundBalance <= 0} className="flex-1 bg-white/10 hover:bg-white/20 transition-colors py-3 rounded-xl font-bold text-white flex items-center justify-center gap-2 backdrop-blur-sm disabled:opacity-50 disabled:cursor-not-allowed">
-                <span className="material-symbols-outlined text-[20px]">remove_circle</span>
+              <button onClick={() => setShowWithdrawCapital(true)} disabled={summary.totalFundBalance <= 0} className="flex-1 bg-white/10 hover:bg-white/20 transition-colors py-2.5 rounded-xl text-[13px] font-bold text-white flex items-center justify-center gap-2 backdrop-blur-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                <span className="material-symbols-outlined text-[18px]">remove_circle</span>
                 Rút vốn
               </button>
             </div>

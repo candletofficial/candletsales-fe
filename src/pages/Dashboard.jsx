@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { adminService } from '../services/adminService';
 import { fundService } from '../services/fundService';
 import DetailedAnalysisModal from '../components/DetailedAnalysis';
@@ -42,6 +43,7 @@ const GrowthBadge = ({ value }) => {
 };
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -53,6 +55,14 @@ export default function Dashboard() {
   const [showOrderAnalysis, setShowOrderAnalysis] = useState(false);
   const [refreshingActivities, setRefreshingActivities] = useState(false);
   const [fundSummary, setFundSummary] = useState(null);
+
+  const expectedFund = useMemo(() => {
+    if (!fundSummary) return 0;
+    const currentFund = fundSummary.totalFundBalance || 0;
+    const platformBalances = (fundSummary.platformBalances || []).reduce((acc, p) => acc + (p.availableBalance || 0), 0);
+    const importDebt = fundSummary.totalImportDebt || 0;
+    return currentFund + platformBalances - importDebt;
+  }, [fundSummary]);
 
   const getPeriodLabel = () => {
     if (filterType === 'today') return 'Hôm nay';
@@ -249,7 +259,10 @@ export default function Dashboard() {
         {/* Stat Cards: 1 large left + 2x2 right */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-md mb-lg">
           {/* LEFT: Tổng tài sản chung - large card */}
-          <div className="lg:col-span-1 bg-gradient-to-br from-[#1e3a5f] to-[#2563eb] rounded-2xl p-6 shadow-sm flex flex-col justify-between relative overflow-hidden">
+          <div 
+            onClick={() => navigate('/funds')}
+            className="lg:col-span-1 bg-gradient-to-br from-[#1e3a5f] to-[#2563eb] rounded-2xl p-6 shadow-sm flex flex-col justify-between relative overflow-hidden cursor-pointer hover:shadow-lg transition-all hover:scale-[1.01]"
+          >
             <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/5" />
             <div className="absolute -right-4 -bottom-10 w-56 h-56 rounded-full bg-white/5" />
             <div className="relative z-10">
@@ -264,7 +277,20 @@ export default function Dashboard() {
                   ? <div className="h-9 w-44 bg-white/20 rounded animate-pulse" />
                   : formatCurrency(fundSummary.totalFundBalance)}
               </h2>
-              <p className="text-white/60 text-[12px] mt-1">Số dư quỹ hiện tại</p>
+              <p className="text-white/60 text-[12px] mt-1 mb-3">Số dư quỹ hiện tại</p>
+              
+              <div className="flex flex-wrap gap-2 mt-2">
+                <p className="text-white/90 text-[12px] font-medium bg-white/10 inline-flex items-center gap-1 px-3 py-1 rounded-full backdrop-blur-sm border border-white/20">
+                  <span className="material-symbols-outlined text-[14px]">trending_up</span>
+                  Dự kiến: <strong className="text-white">{formatCompactCurrency(expectedFund)}</strong>
+                </p>
+                {(fundSummary?.totalImportDebt || 0) > 0 && (
+                  <p className="text-white/90 text-[12px] font-medium bg-red-500/30 inline-flex items-center gap-1 px-3 py-1 rounded-full backdrop-blur-sm border border-red-300/30">
+                    <span className="material-symbols-outlined text-[14px]">receipt_long</span>
+                    Nợ kho: <strong className="text-red-200">{formatCompactCurrency(fundSummary.totalImportDebt)}</strong>
+                  </p>
+                )}
+              </div>
             </div>
             <div className="relative z-10 mt-6 pt-4 border-t border-white/20">
               <p className="text-white/70 text-[12px] font-semibold mb-2">Doanh thu chưa rút</p>
