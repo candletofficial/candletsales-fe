@@ -26,6 +26,7 @@ export default function DetailedAnalysisModal({ isOpen, onClose, data, periodLab
   
   const cogs = data.cogs || 0;
   const adCost = data.adCost || 0;
+  const affiliateFee = data.affiliateFee || 0;
   const returnCost = data.returnCost || 0;
   const logisticsCost = data.logisticsCost || 0;
   const replacementCost = data.replacementCost || 0;
@@ -119,6 +120,10 @@ export default function DetailedAnalysisModal({ isOpen, onClose, data, periodLab
                   <p className="text-[15px] font-bold text-[#dc2626]">{formatCurrency(adCost)}</p>
                 </div>
                 <div className="flex justify-between items-center">
+                  <p className="text-[13px] text-on-surface-variant font-semibold">Phí Affiliate</p>
+                  <p className="text-[15px] font-bold text-[#EC4899]">{formatCurrency(affiliateFee)}</p>
+                </div>
+                <div className="flex justify-between items-center">
                   <p className="text-[13px] text-on-surface-variant font-semibold">Chi phí vận chuyển (Ship)</p>
                   <p className="text-[15px] font-bold text-secondary">{formatCurrency(logisticsCost)}</p>
                 </div>
@@ -181,7 +186,7 @@ export default function DetailedAnalysisModal({ isOpen, onClose, data, periodLab
             </h4>
             <ul className="list-disc list-inside space-y-1.5 opacity-80">
               <li><strong>Doanh thu</strong>: Chỉ cộng dồn từ những đơn hàng có trạng thái "Hoàn thành". Đơn bị hoàn và Đơn giao bù không được tính vào doanh thu.</li>
-              <li><strong>Lợi nhuận ròng</strong>: Bằng Doanh thu trừ đi toàn bộ Cấu trúc chi phí (Giá trị xuất kho + Quảng cáo + Phí ship + Hoàn hàng + Đơn giao bù).</li>
+              <li><strong>Lợi nhuận ròng</strong>: Bằng Doanh thu trừ đi toàn bộ Cấu trúc chi phí (Giá trị xuất kho + Quảng cáo + Phí Affiliate + Phí ship + Hoàn hàng + Đơn giao bù).</li>
               <li><strong>AOV (Average Order Value)</strong>: Giá trị trung bình mang lại trên mỗi đơn hàng giao thành công.</li>
               <li><strong>CP Quảng cáo / Đơn</strong>: Giúp đo lường chi phí Marketing trung bình bỏ ra để chốt được 1 đơn hàng trong kỳ.</li>
             </ul>
