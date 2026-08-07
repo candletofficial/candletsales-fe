@@ -139,11 +139,15 @@ export default function Dashboard() {
 
   const pieData = useMemo(() => {
     if (!data) return [];
-    return [
+    const arr = [
       { name: 'Quảng cáo (Ads)', value: data.costStructure.ads, color: '#4F46E5' },
       { name: 'Vận hành & Kho', value: data.costStructure.inventory, color: '#06B6D4' },
       { name: 'Logistics & Hoàn hàng', value: data.costStructure.logistics, color: '#F59E0B' },
     ];
+    if (data.costStructure.affiliate > 0) {
+      arr.push({ name: 'Phí Affiliate', value: data.costStructure.affiliate, color: '#EC4899' });
+    }
+    return arr;
   }, [data]);
 
   return (
