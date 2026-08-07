@@ -213,8 +213,10 @@ export default function FundManagement() {
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
   
-  const pendingRevenue = (summary.platformBalances || []).reduce((sum, p) => sum + p.availableBalance, 0);
-  const expectedFund = summary.totalFundBalance + pendingRevenue - (summary.totalImportDebt || 0);
+  // Dự kiến = Tài sản hiện tại + Doanh thu các sàn chưa rút - Nợ phiếu nhập chưa tất toán
+  const expectedFund = summary.totalFundBalance
+    + (summary.platformBalances || []).reduce((sum, p) => sum + p.availableBalance, 0)
+    - (summary.totalImportDebt || 0);
   
   const [filterType, setFilterType] = useState('all');
   const [dateFilter, setDateFilter] = useState('this_month');
@@ -330,14 +332,14 @@ export default function FundManagement() {
               <p className="text-white/80 font-medium text-sm uppercase tracking-widest mb-2">Tổng tài sản chung</p>
               <h3 className="text-4xl font-black">{formatPrice(summary.totalFundBalance)}</h3>
               <div className="flex flex-wrap gap-2 mt-3">
-                <p className="text-white/90 text-[13px] font-medium bg-white/10 inline-flex items-center gap-1.5 px-3 py-1 rounded-full backdrop-blur-sm border border-white/20">
+                <p className="text-white/90 text-[13px] font-medium bg-white/10 inline-flex items-center gap-1 px-3 py-1 rounded-full backdrop-blur-sm border border-white/20">
                   <span className="material-symbols-outlined text-[14px]">trending_up</span>
                   Dự kiến: <strong className="text-white">{formatPrice(expectedFund)}</strong>
                 </p>
                 {(summary.totalImportDebt || 0) > 0 && (
-                  <p className="text-white/90 text-[13px] font-medium bg-red-500/30 inline-flex items-center gap-1.5 px-3 py-1 rounded-full backdrop-blur-sm border border-red-300/40">
-                    <span className="material-symbols-outlined text-[14px]">warning</span>
-                    Nợ kho: <strong className="text-red-200">-{formatPrice(summary.totalImportDebt)}</strong>
+                  <p className="text-white/90 text-[13px] font-medium bg-red-500/30 inline-flex items-center gap-1 px-3 py-1 rounded-full backdrop-blur-sm border border-red-300/30">
+                    <span className="material-symbols-outlined text-[14px]">receipt_long</span>
+                    Nợ kho: <strong className="text-red-200">{formatPrice(summary.totalImportDebt)}</strong>
                   </p>
                 )}
               </div>
