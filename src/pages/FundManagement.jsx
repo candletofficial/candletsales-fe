@@ -208,12 +208,13 @@ function WithdrawModal({ platform, maxAmount, onClose, onSuccess, user }) {
 
 export default function FundManagement() {
   const { user } = useAuth();
-  const [summary, setSummary] = useState({ totalFundBalance: 0, platformBalances: [], adminDeposits: [] });
+  const [summary, setSummary] = useState({ totalFundBalance: 0, platformBalances: [], adminDeposits: [], totalImportDebt: 0 });
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
   
-  const expectedFund = summary.totalFundBalance + (summary.platformBalances || []).reduce((sum, p) => sum + p.availableBalance, 0);
+  const pendingRevenue = (summary.platformBalances || []).reduce((sum, p) => sum + p.availableBalance, 0);
+  const expectedFund = summary.totalFundBalance + pendingRevenue - (summary.totalImportDebt || 0);
   
   const [filterType, setFilterType] = useState('all');
   const [dateFilter, setDateFilter] = useState('this_month');
@@ -328,9 +329,18 @@ export default function FundManagement() {
             <div className="relative z-10">
               <p className="text-white/80 font-medium text-sm uppercase tracking-widest mb-2">Tổng tài sản chung</p>
               <h3 className="text-4xl font-black">{formatPrice(summary.totalFundBalance)}</h3>
-              <p className="text-white/90 text-[13px] font-medium mt-3 bg-white/10 inline-block px-3 py-1 rounded-full backdrop-blur-sm border border-white/20">
-                Dự kiến: <strong className="text-white">{formatPrice(expectedFund)}</strong>
-              </p>
+              <div className="flex flex-wrap gap-2 mt-3">
+                <p className="text-white/90 text-[13px] font-medium bg-white/10 inline-flex items-center gap-1.5 px-3 py-1 rounded-full backdrop-blur-sm border border-white/20">
+                  <span className="material-symbols-outlined text-[14px]">trending_up</span>
+                  Dự kiến: <strong className="text-white">{formatPrice(expectedFund)}</strong>
+                </p>
+                {(summary.totalImportDebt || 0) > 0 && (
+                  <p className="text-white/90 text-[13px] font-medium bg-red-500/30 inline-flex items-center gap-1.5 px-3 py-1 rounded-full backdrop-blur-sm border border-red-300/40">
+                    <span className="material-symbols-outlined text-[14px]">warning</span>
+                    Nợ kho: <strong className="text-red-200">-{formatPrice(summary.totalImportDebt)}</strong>
+                  </p>
+                )}
+              </div>
             </div>
             <div className="relative z-10 mt-6 flex gap-3">
               <button onClick={() => setShowDeposit(true)} className="flex-1 bg-white/20 hover:bg-white/30 transition-colors py-3 rounded-xl font-bold text-white flex items-center justify-center gap-2 backdrop-blur-sm">
