@@ -20,10 +20,12 @@ const formatCompactCurrency = (n) => {
   if (!n) return '0 ₫';
   const num = Math.abs(n);
   if (num >= 1e9) {
-    return (n / 1e9).toFixed(1).replace(/\.0$/, '').replace('.', ',') + 'B ₫';
+    const val = Number.parseFloat((n / 1e9).toFixed(3));
+    return val.toString().replace('.', ',') + 'B ₫';
   }
   if (num >= 1e6) {
-    return (n / 1e6).toFixed(1).replace(/\.0$/, '').replace('.', ',') + 'M ₫';
+    const val = Number.parseFloat((n / 1e6).toFixed(3));
+    return val.toString().replace('.', ',') + 'M ₫';
   }
   return Math.round(n).toLocaleString('vi-VN') + ' ₫';
 };
@@ -260,7 +262,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-md mb-lg">
           {/* LEFT: Tổng tài sản chung - large card */}
           <div 
-            onClick={() => navigate('/funds')}
+            onClick={() => navigate('/fund')}
             className="lg:col-span-1 bg-gradient-to-br from-[#1e3a5f] to-[#2563eb] rounded-2xl p-6 shadow-sm flex flex-col justify-between relative overflow-hidden cursor-pointer hover:shadow-lg transition-all hover:scale-[1.01]"
           >
             <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/5" />
