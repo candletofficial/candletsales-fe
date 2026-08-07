@@ -1422,7 +1422,7 @@ export default function OrderManagement() {
                                 Chờ thu tiền
                               </span>
                             )}
-                            {(order.status === 'completed' || !order.status) && (
+                            {order.status === 'completed' && (
                               <span className="flex items-center gap-1 text-[10px] uppercase font-bold px-1.5 py-0.5 rounded w-max bg-[#d1fae5] text-[#059669] border border-[#6ee7b7]">
                                 <span className="material-symbols-outlined text-[11px]">check_circle</span>
                                 Đã thu tiền
