@@ -504,6 +504,7 @@ export default function ImportManagement() {
   const [requiredDepositAmount, setRequiredDepositAmount] = useState(0);
   const [pendingSettleTicket, setPendingSettleTicket] = useState(null);
   const [alertInfo, setAlertInfo] = useState(null);
+  const [selectedTickets, setSelectedTickets] = useState([]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -574,6 +575,7 @@ export default function ImportManagement() {
       showToast('Đã tất toán phiếu nhập!');
       fetchData();
       setConfirmAction(null);
+      setSelectedTickets(prev => prev.filter(id => id !== ticket._id));
     } catch (err) {
       if (err.response?.data?.code === 'INSUFFICIENT_FUND') {
         setRequiredDepositAmount(err.response.data.requiredAmount || 0);
@@ -588,10 +590,36 @@ export default function ImportManagement() {
     }
   };
 
+  const executeBulkSettle = async () => {
+    setActionLoading(true);
+    try {
+      const res = await importService.bulkSettleImportTickets({ ticketIds: selectedTickets });
+      showToast(`Đã tất toán thành công ${res.data.count} phiếu nhập!`);
+      fetchData();
+      setConfirmAction(null);
+      setSelectedTickets([]);
+    } catch (err) {
+      if (err.response?.data?.code === 'INSUFFICIENT_FUND') {
+        setRequiredDepositAmount(err.response.data.requiredAmount || 0);
+        setPendingSettleTicket({ bulk: true });
+        setShowDepositModal(true);
+        setConfirmAction(null);
+      } else {
+        showToast(err.response?.data?.message || 'Lỗi khi tất toán nhiều phiếu', 'error');
+      }
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const handleDepositSuccess = () => {
     setShowDepositModal(false);
     if (pendingSettleTicket) {
-      executeSettle(pendingSettleTicket);
+      if (pendingSettleTicket.bulk) {
+        executeBulkSettle();
+      } else {
+        executeSettle(pendingSettleTicket);
+      }
       setPendingSettleTicket(null);
     }
   };
@@ -692,6 +720,10 @@ export default function ImportManagement() {
       }));
   }, [statsTickets]);
 
+  const selectedTotalAmount = useMemo(() => {
+    return tickets.filter(t => selectedTickets.includes(t._id)).reduce((sum, t) => sum + (t.total_amount || 0), 0);
+  }, [tickets, selectedTickets]);
+
   const totalPages = Math.ceil(filteredTickets.length / itemsPerPage);
   const currentTickets = filteredTickets.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
@@ -745,6 +777,16 @@ export default function ImportManagement() {
           onConfirm={() => executeSettle(confirmAction.ticket)}
           loading={actionLoading}
           confirmText="Đã tất toán"
+        />
+      )}
+      {confirmAction?.type === 'bulk_settle' && (
+        <ConfirmModal
+          title="Xác nhận tất toán hàng loạt"
+          message={`Xác nhận thanh toán cho ${selectedTickets.length} phiếu nhập đã chọn với tổng số tiền là ${formatPrice(selectedTotalAmount)}?`}
+          onClose={() => setConfirmAction(null)}
+          onConfirm={() => executeBulkSettle()}
+          loading={actionLoading}
+          confirmText="Tất toán ngay"
         />
       )}
 
@@ -813,6 +855,24 @@ export default function ImportManagement() {
         </div>
 
         {/* Table */}
+        {selectedTickets.length > 0 && (
+          <div className="px-lg py-sm bg-primary-container flex items-center justify-between animate-[fadeIn_0.2s_ease] border-b border-outline-variant/30">
+            <span className="text-[14px] font-semibold text-on-surface flex items-center gap-2">
+              <span>Đã chọn <span className="text-primary font-bold">{selectedTickets.length}</span> phiếu nhập</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-on-surface-variant/40"></span>
+              <span>Tổng thanh toán: <span className="text-primary font-bold text-[16px]">{formatPrice(selectedTotalAmount)}</span></span>
+            </span>
+            <div className="flex gap-2">
+              <button onClick={() => setSelectedTickets([])} className="px-4 py-1.5 text-[13px] font-semibold text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-colors">
+                Hủy
+              </button>
+              <button onClick={() => setConfirmAction({ type: 'bulk_settle' })} className="px-4 py-1.5 text-[13px] font-semibold bg-primary text-white hover:opacity-90 rounded-lg transition-colors shadow-sm flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[16px]">payments</span>
+                Tất toán {selectedTickets.length} phiếu
+              </button>
+            </div>
+          </div>
+        )}
         <div className="overflow-auto flex-1 relative custom-scrollbar">
           <table className="w-full text-left border-collapse">
             <thead className="sticky top-0 z-10 shadow-sm">
@@ -825,13 +885,31 @@ export default function ImportManagement() {
                 <th className="px-lg py-md text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold bg-surface-container-lowest">Thanh toán</th>
                 <th className="px-lg py-md text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold text-right bg-surface-container-lowest">Tổng tiền</th>
                 <th className="px-lg py-md text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold text-right bg-surface-container-lowest">Thao tác</th>
+                <th className="px-md py-md border-b border-outline-variant w-[50px] text-center bg-surface-container-lowest">
+                  <input 
+                    type="checkbox" 
+                    className="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary cursor-pointer"
+                    checked={currentTickets.length > 0 && currentTickets.filter(t => (t.payment_status || 'unsettled') === 'unsettled' && t.imported_by === user?.name).length > 0 && currentTickets.filter(t => (t.payment_status || 'unsettled') === 'unsettled' && t.imported_by === user?.name).every(t => selectedTickets.includes(t._id))}
+                    onChange={(e) => {
+                      const unsettled = currentTickets.filter(t => (t.payment_status || 'unsettled') === 'unsettled' && t.imported_by === user?.name);
+                      if (e.target.checked) {
+                        const newIds = unsettled.map(t => t._id).filter(id => !selectedTickets.includes(id));
+                        setSelectedTickets([...selectedTickets, ...newIds]);
+                      } else {
+                        const removeIds = unsettled.map(t => t._id);
+                        setSelectedTickets(selectedTickets.filter(id => !removeIds.includes(id)));
+                      }
+                    }}
+                    disabled={currentTickets.filter(t => (t.payment_status || 'unsettled') === 'unsettled' && t.imported_by === user?.name).length === 0}
+                  />
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-outline-variant/30">
               {loading ? (
                 [...Array(5)].map((_, i) => (
                   <tr key={i}>
-                    {[...Array(6)].map((_, j) => (
+                    {[...Array(9)].map((_, j) => (
                       <td key={j} className="px-lg py-md">
                         <div className="h-4 bg-surface-container-high rounded animate-pulse" />
                       </td>
@@ -840,7 +918,7 @@ export default function ImportManagement() {
                 ))
               ) : filteredTickets.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="px-lg py-16 text-center">
+                  <td colSpan="9" className="px-lg py-16 text-center">
                     <span className="material-symbols-outlined text-[48px] text-on-surface-variant opacity-30 block mb-3">local_shipping</span>
                     <p className="text-on-surface-variant text-sm">
                       {tickets.length === 0 ? 'Chưa có phiếu nhập nào' : 'Không tìm thấy phiếu nhập phù hợp'}
@@ -920,11 +998,6 @@ export default function ImportManagement() {
                             <span className="material-symbols-outlined text-[18px]">payments</span>
                           </button>
                         )}
-                        {ticket.status === 'completed' && (
-                          <button onClick={(e) => { e.stopPropagation(); setDetailsTicket(ticket); }} className="p-1.5 text-on-surface-variant hover:bg-surface-container rounded transition-colors" title="Chi tiết">
-                            <span className="material-symbols-outlined text-[18px]">visibility</span>
-                          </button>
-                        )}
                         {ticket.status === 'pending' && (
                           <>
                             <button disabled={actionLoading} onClick={(e) => { e.stopPropagation(); setConfirmAction({ type: 'complete', ticket }); }} className="p-1.5 text-primary hover:bg-primary-container rounded transition-colors disabled:opacity-50" title="Xác nhận đẩy hàng">
@@ -936,6 +1009,22 @@ export default function ImportManagement() {
                           </>
                         )}
                       </div>
+                    </td>
+                    <td className="px-md py-md text-center" onClick={(e) => e.stopPropagation()}>
+                      {(ticket.payment_status || 'unsettled') === 'unsettled' && ticket.imported_by === user?.name && (
+                        <input 
+                          type="checkbox" 
+                          className="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary cursor-pointer"
+                          checked={selectedTickets.includes(ticket._id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedTickets([...selectedTickets, ticket._id]);
+                            } else {
+                              setSelectedTickets(selectedTickets.filter(id => id !== ticket._id));
+                            }
+                          }}
+                        />
+                      )}
                     </td>
                   </tr>
                 ))
