@@ -523,7 +523,7 @@ export default function AdCostManagement() {
             <p className="text-on-surface-variant mt-1 text-[14px]">Theo dõi chi phí quảng cáo và số dư từng nền tảng</p>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={() => setAffiliateModal(true)}
+            <button style={{ display: 'none' }} onClick={() => setAffiliateModal(true)}
               className="flex items-center gap-xs px-lg py-sm bg-[#ffedd5] text-[#d97706] rounded-lg hover:opacity-90 shadow-sm font-semibold text-sm">
               <span className="material-symbols-outlined text-[20px]">monetization_on</span>
               <span>Phí Affiliate</span>
