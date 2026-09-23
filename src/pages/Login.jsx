@@ -7,7 +7,7 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { login } = useAuth();
+  const { login, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
@@ -17,8 +17,13 @@ export default function Login() {
     setError('');
     setLoading(true);
     try {
-      await login(form.email, form.password);
-      navigate('/dashboard');
+      const user = await login(form.email, form.password);
+      if (user.role !== 'admin') {
+        logout();
+        setError('Tài khoản khách hàng không có quyền truy cập trang quản trị.');
+        return;
+      }
+      navigate('/admin/dashboard');
     } catch (err) {
       const msg = err.response?.data?.message || 'Đăng nhập thất bại';
       const status = err.response?.data?.status;
@@ -73,7 +78,7 @@ export default function Login() {
           <div className="mb-6">
             <div className="flex justify-between items-center mb-2">
               <label className="text-[13px] font-bold text-[#475569]">Mật khẩu</label>
-              <Link to="/forgot-password" className="text-[12px] font-bold text-[#1d4ed8] hover:text-[#1e3a8a] hover:underline transition-colors">Quên mật khẩu?</Link>
+              <Link to="/admin/forgot-password" className="text-[12px] font-bold text-[#1d4ed8] hover:text-[#1e3a8a] hover:underline transition-colors">Quên mật khẩu?</Link>
             </div>
             <div className="relative group">
               <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8] group-focus-within:text-[#1d4ed8] text-[20px] transition-colors">lock</span>
@@ -128,24 +133,11 @@ export default function Login() {
           </button>
         </form>
 
-        {/* Divider */}
-        <div className="flex items-center my-7">
-          <div className="flex-1 border-t border-[#e2e8f0]"></div>
-          <span className="px-4 text-[12px] font-bold uppercase tracking-wider text-[#94a3b8]">Hoặc</span>
-          <div className="flex-1 border-t border-[#e2e8f0]"></div>
-        </div>
-
-        {/* Google Button */}
-        <button type="button" className="w-full bg-white border border-[#cbd5e1] hover:bg-[#f8fafc] text-[#334155] font-bold text-[14px] py-3 rounded-xl flex items-center justify-center gap-3 transition-colors mb-8 shadow-sm">
-          <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
-          Tiếp tục với Google
-        </button>
-
         {/* Register Link */}
         <div className="text-center pt-5 border-t border-[#f1f5f9]">
           <p className="text-[13px] font-medium text-[#475569]">
             Bạn chưa có tài khoản?{' '}
-            <Link to="/register" className="font-bold text-[#1d4ed8] hover:text-[#1e3a8a] hover:underline transition-colors ml-1">Đăng ký ngay</Link>
+            <Link to="/admin/register" className="font-bold text-[#1d4ed8] hover:text-[#1e3a8a] hover:underline transition-colors ml-1">Đăng ký ngay</Link>
           </p>
         </div>
       </div>

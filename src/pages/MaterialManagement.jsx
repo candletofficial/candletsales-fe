@@ -659,14 +659,14 @@ export default function MaterialManagement() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-12 gap-lg mb-lg">
-          <div className="col-span-12 md:col-span-3 bg-white p-lg rounded-xl shadow-sm border border-outline-variant/30 relative overflow-hidden group">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+          <div className="bg-white p-5 rounded-xl shadow-sm border border-outline-variant/30 relative overflow-hidden group">
             <div className="relative z-10">
-              <p className="text-on-surface-variant text-sm mb-xs">Tổng số nguyên liệu</p>
+              <p className="text-on-surface-variant text-sm mb-2">Tổng số nguyên liệu</p>
               <h3 className="text-[36px] font-bold text-primary leading-none">
                 {loading ? <span className="inline-block w-16 h-9 bg-surface-container-high rounded animate-pulse" /> : stats.total.toLocaleString('vi-VN')}
               </h3>
-              <div className="flex items-center gap-xs mt-sm text-on-surface-variant text-[13px] font-semibold">
+              <div className="flex items-center gap-2 mt-3 text-on-surface-variant text-[13px] font-semibold">
                 <span className="material-symbols-outlined text-[16px]">inventory</span>
                 <span>Đang được theo dõi</span>
               </div>
@@ -674,41 +674,41 @@ export default function MaterialManagement() {
             <span className="material-symbols-outlined absolute -right-4 -bottom-4 text-[120px] text-primary opacity-5 rotate-12 group-hover:rotate-0 transition-transform duration-500">inventory</span>
           </div>
 
-          <div className="col-span-12 md:col-span-3 bg-white p-lg rounded-xl shadow-sm border border-outline-variant/30">
-            <p className="text-on-surface-variant text-sm mb-xs">Cần nhập thêm</p>
+          <div className="bg-white p-5 rounded-xl shadow-sm border border-outline-variant/30">
+            <p className="text-on-surface-variant text-sm mb-2">Cần nhập thêm</p>
             <h3 className="text-[36px] font-bold text-error leading-none">
               {loading ? <span className="inline-block w-12 h-9 bg-surface-container-high rounded animate-pulse" /> : stats.low_stock}
             </h3>
             {stats.low_stock > 0 ? (
-              <div className="flex items-center gap-xs mt-sm">
-                <span className="px-xs py-0.5 rounded bg-error-container text-on-error-container text-[11px] font-bold">KHẨN CẤP</span>
+              <div className="flex items-center gap-2 mt-3">
+                <span className="px-2 py-0.5 rounded bg-error-container text-on-error-container text-[11px] font-bold">KHẨN CẤP</span>
                 <span className="text-on-surface-variant text-[12px]">Dưới mức tối thiểu</span>
               </div>
             ) : (
-              <p className="text-[13px] text-on-surface-variant mt-sm">Tất cả đủ hàng ✓</p>
+              <p className="text-[13px] text-on-surface-variant mt-3">Tất cả đủ hàng ✓</p>
             )}
           </div>
 
-          <div className="col-span-12 md:col-span-3 bg-white p-lg rounded-xl shadow-sm border border-outline-variant/30 flex items-center justify-between">
+          <div className="bg-white p-5 rounded-xl shadow-sm border border-outline-variant/30 flex items-center justify-between">
             <div>
-              <p className="text-on-surface-variant text-sm mb-xs">Giá trị tồn kho</p>
-              <h3 className="text-[24px] font-bold text-on-surface leading-none">
+              <p className="text-on-surface-variant text-sm mb-2">Giá trị tồn kho</p>
+              <h3 className="text-[22px] font-bold text-on-surface leading-none">
                 {loading
                   ? <span className="inline-block w-24 h-8 bg-surface-container-high rounded animate-pulse" />
                   : formatPrice(stats.totalValue)}
               </h3>
-              <p className="text-on-surface-variant text-[12px] mt-sm">Đơn giá × Tồn kho thực tế</p>
+              <p className="text-on-surface-variant text-[12px] mt-3">Đơn giá × Tồn kho thực tế</p>
             </div>
-            <div className="w-12 h-12 rounded-full bg-primary-container/50 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-full bg-primary-container/50 flex items-center justify-center flex-shrink-0">
               <span className="material-symbols-outlined text-primary text-[24px]">payments</span>
             </div>
           </div>
 
-          <div className="col-span-12 md:col-span-3 bg-white p-lg rounded-xl shadow-sm border border-outline-variant/30 flex flex-col justify-between">
+          <div className="bg-white p-5 rounded-xl shadow-sm border border-outline-variant/30 flex flex-col justify-between">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-on-surface-variant text-sm mb-xs">Giá trị lệch kho</p>
-                <h3 className={`text-[24px] font-bold leading-none ${stats.discrepancyValue > 0 ? 'text-[#059669]' :
+                <p className="text-on-surface-variant text-sm mb-2">Giá trị lệch kho</p>
+                <h3 className={`text-[22px] font-bold leading-none ${stats.discrepancyValue > 0 ? 'text-[#059669]' :
                   stats.discrepancyValue < 0 ? 'text-error' :
                     'text-on-surface-variant'
                   }`}>
@@ -717,17 +717,17 @@ export default function MaterialManagement() {
                     : `${stats.discrepancyValue >= 0 && stats.discrepancyValue !== 0 ? '+' : ''}${formatPrice(stats.discrepancyValue)}`}
                 </h3>
               </div>
-              <div className={`w-12 h-12 flex-shrink-0 rounded-full flex items-center justify-center ${stats.discrepancyValue > 0 ? 'bg-[#d1fae5]' :
+              <div className={`w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center ${stats.discrepancyValue > 0 ? 'bg-[#d1fae5]' :
                 stats.discrepancyValue < 0 ? 'bg-error-container' :
                   'bg-surface-container'
                 }`}>
-                <span className={`material-symbols-outlined text-[24px] ${stats.discrepancyValue > 0 ? 'text-[#059669]' :
+                <span className={`material-symbols-outlined text-[20px] ${stats.discrepancyValue > 0 ? 'text-[#059669]' :
                   stats.discrepancyValue < 0 ? 'text-error' :
                     'text-on-surface-variant'
                   }`}>balance</span>
               </div>
             </div>
-            <div className="flex items-end justify-between mt-sm gap-2">
+            <div className="flex items-end justify-between mt-3 gap-2">
               <p className="text-on-surface-variant text-[11px] leading-tight">Đơn giá × Số lượng tồn kho chênh lệch</p>
               <button
                 onClick={handleSyncInventoryClick}

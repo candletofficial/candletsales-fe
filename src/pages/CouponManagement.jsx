@@ -19,6 +19,10 @@ function CouponModal({ coupon, products, onClose, onSave }) {
     applicable_products: coupon?.applicable_products || 'all',
     product_ids: coupon?.product_ids?.map(p => typeof p === 'object' ? p._id : p) || [],
     is_active: coupon?.is_active ?? true,
+    is_website_only: coupon?.is_website_only ?? false,
+    is_public: coupon?.is_public ?? true,
+    usage_limit_per_user: coupon?.usage_limit_per_user || 'unlimited',
+    customer_condition: coupon?.customer_condition || 'all',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -198,6 +202,62 @@ function CouponModal({ coupon, products, onClose, onSave }) {
               ))}
             </div>
           )}
+
+          <div className="border-t border-outline-variant/30 pt-4 mt-2">
+            <div className="flex items-center gap-2 mb-4">
+              <input
+                type="checkbox"
+                id="is_website_only"
+                checked={formData.is_website_only}
+                onChange={e => setFormData({ ...formData, is_website_only: e.target.checked })}
+                className="rounded text-primary focus:ring-primary w-4 h-4"
+              />
+              <label htmlFor="is_website_only" className="text-[14px] font-bold text-on-surface cursor-pointer text-primary">
+                Phiếu giảm giá dành riêng cho Website (có điều kiện)
+              </label>
+            </div>
+
+            {formData.is_website_only && (
+              <div className="bg-surface-container-low p-4 rounded-xl space-y-4 border border-outline-variant/50">
+                <div>
+                  <label className="block text-[13px] font-bold text-on-surface-variant mb-1.5">Trạng thái hiển thị</label>
+                  <select
+                    value={formData.is_public ? 'public' : 'private'}
+                    onChange={e => setFormData({ ...formData, is_public: e.target.value === 'public' })}
+                    className="w-full border border-outline-variant rounded-lg px-4 py-2 text-[15px] focus:border-primary focus:ring-1 focus:ring-primary bg-white"
+                  >
+                    <option value="public">Công khai (Gợi ý trên giỏ hàng)</option>
+                    <option value="private">Riêng tư (Khách phải tự nhập chính xác mã)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[13px] font-bold text-on-surface-variant mb-1.5">Giới hạn sử dụng mỗi tài khoản</label>
+                  <select
+                    value={formData.usage_limit_per_user}
+                    onChange={e => setFormData({ ...formData, usage_limit_per_user: e.target.value })}
+                    className="w-full border border-outline-variant rounded-lg px-4 py-2 text-[15px] focus:border-primary focus:ring-1 focus:ring-primary bg-white"
+                  >
+                    <option value="unlimited">Không giới hạn</option>
+                    <option value="once">Mỗi tài khoản dùng 1 lần</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[13px] font-bold text-on-surface-variant mb-1.5">Điều kiện khách hàng</label>
+                  <select
+                    value={formData.customer_condition}
+                    onChange={e => setFormData({ ...formData, customer_condition: e.target.value })}
+                    className="w-full border border-outline-variant rounded-lg px-4 py-2 text-[15px] focus:border-primary focus:ring-1 focus:ring-primary bg-white"
+                  >
+                    <option value="all">Tất cả khách hàng (đã đăng nhập)</option>
+                    <option value="first_time">Chỉ khách hàng mua lần đầu</option>
+                    <option value="returning">Chỉ khách hàng đã từng mua (mua lại)</option>
+                  </select>
+                </div>
+              </div>
+            )}
+          </div>
 
           <div className="flex items-center gap-2 mt-2">
             <input

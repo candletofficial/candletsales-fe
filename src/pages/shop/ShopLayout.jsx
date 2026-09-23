@@ -1,0 +1,709 @@
+import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useCart } from '../../hooks/useCart';
+import { useWishlist } from '../../hooks/useWishlist';
+import { useAuth } from '../../hooks/useAuth';
+import systemConfigService from '../../services/systemConfigService';
+
+export default function ShopLayout() {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [shopAddress, setShopAddress] = useState('');
+  const dropdownRef = useRef(null);
+
+  const { cartItemCount } = useCart();
+  const { wishlistCount } = useWishlist();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Dùng cùng cấu hình địa chỉ shop với trang Cài đặt website của admin.
+  useEffect(() => {
+    let active = true;
+    systemConfigService.getConfig('shop_address')
+      .then((response) => {
+        const address = response?.data?.value;
+        if (active && typeof address === 'string' && address.trim()) {
+          setShopAddress(address.trim());
+        }
+      })
+      .catch(() => {
+        // Footer vẫn hiển thị trạng thái trung tính nếu API cấu hình tạm lỗi.
+      });
+    return () => { active = false; };
+  }, []);
+
+  // Đóng dropdown khi click ra ngoài
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Xử lý sự kiện scroll và tính toán thanh tiến trình cuộn trang
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      setIsScrolled(scrollY > 30);
+
+      const winHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (winHeight > 0) {
+        const progress = Math.min(100, Math.max(0, (scrollY / winHeight) * 100));
+        setScrollProgress(progress);
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Đóng mobile menu khi chuyển trang
+  useEffect(() => {
+    setMobileMenuOpen(false);
+    setShowDropdown(false);
+  }, [location.pathname]);
+
+  const navLinks = [
+    { label: 'Trang Chủ', path: '/' },
+    { label: 'Cửa Hàng Nến', path: '/shop' },
+    { label: 'Cẩm Nang', path: '/guide' },
+    { label: 'Câu Chuyện', path: '/stories' },
+  ];
+
+  return (
+    <div className="font-jakarta bg-[#fbf9f6] text-[#2C1810] antialiased selection:bg-[#4A2C2A] selection:text-white min-h-screen flex flex-col">
+
+      {/* 1. TOP ANNOUNCEMENT BAR (Cuộn tự nhiên cùng trang, không giật layout) */}
+      <aside
+        className="bg-[#381B18] text-[#F3E8E2] text-xs py-2 px-4 border-b border-[#4A2C2A]/40 relative z-30"
+        data-purpose="top-announcement"
+      >
+        <div className="max-w-7xl mx-auto flex items-center justify-between text-[11px] sm:text-xs">
+          <div className="flex items-center space-x-2 text-amber-200/90 font-medium">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>Miễn phí giao hàng toàn quốc đơn từ 100.000đ</span>
+          </div>
+
+          <div className="hidden md:flex items-center space-x-2 text-stone-300">
+            <i className="ph-fill ph-flame text-amber-400 text-sm"></i>
+            <span className="tracking-wider uppercase text-[10.5px] font-semibold text-amber-100">
+              Nến thơm thủ công từ 100% sáp đậu nành & sáp ong tinh khiết
+            </span>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <span className="hidden sm:inline text-stone-300">Hotline: <strong className="text-white">032.862.4761</strong></span>
+            <Link to="/orders" className="text-amber-200 hover:text-white font-medium transition-colors underline-offset-2 hover:underline">
+              Tra cứu đơn
+            </Link>
+          </div>
+        </div>
+      </aside>
+
+      {/* 2. MAIN HEADER (Chuyển động mượt mà, viền cố định không bao giờ nhấp nháy) */}
+      <header
+        className={`sticky top-0 z-40 transition-all duration-300 ease-out border-b relative ${isScrolled
+          ? 'bg-white/95 backdrop-blur-xl shadow-[0_4px_25px_rgba(44,24,16,0.06)] border-stone-200/90 py-0'
+          : 'bg-[#fbf9f6]/95 backdrop-blur-md border-stone-200/50 py-0'
+          }`}
+        data-purpose="site-navigation"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-8">
+          <div
+            className={`flex items-center justify-between transition-all duration-300 ease-out ${isScrolled ? 'h-16' : 'h-20 sm:h-22'
+              }`}
+          >
+
+            {/* BRAND LOGO (Cánh trái) */}
+            <div className="flex items-center gap-3">
+              <Link to="/" className="flex items-center gap-3 group focus:outline-none">
+                <div className="relative shrink-0 flex items-center">
+                  <img
+                    src="/logo.png"
+                    alt="Candlet"
+                    className={`w-auto object-contain transition-transform duration-300 group-hover:scale-105 ${isScrolled ? 'h-9 sm:h-10' : 'h-11 sm:h-12'
+                      }`}
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[9px] uppercase tracking-[0.25em] text-[#8C4A32] font-semibold mt-0.5 opacity-80 group-hover:opacity-100 transition-opacity hidden xs:inline">
+                    Botanical Candles
+                  </span>
+                </div>
+              </Link>
+            </div>
+
+            {/* NAVIGATION MENU (Ở giữa - Layout căn giữa tinh tế với Pill hover) */}
+            <nav className="hidden lg:flex items-center space-x-1.5 xl:space-x-2 text-xs font-semibold tracking-wider uppercase">
+              {navLinks.map(link => {
+                const isActive = location.pathname === link.path;
+                return (
+                  <Link
+                    key={link.label}
+                    to={link.path}
+                    className={`relative px-4 py-2 rounded-full transition-all duration-300 ${isActive
+                      ? 'text-[#4A2C2A] bg-[#4A2C2A]/8 font-bold shadow-2xs'
+                      : 'text-stone-700 hover:text-[#4A2C2A] hover:bg-stone-100/80'
+                      }`}
+                  >
+                    <span>{link.label}</span>
+                  </Link>
+                );
+              })}
+            </nav>
+
+            {/* ACTIONS & ACCOUNT (Cánh phải) */}
+            <div className="flex items-center space-x-2.5 sm:space-x-4">
+
+              {/* Nút Yêu Thích (Wishlist) */}
+              <Link
+                to="/wishlist"
+                className="relative p-2.5 text-[#2C1810] hover:text-rose-600 hover:bg-rose-50 rounded-full transition-all group focus:outline-none"
+                title="Sản phẩm yêu thích"
+              >
+                <i className="ph ph-heart text-[24px] sm:text-[26px] group-hover:scale-110 transition-transform"></i>
+                {wishlistCount > 0 && (
+                  <span className="absolute top-1 right-1 min-w-[19px] h-[19px] bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white shadow-sm px-1 animate-[scaleIn_0.2s_ease-out]">
+                    {wishlistCount}
+                  </span>
+                )}
+              </Link>
+
+              {/* Nút Giỏ hàng cao cấp */}
+              <Link
+                to="/cart"
+                className="relative p-2.5 text-[#2C1810] hover:text-[#4A2C2A] hover:bg-[#4A2C2A]/5 rounded-full transition-all group focus:outline-none"
+                title="Giỏ hàng của bạn"
+              >
+                <i className="ph ph-shopping-bag-open text-[24px] sm:text-[26px] group-hover:scale-110 transition-transform"></i>
+                {cartItemCount > 0 && (
+                  <span className="absolute top-1 right-1 min-w-[19px] h-[19px] bg-gradient-to-tr from-[#8C4A32] to-[#B45309] text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white shadow-sm px-1 animate-[scaleIn_0.2s_ease-out]">
+                    {cartItemCount}
+                  </span>
+                )}
+              </Link>
+
+              {/* Phân cách mảnh */}
+              <span className="w-px h-6 bg-stone-200 hidden sm:inline-block"></span>
+
+              {/* Nút Đăng nhập / User Profile Avatar */}
+              {user ? (
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    onClick={() => setShowDropdown(!showDropdown)}
+                    className="flex items-center gap-2 p-1 sm:pr-3 rounded-full hover:bg-stone-100 transition-colors border border-stone-200/80 focus:outline-none shadow-2xs"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#4A2C2A] to-[#6A382C] text-white flex items-center justify-center font-bold text-xs shadow-xs">
+                      {user.name ? user.name.charAt(0).toUpperCase() : <i className="ph-bold ph-user text-sm"></i>}
+                    </div>
+                    <span className="text-xs font-bold text-stone-800 max-w-[100px] truncate hidden sm:inline">
+                      {user.name}
+                    </span>
+                    <i className="ph-bold ph-caret-down text-xs text-stone-400 hidden sm:inline"></i>
+                  </button>
+
+                  {/* Dropdown Menu Membership VIP */}
+                  {showDropdown && (
+                    <div className="absolute right-0 mt-3 w-60 bg-white rounded-2xl shadow-xl border border-stone-100 py-2.5 z-50 animate-[modalIn_0.2s_ease-out]">
+                      <div className="px-4 py-2.5 border-b border-stone-100 mb-1">
+                        <p className="text-[10px] uppercase tracking-wider font-bold text-amber-800">Thành viên Candlet</p>
+                        <p className="text-sm font-bold text-[#4A2C2A] truncate">{user.name}</p>
+                        <p className="text-[11px] text-stone-400 truncate">{user.email}</p>
+                      </div>
+
+                      <Link
+                        to="/profile"
+                        onClick={() => setShowDropdown(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-xs font-semibold text-stone-700 hover:text-[#8C4A32] hover:bg-[#FAF5EE] transition-colors"
+                      >
+                        <i className="ph-bold ph-user-circle text-base text-[#8C4A32]"></i>
+                        Tài khoản của tôi
+                      </Link>
+
+                      <Link
+                        to="/orders"
+                        onClick={() => setShowDropdown(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-xs font-semibold text-stone-700 hover:text-[#8C4A32] hover:bg-[#FAF5EE] transition-colors"
+                      >
+                        <i className="ph-bold ph-receipt text-base text-[#8C4A32]"></i>
+                        Lịch sử đơn hàng
+                      </Link>
+
+                      <Link
+                        to="/wishlist"
+                        onClick={() => setShowDropdown(false)}
+                        className="flex items-center justify-between px-4 py-2.5 text-xs font-semibold text-stone-700 hover:text-rose-600 hover:bg-rose-50/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <i className="ph-bold ph-heart text-base text-rose-500"></i>
+                          <span>Sản phẩm yêu thích</span>
+                        </div>
+                        {wishlistCount > 0 && (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-600">
+                            {wishlistCount}
+                          </span>
+                        )}
+                      </Link>
+
+                      <div className="h-px bg-stone-100 my-1.5"></div>
+
+                      <button
+                        onClick={() => {
+                          setShowDropdown(false);
+                          logout();
+                          navigate('/login');
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors text-left"
+                      >
+                        <i className="ph-bold ph-sign-out text-base"></i>
+                        Đăng xuất
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link
+                  to="/login"
+                  className="inline-flex items-center gap-2 bg-gradient-to-r from-[#4A2C2A] to-[#6A382C] hover:from-[#3D1E1C] hover:to-[#552B23] text-white text-[11px] sm:text-xs font-bold uppercase tracking-wider py-2.5 px-4 sm:px-5 rounded-full shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-98 transition-all group"
+                >
+                  <span>Đăng nhập</span>
+                  <i className="ph-bold ph-arrow-right text-xs group-hover:translate-x-0.5 transition-transform"></i>
+                </Link>
+              )}
+
+              {/* Nút Hamburger Menu (Mobile/Tablet) */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="lg:hidden p-2 text-stone-700 hover:text-[#4A2C2A] rounded-xl hover:bg-stone-100 transition-colors focus:outline-none"
+                aria-label="Menu"
+              >
+                <i className={`ph-bold ${mobileMenuOpen ? 'ph-x' : 'ph-list'} text-2xl`}></i>
+              </button>
+
+            </div>
+
+          </div>
+        </div>
+
+        {/* 3. SCROLL PROGRESS BAR (Ghim sát đáy header mượt mà, không giật layout, không chớp viền) */}
+        <div
+          className={`absolute bottom-0 left-0 right-0 h-[2px] pointer-events-none transition-opacity duration-300 ${isScrolled ? 'opacity-100' : 'opacity-0'
+            }`}
+        >
+          <div
+            className="h-full bg-gradient-to-r from-amber-500 via-[#8C4A32] to-[#4A2C2A] transition-all duration-75 ease-out"
+            style={{ width: `${scrollProgress}%` }}
+          />
+        </div>
+      </header>
+
+      {/* 4. MOBILE DRAWER MENU (Giao diện trượt mềm mại trên thiết bị di động) */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden fixed inset-0 z-50 flex justify-end">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-stone-900/60 backdrop-blur-xs transition-opacity"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+
+          {/* Drawer Content */}
+          <div className="relative w-full max-w-xs bg-white h-full shadow-2xl flex flex-col p-6 overflow-y-auto animate-[fadeIn_0.2s_ease-out]">
+            <div className="flex items-center justify-between pb-5 border-b border-stone-100">
+              <div className="flex items-center gap-2">
+                <img src="/logo.png" alt="CandletShop" className="h-8 w-auto" />
+                <span className="font-serif-display font-bold text-lg text-[#4A2C2A]">CANDLETSHOP</span>
+              </div>
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center text-stone-500 hover:text-stone-800"
+              >
+                <i className="ph-bold ph-x text-base"></i>
+              </button>
+            </div>
+
+            {/* Mobile Nav Links */}
+            <div className="py-6 space-y-2 flex-1">
+              {navLinks.map(link => {
+                const isActive = location.pathname === link.path;
+                return (
+                  <Link
+                    key={link.label}
+                    to={link.path}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${isActive
+                      ? 'bg-[#FAF5EE] text-[#4A2C2A] font-bold border border-amber-200/60'
+                      : 'text-stone-700 hover:bg-stone-50'
+                      }`}
+                  >
+                    <span>{link.label}</span>
+                    <i className="ph-bold ph-caret-right text-xs text-stone-400"></i>
+                  </Link>
+                );
+              })}
+
+              <Link
+                to="/orders"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold text-stone-700 hover:bg-stone-50 transition-colors"
+              >
+                <span>Tra Cứu Đơn Hàng</span>
+                <i className="ph-bold ph-receipt text-base text-stone-400"></i>
+              </Link>
+
+              <Link
+                to="/wishlist"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold text-stone-700 hover:bg-stone-50 transition-colors"
+              >
+                <div className="flex items-center gap-2.5">
+                  <i className="ph-bold ph-heart text-base text-rose-500"></i>
+                  <span>Sản Phẩm Yêu Thích</span>
+                </div>
+                {wishlistCount > 0 && (
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-600">
+                    {wishlistCount}
+                  </span>
+                )}
+              </Link>
+            </div>
+
+            {/* Mobile Footer Area */}
+            <div className="pt-6 border-t border-stone-100 space-y-4">
+              {user ? (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 bg-stone-50 p-3 rounded-xl border border-stone-100">
+                    <div className="w-10 h-10 rounded-full bg-[#4A2C2A] text-white flex items-center justify-center font-bold">
+                      {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-bold text-stone-900 truncate">{user.name}</p>
+                      <p className="text-[11px] text-stone-500 truncate">{user.email}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      logout();
+                      navigate('/login');
+                    }}
+                    className="w-full bg-stone-100 hover:bg-red-50 hover:text-red-600 text-stone-700 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors"
+                  >
+                    Đăng xuất
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  to="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full bg-[#4A2C2A] text-white py-3 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm"
+                >
+                  <i className="ph-bold ph-user"></i>
+                  <span>Đăng nhập ngay</span>
+                </Link>
+              )}
+
+              <p className="text-center text-[11px] text-stone-400">
+                Candlet • Nến thơm thủ công & nghệ thuật
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <main className="flex-1">
+        <Outlet />
+      </main>
+
+      {/* BEGIN: MainFooter (Thiết kế sang trọng, ấm áp phong cách Atelier Nến Thủ Công) */}
+      <footer className="bg-gradient-to-b from-[#2B0C10] via-[#21070A] to-[#150406] text-[#E8D9D5] text-xs mt-auto relative overflow-hidden" data-purpose="main-footer">
+        {/* Họa tiết quầng sáng vàng ấm nghệ thuật */}
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute bottom-0 right-10 w-80 h-80 bg-red-900/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        {/* 1. DẢI GIÁ TRỊ CAM KẾT THỦ CÔNG (TRUST & ARTISAN VALUES BAR) */}
+        <div className="border-b border-white/10 bg-black/20 backdrop-blur-xs">
+          <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8 sm:py-10">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+
+              <div className="flex items-start gap-3.5 group">
+                <div className="w-10 h-10 rounded-xl bg-white/5 border border-amber-400/20 flex items-center justify-center shrink-0 text-amber-300 group-hover:scale-110 group-hover:border-amber-400/50 group-hover:bg-amber-400/10 transition-all duration-300">
+                  <i className="ph-duotone ph-plant text-xl"></i>
+                </div>
+                <div>
+                  <h5 className="font-semibold text-white text-xs sm:text-[13px] tracking-wide mb-1">100% Sáp Thực Vật</h5>
+                  <p className="text-[11px] text-stone-400 leading-relaxed">Sáp đậu nành & sáp cọ tự nhiên, bấc cotton không chì, đốt sạch an toàn.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3.5 group">
+                <div className="w-10 h-10 rounded-xl bg-white/5 border border-amber-400/20 flex items-center justify-center shrink-0 text-amber-300 group-hover:scale-110 group-hover:border-amber-400/50 group-hover:bg-amber-400/10 transition-all duration-300">
+                  <i className="ph-duotone ph-envelope-open text-xl"></i>
+                </div>
+                <div>
+                  <h5 className="font-semibold text-white text-xs sm:text-[13px] tracking-wide mb-1">Thông Điệp Ẩn Độc Bản</h5>
+                  <p className="text-[11px] text-stone-400 leading-relaxed">Lời nhắn bí mật hiện dần sau khi thắp nến, lưu giữ kỷ niệm sâu sắc.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3.5 group">
+                <div className="w-10 h-10 rounded-xl bg-white/5 border border-amber-400/20 flex items-center justify-center shrink-0 text-amber-300 group-hover:scale-110 group-hover:border-amber-400/50 group-hover:bg-amber-400/10 transition-all duration-300">
+                  <i className="ph-duotone ph-drop text-xl"></i>
+                </div>
+                <div>
+                  <h5 className="font-semibold text-white text-xs sm:text-[13px] tracking-wide mb-1">Hương Thơm Trị Liệu</h5>
+                  <p className="text-[11px] text-stone-400 leading-relaxed">Tinh dầu thiên nhiên tinh khiết chuẩn IFRA, nuôi dưỡng tâm trí an yên.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3.5 group">
+                <div className="w-10 h-10 rounded-xl bg-white/5 border border-amber-400/20 flex items-center justify-center shrink-0 text-amber-300 group-hover:scale-110 group-hover:border-amber-400/50 group-hover:bg-amber-400/10 transition-all duration-300">
+                  <i className="ph-duotone ph-gift text-xl"></i>
+                </div>
+                <div>
+                  <h5 className="font-semibold text-white text-xs sm:text-[13px] tracking-wide mb-1">Đóng Gói Quà Nghệ Thuật</h5>
+                  <p className="text-[11px] text-stone-400 leading-relaxed">Hộp quà vintage, tặng kèm diêm dài và thiệp viết tay theo yêu cầu.</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        {/* 2. KHỐI THÔNG TIN CHÍNH (4 CỘT HIỆN ĐẠI & CHI TIẾT) */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 pt-14 pb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 pb-12 border-b border-white/10">
+
+            {/* Cột 1: Câu chuyện & Triết lý thương hiệu (lg:col-span-4) */}
+            <div className="lg:col-span-4 space-y-4">
+              <Link to="/" className="inline-flex items-center gap-3 group focus:outline-none">
+                <img
+                  src="/logo.png"
+                  alt="CandletShop"
+                  className="h-10 sm:h-11 w-auto object-contain brightness-0 invert opacity-95 group-hover:opacity-100 transition-opacity"
+                />
+                <div className="flex flex-col">
+                  <span className="font-serif-display text-xl font-bold tracking-wider text-amber-100">CANDLETSHOP</span>
+                  <span className="text-[9px] uppercase tracking-[0.25em] text-amber-300/70 font-medium">Artisan Botanical Studio</span>
+                </div>
+              </Link>
+
+              <p className="text-[12px] sm:text-[12.5px] text-[#CBB9B4] leading-relaxed max-w-sm">
+                Candlet thắp lên sự bình yên qua những ngọn nến thơm thuần chay và nghệ thuật giấu thông điệp dưới tầng sáp đậu nành ấm áp. Mỗi tác phẩm là một lời sẻ chia chân thành gửi đến người trân quý.
+              </p>
+
+              {/* Huy hiệu cam kết thủ công */}
+              <div className="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10.5px] text-amber-200/90 font-mono">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span>
+                <span>Rót tay tỉ mỉ tại xưởng Sài Gòn</span>
+              </div>
+
+              {/* Thông tin hotline trực tiếp */}
+              <div className="pt-2 flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-amber-500/10 border border-amber-400/30 flex items-center justify-center text-amber-300">
+                  <i className="ph-bold ph-phone-call text-sm"></i>
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase tracking-wider text-stone-400 block font-medium">Hotline tư vấn hương:</span>
+                  <a href="tel:0328624761" className="text-sm font-bold text-white hover:text-amber-300 transition-colors font-mono">
+                    032.862.4761
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Cột 2: Cửa Hàng & Bộ Sưu Tập (lg:col-span-3) */}
+            <div className="lg:col-span-3 space-y-3.5">
+              <h4 className="font-serif-display text-base font-bold text-amber-100 uppercase tracking-widest flex items-center gap-2">
+                <span className="w-4 h-px bg-amber-400/60"></span>
+                Bộ Sưu Tập Nến
+              </h4>
+              <ul className="space-y-2.5 text-[12px]">
+                <li>
+                  <Link to="/shop" className="text-stone-300 hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
+                    <i className="ph ph-arrow-right text-[10px] text-amber-400/60 group-hover:translate-x-1 transition-transform"></i>
+                    <span>Nến Thông Điệp Ẩn Giấu</span>
+                    <span className="text-[9px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-bold uppercase ml-1">Signature</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/shop?tag=Mới" className="text-stone-300 hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
+                    <i className="ph ph-arrow-right text-[10px] text-amber-400/60 group-hover:translate-x-1 transition-transform"></i>
+                    <span>Bộ Sưu Tập Mùa Đông (Winter)</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/shop" className="text-stone-300 hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
+                    <i className="ph ph-arrow-right text-[10px] text-amber-400/60 group-hover:translate-x-1 transition-transform"></i>
+                    <span>Nến Ly Hổ Phách Cổ Điển</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/shop" className="text-stone-300 hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
+                    <i className="ph ph-arrow-right text-[10px] text-amber-400/60 group-hover:translate-x-1 transition-transform"></i>
+                    <span>Tinh Dầu Tán Hương & Xịt Phòng</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/shop" className="text-stone-300 hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
+                    <i className="ph ph-arrow-right text-[10px] text-amber-400/60 group-hover:translate-x-1 transition-transform"></i>
+                    <span>Phụ Kiện Chăm Sóc Nến (Kéo & Dập)</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/shop" className="text-stone-300 hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
+                    <i className="ph ph-arrow-right text-[10px] text-amber-400/60 group-hover:translate-x-1 transition-transform"></i>
+                    <span>Hộp Quà Doanh Nghiệp & Đám Cưới</span>
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Cột 3: Hỗ Trợ Khách Hàng & Trải Nghiệm (lg:col-span-2) */}
+            <div className="lg:col-span-2 space-y-3.5">
+              <h4 className="font-serif-display text-base font-bold text-amber-100 uppercase tracking-widest flex items-center gap-2">
+                <span className="w-4 h-px bg-amber-400/60"></span>
+                Chăm Sóc & Trợ Giúp
+              </h4>
+              <ul className="space-y-2.5 text-[12px]">
+                <li>
+                  <Link to="/orders" className="text-stone-300 hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
+                    <i className="ph ph-receipt text-xs text-amber-400/60"></i>
+                    <span>Tra Cứu Đơn Hàng</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/guide" className="text-stone-300 hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
+                    <i className="ph ph-book-open text-xs text-amber-400/60"></i>
+                    <span>Cẩm Nang Chăm Sóc Nến</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/stories" className="text-stone-300 hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
+                    <i className="ph ph-article text-xs text-amber-400/60"></i>
+                    <span>Câu Chuyện & Blog Nến Thơm</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/" className="text-stone-300 hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
+                    <i className="ph ph-arrows-clockwise text-xs text-amber-400/60"></i>
+                    <span>Chính Sách Đổi Trả 1 - 1</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/" className="text-stone-300 hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
+                    <i className="ph ph-truck text-xs text-amber-400/60"></i>
+                    <span>Vận Chuyển Toàn Quốc</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/" className="text-stone-300 hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
+                    <i className="ph ph-question text-xs text-amber-400/60"></i>
+                    <span>Câu Hỏi Thường Gặp (FAQ)</span>
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Cột 4: Atelier & Kết Nối (lg:col-span-3) */}
+            <div className="lg:col-span-3 space-y-3.5">
+              <h4 className="font-serif-display text-base font-bold text-amber-100 uppercase tracking-widest flex items-center gap-2">
+                <span className="w-4 h-px bg-amber-400/60"></span>
+                Atelier & Ghé Thăm
+              </h4>
+              <div className="space-y-3 text-[12px] text-stone-300">
+                <div className="flex items-start gap-2.5">
+                  <i className="ph ph-map-pin text-amber-300 text-base mt-0.5 shrink-0"></i>
+                  <span>{shopAddress || 'Địa chỉ shop đang được cập nhật'}</span>
+                </div>
+                <div className="flex items-center gap-2.5">
+                  <i className="ph ph-envelope-simple text-amber-300 text-base shrink-0"></i>
+                  <a href="mailto:hello@candlet.vn" className="hover:text-amber-200 transition-colors font-mono">
+                    candlet.official@gmail.com
+                  </a>
+                </div>
+                <div className="flex items-center gap-2.5">
+                  <i className="ph ph-clock text-amber-300 text-base shrink-0"></i>
+                  <span>Mở cửa: 09:00 - 21:00 (Thứ 2 - CN)</span>
+                </div>
+              </div>
+
+              {/* Phương thức thanh toán được hỗ trợ */}
+              <div className="pt-3 border-t border-white/10">
+                <span className="text-[10px] uppercase tracking-wider text-stone-400 block mb-2 font-medium">Thanh toán an toàn tiện lợi</span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="px-2 py-1 rounded bg-white/10 border border-white/15 text-[10px] font-mono text-amber-100">VietQR</span>
+                  <span className="px-2 py-1 rounded bg-white/10 border border-white/15 text-[10px] font-mono text-amber-100">MoMo</span>
+                  <span className="px-2 py-1 rounded bg-white/10 border border-white/15 text-[10px] font-mono text-amber-100">COD</span>
+                  <span className="px-2 py-1 rounded bg-white/10 border border-white/15 text-[10px] font-mono text-amber-100">Visa / Master</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          {/* 3. DÒNG BẢN QUYỀN & MẠNG XÃ HỘI (BOTTOM BAR) */}
+          <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-[11px] text-stone-400 gap-4">
+            <div className="text-center sm:text-left">
+              © 2026 Candlet Vietnam. Bảo lưu mọi quyền. Nghệ thuật nến thơm chánh niệm & thông điệp cảm xúc.
+            </div>
+
+            {/* Các icon Mạng xã hội với hiệu ứng hover sang trọng */}
+            <div className="flex items-center space-x-3 text-lg">
+              <a
+                href="https://instagram.com"
+                target="_blank"
+                rel="noreferrer"
+                className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-amber-200/80 hover:text-white hover:bg-amber-500/20 hover:border-amber-400/40 hover:scale-110 transition-all"
+                title="Theo dõi Candlet trên Instagram"
+              >
+                <i className="ph ph-instagram-logo"></i>
+              </a>
+              <a
+                href="https://facebook.com"
+                target="_blank"
+                rel="noreferrer"
+                className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-amber-200/80 hover:text-white hover:bg-amber-500/20 hover:border-amber-400/40 hover:scale-110 transition-all"
+                title="Theo dõi Candlet trên Facebook"
+              >
+                <i className="ph ph-facebook-logo"></i>
+              </a>
+              <a
+                href="https://tiktok.com"
+                target="_blank"
+                rel="noreferrer"
+                className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-amber-200/80 hover:text-white hover:bg-amber-500/20 hover:border-amber-400/40 hover:scale-110 transition-all"
+                title="Theo dõi Candlet trên TikTok"
+              >
+                <i className="ph ph-tiktok-logo"></i>
+              </a>
+              <a
+                href="https://pinterest.com"
+                target="_blank"
+                rel="noreferrer"
+                className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-amber-200/80 hover:text-white hover:bg-amber-500/20 hover:border-amber-400/40 hover:scale-110 transition-all"
+                title="Khám phá cảm hứng trên Pinterest"
+              >
+                <i className="ph ph-pinterest-logo"></i>
+              </a>
+
+              {/* Nút cuộn nhanh lên đầu trang */}
+              <button
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                className="w-8 h-8 rounded-full bg-amber-500/10 border border-amber-400/30 flex items-center justify-center text-amber-300 hover:text-white hover:bg-amber-500/30 hover:scale-110 transition-all ml-2"
+                title="Cuộn lên đầu trang"
+              >
+                <i className="ph-bold ph-arrow-up text-xs"></i>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </footer>
+    </div>
+  );
+}

@@ -5,6 +5,7 @@ import { orderService } from '../services/orderService';
 import { fundService } from '../services/fundService';
 import { couponService } from '../services/couponService';
 import { printInvoice } from '../utils/printInvoice';
+import { getImageUrl } from '../utils/imageUtils';
 
 const formatPrice = (n) =>
   Math.round(n ?? 0).toLocaleString('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 });
@@ -286,7 +287,7 @@ export default function POS() {
                   >
                     <div className="aspect-square bg-surface-container-low flex items-center justify-center overflow-hidden">
                       {product.image ? (
-                        <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                        <img src={getImageUrl(product.image)} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                       ) : (
                         <span className="material-symbols-outlined text-[40px] text-on-surface-variant/30">image</span>
                       )}

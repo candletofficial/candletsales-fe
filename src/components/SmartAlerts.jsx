@@ -148,7 +148,7 @@ export default function SmartAlerts() {
         {/* Modal Body */}
         <div className="p-6">
           <p className="text-gray-600 text-[14px] mb-5">
-            Dựa trên dữ liệu kinh doanh gần nhất, AI của hệ thống Candlet Sales xin gửi đến bạn những lưu ý sau:
+            Dựa trên dữ liệu kinh doanh gần nhất, AI của hệ thống CandletShop xin gửi đến bạn những lưu ý sau:
           </p>
           
           <div className="relative flex flex-col max-h-[60vh] overflow-y-auto custom-scrollbar pr-2">

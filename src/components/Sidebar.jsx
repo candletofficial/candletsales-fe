@@ -8,7 +8,7 @@ const NAV_ITEMS = [
     label: 'Tổng quan',
   },
   {
-    to: '/dashboard',
+    to: '/admin/dashboard',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <rect x="3" y="3" width="7" height="7" rx="1" />
@@ -24,7 +24,7 @@ const NAV_ITEMS = [
     label: 'Quản lý Kho',
   },
   {
-    to: '/materials',
+    to: '/admin/materials',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
@@ -35,14 +35,14 @@ const NAV_ITEMS = [
     label: 'Nguyên vật liệu',
   },
   {
-    to: '/imports',
+    to: '/admin/imports',
     icon: (
       <span className="material-symbols-outlined text-[20px]">local_shipping</span>
     ),
     label: 'Nhập hàng',
   },
   {
-    to: '/inventory-checks',
+    to: '/admin/inventory-checks',
     icon: (
       <span className="material-symbols-outlined text-[20px]">fact_check</span>
     ),
@@ -53,7 +53,7 @@ const NAV_ITEMS = [
     label: 'Bán hàng',
   },
   {
-    to: '/products',
+    to: '/admin/products',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M20 16.2A2 2 0 0 0 21 14.5V9.5A2 2 0 0 0 20 7.8L13 3.8a2 2 0 0 0-2 0L4 7.8A2 2 0 0 0 3 9.5v5A2 2 0 0 0 4 16.2l7 4a2 2 0 0 0 2 0l7-4z" />
@@ -65,14 +65,14 @@ const NAV_ITEMS = [
     label: 'Sản phẩm',
   },
   {
-    to: '/pos',
+    to: '/admin/pos',
     icon: (
       <span className="material-symbols-outlined text-[20px]">point_of_sale</span>
     ),
     label: 'POS Bán hàng',
   },
   {
-    to: '/orders',
+    to: '/admin/orders',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
@@ -88,21 +88,21 @@ const NAV_ITEMS = [
     label: 'Tài chính & Marketing',
   },
   {
-    to: '/fund',
+    to: '/admin/fund',
     icon: (
       <span className="material-symbols-outlined text-[20px]">account_balance</span>
     ),
     label: 'Tài sản chung',
   },
   {
-    to: '/expenses',
+    to: '/admin/expenses',
     icon: (
       <span className="material-symbols-outlined text-[20px]">receipt_long</span>
     ),
     label: 'Chi tiêu',
   },
   {
-    to: '/ad-costs',
+    to: '/admin/ad-costs',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
@@ -111,11 +111,18 @@ const NAV_ITEMS = [
     label: 'Chi phí Quảng cáo',
   },
   {
-    to: '/coupons',
+    to: '/admin/coupons',
     icon: (
       <span className="material-symbols-outlined text-[20px]">local_offer</span>
     ),
     label: 'Khuyến mãi',
+  },
+  {
+    to: '/admin/posts',
+    icon: (
+      <span className="material-symbols-outlined text-[20px]">auto_stories</span>
+    ),
+    label: 'Bài viết & Câu chuyện',
   },
   {
     isSection: true,
@@ -129,7 +136,7 @@ const NAV_ITEMS = [
     ),
     children: [
       {
-        to: '/tools/shopee',
+        to: '/admin/tools/shopee',
         icon: (
           <span className="w-5 h-5 rounded flex-shrink-0 overflow-hidden">
             <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -141,7 +148,7 @@ const NAV_ITEMS = [
         label: 'Shopee',
       },
       {
-        to: '/tools/tiktok',
+        to: '/admin/tools/tiktok',
         icon: (
           <span className="w-5 h-5 bg-[#010101] rounded flex items-center justify-center flex-shrink-0">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.23 8.23 0 004.84 1.56V6.79a4.85 4.85 0 01-1.07-.1z"/></svg>
@@ -157,7 +164,7 @@ const NAV_ITEMS = [
     label: 'Hệ thống',
   },
   {
-    to: '/users',
+    to: '/admin/users',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -176,20 +183,20 @@ export default function Sidebar({ isOpen, onClose }) {
   const location = useLocation();
   const [openGroups, setOpenGroups] = useState(() => {
     // Auto-open if on a tool page
-    return location.pathname.startsWith('/tools') ? { 'Công cụ tính': true } : {};
+    return location.pathname.startsWith('/admin/tools') ? { 'Công cụ tính': true } : {};
   });
 
   const toggleGroup = (label) => setOpenGroups(g => ({ ...g, [label]: !g[label] }));
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/admin/login');
   };
 
   return (
     <aside className={`sidebar z-40 ${isOpen ? 'open' : ''}`}>
       <div className="sidebar-brand flex items-center justify-center">
-        <img src="/logo.png" alt="Candlet Shop" className="h-[48px] w-auto object-contain drop-shadow-sm" />
+        <img src="/logo.png" alt="CandletShop" className="h-[48px] w-auto object-contain drop-shadow-sm" />
       </div>
 
       <nav className="sidebar-nav overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-gray-300">
@@ -255,7 +262,7 @@ export default function Sidebar({ isOpen, onClose }) {
 
       <div className="sidebar-footer">
         <NavLink
-          to="/settings"
+          to="/admin/settings"
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
         >
           <span className="material-symbols-outlined text-[20px]">settings</span>

@@ -18,7 +18,14 @@ export function AuthProvider({ children }) {
     if (token) {
       authService
         .getMe()
-        .then((res) => setUser(res.data.data))
+        .then((res) => {
+          if (res.data?.data) {
+            setUser(res.data.data);
+            try {
+              localStorage.setItem('user', JSON.stringify(res.data.data));
+            } catch (e) {}
+          }
+        })
         .catch(() => logout())
         .finally(() => setLoading(false));
     } else {
@@ -41,8 +48,14 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  const updateUser = (updatedData) => {
+    const newUser = { ...user, ...updatedData };
+    setUser(newUser);
+    localStorage.setItem('user', JSON.stringify(newUser));
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, updateUser, loading }}>
       {children}
     </AuthContext.Provider>
   );

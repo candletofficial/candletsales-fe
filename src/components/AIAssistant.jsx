@@ -133,7 +133,7 @@ export default function AIAssistant({ periodLabel = 'Tháng này' }) {
       setMessages([
         {
           role: 'assistant',
-          content: `Xin chào! Tôi là **AI Business Analyst** của Candlet Sales 🕯️\n\nTôi có thể giúp bạn phân tích dữ liệu kinh doanh, đưa ra nhận xét và gợi ý cải thiện dựa trên số liệu thực tế của cửa hàng.\n\nBạn muốn hỏi gì hôm nay?`,
+          content: `Xin chào! Tôi là **AI Business Analyst** của CandletShop 🕯️\n\nTôi có thể giúp bạn phân tích dữ liệu kinh doanh, đưa ra nhận xét và gợi ý cải thiện dựa trên số liệu thực tế của cửa hàng.\n\nBạn muốn hỏi gì hôm nay?`,
         },
       ]);
     }

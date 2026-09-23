@@ -12,6 +12,11 @@ export default function ProtectedRoute({ children }) {
     );
   }
 
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/admin/login" replace />;
+
+  // JWT của khách hàng vẫn hợp lệ cho các API shop, nhưng không được phép
+  // hiển thị bất kỳ màn hình quản trị nào ở frontend.
+  if (user.role !== 'admin') return <Navigate to="/" replace />;
+
   return children;
 }

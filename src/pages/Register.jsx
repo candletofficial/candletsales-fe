@@ -186,7 +186,7 @@ export default function Register() {
         <div className="text-center pt-6 mt-6 border-t border-[#f1f5f9]">
           <p className="text-[13px] font-medium text-[#475569]">
             Đã có tài khoản?{' '}
-            <Link to="/login" className="font-bold text-[#1d4ed8] hover:text-[#1e3a8a] hover:underline transition-colors ml-1">Đăng nhập</Link>
+            <Link to="/admin/login" className="font-bold text-[#1d4ed8] hover:text-[#1e3a8a] hover:underline transition-colors ml-1">Đăng nhập</Link>
           </p>
         </div>
       </div>
