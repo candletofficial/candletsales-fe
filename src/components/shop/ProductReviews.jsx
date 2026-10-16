@@ -119,14 +119,14 @@ export default function ProductReviews({ productId }) {
 
   if (loading) {
     return (
-      <div className="bg-[#FFFDF9] py-16 mt-16 border-t border-stone-200 flex justify-center">
+      <div className="bg-[#FFFDF9] pt-10 sm:pt-16 pb-6 sm:pb-8 mt-12 sm:mt-16 border-t border-stone-200 flex justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4A2C2A]"></div>
       </div>
     );
   }
 
   return (
-    <div className="bg-[#FFFDF9] py-16 mt-16 border-t border-stone-200 relative">
+    <div className="bg-[#FFFDF9] pt-10 sm:pt-16 pb-4 sm:pb-8 mt-12 sm:mt-16 border-t border-stone-200 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-8">
         
         {/* Header */}
@@ -361,27 +361,30 @@ export default function ProductReviews({ productId }) {
         
       </div>
 
-      {/* Write Review Modal */}
+      {/* Write Review Modal / Bottom Sheet on mobile */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-lg w-full p-8 relative">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center z-50 p-0 sm:p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-t-3xl sm:rounded-2xl max-w-lg w-full p-6 sm:p-8 relative max-h-[90vh] overflow-y-auto shadow-2xl animate-in slide-in-from-bottom-4 duration-300">
+            {/* Mobile drag handle indicator */}
+            <div className="w-12 h-1.5 bg-stone-300 rounded-full mx-auto mb-4 sm:hidden"></div>
+            
             <button 
               onClick={() => setShowModal(false)}
-              className="absolute top-4 right-4 text-stone-400 hover:text-stone-700"
+              className="absolute top-5 right-5 w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center text-stone-500 hover:text-stone-800 transition-colors cursor-pointer"
             >
-              <i className="ph ph-x text-xl"></i>
+              <i className="ph ph-x text-lg"></i>
             </button>
-            <h3 className="text-2xl font-serif-display text-[#4A2C2A] mb-6">Viết Đánh Giá</h3>
+            <h3 className="text-xl sm:text-2xl font-serif-display text-[#4A2C2A] mb-5">Viết Đánh Giá Của Bạn</h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-bold text-stone-700 mb-2">Đánh giá của bạn</label>
-                <div className="flex gap-2">
+                <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Đánh giá số sao</label>
+                <div className="flex gap-2.5">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
                       key={star}
                       type="button"
                       onClick={() => setRating(star)}
-                      className="text-2xl focus:outline-none"
+                      className="text-3xl focus:outline-none cursor-pointer active:scale-90 transition-transform"
                     >
                       <i className={`${star <= rating ? 'ph-fill text-[#B45309]' : 'ph text-stone-300'} ph-star`}></i>
                     </button>
@@ -389,33 +392,33 @@ export default function ProductReviews({ productId }) {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-bold text-stone-700 mb-2">Tiêu đề</label>
+                <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1.5">Tiêu đề cảm nhận</label>
                 <input 
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full border border-stone-300 rounded px-4 py-2 focus:outline-none focus:border-[#4A2C2A]"
-                  placeholder="Ví dụ: Mùi hương tuyệt vời"
+                  className="w-full border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#4A2C2A] bg-stone-50/50"
+                  placeholder="Ví dụ: Hương thơm gỗ thông ấm cúng..."
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-bold text-stone-700 mb-2">Nội dung đánh giá</label>
+                <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1.5">Chi tiết trải nghiệm</label>
                 <textarea 
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  className="w-full border border-stone-300 rounded px-4 py-2 focus:outline-none focus:border-[#4A2C2A] min-h-[100px]"
-                  placeholder="Chia sẻ cảm nhận của bạn về sản phẩm này..."
+                  className="w-full border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#4A2C2A] min-h-[110px] bg-stone-50/50"
+                  placeholder="Chia sẻ cảm nhận về độ tỏa hương, thời gian cháy, thẩm mỹ hũ nến..."
                   required
                 ></textarea>
               </div>
-              <div className="pt-4">
+              <div className="pt-2">
                 <button 
                   type="submit"
                   disabled={submitting}
-                  className="w-full bg-[#4A2C2A] hover:bg-[#3A2221] text-white font-bold py-3 rounded disabled:opacity-50"
+                  className="w-full bg-[#4A2C2A] hover:bg-[#3A2221] active:bg-[#2A1817] text-white font-bold py-3.5 rounded-xl uppercase tracking-wider text-xs transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer shadow-md"
                 >
-                  {submitting ? 'Đang gửi...' : 'Gửi Đánh Giá'}
+                  {submitting ? 'Đang gửi đánh giá...' : 'Gửi Đánh Giá'}
                 </button>
               </div>
             </form>

@@ -32,7 +32,7 @@ export const getImageUrl = (path) => {
 /**
  * Kiểm tra xem một URL/đường dẫn ảnh có phải là file tải lên lưu trữ nội bộ trên máy chủ hay không
  */
-export const isLocalUploadedImage = (path) => {
+export const isManagedUploadedImage = (path) => {
   if (!path || typeof path !== 'string') return false;
-  return path.includes('/uploads/') || path.startsWith('uploads/');
+  return path.includes('/uploads/') || path.startsWith('uploads/') || path.includes('res.cloudinary.com/');
 };

@@ -296,6 +296,7 @@ export default function FundManagement() {
       case 'admin_deposit': return { label: 'Góp vốn', color: 'bg-[#d1fae5] text-[#059669]' };
       case 'admin_withdrawal': return { label: 'Rút vốn', color: 'bg-[#fee2e2] text-[#dc2626]' };
       case 'revenue_withdrawal': return { label: 'Rút doanh thu', color: 'bg-[#dbeafe] text-[#2563eb]' };
+      case 'ad_topup': return { label: 'Nạp quảng cáo', color: 'bg-purple-100 text-purple-700' };
       case 'import_payment': return { label: 'Thanh toán PN', color: 'bg-[#fee2e2] text-[#dc2626]' };
       case 'expense_payment': return { label: 'Chi tiêu', color: 'bg-orange-100 text-orange-700' };
       case 'system_adjustment': return { label: 'Đồng bộ hệ thống', color: 'bg-surface-container-high text-on-surface-variant' };
@@ -477,6 +478,7 @@ export default function FundManagement() {
                 <option value="admin_deposit">Góp vốn</option>
                 <option value="admin_withdrawal">Rút vốn</option>
                 <option value="revenue_withdrawal">Rút doanh thu</option>
+                <option value="ad_topup">Nạp quảng cáo</option>
                 <option value="import_payment">Thanh toán PN</option>
                 <option value="seeding_payment">Chi phí Seeding</option>
                 <option value="shipping_payment">Phí Ship</option>
@@ -542,12 +544,18 @@ export default function FundManagement() {
                           <span className={`font-bold text-[14px] ${displayChange >= 0 ? 'text-[#059669]' : 'text-[#dc2626]'}`}>
                             {displayChange > 0 ? '+' : ''}{formatPrice(displayChange)}
                           </span>
+                          {t.funding_source === 'platform' && (
+                            <p className="mt-1 text-[11px] text-on-surface-variant">Trừ số dư {t.source}, đã gồm phí</p>
+                          )}
                         </td>
                         <td className="px-6 py-3 text-[13px] text-on-surface-variant font-medium">
                           {t.fee > 0 ? formatPrice(t.fee) : '-'}
                         </td>
-                        <td className="px-6 py-3 text-[13px] text-on-surface max-w-[250px] truncate" title={t.note}>
-                          {t.note || '-'}
+                        <td className="px-6 py-3 text-[13px] text-on-surface max-w-[250px]" title={t.note}>
+                          <p className="truncate">{t.note || '-'}</p>
+                          {t.type === 'ad_topup' && (
+                            <p className="mt-1 text-[11px] text-on-surface-variant">Vào tài khoản quảng cáo: {formatPrice(t.amount)}</p>
+                          )}
                         </td>
                         <td className="px-6 py-3 text-[13px] font-semibold text-right">
                           {t.created_by}

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { orderService } from '../../services/orderService';
+import { getImageUrl } from '../../utils/imageUtils';
 
 export default function ShopOrders() {
   const { user } = useAuth();
@@ -374,27 +375,28 @@ export default function ShopOrders() {
         {/* ======================================================== */}
         {/* TABS TRẠNG THÁI GIAO HÀNG VỚI SỐ ĐẾM ĐỘNG                */}
         {/* ======================================================== */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs font-semibold scrollbar-none">
+        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar pb-1 text-xs font-semibold -mx-2 px-2 sm:mx-0 sm:px-0">
           {[
-            { key: 'all', label: 'Tất cả', count: counts.all },
-            { key: 'pending', label: 'Chờ xác nhận', count: counts.pending },
-            { key: 'confirmed', label: 'Đã chấp nhận', count: counts.confirmed },
-            { key: 'shipping', label: 'Đang giao', count: counts.shipping },
-            { key: 'delivered', label: 'Giao thành công', count: counts.delivered },
-            { key: 'cancelled', label: 'Đã huỷ / Hoàn', count: counts.cancelled },
+            { key: 'all', label: 'Tất cả', icon: 'ph-squares-four', count: counts.all },
+            { key: 'pending', label: 'Chờ duyệt', icon: 'ph-clock', count: counts.pending },
+            { key: 'confirmed', label: 'Đã nhận', icon: 'ph-package', count: counts.confirmed },
+            { key: 'shipping', label: 'Đang giao', icon: 'ph-truck', count: counts.shipping },
+            { key: 'delivered', label: 'Đã giao', icon: 'ph-check-circle', count: counts.delivered },
+            { key: 'cancelled', label: 'Đã huỷ', icon: 'ph-prohibit', count: counts.cancelled },
           ].map(tab => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`px-4 py-2.5 rounded-2xl whitespace-nowrap transition-all cursor-pointer flex items-center gap-2 border ${
+              className={`px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 border active:scale-95 text-xs shadow-2xs ${
                 activeTab === tab.key
-                  ? 'bg-[#4A2C2A] text-white border-[#4A2C2A] font-bold shadow-xs'
+                  ? 'bg-[#4A2C2A] text-white border-[#4A2C2A] font-bold'
                   : 'bg-white text-stone-600 hover:text-stone-900 border-stone-200/80 hover:bg-stone-50'
               }`}
             >
+              <i className={`ph-bold ${tab.icon} text-xs ${activeTab === tab.key ? 'text-amber-300' : 'text-stone-400'}`}></i>
               <span>{tab.label}</span>
               {tab.count > 0 && (
-                <span className={`px-2 py-0.2 rounded-full text-[10.5px] font-bold ${
+                <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
                   activeTab === tab.key
                     ? 'bg-white/20 text-white'
                     : 'bg-stone-100 text-stone-600'
@@ -623,7 +625,7 @@ export default function ShopOrders() {
                         <div className="flex items-center gap-3.5 min-w-0">
                           {item.product_image ? (
                             <img
-                              src={item.product_image}
+                              src={getImageUrl(item.product_image)}
                               alt={item.product_name}
                               className="w-14 h-14 sm:w-16 sm:h-16 object-cover rounded-2xl border border-stone-200 shrink-0 shadow-2xs hover:scale-105 transition-transform"
                             />
@@ -778,8 +780,8 @@ export default function ShopOrders() {
       {/* MODAL XEM CHI TIẾT ĐƠN HÀNG TOÀN DIỆN                    */}
       {/* ======================================================== */}
       {selectedOrderDetail && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-xs animate-[fadeIn_0.2s_ease-out]">
-          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-stone-200 max-h-[90vh] overflow-y-auto space-y-6">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-stone-900/60 backdrop-blur-xs animate-[fadeIn_0.2s_ease-out]">
+          <div className="bg-white rounded-t-3xl sm:rounded-3xl max-w-2xl w-full p-5 sm:p-8 shadow-2xl border border-stone-200 max-h-[88vh] sm:max-h-[90vh] overflow-y-auto space-y-5 sm:space-y-6 no-scrollbar">
             {/* Header Modal */}
             <div className="flex items-center justify-between pb-4 border-b border-stone-100">
               <div className="flex items-center gap-2.5">
@@ -938,8 +940,8 @@ export default function ShopOrders() {
       {/* MODAL HUỶ ĐƠN HÀNG CẢI TIẾN                              */}
       {/* ======================================================== */}
       {cancelModalOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-xs animate-[fadeIn_0.2s_ease-out]">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-stone-200 space-y-5">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-stone-900/60 backdrop-blur-xs animate-[fadeIn_0.2s_ease-out]">
+          <div className="bg-white rounded-t-3xl sm:rounded-3xl max-w-md w-full p-5 sm:p-8 shadow-2xl border border-stone-200 space-y-4 sm:space-y-5 max-h-[90vh] overflow-y-auto no-scrollbar">
             <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto text-2xl">
               <i className="ph-bold ph-warning"></i>
             </div>

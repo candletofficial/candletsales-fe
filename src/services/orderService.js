@@ -5,6 +5,8 @@ export const orderService = {
   getOrder: (id) => api.get(`/orders/${id}`),
   createOrder: (data) => api.post('/orders', data),
   updateOrder: (id, data) => api.put(`/orders/${id}`, data),
+  getItemMaterials: (id, index) => api.get(`/orders/${id}/items/${index}/materials`),
+  updateItemMaterials: (id, index, data) => api.put(`/orders/${id}/items/${index}/materials`, data),
   deleteOrder: (id, restoreStock = false) => api.delete(`/orders/${id}?restoreStock=${restoreStock}`),
   markAsReturned: (id, returnCost) => api.patch(`/orders/${id}/return`, { returnCost }),
   markAsRefunded: (id, refundTransactionId) => api.patch(`/orders/${id}/refund`, { refund_transaction_id: refundTransactionId }),

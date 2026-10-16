@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Layout from '../components/Layout';
+import OrderItemMaterialsModal from '../components/OrderItemMaterialsModal';
+import OrderCustomerDetails from '../components/OrderCustomerDetails';
 import { orderService } from '../services/orderService';
 import { productService } from '../services/productService';
 import { couponService } from '../services/couponService';
@@ -8,6 +10,7 @@ import systemConfigService from '../services/systemConfigService';
 import { fundService } from '../services/fundService';
 import { printInvoice } from '../utils/printInvoice';
 import { getImageUrl } from '../utils/imageUtils';
+import { shippingDiscountLabel, shippingDiscountConditions } from '../utils/couponUtils';
 
 // ── Helpers ────────────────────────────────────────────────────────
 const formatPrice = (n) =>
@@ -22,9 +25,10 @@ const today = () => {
 };
 
 // ── Modal Tạo / Chỉnh sửa đơn hàng ───────────────────────────────
-function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, isReplacementMode = false, isSeedingMode = false }) {
+function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, onMaterialsSaved, isReplacementMode = false, isSeedingMode = false }) {
   const isEdit = !!order;
   const [items, setItems] = useState(order?.items?.map(i => ({ ...i })) || []);
+  const [materialsIndex, setMaterialsIndex] = useState(null);
   // totalPrice = tiền hàng thuần (chưa bao gồm shipping_fee của khách, chưa trừ discount)
   const [totalPrice, setTotalPrice] = useState(order ? (() => {
     if (order.source === 'website') {
@@ -142,16 +146,20 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
   const [availableCoupons, setAvailableCoupons] = useState([]);
 
   useEffect(() => {
-    couponService.getCoupons().then(res => {
+    let active = true;
+    setAvailableCoupons([]);
+    couponService.getCoupons(source).then(res => {
       // Chỉ lấy những mã đang active và còn hạn, còn lượt
       const valid = res.data.data.filter(c => 
-        c.is_active && 
+        (source === 'website' || (c.type !== 'freeship' && !c.is_website_only)) &&
+        c.is_active && new Date() >= new Date(c.start_date) &&
         new Date() <= new Date(c.end_date) && 
         c.used_count < c.quantity
       );
-      setAvailableCoupons(valid);
+      if (active) setAvailableCoupons(valid);
     }).catch(err => console.error('Failed to load coupons', err));
-  }, []);
+    return () => { active = false; };
+  }, [source]);
 
   // Tính tổng tự động
   const calcTotal = useCallback(() => {
@@ -233,7 +241,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
     setValidatingCoupon(true);
     setCouponError('');
     try {
-      const res = await couponService.validateCoupon(discountCodeInput, items, totalPrice);
+      const res = await couponService.validateCoupon(discountCodeInput, items, totalPrice, source === 'website' ? shippingFee : 0, source);
       const data = res.data.data;
       setAppliedDiscount({ code: data.code, amount: data.discount_amount });
     } catch (err) {
@@ -841,7 +849,14 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                         <button
                           key={src.id}
                           type="button"
-                          onClick={() => setSource(src.id)}
+                          onClick={() => {
+                            if (source !== src.id) {
+                              setSource(src.id);
+                              setDiscountCodeInput('');
+                              setAppliedDiscount({ code: null, amount: 0 });
+                              setCouponError('');
+                            }
+                          }}
                           className={`px-2 py-1.5 rounded-xl border text-[11px] font-bold transition-all cursor-pointer text-center truncate ${
                             isSelected
                               ? 'bg-primary border-primary text-white shadow-xs'
@@ -869,6 +884,10 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                   />
                 </div>
               </div>
+
+              {isEdit && (order.pancake_order_id || (source !== 'website' && source !== 'pos')) && (
+                <OrderCustomerDetails order={order} name={customerName} phone={customerPhone} address={customerAddress} />
+              )}
 
               {/* Card 2: Thông tin khách hàng & Giao nhận (Website / POS / Khách lẻ) */}
               {(source === 'website' || source === 'pos') && (
@@ -1130,6 +1149,19 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                             <p className="text-[11px] text-stone-400 mt-0.5">
                               Đơn giá: <strong className="text-stone-700 font-mono">{formatPrice(isReplacementMode ? (item.unit_cost || 0) : item.unit_price)}</strong>
                             </p>
+                            <button
+                              type="button"
+                              onClick={() => setMaterialsIndex(idx)}
+                              disabled={!isEdit || isReturned || order?.status === 'cancelled' || ['failed', 'cancelled'].includes(order?.delivery_status)
+                                || order?.items?.[idx]?.product_id !== item.product_id
+                                || order?.items?.[idx]?.sku_id !== item.sku_id
+                                || order?.items?.[idx]?.quantity !== item.quantity}
+                              title={isReturned || order?.status === 'cancelled' ? 'Đơn đã hoàn hoặc huỷ không được đổi nguyên liệu' : 'Lưu đơn và số lượng sản phẩm trước khi đổi nguyên liệu'}
+                              className="mt-1 inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-[11px] font-semibold text-primary no-underline transition-colors cursor-pointer enabled:hover:bg-blue-50 enabled:hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:text-stone-400 disabled:cursor-not-allowed"
+                            >
+                              <span aria-hidden="true" className="material-symbols-outlined shrink-0 text-[14px] leading-none">tune</span>
+                              {item.material_overrides ? 'Nguyên liệu riêng · Chỉnh sửa' : 'Đổi nguyên liệu'}
+                            </button>
                           </div>
                         </div>
 
@@ -1204,7 +1236,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                       <option value="">-- Chọn mã giảm giá --</option>
                       {availableCoupons.map(c => (
                         <option key={c._id} value={c.code}>
-                          {c.code} — {c.name} ({c.type === 'percent' ? `Giảm ${c.value}%` : `Giảm ${formatPrice(c.value)}`})
+                          {c.code} — {c.name} ({c.type === 'freeship' ? `${shippingDiscountLabel(c)} • ${shippingDiscountConditions(c)}` : c.type === 'percent' ? `Giảm ${c.value}%` : `Giảm ${formatPrice(c.value)}`})
                         </option>
                       ))}
                       {discountCodeInput && !availableCoupons.find(c => c.code === discountCodeInput) && (
@@ -1244,10 +1276,34 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                   </div>
 
                   <div className="space-y-2 text-[13px]">
-                    <div className="flex justify-between text-stone-600">
-                      <span>Tạm tính tiền hàng:</span>
-                      <span className="font-mono font-semibold text-stone-900">{formatPrice(totalPrice)}</span>
+                    <div className="flex items-center justify-between gap-3 text-stone-600">
+                      <label htmlFor="order-subtotal">Tạm tính tiền hàng:</label>
+                      {autoTotal ? (
+                        <span className="font-mono font-semibold text-stone-900">{formatPrice(totalPrice)}</span>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <input
+                            id="order-subtotal"
+                            type="number"
+                            min="0"
+                            step="1"
+                            required
+                            value={totalPrice}
+                            onChange={e => {
+                              setTotalPrice(e.target.value === '' ? '' : Number(e.target.value));
+                              setAppliedDiscount({ code: null, amount: 0 });
+                            }}
+                            className="w-36 sm:w-44 min-w-0 rounded-lg border border-blue-200 bg-white px-3 py-2 text-right font-mono font-semibold text-stone-900 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                          />
+                          <span className="font-semibold">đ</span>
+                        </div>
+                      )}
                     </div>
+                    {!autoTotal && (
+                      <p className="text-[11px] text-stone-500">
+                        Nhập tiền hàng trước phí vận chuyển và giảm giá. Áp dụng lại voucher sau khi đổi số tiền.
+                      </p>
+                    )}
 
                     {/* Phí vận chuyển khách trả — chỉ đơn website */}
                     {source === 'website' ? (
@@ -1463,6 +1519,22 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
             </div>
           </div>
         </div>
+      )}
+
+      {materialsIndex !== null && items[materialsIndex] && (
+        <OrderItemMaterialsModal
+          orderId={order._id}
+          index={materialsIndex}
+          item={items[materialsIndex]}
+          onClose={() => setMaterialsIndex(null)}
+          onSaved={({ item, order: updatedOrder }) => {
+            setItems(current => current.map((currentItem, index) => index === materialsIndex
+              ? { ...currentItem, material_overrides: item.material_overrides, materials_key: item.materials_key, unit_cost: item.unit_cost }
+              : currentItem));
+            setMaterialsIndex(null);
+            onMaterialsSaved?.(updatedOrder);
+          }}
+        />
       )}
 
       {/* Deposit Fund Sub-modal */}
@@ -2295,6 +2367,11 @@ export default function OrderManagement() {
           onSave={handleSave}
           onDelete={() => setModal({ type: 'delete', data: modal.data })}
           onMarkReturn={() => setModal({ type: 'return', data: modal.data })}
+          onMaterialsSaved={updatedOrder => {
+            setOrders(current => current.map(order => order._id === updatedOrder._id ? updatedOrder : order));
+            setModal(current => ({ ...current, data: updatedOrder }));
+            showToast('Đã đổi nguyên liệu và cập nhật tồn kho');
+          }}
           isReplacementMode={modal.data?.is_replacement}
           isSeedingMode={modal.data?.is_seeding}
         />
@@ -2757,7 +2834,7 @@ export default function OrderManagement() {
                         {/* 5. Trạng thái */}
                         <td className="px-5 py-3.5 text-center align-middle">
                           <div className="flex flex-col gap-1 items-center justify-center">
-                            {order.source === 'website' ? (
+                            {order.source === 'website' && !isReturned && order.status !== 'cancelled' ? (
                               <>
                                 {(!order.delivery_status || order.delivery_status === 'pending') && (
                                   <span className="inline-flex items-center gap-1 text-[10.5px] uppercase font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-300">
@@ -2798,6 +2875,12 @@ export default function OrderManagement() {
                               </>
                             ) : (
                               <>
+                                {order.status === 'cancelled' && (
+                                  <span className="inline-flex items-center gap-1 text-[10.5px] uppercase font-bold px-2 py-0.5 rounded-full bg-stone-100 text-stone-600 border border-stone-200">
+                                    <span className="material-symbols-outlined text-[12px]">block</span>
+                                    Đã huỷ
+                                  </span>
+                                )}
                                 {order.status === 'returned' && (
                                   <span className="inline-flex items-center gap-1 text-[10.5px] uppercase font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-300">
                                     <span className="material-symbols-outlined text-[12px]">assignment_return</span>

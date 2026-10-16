@@ -45,8 +45,10 @@ export default function POS() {
 
   const fetchCoupons = async () => {
     try {
-      const res = await couponService.getCoupons();
-      const valid = res.data.data.filter(c => c.is_active && new Date() <= new Date(c.end_date) && c.used_count < c.quantity);
+      const res = await couponService.getCoupons('pos');
+      const now = new Date();
+      const valid = res.data.data.filter(c => c.type !== 'freeship' && !c.is_website_only
+        && c.is_active && now >= new Date(c.start_date) && now <= new Date(c.end_date) && c.used_count < c.quantity);
       setAvailableCoupons(valid);
     } catch (error) {
       console.error('Failed to load coupons', error);
@@ -160,7 +162,7 @@ export default function POS() {
     setValidatingCoupon(true);
     setCouponError('');
     try {
-      const res = await couponService.validateCoupon(discountCodeInput, cartItems, baseTotalPrice);
+      const res = await couponService.validateCoupon(discountCodeInput, cartItems, baseTotalPrice, 0, 'pos');
       const data = res.data.data;
       setAppliedDiscount({ code: data.code, amount: data.discount_amount });
     } catch (err) {

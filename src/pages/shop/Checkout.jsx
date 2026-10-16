@@ -6,6 +6,8 @@ import { useAuth } from '../../hooks/useAuth';
 import AddressSelector from '../../components/shop/AddressSelector';
 import { locationService } from '../../services/locationService';
 import { authService } from '../../services/authService';
+import { getImageUrl } from '../../utils/imageUtils';
+import { calculateShippingDiscount, shippingDiscountValue, shippingDiscountConditions } from '../../utils/couponUtils';
 import axios from 'axios';
 
 const api = axios.create({
@@ -33,6 +35,7 @@ export default function Checkout() {
     }
   });
 
+  const [isMobileItemsCollapsed, setIsMobileItemsCollapsed] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(null); // Stores created order on success
@@ -102,7 +105,6 @@ export default function Checkout() {
 
   const [activeCoupons, setActiveCoupons] = useState([]);
   const [selectedCouponCode, setSelectedCouponCode] = useState('');
-  const [discountAmount, setDiscountAmount] = useState(0);
   const [showCouponModal, setShowCouponModal] = useState(false);
   const [customCouponCode, setCustomCouponCode] = useState('');
   const [validatingCustom, setValidatingCustom] = useState(false);
@@ -333,7 +335,7 @@ export default function Checkout() {
   const shippingFee = formData.shippingMethod === 'express' ? expressShippingFee : standardShippingFee;
   const freeshipRemaining = Math.max(0, FREESHIP_THRESHOLD - subtotal);
   const calculateDiscountForCoupon = (coupon) => {
-    if (!coupon) return 0;
+    if (!coupon || coupon.is_eligible === false) return 0;
     let discount = 0;
     let applicableSubtotal = 0;
     
@@ -348,7 +350,9 @@ export default function Checkout() {
     });
 
     if (applicableSubtotal > 0) {
-      if (coupon.type === 'percent') {
+      if (coupon.type === 'freeship') {
+        discount = calculateShippingDiscount(coupon, shippingFee, subtotal);
+      } else if (coupon.type === 'percent') {
         discount = (applicableSubtotal * coupon.value) / 100;
         if (coupon.max_discount && discount > coupon.max_discount) {
           discount = coupon.max_discount;
@@ -380,20 +384,14 @@ export default function Checkout() {
 
       if (best) {
         setSelectedCouponCode(best.code);
-        setDiscountAmount(maxDiscount);
       }
     }
-  }, [activeCoupons, checkoutItems]);
+  }, [activeCoupons, checkoutItems, shippingFee]);
 
-  // Cập nhật discountAmount khi user đổi coupon
-  useEffect(() => {
-    if (selectedCouponCode) {
-      const coupon = activeCoupons.find(c => c.code === selectedCouponCode);
-      setDiscountAmount(calculateDiscountForCoupon(coupon));
-    } else {
-      setDiscountAmount(0);
-    }
-  }, [selectedCouponCode, activeCoupons, checkoutItems]);
+  // Derive synchronously so a shipping/address change cannot submit a stale discount.
+  const selectedCoupon = activeCoupons.find(c => c.code === selectedCouponCode);
+  const discountAmount = calculateDiscountForCoupon(selectedCoupon);
+  const isFreeshipCoupon = selectedCoupon?.type === 'freeship' && discountAmount > 0;
 
   const handleApplyCustomCoupon = async () => {
     if (!customCouponCode.trim()) return;
@@ -404,7 +402,11 @@ export default function Checkout() {
       if (res.success && res.data) {
         const potentialDiscount = calculateDiscountForCoupon(res.data);
         if (potentialDiscount === 0) {
-          setCustomError('Mã này không áp dụng được cho sản phẩm trong giỏ.');
+          setCustomError(res.data.type === 'freeship' && subtotal < Number(res.data.min_order_value || 0)
+            ? `Chưa đủ điều kiện: ${shippingDiscountConditions(res.data)} (chưa gồm phí vận chuyển).`
+            : res.data.type === 'freeship' && shippingFee === 0
+            ? 'Đơn hàng đã được miễn phí vận chuyển.'
+            : 'Mã này không áp dụng được cho sản phẩm trong giỏ.');
           return;
         }
 
@@ -470,14 +472,13 @@ export default function Checkout() {
         note: formData.note.trim(),
         payment_method: formData.payment_method,
         shippingMethod: formData.shippingMethod,
-        discount_code: selectedCouponCode || null,
+        discount_code: discountAmount > 0 ? selectedCouponCode : null,
         discount_amount: discountAmount || 0
       };
 
       const res = await api.post('/shop/checkout', payload);
       
       if (res.data.success) {
-        if (formData.payment_method !== 'transfer') {
         // Xoá sản phẩm đã thanh toán khỏi giỏ hàng nếu có
         try {
           const removePayload = checkoutItems.map(i => ({
@@ -511,8 +512,6 @@ export default function Checkout() {
         }
 
         // Chuyển hướng sang trang Hoàn tất đơn hàng chuyên biệt
-        }
-
         const destination = formData.payment_method === 'transfer'
           ? `/payment/${res.data.data.orderId}`
           : `/order-success/${res.data.data.orderId}`;
@@ -640,16 +639,32 @@ export default function Checkout() {
 
   /* CHECKOUT FORM VIEW */
   return (
-    <div className="bg-[#fbf9f6] min-h-screen py-6 sm:py-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="bg-[#f5f5f5] sm:bg-[#fbf9f6] min-h-screen py-3 sm:py-10 pb-20 lg:pb-16">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         
-        {/* Order Stepper Header */}
-        <div className="flex items-center justify-center gap-3 sm:gap-6 mb-8 text-xs sm:text-sm font-bold">
+        {/* Mobile Header chuẩn Shopee (Nút quay lại & Tiêu đề) */}
+        <div className="sm:hidden flex items-center justify-between pb-3 mb-3 border-b border-stone-200/80">
+          <button
+            type="button"
+            onClick={() => navigate('/cart')}
+            className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-stone-700 active:scale-95 shadow-2xs border border-stone-200 cursor-pointer"
+            aria-label="Quay lại giỏ hàng"
+          >
+            <i className="ph-bold ph-arrow-left text-base"></i>
+          </button>
+          <h1 className="font-serif-display font-bold text-base text-[#4A2C2A]">
+            Thanh Toán Đơn Hàng
+          </h1>
+          <div className="w-8"></div> {/* Cân đối khoảng cách */}
+        </div>
+
+        {/* Order Stepper Header (Desktop & Tablet) */}
+        <div className="hidden sm:flex items-center justify-center gap-3 sm:gap-6 mb-8 text-xs sm:text-sm font-bold">
           <div className="flex items-center gap-2 text-stone-400">
             <span className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs">
               <i className="ph-bold ph-check"></i>
             </span>
-            <span className="hidden sm:inline">1. Giỏ hàng</span>
+            <span>1. Giỏ hàng</span>
           </div>
           <span className="text-stone-300">———</span>
           <div className="flex items-center gap-2 text-[#4A2C2A]">
@@ -663,28 +678,36 @@ export default function Checkout() {
             <span className="w-6 h-6 rounded-full bg-stone-100 text-stone-400 flex items-center justify-center text-xs">
               3
             </span>
-            <span className="hidden sm:inline">3. Hoàn tất</span>
+            <span>3. Hoàn tất</span>
           </div>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-8 items-start">
+        <div className="flex flex-col lg:flex-row gap-5 sm:gap-8 items-start">
           
           {/* CỘT TRÁI: FORM THÔNG TIN GIAO HÀNG & PHƯƠNG THỨC */}
-          <div className="flex-1 w-full space-y-6">
+          <div className="flex-1 w-full space-y-4 sm:space-y-6">
 
-            {/* Card 1: Thông tin người nhận */}
-            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-stone-200 shadow-xs space-y-5">
-              <div className="flex items-center gap-2.5 border-b border-stone-100 pb-3.5">
-                <span className="w-8 h-8 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
-                  <i className="ph-fill ph-user text-lg"></i>
-                </span>
-                <div>
-                  <h2 className="text-base sm:text-lg font-serif-display font-bold text-stone-900">
-                    Thông Tin Người Nhận
-                  </h2>
-                  <p className="text-xs text-stone-400">Vui lòng cung cấp địa chỉ chính xác để nến được giao an toàn</p>
+            {/* Card 1: Thông tin người nhận - Chuẩn Shopee có dải bì thư bưu chính */}
+            <div className="bg-white rounded-2xl border border-stone-200 shadow-xs overflow-hidden">
+              {/* Dải sọc bì thư bưu chính đặc trưng Shopee */}
+              <div 
+                className="h-1 sm:h-1.5 w-full"
+                style={{
+                  backgroundImage: 'repeating-linear-gradient(45deg, #f43f5e 0, #f43f5e 12px, transparent 12px, transparent 18px, #3b82f6 18px, #3b82f6 30px, transparent 30px, transparent 36px)'
+                }}
+              />
+              <div className="p-4 sm:p-7 space-y-4 sm:space-y-5">
+                <div className="flex items-center gap-2.5 border-b border-stone-100 pb-3">
+                  <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+                    <i className="ph-fill ph-map-pin text-base sm:text-lg"></i>
+                  </span>
+                  <div>
+                    <h2 className="text-sm sm:text-base font-bold text-stone-900">
+                      Địa Chỉ Nhận Hàng
+                    </h2>
+                    <p className="text-[11px] text-stone-400">Vui lòng cung cấp địa chỉ chính xác để nến được giao an toàn</p>
+                  </div>
                 </div>
-              </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
@@ -748,6 +771,7 @@ export default function Checkout() {
                 </div>
               </div>
             </div>
+          </div>
 
             {/* Card 2: Phương thức vận chuyển */}
             <div className="bg-white rounded-2xl p-6 sm:p-7 border border-stone-200 shadow-xs space-y-4">
@@ -1015,48 +1039,68 @@ export default function Checkout() {
           {/* CỘT PHẢI: TÓM TẮT ĐƠN HÀNG, VOUCHER VÀ NÚT ĐẶT HÀNG */}
           <div className="lg:w-[420px] shrink-0 w-full space-y-6">
 
-            {/* Order Review Card */}
-            <div className="bg-white rounded-2xl shadow-sm border border-stone-200 p-6 sm:p-7 sticky top-24 space-y-6">
-              <h3 className="text-xl font-serif-display text-[#4A2C2A] font-bold pb-4 border-b border-stone-100 flex items-center justify-between">
-                <span>Đơn Hàng Của Bạn</span>
-                <span className="text-xs font-mono font-bold bg-[#FAF5EE] text-[#8C4A32] px-2.5 py-0.5 rounded-full border border-amber-200/50">
-                  {checkoutItems.length} sản phẩm
-                </span>
-              </h3>
+            {/* Order Review Card - Chuẩn gian hàng Shopee */}
+            <div className="bg-white rounded-2xl shadow-xs border border-stone-200 p-4 sm:p-7 sticky top-24 space-y-4 sm:space-y-6">
+              <div 
+                className="pb-3 border-b border-stone-100 flex items-center justify-between cursor-pointer select-none"
+                onClick={() => setIsMobileItemsCollapsed(!isMobileItemsCollapsed)}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="w-7 h-7 rounded-lg bg-amber-50 text-amber-800 flex items-center justify-center shrink-0">
+                    <i className="ph-fill ph-storefront text-base"></i>
+                  </span>
+                  <div>
+                    <h3 className="text-xs sm:text-sm font-bold text-stone-900 flex items-center gap-1.5">
+                      <span>Candlet Official Store</span>
+                      <span className="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded font-mono font-bold">Chính Hãng</span>
+                    </h3>
+                    <p className="text-[10.5px] text-stone-400">Đơn hàng gồm ({checkoutItems.length}) sản phẩm</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="sm:hidden text-xs text-stone-500 font-medium flex items-center gap-1 cursor-pointer"
+                >
+                  <span>{isMobileItemsCollapsed ? 'Xem chi tiết' : 'Thu gọn'}</span>
+                  <i className={`ph-bold ${isMobileItemsCollapsed ? 'ph-caret-down' : 'ph-caret-up'} text-xs`}></i>
+                </button>
+              </div>
 
               {/* Items List in Checkout */}
-              <div className="space-y-3.5 max-h-[38vh] overflow-y-auto pr-1.5 custom-scrollbar divide-y divide-stone-100">
-                {checkoutItems.map((item, idx) => (
-                  <div key={idx} className="flex gap-3.5 items-center pt-3 first:pt-0">
-                    <div className="w-16 h-16 rounded-xl bg-stone-100 border border-stone-200 overflow-hidden shrink-0 relative">
-                      {item.product_id?.image ? (
-                        <img src={item.product_id.image} alt={item.product_id.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-stone-300">
-                          <i className="ph ph-image text-xl"></i>
-                        </div>
-                      )}
-                      <span className="absolute bottom-0 right-0 bg-[#4A2C2A] text-white text-[10px] font-bold px-1.5 rounded-tl-md font-mono">
-                        x{item.quantity}
-                      </span>
-                    </div>
+              {!isMobileItemsCollapsed && (
+                <div className="space-y-3 max-h-[38vh] overflow-y-auto pr-1.5 custom-scrollbar divide-y divide-stone-100">
+                  {checkoutItems.map((item, idx) => (
+                    <div key={idx} className="flex gap-3 items-center pt-2.5 first:pt-0">
+                      <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-stone-100 border border-stone-200 overflow-hidden shrink-0 relative">
+                        {item.product_id?.image ? (
+                          <img src={getImageUrl(item.product_id.image)} alt={item.product_id.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-stone-300">
+                            <i className="ph ph-image text-xl"></i>
+                          </div>
+                        )}
+                        <span className="absolute bottom-0 right-0 bg-[#4A2C2A] text-white text-[9px] font-bold px-1.5 rounded-tl-md font-mono">
+                          x{item.quantity}
+                        </span>
+                      </div>
 
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-xs sm:text-sm font-bold text-stone-900 truncate">
-                        {item.product_id?.name}
-                      </h4>
-                      {item.sku_id && (
-                        <p className="text-[11px] text-[#8C4A32] truncate mt-0.5 font-medium">
-                          {getVariantLabel(item.product_id, item.sku_id)}
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-xs sm:text-sm font-bold text-stone-900 truncate">
+                          {item.product_id?.name}
+                        </h4>
+                        {item.sku_id && (
+                          <p className="text-[10.5px] text-[#8C4A32] truncate mt-0.5 font-medium">
+                            {getVariantLabel(item.product_id, item.sku_id)}
+                          </p>
+                        )}
+                        <p className="text-xs font-bold text-stone-700 mt-0.5">
+                          {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(calculateItemPrice(item) * item.quantity)}
                         </p>
-                      )}
-                      <p className="text-xs font-bold text-stone-700 mt-1">
-                        {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(calculateItemPrice(item) * item.quantity)}
-                      </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
 
               {/* VOUCHER TICKET SECTION */}
               <div className="pt-2">
@@ -1091,7 +1135,7 @@ export default function Checkout() {
                     </div>
                     <button 
                       type="button"
-                      onClick={() => { setSelectedCouponCode(''); setDiscountAmount(0); }}
+                      onClick={() => setSelectedCouponCode('')}
                       className="w-7 h-7 rounded-full bg-white hover:bg-red-50 text-stone-400 hover:text-red-500 flex items-center justify-center transition-colors shadow-xs shrink-0"
                       title="Gỡ mã giảm giá"
                     >
@@ -1148,7 +1192,7 @@ export default function Checkout() {
 
                 {discountAmount > 0 && (
                   <div className="flex justify-between text-[#8C4A32]">
-                    <span>Giảm giá từ voucher</span>
+                    <span>{isFreeshipCoupon ? 'Giảm phí vận chuyển từ voucher' : 'Giảm giá từ voucher'}</span>
                     <span className="font-bold">
                       - {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(discountAmount)}
                     </span>
@@ -1165,12 +1209,12 @@ export default function Checkout() {
                 </div>
               </div>
 
-              {/* Submit Order Button */}
+              {/* Submit Order Button (Desktop/Tablet) */}
               <button 
                 type="button"
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="w-full bg-[#4A2C2A] hover:bg-[#341F1D] text-white text-xs font-bold uppercase tracking-widest rounded-xl py-4 px-6 flex items-center justify-center gap-2.5 transition-all shadow-md hover:shadow-lg active:scale-98 disabled:opacity-60 disabled:cursor-not-allowed"
+                className="hidden lg:flex w-full bg-[#4A2C2A] hover:bg-[#341F1D] text-white text-xs font-bold uppercase tracking-widest rounded-xl py-4 px-6 items-center justify-center gap-2.5 transition-all shadow-md hover:shadow-lg active:scale-98 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
               >
                 {submitting ? (
                   <>
@@ -1197,11 +1241,52 @@ export default function Checkout() {
 
       </div>
 
-      {/* VOUCHER SELECTION MODAL */}
+      {/* ======================================================== */}
+      {/* SHOPEE-STYLE MOBILE STICKY BOTTOM CHECKOUT ACTION BAR    */}
+      {/* Cố định sát mép đáy trên mobile chuẩn Shopee             */}
+      {/* ======================================================== */}
+      <div 
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-stone-200/90 shadow-[0_-4px_25px_rgba(0,0,0,0.12)] flex items-stretch h-14"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+      >
+        {/* Cột trái: Tổng thanh toán & Tiết kiệm */}
+        <div className="flex-1 flex flex-col justify-center items-end pr-3.5 min-w-0">
+          <div className="flex items-baseline gap-1">
+            <span className="text-[11px] text-stone-600 font-medium">Tổng thanh toán:</span>
+            <span className="font-bold text-base sm:text-lg text-[#B45309] truncate">
+              {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(finalTotal)}
+            </span>
+          </div>
+          {discountAmount > 0 && (
+            <span className="text-[10px] text-emerald-600 font-medium block truncate leading-none">
+              Tiết kiệm {new Intl.NumberFormat('vi-VN').format(discountAmount)}đ
+            </span>
+          )}
+        </div>
+
+        {/* Cột phải: Nút Đặt Hàng chuẩn Shopee */}
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={submitting}
+          className="w-36 sm:w-40 bg-gradient-to-r from-[#94432C] to-[#4A2C2A] active:from-[#7D3824] active:to-[#38201F] text-white text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all disabled:opacity-60 cursor-pointer shrink-0 shadow-inner px-2"
+        >
+          {submitting ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              <span>Đang đặt...</span>
+            </>
+          ) : (
+            <span>Đặt Hàng</span>
+          )}
+        </button>
+      </div>
+
+      {/* VOUCHER SELECTION MODAL (Bottom Sheet trên Mobile) */}
       {showCouponModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[540px] overflow-hidden flex flex-col max-h-[85vh] border border-stone-200 animate-[fadeIn_0.2s_ease-out]">
-            <div className="flex justify-between items-center p-5 border-b border-stone-100 bg-stone-50/70">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-stone-900/60 backdrop-blur-sm">
+          <div className="bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl w-full max-w-[540px] overflow-hidden flex flex-col max-h-[88vh] sm:max-h-[85vh] border border-stone-200 animate-[fadeIn_0.2s_ease-out]">
+            <div className="flex justify-between items-center p-4 sm:p-5 border-b border-stone-100 bg-stone-50/70">
               <div className="flex items-center gap-2">
                 <i className="ph-fill ph-ticket text-[#8C4A32] text-xl"></i>
                 <h3 className="text-base font-serif-display font-bold text-[#4A2C2A]">Phiếu Ưu Đãi Candlet</h3>
@@ -1258,7 +1343,11 @@ export default function Checkout() {
                     } else if (maxSave > 0) {
                       labelSuffix = `Giảm ${new Intl.NumberFormat('vi-VN').format(maxSave)}đ`;
                     } else {
-                      labelSuffix = 'Sản phẩm trong giỏ chưa phù hợp';
+                      labelSuffix = coupon.type === 'freeship' && subtotal < Number(coupon.min_order_value || 0)
+                        ? `Mua thêm ${new Intl.NumberFormat('vi-VN').format(coupon.min_order_value - subtotal)}đ tiền hàng`
+                        : coupon.type === 'freeship' && shippingFee === 0
+                        ? 'Đơn hàng đã được miễn phí vận chuyển'
+                        : 'Sản phẩm trong giỏ chưa phù hợp';
                     }
 
                     const isSelected = selectedCouponCode === coupon.code;
@@ -1286,7 +1375,9 @@ export default function Checkout() {
                             !isApplicable ? 'bg-stone-300' : isSelected ? 'bg-[#F59E0B]' : 'bg-[#D97706]'
                           }`}>
                             <span className="text-xl font-bold font-serif-display leading-tight text-center">
-                              {coupon.type === 'percent' ? `${coupon.value}%` : `${new Intl.NumberFormat('vi-VN').format(coupon.value / 1000)}K`}
+                              {coupon.type === 'freeship'
+                                ? (coupon.shipping_discount_type === 'fixed' ? `${new Intl.NumberFormat('vi-VN').format(shippingDiscountValue(coupon) / 1000)}K SHIP` : `${shippingDiscountValue(coupon)}% SHIP`)
+                                : coupon.type === 'percent' ? `${coupon.value}%` : `${new Intl.NumberFormat('vi-VN').format(coupon.value / 1000)}K`}
                             </span>
                             <span className="text-[9px] uppercase tracking-widest font-bold mt-0.5 opacity-90">GIẢM GIÁ</span>
                           </div>
@@ -1335,7 +1426,7 @@ export default function Checkout() {
                               </div>
 
                               <p className="text-[11px] text-stone-500 line-clamp-1">
-                                {coupon.max_discount ? `Giảm tối đa ${new Intl.NumberFormat('vi-VN').format(coupon.max_discount)}đ` : 'Không giới hạn mức giảm'}
+                                {coupon.type === 'freeship' ? shippingDiscountConditions(coupon) : coupon.max_discount ? `Giảm tối đa ${new Intl.NumberFormat('vi-VN').format(coupon.max_discount)}đ` : 'Không giới hạn mức giảm'}
                               </p>
                             </div>
                             

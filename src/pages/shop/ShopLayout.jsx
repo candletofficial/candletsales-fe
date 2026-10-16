@@ -19,6 +19,9 @@ export default function ShopLayout() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Ẩn thanh Bottom Nav 5 tab ở trang chi tiết sản phẩm, giỏ hàng và thanh toán
+  const isBottomNavHidden = location.pathname.startsWith('/product/') || location.pathname === '/cart' || location.pathname === '/checkout';
+
   // Dùng cùng cấu hình địa chỉ shop với trang Cài đặt website của admin.
   useEffect(() => {
     let active = true;
@@ -80,13 +83,13 @@ export default function ShopLayout() {
 
       {/* 1. TOP ANNOUNCEMENT BAR (Cuộn tự nhiên cùng trang, không giật layout) */}
       <aside
-        className="bg-[#381B18] text-[#F3E8E2] text-xs py-2 px-4 border-b border-[#4A2C2A]/40 relative z-30"
+        className="bg-[#381B18] text-[#F3E8E2] text-xs py-2 px-3 sm:px-4 border-b border-[#4A2C2A]/40 relative z-30"
         data-purpose="top-announcement"
       >
-        <div className="max-w-7xl mx-auto flex items-center justify-between text-[11px] sm:text-xs">
-          <div className="flex items-center space-x-2 text-amber-200/90 font-medium">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>Miễn phí giao hàng toàn quốc đơn từ 100.000đ</span>
+        <div className="max-w-7xl mx-auto flex items-center justify-between text-[10.5px] sm:text-xs">
+          <div className="flex items-center space-x-1.5 sm:space-x-2 text-amber-200/95 font-medium truncate">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+            <span className="truncate">Miễn phí giao hàng toàn quốc đơn từ 100K</span>
           </div>
 
           <div className="hidden md:flex items-center space-x-2 text-stone-300">
@@ -96,7 +99,7 @@ export default function ShopLayout() {
             </span>
           </div>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3 sm:space-x-4 shrink-0">
             <span className="hidden sm:inline text-stone-300">Hotline: <strong className="text-white">032.862.4761</strong></span>
             <Link to="/orders" className="text-amber-200 hover:text-white font-medium transition-colors underline-offset-2 hover:underline">
               Tra cứu đơn
@@ -113,20 +116,20 @@ export default function ShopLayout() {
           }`}
         data-purpose="site-navigation"
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-8">
+        <div className="max-w-7xl mx-auto px-3 sm:px-8">
           <div
-            className={`flex items-center justify-between transition-all duration-300 ease-out ${isScrolled ? 'h-16' : 'h-20 sm:h-22'
+            className={`flex items-center justify-between transition-all duration-300 ease-out ${isScrolled ? 'h-14 sm:h-16' : 'h-16 sm:h-22'
               }`}
           >
 
             {/* BRAND LOGO (Cánh trái) */}
             <div className="flex items-center gap-3">
-              <Link to="/" className="flex items-center gap-3 group focus:outline-none">
+              <Link to="/" className="flex items-center gap-2.5 sm:gap-3 group focus:outline-none">
                 <div className="relative shrink-0 flex items-center">
                   <img
                     src="/logo.png"
                     alt="Candlet"
-                    className={`w-auto object-contain transition-transform duration-300 group-hover:scale-105 ${isScrolled ? 'h-9 sm:h-10' : 'h-11 sm:h-12'
+                    className={`w-auto object-contain transition-transform duration-300 group-hover:scale-105 ${isScrolled ? 'h-8 sm:h-10' : 'h-10 sm:h-12'
                       }`}
                   />
                 </div>
@@ -158,12 +161,21 @@ export default function ShopLayout() {
             </nav>
 
             {/* ACTIONS & ACCOUNT (Cánh phải) */}
-            <div className="flex items-center space-x-2.5 sm:space-x-4">
+            <div className="flex items-center space-x-1 sm:space-x-3">
 
-              {/* Nút Yêu Thích (Wishlist) */}
+              {/* Nút Tìm kiếm nhanh / Khám phá trên mobile */}
+              <Link
+                to="/shop"
+                className="p-2 sm:p-2.5 text-[#2C1810] hover:text-[#4A2C2A] hover:bg-stone-100/80 rounded-full transition-all lg:hidden"
+                title="Khám phá nến thơm"
+              >
+                <i className="ph ph-magnifying-glass text-[22px]"></i>
+              </Link>
+
+              {/* Nút Yêu Thích (Wishlist) - Hiển thị từ màn hình sm trở lên (mobile dùng Bottom Nav) */}
               <Link
                 to="/wishlist"
-                className="relative p-2.5 text-[#2C1810] hover:text-rose-600 hover:bg-rose-50 rounded-full transition-all group focus:outline-none"
+                className="hidden sm:flex relative p-2.5 text-[#2C1810] hover:text-rose-600 hover:bg-rose-50 rounded-full transition-all group focus:outline-none"
                 title="Sản phẩm yêu thích"
               >
                 <i className="ph ph-heart text-[24px] sm:text-[26px] group-hover:scale-110 transition-transform"></i>
@@ -177,12 +189,12 @@ export default function ShopLayout() {
               {/* Nút Giỏ hàng cao cấp */}
               <Link
                 to="/cart"
-                className="relative p-2.5 text-[#2C1810] hover:text-[#4A2C2A] hover:bg-[#4A2C2A]/5 rounded-full transition-all group focus:outline-none"
+                className="relative p-2 sm:p-2.5 text-[#2C1810] hover:text-[#4A2C2A] hover:bg-[#4A2C2A]/5 rounded-full transition-all group focus:outline-none"
                 title="Giỏ hàng của bạn"
               >
-                <i className="ph ph-shopping-bag-open text-[24px] sm:text-[26px] group-hover:scale-110 transition-transform"></i>
+                <i className="ph ph-shopping-bag-open text-[22px] sm:text-[26px] group-hover:scale-110 transition-transform"></i>
                 {cartItemCount > 0 && (
-                  <span className="absolute top-1 right-1 min-w-[19px] h-[19px] bg-gradient-to-tr from-[#8C4A32] to-[#B45309] text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white shadow-sm px-1 animate-[scaleIn_0.2s_ease-out]">
+                  <span className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 min-w-[18px] h-[18px] sm:min-w-[19px] sm:h-[19px] bg-gradient-to-tr from-[#8C4A32] to-[#B45309] text-white text-[9px] sm:text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white shadow-sm px-1 animate-[scaleIn_0.2s_ease-out]">
                     {cartItemCount}
                   </span>
                 )}
@@ -193,7 +205,7 @@ export default function ShopLayout() {
 
               {/* Nút Đăng nhập / User Profile Avatar */}
               {user ? (
-                <div className="relative" ref={dropdownRef}>
+                <div className="relative hidden sm:block" ref={dropdownRef}>
                   <button
                     onClick={() => setShowDropdown(!showDropdown)}
                     className="flex items-center gap-2 p-1 sm:pr-3 rounded-full hover:bg-stone-100 transition-colors border border-stone-200/80 focus:outline-none shadow-2xs"
@@ -314,13 +326,17 @@ export default function ShopLayout() {
           {/* Drawer Content */}
           <div className="relative w-full max-w-xs bg-white h-full shadow-2xl flex flex-col p-6 overflow-y-auto animate-[fadeIn_0.2s_ease-out]">
             <div className="flex items-center justify-between pb-5 border-b border-stone-100">
-              <div className="flex items-center gap-2">
-                <img src="/logo.png" alt="CandletShop" className="h-8 w-auto" />
-                <span className="font-serif-display font-bold text-lg text-[#4A2C2A]">CANDLETSHOP</span>
-              </div>
+              <Link 
+                to="/" 
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center"
+              >
+                <img src="/logo.png" alt="Candlet" className="h-8 w-auto object-contain" />
+              </Link>
               <button
                 onClick={() => setMobileMenuOpen(false)}
-                className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center text-stone-500 hover:text-stone-800"
+                className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center text-stone-500 hover:text-stone-800 cursor-pointer"
+                aria-label="Đóng menu"
               >
                 <i className="ph-bold ph-x text-base"></i>
               </button>
@@ -345,6 +361,23 @@ export default function ShopLayout() {
                   </Link>
                 );
               })}
+
+              {/* Mục Tài Khoản Của Tôi */}
+              <Link
+                to={user ? "/profile" : "/login"}
+                onClick={() => setMobileMenuOpen(false)}
+                className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${
+                  location.pathname === '/profile'
+                    ? 'bg-[#FAF5EE] text-[#4A2C2A] font-bold border border-amber-200/60'
+                    : 'text-stone-700 hover:bg-stone-50'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <i className="ph-bold ph-user-circle text-base text-[#4A2C2A]"></i>
+                  <span>Tài Khoản Của Tôi</span>
+                </div>
+                <i className="ph-bold ph-caret-right text-xs text-stone-400"></i>
+              </Link>
 
               <Link
                 to="/orders"
@@ -376,24 +409,34 @@ export default function ShopLayout() {
             <div className="pt-6 border-t border-stone-100 space-y-4">
               {user ? (
                 <div className="space-y-3">
-                  <div className="flex items-center gap-3 bg-stone-50 p-3 rounded-xl border border-stone-100">
-                    <div className="w-10 h-10 rounded-full bg-[#4A2C2A] text-white flex items-center justify-center font-bold">
+                  <Link
+                    to="/profile"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 bg-stone-50 hover:bg-[#FAF5EE] active:scale-98 p-3 rounded-xl border border-stone-200/80 transition-all group cursor-pointer"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#4A2C2A] to-[#6A382C] text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
                       {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-bold text-stone-900 truncate">{user.name}</p>
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs font-bold text-stone-900 truncate group-hover:text-[#4A2C2A] transition-colors">{user.name}</p>
+                        <span className="text-[10px] text-amber-800 font-bold group-hover:underline flex items-center gap-0.5">
+                          Hồ sơ <i className="ph-bold ph-caret-right text-[10px]"></i>
+                        </span>
+                      </div>
                       <p className="text-[11px] text-stone-500 truncate">{user.email}</p>
                     </div>
-                  </div>
+                  </Link>
                   <button
                     onClick={() => {
                       setMobileMenuOpen(false);
                       logout();
                       navigate('/login');
                     }}
-                    className="w-full bg-stone-100 hover:bg-red-50 hover:text-red-600 text-stone-700 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors"
+                    className="w-full bg-stone-100 hover:bg-red-50 hover:text-red-600 text-stone-700 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                   >
-                    Đăng xuất
+                    <i className="ph-bold ph-sign-out text-sm"></i>
+                    <span>Đăng xuất</span>
                   </button>
                 </div>
               ) : (
@@ -415,12 +458,12 @@ export default function ShopLayout() {
         </div>
       )}
 
-      <main className="flex-1">
+      <main className={`flex-1 ${isBottomNavHidden ? 'pb-0' : 'pb-16 lg:pb-0'}`}>
         <Outlet />
       </main>
 
       {/* BEGIN: MainFooter (Thiết kế sang trọng, ấm áp phong cách Atelier Nến Thủ Công) */}
-      <footer className="bg-gradient-to-b from-[#2B0C10] via-[#21070A] to-[#150406] text-[#E8D9D5] text-xs mt-auto relative overflow-hidden" data-purpose="main-footer">
+      <footer className="bg-gradient-to-b from-[#2B0C10] via-[#21070A] to-[#150406] text-[#E8D9D5] text-xs mt-auto relative overflow-hidden pb-16 lg:pb-0" data-purpose="main-footer">
         {/* Họa tiết quầng sáng vàng ấm nghệ thuật */}
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute bottom-0 right-10 w-80 h-80 bg-red-900/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -704,6 +747,101 @@ export default function ShopLayout() {
 
         </div>
       </footer>
+
+      {/* 5. MOBILE BOTTOM NAVIGATION TAB BAR (Thanh điều hướng đáy) - Ẩn khi ở trang chi tiết sản phẩm / giỏ hàng / thanh toán */}
+      {!isBottomNavHidden && (
+        <nav
+          className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-stone-200/90 shadow-[0_-4px_25px_rgba(44,24,16,0.08)] lg:hidden"
+          style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+          aria-label="Điều hướng di động"
+        >
+        <div className="grid grid-cols-5 h-15 max-w-lg mx-auto px-1 items-center">
+          {/* 1. Trang chủ */}
+          <Link
+            to="/"
+            className={`flex flex-col items-center justify-center py-1 transition-all duration-200 active:scale-95 ${
+              location.pathname === '/' ? 'text-[#4A2C2A] font-bold' : 'text-stone-500 hover:text-stone-800'
+            }`}
+          >
+            <i className={`text-xl transition-transform ${location.pathname === '/' ? 'ph-fill ph-house scale-110 text-[#4A2C2A]' : 'ph ph-house'}`}></i>
+            <span className="text-[10px] mt-0.5 tracking-tight">Trang chủ</span>
+            {location.pathname === '/' && (
+              <span className="w-1 h-1 rounded-full bg-[#4A2C2A] mt-0.5"></span>
+            )}
+          </Link>
+
+          {/* 2. Cửa hàng */}
+          <Link
+            to="/shop"
+            className={`flex flex-col items-center justify-center py-1 transition-all duration-200 active:scale-95 ${
+              location.pathname.startsWith('/shop') ? 'text-[#4A2C2A] font-bold' : 'text-stone-500 hover:text-stone-800'
+            }`}
+          >
+            <i className={`text-xl transition-transform ${location.pathname.startsWith('/shop') ? 'ph-fill ph-flame scale-110 text-amber-700' : 'ph ph-flame'}`}></i>
+            <span className="text-[10px] mt-0.5 tracking-tight">Cửa hàng</span>
+            {location.pathname.startsWith('/shop') && (
+              <span className="w-1 h-1 rounded-full bg-[#4A2C2A] mt-0.5"></span>
+            )}
+          </Link>
+
+          {/* 3. Yêu thích */}
+          <Link
+            to="/wishlist"
+            className={`flex flex-col items-center justify-center py-1 transition-all duration-200 active:scale-95 ${
+              location.pathname === '/wishlist' ? 'text-rose-600 font-bold' : 'text-stone-500 hover:text-stone-800'
+            }`}
+          >
+            <div className="relative">
+              <i className={`text-xl transition-transform ${location.pathname === '/wishlist' ? 'ph-fill ph-heart scale-110 text-rose-500' : 'ph ph-heart'}`}></i>
+              {wishlistCount > 0 && (
+                <span className="absolute -top-1 -right-2 min-w-[16px] h-[16px] bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center rounded-full border border-white shadow-xs px-0.5">
+                  {wishlistCount > 99 ? '99+' : wishlistCount}
+                </span>
+              )}
+            </div>
+            <span className="text-[10px] mt-0.5 tracking-tight">Yêu thích</span>
+            {location.pathname === '/wishlist' && (
+              <span className="w-1 h-1 rounded-full bg-rose-500 mt-0.5"></span>
+            )}
+          </Link>
+
+          {/* 4. Giỏ hàng */}
+          <Link
+            to="/cart"
+            className={`flex flex-col items-center justify-center py-1 transition-all duration-200 active:scale-95 ${
+              location.pathname === '/cart' ? 'text-[#4A2C2A] font-bold' : 'text-stone-500 hover:text-stone-800'
+            }`}
+          >
+            <div className="relative">
+              <i className={`text-xl transition-transform ${location.pathname === '/cart' ? 'ph-fill ph-shopping-bag scale-110 text-[#4A2C2A]' : 'ph ph-shopping-bag-open'}`}></i>
+              {cartItemCount > 0 && (
+                <span className="absolute -top-1 -right-2 min-w-[16px] h-[16px] bg-gradient-to-tr from-[#8C4A32] to-[#B45309] text-white text-[9px] font-bold flex items-center justify-center rounded-full border border-white shadow-xs px-0.5">
+                  {cartItemCount > 99 ? '99+' : cartItemCount}
+                </span>
+              )}
+            </div>
+            <span className="text-[10px] mt-0.5 tracking-tight">Giỏ hàng</span>
+            {location.pathname === '/cart' && (
+              <span className="w-1 h-1 rounded-full bg-[#4A2C2A] mt-0.5"></span>
+            )}
+          </Link>
+
+          {/* 5. Tài khoản */}
+          <Link
+            to={user ? '/profile' : '/login'}
+            className={`flex flex-col items-center justify-center py-1 transition-all duration-200 active:scale-95 ${
+              location.pathname === '/profile' || location.pathname === '/login' ? 'text-[#4A2C2A] font-bold' : 'text-stone-500 hover:text-stone-800'
+            }`}
+          >
+            <i className={`text-xl transition-transform ${location.pathname === '/profile' || location.pathname === '/login' ? 'ph-fill ph-user-circle scale-110 text-[#4A2C2A]' : 'ph ph-user'}`}></i>
+            <span className="text-[10px] mt-0.5 tracking-tight">{user ? 'Tài khoản' : 'Đăng nhập'}</span>
+            {(location.pathname === '/profile' || location.pathname === '/login') && (
+              <span className="w-1 h-1 rounded-full bg-[#4A2C2A] mt-0.5"></span>
+            )}
+          </Link>
+        </div>
+      </nav>
+      )}
     </div>
   );
 }

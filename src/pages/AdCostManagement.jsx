@@ -100,7 +100,7 @@ function TopupModal({ platform, onClose, onSuccess, user }) {
             </div>
             <div className="w-[100px]">
               <label className="block text-[13px] font-bold text-on-surface-variant mb-2">VAT (%)</label>
-              <input type="number" value={vatPct} onChange={e => setVatPct(e.target.value)} min="0" max="100"
+              <input type="number" value={vatPct} onChange={e => setVatPct(e.target.value)} min="0" max="100" step="any" inputMode="decimal"
                 className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-[15px] font-bold text-center focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
             </div>
           </div>
@@ -255,7 +255,7 @@ function AdCostModal({ record, defaultDate, onClose, onSave, onDelete }) {
             </div>
             <div className="w-[100px]">
               <label className="block text-[13px] font-bold text-on-surface-variant mb-2">VAT (%)</label>
-              <input type="number" min="0" max="100" value={vat} onChange={e => setVat(e.target.value)}
+              <input type="number" min="0" max="100" step="any" inputMode="decimal" value={vat} onChange={e => setVat(e.target.value)}
                 className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-[16px] font-bold text-center focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
             </div>
           </div>

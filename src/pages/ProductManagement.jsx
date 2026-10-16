@@ -7,7 +7,7 @@ import SearchableSelect from '../components/SearchableSelect';
 import { formatPrice } from '../utils/formatPrice';
 import { TAG_PRESETS, TAG_COLORS, resolveTagColor } from '../utils/productTagUtils';
 import { uploadService } from '../services/uploadService';
-import { getImageUrl, isLocalUploadedImage } from '../utils/imageUtils';
+import { getImageUrl, isManagedUploadedImage } from '../utils/imageUtils';
 
 const getEmptyForm = () => ({
   productId: `SP-${Math.floor(1000000 + Math.random() * 9000000)}`,
@@ -253,7 +253,7 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
       if (res.data?.success) {
         const oldImg = form.image;
         // Nếu ảnh cũ cũng là ảnh nội bộ do upload trong phiên này và khác ảnh mới thì dọn dẹp
-        if (oldImg && isLocalUploadedImage(oldImg) && oldImg !== res.data.data.path) {
+        if (oldImg && isManagedUploadedImage(oldImg) && oldImg !== res.data.data.path) {
           uploadService.deleteUploadedFile(oldImg).catch(err => console.warn('Lỗi dọn ảnh cũ:', err));
         }
         setForm(prev => ({ ...prev, image: res.data.data.path }));
@@ -273,7 +273,7 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
     setForm(prev => ({ ...prev, image: '' }));
 
     // Nếu ảnh là file lưu trữ nội bộ trên máy chủ, xóa file vật lý ngay
-    if (isLocalUploadedImage(currentImg)) {
+    if (isManagedUploadedImage(currentImg)) {
       try {
         await uploadService.deleteUploadedFile(currentImg);
       } catch (err) {
@@ -327,7 +327,7 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
       images: (prev.images || []).filter((_, idx) => idx !== idxToRemove)
     }));
 
-    if (imgToRemove && isLocalUploadedImage(imgToRemove)) {
+    if (imgToRemove && isManagedUploadedImage(imgToRemove)) {
       try {
         await uploadService.deleteUploadedFile(imgToRemove);
       } catch (err) {
@@ -702,7 +702,7 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-1.5">
                       <span className="text-[13px] font-bold text-stone-800">1. Ảnh đại diện chính (Cover Image) *</span>
-                      {form.image && isLocalUploadedImage(form.image) && (
+                      {form.image && isManagedUploadedImage(form.image) && (
                         <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200">
                           <span className="material-symbols-outlined text-[12px]">cloud_done</span> Tệp trên máy chủ
                         </span>
@@ -935,7 +935,7 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
                   {(form.images || []).length > 0 ? (
                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 p-3 bg-white rounded-xl border border-stone-200">
                       {form.images.map((imgUrl, idx) => {
-                        const isLocal = isLocalUploadedImage(imgUrl);
+                        const isManaged = isManagedUploadedImage(imgUrl);
                         return (
                           <div key={idx} className="relative aspect-square rounded-lg bg-stone-50 border border-stone-200 overflow-hidden group shadow-xs">
                             <img
@@ -944,9 +944,9 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
                               className="w-full h-full object-cover"
                             />
                             {/* Badge chỉ rõ ảnh nội bộ */}
-                            {isLocal && (
+                            {isManaged && (
                               <div
-                                title="Ảnh lưu trên máy chủ hosting"
+                                title="Ảnh đã tải lên"
                                 className="absolute bottom-1 left-1 bg-stone-900/80 text-white rounded p-0.5 text-[9px] flex items-center pointer-events-none"
                               >
                                 <span className="material-symbols-outlined text-[11px]">dns</span>

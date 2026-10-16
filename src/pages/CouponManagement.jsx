@@ -2,16 +2,20 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Layout from '../components/Layout';
 import { couponService } from '../services/couponService';
 import { productService } from '../services/productService';
+import { shippingDiscountLabel, shippingDiscountConditions } from '../utils/couponUtils';
 
 const formatPrice = (n) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n || 0);
 
-function CouponModal({ coupon, products, onClose, onSave }) {
+function CouponModal({ coupon, initialType = 'percent', products, onClose, onSave }) {
   const isEdit = !!coupon;
+  const isFreeship = (coupon?.type || initialType) === 'freeship';
   const [formData, setFormData] = useState({
     code: coupon?.code || '',
     name: coupon?.name || '',
-    type: coupon?.type || 'percent',
-    value: coupon?.value || '',
+    type: coupon?.type || initialType,
+    value: coupon?.type === 'freeship' && !coupon.shipping_discount_type ? 100 : coupon?.value || '',
+    shipping_discount_type: coupon?.shipping_discount_type || 'percent',
+    min_order_value: coupon?.min_order_value || 0,
     max_discount: coupon?.max_discount || '',
     quantity: coupon?.quantity || '',
     start_date: coupon?.start_date ? new Date(coupon.start_date).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16),
@@ -19,13 +23,15 @@ function CouponModal({ coupon, products, onClose, onSave }) {
     applicable_products: coupon?.applicable_products || 'all',
     product_ids: coupon?.product_ids?.map(p => typeof p === 'object' ? p._id : p) || [],
     is_active: coupon?.is_active ?? true,
-    is_website_only: coupon?.is_website_only ?? false,
+    is_website_only: isFreeship || (coupon?.is_website_only ?? false),
     is_public: coupon?.is_public ?? true,
     usage_limit_per_user: coupon?.usage_limit_per_user || 'unlimited',
     customer_condition: coupon?.customer_condition || 'all',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const isPercent = formData.type === 'percent'
+    || (formData.type === 'freeship' && formData.shipping_discount_type === 'percent');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,7 +39,11 @@ function CouponModal({ coupon, products, onClose, onSave }) {
     setLoading(true);
     try {
       const payload = { ...formData };
-      if (payload.type === 'fixed') payload.max_discount = null;
+      if (!isPercent || payload.max_discount === '') payload.max_discount = null;
+      if (payload.type === 'freeship' && (!(Number(payload.value) > 0)
+        || (isPercent && Number(payload.value) > 100) || Number(payload.min_order_value) < 0)) {
+        throw new Error('Nhập mức giảm lớn hơn 0, tối đa 100% và đơn tối thiểu không âm.');
+      }
       if (payload.applicable_products === 'all') payload.product_ids = [];
 
       if (isEdit) {
@@ -43,7 +53,7 @@ function CouponModal({ coupon, products, onClose, onSave }) {
       }
       onSave();
     } catch (err) {
-      setError(err.response?.data?.message || 'Có lỗi xảy ra');
+      setError(err.response?.data?.message || err.message || 'Có lỗi xảy ra');
     } finally {
       setLoading(false);
     }
@@ -64,7 +74,9 @@ function CouponModal({ coupon, products, onClose, onSave }) {
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col animate-[fadeIn_0.2s_ease]">
         <div className="px-6 py-4 border-b border-outline-variant/30 flex justify-between items-center">
           <h2 className="text-[18px] font-bold text-on-surface">
-            {isEdit ? 'Chỉnh sửa phiếu giảm giá' : 'Tạo phiếu giảm giá mới'}
+            {isFreeship
+              ? (isEdit ? 'Chỉnh sửa phiếu freeship' : 'Tạo phiếu freeship')
+              : (isEdit ? 'Chỉnh sửa phiếu giảm giá' : 'Tạo phiếu giảm giá')}
           </h2>
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-surface-container transition-colors">
             <span className="material-symbols-outlined text-[20px] text-on-surface-variant">close</span>
@@ -76,13 +88,13 @@ function CouponModal({ coupon, products, onClose, onSave }) {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[13px] font-bold text-on-surface-variant mb-1.5">Mã giảm giá (Code)</label>
+              <label className="block text-[13px] font-bold text-on-surface-variant mb-1.5">{isFreeship ? 'Mã freeship (Code)' : 'Mã giảm giá (Code)'}</label>
               <input
                 type="text"
                 required
                 value={formData.code}
                 onChange={e => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                placeholder="VD: SUMMER2026"
+                placeholder={isFreeship ? 'VD: SHIP20K' : 'VD: SUMMER2026'}
                 className="w-full border border-outline-variant rounded-lg px-4 py-2 text-[15px] font-mono focus:border-primary focus:ring-1 focus:ring-primary uppercase"
               />
             </div>
@@ -93,7 +105,7 @@ function CouponModal({ coupon, products, onClose, onSave }) {
                 required
                 value={formData.name}
                 onChange={e => setFormData({ ...formData, name: e.target.value })}
-                placeholder="VD: Giảm giá mùa hè"
+                placeholder={isFreeship ? 'VD: Giảm 20.000đ phí vận chuyển' : 'VD: Giảm giá mùa hè'}
                 className="w-full border border-outline-variant rounded-lg px-4 py-2 text-[15px] focus:border-primary focus:ring-1 focus:ring-primary"
               />
             </div>
@@ -101,24 +113,30 @@ function CouponModal({ coupon, products, onClose, onSave }) {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[13px] font-bold text-on-surface-variant mb-1.5">Loại giảm giá</label>
+              <label className="block text-[13px] font-bold text-on-surface-variant mb-1.5">{isFreeship ? 'Cách giảm phí vận chuyển' : 'Loại giảm giá'}</label>
               <select
-                value={formData.type}
-                onChange={e => setFormData({ ...formData, type: e.target.value })}
+                value={isFreeship ? formData.shipping_discount_type : formData.type}
+                onChange={e => setFormData({
+                  ...formData,
+                  [isFreeship ? 'shipping_discount_type' : 'type']: e.target.value,
+                  value: '',
+                  max_discount: '',
+                })}
                 className="w-full border border-outline-variant rounded-lg px-4 py-2 text-[15px] focus:border-primary focus:ring-1 focus:ring-primary"
               >
-                <option value="percent">Giảm theo phần trăm (%)</option>
-                <option value="fixed">Giảm số tiền cố định (VNĐ)</option>
+                <option value="percent">{isFreeship ? 'Theo phần trăm phí ship (%)' : 'Giảm theo phần trăm (%)'}</option>
+                <option value="fixed">{isFreeship ? 'Theo số tiền phí ship (VNĐ)' : 'Giảm số tiền cố định (VNĐ)'}</option>
               </select>
             </div>
             <div>
               <label className="block text-[13px] font-bold text-on-surface-variant mb-1.5">
-                {formData.type === 'percent' ? 'Mức giảm (%)' : 'Mức giảm (VNĐ)'}
+                {isPercent ? 'Mức giảm (%)' : 'Mức giảm (VNĐ)'}
               </label>
               <input
                 type="number"
                 required
                 min="0"
+                max={isPercent ? 100 : undefined}
                 value={formData.value}
                 onChange={e => setFormData({ ...formData, value: Number(e.target.value) })}
                 className="w-full border border-outline-variant rounded-lg px-4 py-2 text-[15px] focus:border-primary focus:ring-1 focus:ring-primary"
@@ -126,7 +144,19 @@ function CouponModal({ coupon, products, onClose, onSave }) {
             </div>
           </div>
 
-          {formData.type === 'percent' && (
+          {formData.type === 'freeship' && (
+            <div className="space-y-3 rounded-xl bg-emerald-50 p-4">
+              <div>
+                <label className="block text-[13px] font-bold mb-1.5">Giá trị đơn hàng tối thiểu (VNĐ)</label>
+                <input type="number" min="0" value={formData.min_order_value}
+                  onChange={e => setFormData({ ...formData, min_order_value: Number(e.target.value) })}
+                  className="w-full border border-outline-variant rounded-lg px-4 py-2 bg-white" />
+              </div>
+              <p className="text-xs text-emerald-800">Tính trên tổng tiền hàng, chưa gồm phí vận chuyển. Để 0 nếu không yêu cầu tối thiểu. Mức giảm không vượt quá phí ship thực tế.</p>
+            </div>
+          )}
+
+          {isPercent && (
             <div>
               <label className="block text-[13px] font-bold text-on-surface-variant mb-1.5">Giảm tối đa (VNĐ) - Tùy chọn</label>
               <input
@@ -209,11 +239,12 @@ function CouponModal({ coupon, products, onClose, onSave }) {
                 type="checkbox"
                 id="is_website_only"
                 checked={formData.is_website_only}
+                disabled={isFreeship}
                 onChange={e => setFormData({ ...formData, is_website_only: e.target.checked })}
                 className="rounded text-primary focus:ring-primary w-4 h-4"
               />
               <label htmlFor="is_website_only" className="text-[14px] font-bold text-on-surface cursor-pointer text-primary">
-                Phiếu giảm giá dành riêng cho Website (có điều kiện)
+                {isFreeship ? 'Phiếu freeship chỉ dành cho Website' : 'Phiếu giảm giá dành riêng cho Website (có điều kiện)'}
               </label>
             </div>
 
@@ -346,29 +377,42 @@ export default function CouponManagement() {
 
       {modal && (
         <CouponModal
+          key={modal.data?._id || modal.initialType || 'percent'}
           coupon={modal.data}
+          initialType={modal.initialType}
           products={products}
           onClose={() => setModal(null)}
           onSave={() => {
             setModal(null);
-            showToast('Đã lưu mã giảm giá');
+            showToast((modal.data?.type || modal.initialType) === 'freeship' ? 'Đã lưu phiếu freeship' : 'Đã lưu phiếu giảm giá');
             fetchData();
           }}
         />
       )}
 
-      <div className="flex justify-between items-end mb-lg">
+      <div className="flex flex-col gap-4 xl:flex-row xl:justify-between xl:items-end mb-lg">
         <div>
           <h2 className="text-[24px] font-bold text-on-surface">Khuyến mãi & Phiếu giảm giá</h2>
           <p className="text-on-surface-variant mt-1 text-[14px]">Quản lý các chương trình ưu đãi cho đơn hàng</p>
         </div>
-        <button
-          onClick={() => setModal({ type: 'add' })}
-          className="flex items-center gap-xs px-lg py-sm bg-primary text-white rounded-lg hover:opacity-90 font-semibold text-sm shadow-sm"
-        >
-          <span className="material-symbols-outlined text-[20px]">add</span>
-          Tạo mã mới
-        </button>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <button
+            type="button"
+            onClick={() => setModal({ type: 'add', initialType: 'percent' })}
+            className="flex items-center justify-center gap-xs px-lg py-sm bg-primary text-white rounded-lg hover:opacity-90 font-semibold text-sm shadow-sm"
+          >
+            <span className="material-symbols-outlined text-[20px]">sell</span>
+            Tạo phiếu giảm giá
+          </button>
+          <button
+            type="button"
+            onClick={() => setModal({ type: 'add', initialType: 'freeship' })}
+            className="flex items-center justify-center gap-xs px-lg py-sm bg-emerald-700 text-white rounded-lg hover:bg-emerald-800 font-semibold text-sm shadow-sm"
+          >
+            <span className="material-symbols-outlined text-[20px]">local_shipping</span>
+            Tạo phiếu freeship
+          </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-outline-variant/30 overflow-hidden">
@@ -378,7 +422,7 @@ export default function CouponManagement() {
           <div className="p-12 text-center text-on-surface-variant flex flex-col items-center">
             <span className="material-symbols-outlined text-[48px] opacity-20 mb-3">sell</span>
             <p className="text-[15px] font-medium text-on-surface">Chưa có mã giảm giá nào</p>
-            <p className="text-[13px] mt-1">Bấm "Tạo mã mới" để bắt đầu chương trình ưu đãi.</p>
+            <p className="text-[13px] mt-1">Bấm "Tạo phiếu giảm giá" hoặc "Tạo phiếu freeship" để bắt đầu.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -418,11 +462,12 @@ export default function CouponManagement() {
                       <td className="py-4 px-6">
                         <div className="flex flex-col gap-0.5">
                           <span className="text-[14px] font-bold text-on-surface">
-                            Giảm {c.type === 'percent' ? `${c.value}%` : formatPrice(c.value)}
+                            {c.type === 'freeship' ? shippingDiscountLabel(c) : `Giảm ${c.type === 'percent' ? `${c.value}%` : formatPrice(c.value)}`}
                           </span>
                           {c.type === 'percent' && c.max_discount && (
                             <span className="text-[12px] text-on-surface-variant">Tối đa: {formatPrice(c.max_discount)}</span>
                           )}
+                          {c.type === 'freeship' && <span className="text-[12px] text-on-surface-variant">{shippingDiscountConditions(c)}</span>}
                           <span className="text-[11px] text-on-surface-variant mt-1 border border-outline-variant/50 inline-block px-1.5 py-0.5 rounded bg-surface-container-low max-w-fit">
                             {c.applicable_products === 'all' ? 'Tất cả sản phẩm' : `Chỉ ${c.product_ids?.length || 0} sản phẩm`}
                           </span>

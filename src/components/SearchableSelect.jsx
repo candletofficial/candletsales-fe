@@ -1,9 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-export default function SearchableSelect({ options, value, onChange, placeholder = "-- Chọn --", className = "" }) {
+const searchText = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/gi, 'd').toLowerCase().trim();
+
+export default function SearchableSelect({ options, value, onChange, placeholder = "-- Chọn --", className = "", disabled = false, inlineMenu = false, searchPlaceholder = "Tìm kiếm...", ariaLabel }) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
   const wrapperRef = useRef(null);
+  const triggerRef = useRef(null);
 
   // Đóng dropdown khi click ra ngoài
   useEffect(() => {
@@ -19,14 +22,19 @@ export default function SearchableSelect({ options, value, onChange, placeholder
   const selectedOption = options.find(opt => String(opt.value) === String(value));
   
   const filteredOptions = options.filter(opt => 
-    opt.label.toLowerCase().includes(search.toLowerCase())
+    searchText(opt.label).includes(searchText(search))
   );
 
   return (
-    <div ref={wrapperRef} className="relative w-full">
-      <div 
-        className={`w-full bg-transparent rounded-md px-2 py-1.5 text-[14px] cursor-pointer flex justify-between items-center group ${className || 'border-none'}`}
-        onClick={() => { setIsOpen(!isOpen); setSearch(''); }}
+    <div ref={wrapperRef} className="relative w-full" onKeyDown={event => { if (event.key === 'Escape' && isOpen) { event.stopPropagation(); setIsOpen(false); triggerRef.current?.focus(); } }}>
+      <button
+        ref={triggerRef}
+        type="button"
+        className={`w-full bg-transparent rounded-md px-2 py-1.5 text-[14px] cursor-pointer flex justify-between items-center group text-left focus-visible:outline-2 focus-visible:outline-primary disabled:cursor-not-allowed ${className || 'border-none'}`}
+        disabled={disabled}
+        aria-label={ariaLabel || placeholder}
+        aria-expanded={isOpen && !disabled}
+        onClick={() => { if (!disabled) { setIsOpen(!isOpen); setSearch(''); } }}
       >
         <span className={`truncate flex-1 min-w-0 text-left pr-2 ${!selectedOption ? 'text-on-surface-variant' : 'text-on-surface font-medium'}`}>
           {selectedOption ? selectedOption.label : placeholder}
@@ -34,17 +42,18 @@ export default function SearchableSelect({ options, value, onChange, placeholder
         <span className={`material-symbols-outlined text-[20px] transition-transform ${isOpen ? 'rotate-180 text-primary' : 'text-on-surface-variant group-hover:text-on-surface'}`}>
           expand_more
         </span>
-      </div>
+      </button>
 
-      {isOpen && (
-        <div className="absolute z-[100] w-full min-w-[300px] left-0 mt-2 bg-white border border-outline-variant/30 rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] max-h-[300px] flex flex-col overflow-hidden">
+      {isOpen && !disabled && (
+        <div className={`${inlineMenu ? 'relative' : 'absolute z-[100] min-w-[300px] left-0'} w-full mt-2 bg-white border border-outline-variant/30 rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] max-h-[300px] flex flex-col overflow-hidden`}>
           <div className="p-2 border-b border-outline-variant/30 bg-surface-container-lowest z-10 flex-shrink-0">
             <div className="relative">
               <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant">search</span>
               <input
                 type="text"
                 className="w-full pl-9 pr-3 py-2 text-[14px] bg-surface-container-low border border-transparent rounded-lg focus:outline-none focus:border-primary/50 focus:bg-white transition-all"
-                placeholder="Tìm kiếm..."
+                placeholder={searchPlaceholder}
+                aria-label={searchPlaceholder}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 onClick={(e) => e.stopPropagation()}
@@ -57,18 +66,20 @@ export default function SearchableSelect({ options, value, onChange, placeholder
               filteredOptions.map(opt => {
                 const isSelected = String(opt.value) === String(value);
                 return (
-                  <div
+                  <button
+                    type="button"
                     key={opt.value}
-                    className={`px-3 py-2.5 text-[14px] cursor-pointer rounded-lg transition-colors flex items-center justify-between
+                    className={`w-full text-left px-3 py-2.5 text-[14px] cursor-pointer rounded-lg transition-colors flex items-center justify-between focus-visible:outline-2 focus-visible:outline-primary
                       ${isSelected ? 'bg-primary-container text-on-primary-container font-bold' : 'text-on-surface hover:bg-surface-container-low'}`}
                     onClick={() => {
                       onChange(opt.value);
                       setIsOpen(false);
+                      triggerRef.current?.focus();
                     }}
                   >
-                    <span className="truncate">{opt.label}</span>
+                    <span className={inlineMenu ? 'min-w-0 break-words' : 'truncate'}>{opt.label}</span>
                     {isSelected && <span className="material-symbols-outlined text-[18px]">check</span>}
-                  </div>
+                  </button>
                 );
               })
             ) : (
