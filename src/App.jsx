@@ -29,6 +29,7 @@ import Cart from './pages/shop/Cart';
 import Checkout from './pages/shop/Checkout';
 import OrderSuccess from './pages/shop/OrderSuccess';
 import ShopOrders from './pages/shop/ShopOrders';
+import OrderTracking from './pages/shop/OrderTracking';
 import ShopProfile from './pages/shop/ShopProfile';
 import ShopLogin from './pages/shop/ShopLogin';
 import FacebookLoginCallback from './pages/shop/FacebookLoginCallback';
@@ -80,6 +81,7 @@ export default function App() {
             <Route path="payment/:orderId" element={<OrderSuccess paymentFlow />} />
             <Route path="order-success/:orderId" element={<OrderSuccess />} />
             <Route path="orders" element={<ShopOrders />} />
+            <Route path="theo-doi-don/:token" element={<OrderTracking />} />
             <Route path="guide" element={<ShopGuide />} />
             <Route path="cam-nang" element={<ShopGuide />} />
             <Route path="stories" element={<ShopStories />} />

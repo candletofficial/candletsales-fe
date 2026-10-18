@@ -262,7 +262,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-md mb-lg">
           {/* LEFT: Tổng tài sản chung - large card */}
           <div 
-            onClick={() => navigate('/fund')}
+            onClick={() => navigate('/admin/fund')}
             className="lg:col-span-1 bg-gradient-to-br from-[#1e3a5f] to-[#2563eb] rounded-2xl p-6 shadow-sm flex flex-col justify-between relative overflow-hidden cursor-pointer hover:shadow-lg transition-all hover:scale-[1.01]"
           >
             <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/5" />

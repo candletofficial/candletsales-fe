@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { formatPrice } from '../utils/formatPrice';
 
 const hasValue = value => value !== undefined && value !== null && String(value).trim() !== '';
@@ -23,6 +24,7 @@ function DetailGroup({ title, fields }) {
 }
 
 export default function OrderCustomerDetails({ order, name, phone, address }) {
+  const [expanded, setExpanded] = useState(false);
   const details = order.pancake_details || {};
   const pancake = Boolean(order.pancake_order_id);
   const phones = details.phones?.length ? details.phones.join('\n') : phone;
@@ -38,6 +40,9 @@ export default function OrderCustomerDetails({ order, name, phone, address }) {
     { label: 'Cuộc trò chuyện', url: safeUrl(details.conversation_url), icon: 'forum' },
     { label: 'Tra cứu vận chuyển', url: safeUrl(details.tracking_url), icon: 'local_shipping' },
   ].filter(link => link.url);
+  const summaryName = details.name || name || details.recipient_name || 'Chưa có tên khách hàng';
+  const summaryPhone = phones || details.recipient_phone;
+  const summaryAddress = details.address || address || details.street;
 
   return <section aria-labelledby="order-customer-details-title" className="rounded-2xl border border-stone-200/90 bg-white p-4 shadow-2xs sm:p-5">
     <div className="flex flex-wrap items-center justify-between gap-2 border-b border-stone-100 pb-3">
@@ -45,9 +50,35 @@ export default function OrderCustomerDetails({ order, name, phone, address }) {
         <span aria-hidden="true" className="material-symbols-outlined flex size-8 items-center justify-center rounded-lg bg-blue-50 text-[19px] text-primary">person_pin</span>
         <h3 id="order-customer-details-title" className="text-[13px] font-bold uppercase tracking-wider text-stone-700">Thông tin khách hàng</h3>
       </div>
+      <button
+        type="button"
+        onClick={() => setExpanded(value => !value)}
+        aria-expanded={expanded}
+        aria-controls="order-customer-details-content"
+        className="inline-flex min-h-9 items-center gap-1 rounded-lg px-2.5 text-xs font-bold text-primary transition-colors hover:bg-blue-50"
+      >
+        {expanded ? 'Thu gọn' : 'Xem chi tiết'}
+        <span aria-hidden="true" className={`material-symbols-outlined text-lg transition-transform ${expanded ? 'rotate-180' : ''}`}>expand_more</span>
+      </button>
     </div>
 
-    <div className="mt-4 space-y-5">
+    {!expanded && <div className="mt-3 space-y-2.5">
+      <div className="flex min-w-0 items-center gap-2.5">
+        <span aria-hidden="true" className="material-symbols-outlined text-[18px] text-stone-400">person</span>
+        <span className="truncate text-sm font-semibold text-stone-800">{summaryName}</span>
+        {details.is_block && <span className="shrink-0 rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-bold text-red-700">Đã chặn</span>}
+      </div>
+      {hasValue(summaryPhone) && <div className="flex min-w-0 items-center gap-2.5">
+        <span aria-hidden="true" className="material-symbols-outlined text-[18px] text-stone-400">call</span>
+        <span className="whitespace-pre-line text-xs font-medium text-stone-600">{summaryPhone}</span>
+      </div>}
+      {hasValue(summaryAddress) && <div className="flex min-w-0 items-start gap-2.5">
+        <span aria-hidden="true" className="material-symbols-outlined mt-px text-[18px] text-stone-400">location_on</span>
+        <span className="line-clamp-2 text-xs leading-relaxed text-stone-600">{summaryAddress}</span>
+      </div>}
+    </div>}
+
+    {expanded && <div id="order-customer-details-content" className="mt-4 space-y-5">
       {details.is_block && <p className="rounded-lg bg-red-50 px-3 py-2 text-xs font-medium text-red-700">Khách hàng được đánh dấu chặn.</p>}
       <DetailGroup title="Hồ sơ khách hàng" fields={[
         { label: 'Họ tên', value: details.name || name },
@@ -84,6 +115,6 @@ export default function OrderCustomerDetails({ order, name, phone, address }) {
         { label: 'Đơn vị giao hàng', value: details.carrier },
       ]} />}
       {links.length > 0 && <div className="flex flex-wrap gap-2">{links.map(link => <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-lg border border-blue-100 px-2.5 py-2 text-[11px] font-semibold text-primary no-underline transition-colors hover:bg-blue-50"><span aria-hidden="true" className="material-symbols-outlined text-[15px]">{link.icon}</span>{link.label}</a>)}</div>}
-    </div>
+    </div>}
   </section>;
 }

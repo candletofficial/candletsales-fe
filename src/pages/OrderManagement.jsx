@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Layout from '../components/Layout';
 import OrderItemMaterialsModal from '../components/OrderItemMaterialsModal';
@@ -25,7 +25,7 @@ const today = () => {
 };
 
 // ── Modal Tạo / Chỉnh sửa đơn hàng ───────────────────────────────
-function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, onMaterialsSaved, isReplacementMode = false, isSeedingMode = false }) {
+function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, onMaterialsSaved, onTrackingCreated, onStatusSaved, isReplacementMode = false, isSeedingMode = false }) {
   const isEdit = !!order;
   const [items, setItems] = useState(order?.items?.map(i => ({ ...i })) || []);
   const [materialsIndex, setMaterialsIndex] = useState(null);
@@ -51,6 +51,30 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
   });
   const [source, setSource] = useState(order?.source || 'shopee');
   const [deliveryStatus, setDeliveryStatus] = useState(order?.delivery_status || (order?.source === 'website' ? 'pending' : 'delivered'));
+  const [statusSaving, setStatusSaving] = useState(null);
+  const [statusMessage, setStatusMessage] = useState('');
+  const statusRequestRef = useRef(false);
+  const [createTracking, setCreateTracking] = useState(false);
+  const [linkLoading, setLinkLoading] = useState(false);
+  const [linkMessage, setLinkMessage] = useState('');
+  const managesDelivery = source === 'website' || order?.tracking_enabled;
+  const canEditCustomer = source === 'website' || source === 'pos' || !order?.pancake_order_id;
+  const trackingUrl = order?.tracking_token ? `${window.location.origin}/theo-doi-don/${order.tracking_token}` : '';
+  const handleCreateTracking = async () => {
+    setLinkLoading(true);
+    setError('');
+    try {
+      const result = await orderService.createTrackingLink(order._id);
+      setDeliveryStatus(result.data.data.order.delivery_status);
+      onTrackingCreated(result.data.data.order);
+      setLinkMessage('Đã tạo link. Bạn có thể sao chép và gửi cho khách.');
+    } catch (err) { setError(err.response?.data?.message || 'Không tạo được link theo dõi.'); }
+    finally { setLinkLoading(false); }
+  };
+  const handleCopyTracking = async () => {
+    try { await navigator.clipboard.writeText(trackingUrl); setLinkMessage('Đã sao chép link theo dõi.'); }
+    catch { setLinkMessage('Hãy chọn đường link bên dưới và sao chép thủ công.'); }
+  };
   const [cancelReason, setCancelReason] = useState(order?.cancelled_reason || '');
   const [posMode, setPosMode] = useState(order?.pos_mode || 'offline');
   const [customerName, setCustomerName] = useState(order?.customer_name || '');
@@ -72,6 +96,43 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
   const [productSearch, setProductSearch] = useState('');
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [requiredDepositAmount, setRequiredDepositAmount] = useState(0);
+
+  const handleStatusChange = async (nextStatus) => {
+    if (statusRequestRef.current || loading || linkLoading || confirmAcceptLoading || nextStatus === deliveryStatus) return;
+    if (!isEdit) {
+      setDeliveryStatus(nextStatus);
+      return;
+    }
+    statusRequestRef.current = true;
+    setStatusSaving(nextStatus);
+    setStatusMessage('');
+    setError('');
+    try {
+      const result = await orderService.updateDeliveryStatus(order._id, {
+        delivery_status: nextStatus,
+        ...(nextStatus === 'cancelled' ? { cancelled_reason: cancelReason.trim() || 'Đã huỷ theo yêu cầu' } : {}),
+      });
+      const updatedOrder = result.data.data;
+      setDeliveryStatus(updatedOrder.delivery_status);
+      if (nextStatus === 'cancelled') setCancelReason(updatedOrder.cancelled_reason || '');
+      if (updatedOrder.status === 'returned') setReturnCost(updatedOrder.return_cost || 0);
+      onStatusSaved(updatedOrder);
+      setStatusMessage('Đã lưu trạng thái. Trang theo dõi của khách sẽ cập nhật tự động.');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Không lưu được trạng thái. Vui lòng thử lại.');
+    } finally {
+      statusRequestRef.current = false;
+      setStatusSaving(null);
+    }
+  };
+  const handleStatusClick = (event) => {
+    const nextStatus = event.currentTarget.dataset.status;
+    if (nextStatus === 'confirmed' && deliveryStatus === 'confirmed') {
+      setShowConfirmAcceptModal(true);
+    } else {
+      handleStatusChange(nextStatus);
+    }
+  };
 
   // Xử lý xác nhận chấp nhận đơn hàng và cập nhật mã vận đơn / phí ship
   const handleConfirmAcceptOrder = async ({ newOrderId, newLogisticsCost, saveDirectly }) => {
@@ -100,10 +161,10 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
           logistics_cost: newLogisticsCost,
           source,
           pos_mode: source === 'pos' ? posMode : undefined,
-          customer_name: (source === 'pos' || source === 'website') ? customerName : undefined,
-          customer_phone: (source === 'pos' || source === 'website') ? customerPhone : undefined,
-          customer_address: (source === 'pos' || source === 'website') ? customerAddress : undefined,
-          payment_method: (source === 'pos' || source === 'website') ? paymentMethod : undefined,
+          customer_name: canEditCustomer ? customerName : undefined,
+          customer_phone: canEditCustomer ? customerPhone : undefined,
+          customer_address: canEditCustomer ? customerAddress : undefined,
+          payment_method: canEditCustomer ? paymentMethod : undefined,
           shippingMethod,
           delivery_status: 'confirmed',
           note,
@@ -252,8 +313,10 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, withTracking = createTracking) => {
     e.preventDefault();
+    if (loading || statusRequestRef.current) return;
+    setCreateTracking(withTracking);
     if (!isSeeding && items.length === 0) { setError('Vui lòng thêm ít nhất 1 sản phẩm'); return; }
     setError('');
     setLoading(true);
@@ -284,13 +347,13 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
         logistics_cost: logisticsCost, 
         source, 
         pos_mode: source === 'pos' ? posMode : undefined,
-        customer_name: (source === 'pos' || source === 'website') ? customerName : undefined,
-        customer_phone: (source === 'pos' || source === 'website') ? customerPhone : undefined,
-        customer_address: (source === 'pos' || source === 'website') ? customerAddress : undefined,
-        payment_method: (source === 'pos' || source === 'website') ? paymentMethod : undefined,
+        customer_name: canEditCustomer ? customerName : undefined,
+        customer_phone: canEditCustomer ? customerPhone : undefined,
+        customer_address: canEditCustomer ? customerAddress : undefined,
+        payment_method: canEditCustomer ? paymentMethod : undefined,
         shippingMethod, 
-        delivery_status: source === 'website' ? deliveryStatus : undefined,
-        cancelled_reason: (source === 'website' && deliveryStatus === 'cancelled') ? cancelReason : undefined,
+        delivery_status: managesDelivery ? deliveryStatus : undefined,
+        cancelled_reason: (managesDelivery && deliveryStatus === 'cancelled') ? cancelReason : undefined,
         note, 
         ordered_at: finalOrderedAt, 
         is_replacement: isReplacement,
@@ -304,10 +367,11 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
       
       if (isEdit) {
         await orderService.updateOrder(order._id, payload);
+        onSave();
       } else {
-        await orderService.createOrder({ ...payload, orderId: orderId.trim() || undefined });
+        const result = await orderService.createOrder({ ...payload, orderId: orderId.trim() || undefined, create_tracking_link: withTracking });
+        onSave(result.data.data, { keepOpen: withTracking });
       }
-      onSave();
     } catch (err) {
       if (err.response?.data?.code === 'INSUFFICIENT_FUND') {
         const amt = err.response.data.requiredAmount || 0;
@@ -403,8 +467,9 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                 <span className="hidden sm:inline">In Hóa Đơn</span>
               </button>
             )}
-            <button 
-              onClick={onClose} 
+            <button
+              disabled={Boolean(statusSaving)}
+              onClick={onClose}
               className="p-1.5 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors cursor-pointer"
             >
               <span className="material-symbols-outlined text-[22px]">close</span>
@@ -441,7 +506,18 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
           )}
 
           {/* ═══════════ FULL WIDTH: TIẾN TRÌNH TRẠNG THÁI GIAO HÀNG (ĐƠN WEBSITE) ═══════════ */}
-          {source === 'website' && (() => {
+          {isEdit && !order.pancake_order_id && (
+            <section className="mb-5 rounded-2xl border border-blue-100 bg-white p-4 sm:p-5">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div><h3 className="flex items-center gap-2 text-sm font-bold text-stone-800"><span aria-hidden="true" className="material-symbols-outlined text-primary">link</span>Link theo dõi đơn hàng</h3><p className="mt-1 text-xs text-stone-500">Khách mở link để xem tiến trình giao hàng, không cần đăng nhập.</p></div>
+                {trackingUrl ? <div className="flex gap-2"><button type="button" onClick={handleCopyTracking} className="cursor-pointer rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-white hover:bg-blue-800">Sao chép link</button><a href={trackingUrl} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-stone-200 px-3 py-2 text-xs font-semibold text-stone-700 hover:bg-stone-50">Mở trang</a></div>
+                  : <button type="button" onClick={handleCreateTracking} disabled={linkLoading || loading || Boolean(statusSaving)} className="cursor-pointer rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-white disabled:opacity-40">{linkLoading ? 'Đang tạo…' : 'Tạo link theo dõi'}</button>}
+              </div>
+              {trackingUrl && <input aria-label="Đường link theo dõi đơn hàng" readOnly value={trackingUrl} onFocus={e => e.target.select()} className="mt-3 w-full rounded-lg border border-blue-100 bg-blue-50/50 px-3 py-2 text-xs text-blue-800" />}
+              {linkMessage && <p role="status" className="mt-2 text-xs text-emerald-700">{linkMessage}</p>}
+            </section>
+          )}
+          {managesDelivery && (() => {
             // Hàm kiểm tra tính hợp lệ khi ép buộc chuyển trạng thái tuần tự
             const checkStatusAvailability = (targetVal) => {
               if (targetVal === deliveryStatus) {
@@ -449,7 +525,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
               }
 
               // Đơn đã giao thành công hoặc đã huỷ thì khoá toàn bộ thao tác đổi
-              if (deliveryStatus === 'delivered' || deliveryStatus === 'cancelled') {
+              if (deliveryStatus === 'delivered' || deliveryStatus === 'cancelled' || isReturned) {
                 return { allowed: false, isCurrent: false, isCompleted: false, isNext: false, reason: 'Đơn hàng đã hoàn tất chu trình, không thể thay đổi' };
               }
 
@@ -532,7 +608,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                 <div className="absolute top-0 right-0">
                   <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-bl-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[11px] font-mono font-bold tracking-wider uppercase shadow-xs">
                     <span className="w-2 h-2 rounded-full bg-white animate-ping"></span>
-                    Ưu Tiên Xử Lý • Đơn Website
+                    {source === 'website' ? 'Ưu Tiên Xử Lý • Đơn Website' : 'Đơn có link theo dõi'}
                   </span>
                 </div>
 
@@ -543,12 +619,13 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                       <span className="material-symbols-outlined text-[20px]">alt_route</span>
                     </span>
                     <h3 className="text-[14px] sm:text-[15px] font-black uppercase tracking-wider text-stone-900">
-                      Tiến Trình Giao Hàng Đơn Website
+                      Tiến Trình Giao Hàng
                     </h3>
                   </div>
                   <p className="text-[12px] text-stone-600 font-medium">
-                    Hệ thống áp dụng quy trình chuyển đổi tuần tự từng bước để đảm bảo tính toàn vẹn kho hàng và giao vận
+                    {isEdit ? 'Bấm vào bước tiếp theo để chuyển và lưu trạng thái ngay.' : 'Trạng thái sẽ được lưu khi tạo đơn hàng.'}
                   </p>
+                  {(statusSaving || statusMessage) && <p role="status" className={`mt-2 flex items-center gap-1.5 text-xs font-semibold ${statusSaving ? 'text-blue-700' : 'text-emerald-700'}`}><span aria-hidden="true" className={`material-symbols-outlined text-base ${statusSaving ? 'animate-spin' : ''}`}>{statusSaving ? 'progress_activity' : 'check_circle'}</span>{statusSaving ? 'Đang lưu trạng thái…' : statusMessage}</p>}
                 </div>
 
                 {/* Status Indicator Banner (Mô tả hành động của trạng thái hiện tại) */}
@@ -599,7 +676,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
 
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                     {[
-                      { step: '01', val: 'pending', label: 'Chờ xác nhận', desc: 'Mới đặt từ web', icon: 'hourglass_empty', activeColor: 'bg-amber-500 border-amber-600 text-white shadow-md ring-2 ring-amber-300' },
+                      { step: '01', val: 'pending', label: 'Chờ xác nhận', desc: 'Chờ kiểm tra đơn', icon: 'hourglass_empty', activeColor: 'bg-amber-500 border-amber-600 text-white shadow-md ring-2 ring-amber-300' },
                       { step: '02', val: 'confirmed', label: 'Đã chấp nhận', desc: 'Đã duyệt & soạn hàng', icon: 'inventory_2', activeColor: 'bg-blue-600 border-blue-700 text-white shadow-md ring-2 ring-blue-300' },
                       { step: '03', val: 'shipping', label: 'Đang giao hàng', desc: 'Shipper đang giao', icon: 'local_shipping', activeColor: 'bg-indigo-600 border-indigo-700 text-white shadow-md ring-2 ring-indigo-300' },
                       { step: '04', val: 'delivered', label: 'Giao thành công', desc: 'Khách đã nhận', icon: 'check_circle', activeColor: 'bg-emerald-600 border-emerald-700 text-white shadow-md ring-2 ring-emerald-300' },
@@ -614,16 +691,9 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                         <button
                           key={st.val}
                           type="button"
-                          disabled={!isAllowed && (!isSelected || st.val !== 'confirmed')}
-                          onClick={() => {
-                            if (st.val === 'confirmed') {
-                              if (isAllowed || isSelected) {
-                                setShowConfirmAcceptModal(true);
-                              }
-                              return;
-                            }
-                            if (isAllowed) setDeliveryStatus(st.val);
-                          }}
+                          disabled={Boolean(statusSaving) || loading || linkLoading || confirmAcceptLoading || (!isAllowed && (!isSelected || st.val !== 'confirmed'))}
+                          data-status={st.val}
+                          onClick={handleStatusClick}
                           title={statusInfo.reason || ''}
                           className={`p-3.5 rounded-2xl border text-left transition-all flex flex-col justify-between min-h-[86px] relative group ${
                             isSelected
@@ -702,8 +772,9 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                       return (
                         <button
                           type="button"
-                          disabled={!isAllowed}
-                          onClick={() => isAllowed && setDeliveryStatus('failed')}
+                          disabled={!isAllowed || Boolean(statusSaving) || loading || linkLoading || confirmAcceptLoading}
+                          data-status="failed"
+                          onClick={handleStatusClick}
                           title={failedInfo.reason || ''}
                           className={`p-3 rounded-2xl border text-left transition-all flex items-center gap-3 ${
                             isSelected
@@ -744,8 +815,9 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                       return (
                         <button
                           type="button"
-                          disabled={!isAllowed}
-                          onClick={() => isAllowed && setDeliveryStatus('cancelled')}
+                          disabled={!isAllowed || Boolean(statusSaving) || loading || linkLoading || confirmAcceptLoading}
+                          data-status="cancelled"
+                          onClick={handleStatusClick}
                           title={cancelInfo.reason || ''}
                           className={`p-3 rounded-2xl border text-left transition-all flex items-center gap-3 ${
                             isSelected
@@ -779,11 +851,13 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                   </div>
 
                   {/* Khối lý do huỷ đơn */}
-                  {deliveryStatus === 'cancelled' && (
+                  {['pending', 'confirmed', 'cancelled'].includes(deliveryStatus) && (
                     <div className="mt-3 p-3.5 bg-red-50 border border-red-200 rounded-xl space-y-1.5 animate-[fadeIn_0.15s_ease]">
-                      <label className="block text-[11.5px] font-bold text-red-700">Lý do huỷ đơn *</label>
+                      <label className="block text-[11.5px] font-bold text-red-700">Lý do huỷ đơn {deliveryStatus !== 'cancelled' && '(nếu có)'}</label>
                       <input
                         type="text"
+                        readOnly={isEdit && deliveryStatus === 'cancelled'}
+                        disabled={Boolean(statusSaving)}
                         value={cancelReason}
                         onChange={e => setCancelReason(e.target.value)}
                         placeholder="VD: Khách đổi ý, hết hàng, không liên lạc được..."
@@ -890,7 +964,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
               )}
 
               {/* Card 2: Thông tin khách hàng & Giao nhận (Website / POS / Khách lẻ) */}
-              {(source === 'website' || source === 'pos') && (
+              {canEditCustomer && (
                 <div className="bg-white rounded-2xl p-4 sm:p-5 border border-stone-200/90 shadow-2xs space-y-3.5">
                   <div className="flex items-center justify-between pb-2 border-b border-stone-100">
                     <h3 className="text-[13px] font-bold uppercase tracking-wider text-stone-700 flex items-center gap-1.5">
@@ -1152,7 +1226,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                             <button
                               type="button"
                               onClick={() => setMaterialsIndex(idx)}
-                              disabled={!isEdit || isReturned || order?.status === 'cancelled' || ['failed', 'cancelled'].includes(order?.delivery_status)
+                              disabled={Boolean(statusSaving) || !isEdit || isReturned || order?.status === 'cancelled' || ['failed', 'cancelled'].includes(order?.delivery_status)
                                 || order?.items?.[idx]?.product_id !== item.product_id
                                 || order?.items?.[idx]?.sku_id !== item.sku_id
                                 || order?.items?.[idx]?.quantity !== item.quantity}
@@ -1409,6 +1483,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                   <button
                     type="button"
                     onClick={onMarkReturn}
+                    disabled={Boolean(statusSaving)}
                     className="px-3.5 py-2 text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
                   >
                     <span className="material-symbols-outlined text-[17px]">assignment_return</span>
@@ -1419,6 +1494,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                 <button
                   type="button"
                   onClick={onDelete}
+                  disabled={Boolean(statusSaving)}
                   className="px-3.5 py-2 text-red-600 hover:bg-red-50 border border-transparent hover:border-red-200 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[17px]">delete</span>
@@ -1428,12 +1504,13 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
             )}
           </div>
 
-          <div className="flex items-center gap-3">
-            <button type="button" onClick={onClose} className="px-4 py-2 text-on-surface-variant text-[14px] font-medium hover:bg-surface-container rounded-lg transition-colors">
+          <div className="flex flex-wrap items-center gap-3">
+            <button type="button" onClick={onClose} disabled={Boolean(statusSaving)} className="px-4 py-2 text-on-surface-variant text-[14px] font-medium hover:bg-surface-container rounded-lg transition-colors">
               Hủy
             </button>
+            {!isEdit && <button type="button" onClick={e => handleSubmit(e, true)} disabled={loading || (!isSeeding && items.length === 0)} className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-primary px-4 py-2.5 text-sm font-semibold text-primary hover:bg-blue-50 disabled:opacity-40"><span aria-hidden="true" className="material-symbols-outlined text-lg">add_link</span>Tạo đơn & link theo dõi</button>}
             {(!isEdit || order.status !== 'returned') && (
-              <button onClick={handleSubmit} disabled={loading || (!isSeeding && items.length === 0)}
+              <button onClick={e => handleSubmit(e, false)} disabled={loading || linkLoading || Boolean(statusSaving) || (!isSeeding && items.length === 0)}
                 className="px-6 py-2.5 bg-primary text-white text-[14px] font-semibold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-60 flex items-center gap-2 shadow-sm">
                 {loading && <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
                 {isEdit ? 'Lưu thay đổi' : 'Tạo đơn hàng'}
@@ -1928,7 +2005,7 @@ function AcceptOrderModal({
 
 // ── Modal Xác nhận xóa ────────────────────────────────────────────
 function DeleteModal({ order, onClose, onConfirm, loading }) {
-  const isReturned = order.status === 'returned';
+  const isReturned = ['returned', 'cancelled'].includes(order.status) || ['failed', 'cancelled'].includes(order.delivery_status);
   const [restoreStock, setRestoreStock] = useState(!isReturned); // đơn hoàn: mặc định false vì kho đã hoàn rồi
 
   return (
@@ -1946,7 +2023,7 @@ function DeleteModal({ order, onClose, onConfirm, loading }) {
           /* Đơn đã hoàn — kho đã được hoàn khi markAsReturned, không cần hoàn thêm */
           <div className="flex items-start gap-2.5 text-sm bg-[#fef9c3] text-[#854d0e] px-4 py-3 rounded-lg border border-[#fde68a] w-full mb-6 text-left">
             <span className="material-symbols-outlined text-[17px] flex-shrink-0 mt-0.5">info</span>
-            <span>Đơn hàng này đã bị hoàn — nguyên liệu đã được <strong>hoàn vào kho</strong> trước đó. Xóa đơn sẽ không thay đổi tồn kho.</span>
+            <span>Đơn hàng này đã hoàn hoặc huỷ — nguyên liệu đã được <strong>hoàn vào kho</strong> trước đó. Xóa đơn sẽ không thay đổi tồn kho.</span>
           </div>
         ) : (
           /* Đơn hoàn thành — cho phép chọn hoàn kho hay không */
@@ -2207,8 +2284,8 @@ export default function OrderManagement() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const handleSave = () => {
-    setModal(null);
+  const handleSave = (savedOrder, options = {}) => {
+    setModal(options.keepOpen && savedOrder?._id ? { type: 'edit', data: savedOrder } : null);
     showToast(modal?.type === 'edit' ? 'Đã cập nhật đơn hàng' : 'Đã tạo đơn hàng mới');
     fetchData();
   };
@@ -2365,11 +2442,23 @@ export default function OrderManagement() {
           products={products}
           onClose={() => setModal(null)}
           onSave={handleSave}
+          onStatusSaved={updatedOrder => {
+            setOrders(current => current.map(order => order._id === updatedOrder._id ? { ...updatedOrder, tracking_token: order.tracking_token } : order));
+            setModal(current => current?.data?._id === updatedOrder._id ? { ...current, data: { ...updatedOrder, tracking_token: current.data.tracking_token } } : current);
+          }}
+          onTrackingCreated={updatedOrder => {
+            const tracking = {
+              tracking_enabled: updatedOrder.tracking_enabled, tracking_token: updatedOrder.tracking_token,
+              status: updatedOrder.status, delivery_status: updatedOrder.delivery_status, updatedAt: updatedOrder.updatedAt,
+            };
+            setModal(current => ({ ...current, data: { ...current.data, ...tracking } }));
+            setOrders(current => current.map(order => order._id === updatedOrder._id ? { ...order, ...tracking } : order));
+          }}
           onDelete={() => setModal({ type: 'delete', data: modal.data })}
           onMarkReturn={() => setModal({ type: 'return', data: modal.data })}
           onMaterialsSaved={updatedOrder => {
-            setOrders(current => current.map(order => order._id === updatedOrder._id ? updatedOrder : order));
-            setModal(current => ({ ...current, data: updatedOrder }));
+            setOrders(current => current.map(order => order._id === updatedOrder._id ? { ...updatedOrder, tracking_token: order.tracking_token } : order));
+            setModal(current => ({ ...current, data: { ...updatedOrder, tracking_token: current.data.tracking_token } }));
             showToast('Đã đổi nguyên liệu và cập nhật tồn kho');
           }}
           isReplacementMode={modal.data?.is_replacement}
@@ -2834,7 +2923,7 @@ export default function OrderManagement() {
                         {/* 5. Trạng thái */}
                         <td className="px-5 py-3.5 text-center align-middle">
                           <div className="flex flex-col gap-1 items-center justify-center">
-                            {order.source === 'website' && !isReturned && order.status !== 'cancelled' ? (
+                            {(order.source === 'website' || order.tracking_enabled) && !isReturned && order.status !== 'cancelled' ? (
                               <>
                                 {(!order.delivery_status || order.delivery_status === 'pending') && (
                                   <span className="inline-flex items-center gap-1 text-[10.5px] uppercase font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-300">

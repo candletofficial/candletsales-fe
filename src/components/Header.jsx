@@ -52,7 +52,7 @@ export default function Header({ onMenuClick }) {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/admin/login');
   };
 
   let placeholder = "Tìm kiếm...";
@@ -118,7 +118,7 @@ export default function Header({ onMenuClick }) {
                     </div>
                   ) : (
                     lowStockMaterials.map(m => (
-                      <div key={m._id} className="px-4 py-3 border-b border-outline-variant/20 hover:bg-surface-container-low transition-colors cursor-pointer" onClick={() => { setShowNotifications(false); navigate('/imports', { state: { autoOpenImport: true, materialId: m._id } }); }}>
+                      <div key={m._id} className="px-4 py-3 border-b border-outline-variant/20 hover:bg-surface-container-low transition-colors cursor-pointer" onClick={() => { setShowNotifications(false); navigate('/admin/imports', { state: { autoOpenImport: true, materialId: m._id } }); }}>
                         <div className="flex gap-3 items-start">
                           <div className={`w-8 h-8 mt-0.5 rounded-full flex items-center justify-center flex-shrink-0 ${m.status === 'out_of_stock' || m.actualStock <= 0 ? 'bg-error-container text-error' : 'bg-[#fef3c7] text-[#d97706]'}`}>
                             <span className="material-symbols-outlined text-[20px]">
@@ -169,7 +169,7 @@ export default function Header({ onMenuClick }) {
               <div className="fixed inset-0 z-40" onClick={() => setShowDropdown(false)}></div>
               <div className="absolute right-0 mt-3 w-48 bg-white border border-outline-variant/30 rounded-lg shadow-lg py-1 z-50">
                 <button 
-                  onClick={() => { setShowDropdown(false); navigate('/settings'); }}
+                  onClick={() => { setShowDropdown(false); navigate('/admin/settings'); }}
                   className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-on-surface hover:bg-surface-container flex items-center gap-2 transition-colors"
                 >
                   <span className="material-symbols-outlined text-[18px]">settings</span>

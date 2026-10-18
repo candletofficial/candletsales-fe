@@ -201,6 +201,17 @@ export default function ShopLayout() {
               </Link>
 
               {/* Phân cách mảnh */}
+              {user?.role === 'admin' && (
+                <Link
+                  to="/admin/dashboard"
+                  className="hidden xl:inline-flex min-h-10 items-center gap-2 rounded-full bg-[#1f2937] px-4 text-xs font-bold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-[#111827] hover:shadow-md"
+                  title="Vào trang quản trị"
+                >
+                  <i className="ph-bold ph-gauge text-base"></i>
+                  <span>Quản trị</span>
+                </Link>
+              )}
+
               <span className="w-px h-6 bg-stone-200 hidden sm:inline-block"></span>
 
               {/* Nút Đăng nhập / User Profile Avatar */}
@@ -227,6 +238,18 @@ export default function ShopLayout() {
                         <p className="text-sm font-bold text-[#4A2C2A] truncate">{user.name}</p>
                         <p className="text-[11px] text-stone-400 truncate">{user.email}</p>
                       </div>
+
+                      {user.role === 'admin' && (
+                        <Link
+                          to="/admin/dashboard"
+                          onClick={() => setShowDropdown(false)}
+                          className="mx-2 mb-1 flex items-center gap-3 rounded-xl bg-stone-900 px-3 py-2.5 text-xs font-bold text-white transition-colors hover:bg-stone-800"
+                        >
+                          <i className="ph-bold ph-gauge text-base text-amber-300"></i>
+                          Vào trang quản trị
+                          <i className="ph-bold ph-arrow-right ml-auto text-xs text-stone-400"></i>
+                        </Link>
+                      )}
 
                       <Link
                         to="/profile"
@@ -363,6 +386,20 @@ export default function ShopLayout() {
               })}
 
               {/* Mục Tài Khoản Của Tôi */}
+              {user?.role === 'admin' && (
+                <Link
+                  to="/admin/dashboard"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-between rounded-xl bg-stone-900 px-4 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-stone-800"
+                >
+                  <span className="flex items-center gap-2.5">
+                    <i className="ph-bold ph-gauge text-base text-amber-300"></i>
+                    Vào trang quản trị
+                  </span>
+                  <i className="ph-bold ph-arrow-right text-xs text-stone-400"></i>
+                </Link>
+              )}
+
               <Link
                 to={user ? "/profile" : "/login"}
                 onClick={() => setMobileMenuOpen(false)}
