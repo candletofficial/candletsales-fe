@@ -14,6 +14,12 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (window.location.pathname === '/login/google/callback'
+      || window.location.pathname === '/login/facebook/callback') {
+      setLoading(false);
+      return;
+    }
+
     const token = localStorage.getItem('token');
     if (token) {
       authService
@@ -42,6 +48,25 @@ export function AuthProvider({ children }) {
     return userData;
   };
 
+  const completeSocialLogin = async (token) => {
+    localStorage.setItem('token', token);
+
+    try {
+      const res = await authService.getMe();
+      const userData = res.data?.data;
+      if (!userData) throw new Error('Không lấy được thông tin tài khoản.');
+
+      localStorage.setItem('user', JSON.stringify(userData));
+      setUser(userData);
+      return userData;
+    } catch (error) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      setUser(null);
+      throw error;
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -55,7 +80,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, updateUser, loading }}>
+    <AuthContext.Provider value={{ user, login, completeSocialLogin, logout, updateUser, loading }}>
       {children}
     </AuthContext.Provider>
   );

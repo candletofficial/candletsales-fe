@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 
 const safeReturnPath = (value) => {
   const path = String(value || '/');
@@ -8,21 +9,29 @@ const safeReturnPath = (value) => {
 
 export default function GoogleLoginCallback() {
   const [error, setError] = useState('');
+  const handledRef = useRef(false);
+  const navigate = useNavigate();
+  const { completeSocialLogin } = useAuth();
 
   useEffect(() => {
+    if (handledRef.current) return;
+    handledRef.current = true;
+
     const params = new URLSearchParams(window.location.hash.slice(1));
     const token = params.get('token');
     const returnTo = safeReturnPath(params.get('returnTo'));
     const callbackError = params.get('error');
 
     if (token) {
-      localStorage.setItem('token', token);
-      localStorage.removeItem('user');
-      window.location.replace(returnTo);
+      completeSocialLogin(token)
+        .then(() => navigate(returnTo, { replace: true }))
+        .catch((requestError) => {
+          setError(requestError.response?.data?.message || 'Không thể xác minh phiên đăng nhập Google. Vui lòng thử lại.');
+        });
       return;
     }
     setError(callbackError || 'Không thể hoàn tất đăng nhập bằng Google.');
-  }, []);
+  }, [completeSocialLogin, navigate]);
 
   return (
     <main className="min-h-screen bg-[#FAF7F2] flex items-center justify-center p-5 text-stone-800">
