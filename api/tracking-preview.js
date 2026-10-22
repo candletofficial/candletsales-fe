@@ -1,4 +1,5 @@
 const PUBLIC_SITE_URL = "https://candletshop.vercel.app";
+const PREVIEW_VERSION = "8";
 const TRACKING_CODE_PATTERN = /^[A-Za-z0-9_-]{11}$/;
 
 function escapeHtml(value) {
@@ -34,21 +35,12 @@ export default function handler(request, response) {
 
   const safeToken = escapeHtml(token);
   const origin = getPublicOrigin(request);
-  const shareUrl = `${origin}/s/${safeToken}`;
+  const shareUrl = `${origin}/s/${safeToken}?v=${PREVIEW_VERSION}`;
   const appUrl = `/theo-doi-don/${encodeURIComponent(token)}`;
-  const previewImageUrl = `${origin}/og-order-tracking-v7.jpg`;
-  const userAgent = String(request.headers['user-agent'] || '');
-  const isSocialCrawler = /facebookexternalhit|facebot|twitterbot|linkedinbot|zalo|telegrambot|discordbot|whatsapp|slackbot|pinterest|googlebot|bingbot/i.test(userAgent);
-
-  if (!isSocialCrawler) {
-    response.setHeader('Location', appUrl);
-    response.setHeader('Cache-Control', 'private, no-store');
-    response.status(302).end();
-    return;
-  }
+  const previewImageUrl = `${origin}/og-order-tracking-v7.jpg?v=${PREVIEW_VERSION}`;
 
   response.setHeader("Content-Type", "text/html; charset=utf-8");
-  response.setHeader("Cache-Control", "public, s-maxage=3600, stale-while-revalidate=86400");
+  response.setHeader("Cache-Control", "public, s-maxage=300, stale-while-revalidate=3600");
   response.status(200).end(`<!doctype html>
 <html lang="vi">
   <head>
@@ -86,6 +78,7 @@ export default function handler(request, response) {
   </head>
   <body>
     <p>Đang mở hành trình đơn hàng… <a href="${appUrl}">Xem đơn hàng</a></p>
+    <script>window.location.replace(${JSON.stringify(appUrl)});</script>
   </body>
 </html>`);
 }
