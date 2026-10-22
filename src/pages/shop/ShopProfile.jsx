@@ -197,11 +197,24 @@ export default function ShopProfile() {
   const membership = getMembershipTier(stats.totalSpent);
 
   return (
-    <div className="bg-[#fbf9f6] min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto space-y-8 animate-[fadeIn_0.25s_ease-out]">
+    <div className="bg-[#f5f5f5] sm:px-6 sm:py-10 lg:px-8">
+      <div className="mx-auto max-w-6xl bg-white animate-[fadeIn_0.25s_ease-out] sm:space-y-6 sm:bg-transparent">
+
+        {/* Thanh tiêu đề riêng cho trải nghiệm tài khoản trên mobile */}
+        <header className="flex min-h-14 items-center justify-between border-b border-stone-200 bg-white px-4 sm:hidden">
+          <h1 className="text-[17px] font-extrabold text-stone-900">Tài khoản của tôi</h1>
+          <button
+            type="button"
+            onClick={() => setShowLogoutModal(true)}
+            className="inline-flex size-10 items-center justify-center text-stone-500"
+            aria-label="Đăng xuất tài khoản"
+          >
+            <i className="ph-bold ph-sign-out text-xl"></i>
+          </button>
+        </header>
 
         {/* Breadcrumbs */}
-        <div className="flex items-center flex-wrap text-[11px] font-bold uppercase tracking-widest text-stone-400">
+        <div className="hidden flex-wrap items-center text-[11px] font-bold uppercase tracking-widest text-stone-400 sm:flex">
           <Link to="/" className="hover:text-[#4A2C2A] transition-colors">
             Trang Chủ
           </Link>
@@ -225,29 +238,29 @@ export default function ShopProfile() {
         {/* ======================================================== */}
         {/* HEADER HERO CARD: THẺ THÀNH VIÊN VÀ THỐNG KÊ NHANH       */}
         {/* ======================================================== */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-[#4A2C2A] via-[#3D2422] to-[#251312] text-white rounded-3xl p-6 sm:p-8 lg:p-10 shadow-xl border border-[#4A2C2A]/40">
+        <div className="relative overflow-hidden bg-gradient-to-br from-[#4A2C2A] via-[#3D2422] to-[#251312] p-4 text-white sm:rounded-3xl sm:border sm:border-[#4A2C2A]/40 sm:p-8 sm:shadow-xl lg:p-10">
           {/* Background Ambient Glow */}
-          <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
-          <div className="absolute -left-20 -top-20 w-80 h-80 bg-rose-500/10 rounded-full blur-3xl pointer-events-none"></div>
+          <div className="pointer-events-none absolute -bottom-20 -right-20 hidden size-80 rounded-full bg-amber-500/10 blur-3xl sm:block"></div>
+          <div className="pointer-events-none absolute -left-20 -top-20 hidden size-80 rounded-full bg-rose-500/10 blur-3xl sm:block"></div>
 
           <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
             {/* Cột trái: Thông tin đại diện & Hạng */}
-            <div className="flex items-center gap-5">
+            <div className="flex items-center gap-3 sm:gap-5">
               <div className="relative shrink-0">
-                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-[#FAF5EE] to-[#EADBCA] text-[#4A2C2A] flex items-center justify-center font-serif-display text-3xl sm:text-4xl font-bold shadow-lg ring-4 ring-white/10">
+                <div className="flex size-16 items-center justify-center rounded-full bg-gradient-to-br from-[#FAF5EE] to-[#EADBCA] font-serif-display text-2xl font-bold text-[#4A2C2A] ring-2 ring-white/15 sm:size-24 sm:rounded-2xl sm:text-4xl sm:shadow-lg sm:ring-4">
                   {user?.name ? user.name.charAt(0).toUpperCase() : 'C'}
                 </div>
-                <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-amber-400 text-stone-900 flex items-center justify-center text-sm shadow-md ring-2 ring-[#4A2C2A]">
+                <div className="absolute -bottom-1 -right-1 flex size-6 items-center justify-center rounded-full bg-amber-400 text-xs text-stone-900 shadow-md ring-2 ring-[#4A2C2A] sm:size-7 sm:text-sm">
                   <i className="ph-fill ph-flame"></i>
                 </div>
               </div>
 
               <div className="space-y-1.5 min-w-0">
                 <div className="flex items-center gap-2.5 flex-wrap">
-                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-serif-display font-bold text-[#FAF5EE] truncate">
+                  <h2 className="truncate font-serif-display text-lg font-bold text-[#FAF5EE] sm:text-2xl lg:text-3xl">
                     {user?.name || 'Khách hàng Candlet'}
-                  </h1>
-                  <span className={`inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-xs ${membership.badge}`}>
+                  </h2>
+                  <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide sm:px-2.5 sm:py-1 sm:text-[11px] ${membership.badge}`}>
                     <i className={`ph-fill ${membership.icon} text-xs`}></i>
                     {membership.title}
                   </span>
@@ -268,11 +281,11 @@ export default function ShopProfile() {
             </div>
 
             {/* Cột phải: 4 Card chỉ số nhanh */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 lg:w-auto shrink-0 pt-4 lg:pt-0 border-t lg:border-t-0 border-white/10">
+            <div className="hidden shrink-0 grid-cols-4 lg:grid lg:w-auto">
               {/* Tổng đơn */}
               <Link
                 to="/orders"
-                className="bg-white/5 hover:bg-white/10 backdrop-blur-md rounded-2xl p-3 sm:p-3.5 text-center border border-white/10 transition-all hover:scale-105 group"
+                className="group border-b border-r border-white/10 p-3 text-center transition-colors hover:bg-white/10 sm:border-b-0 sm:p-3.5"
               >
                 <div className="text-xs text-stone-300 font-medium flex items-center justify-center gap-1 mb-1">
                   <i className="ph-light ph-receipt"></i>
@@ -287,7 +300,7 @@ export default function ShopProfile() {
               {/* Đang giao */}
               <Link
                 to="/orders"
-                className="bg-white/5 hover:bg-white/10 backdrop-blur-md rounded-2xl p-3 sm:p-3.5 text-center border border-white/10 transition-all hover:scale-105 group"
+                className="group border-b border-white/10 p-3 text-center transition-colors hover:bg-white/10 sm:border-b-0 sm:border-r sm:p-3.5"
               >
                 <div className="text-xs text-stone-300 font-medium flex items-center justify-center gap-1 mb-1">
                   <i className="ph-light ph-truck"></i>
@@ -302,7 +315,7 @@ export default function ShopProfile() {
               {/* Yêu thích */}
               <Link
                 to="/wishlist"
-                className="bg-white/5 hover:bg-white/10 backdrop-blur-md rounded-2xl p-3 sm:p-3.5 text-center border border-white/10 transition-all hover:scale-105 group"
+                className="group border-r border-white/10 p-3 text-center transition-colors hover:bg-white/10 sm:p-3.5"
               >
                 <div className="text-xs text-stone-300 font-medium flex items-center justify-center gap-1 mb-1">
                   <i className="ph-light ph-heart text-rose-300"></i>
@@ -315,7 +328,7 @@ export default function ShopProfile() {
               </Link>
 
               {/* Tích luỹ */}
-              <div className="bg-white/5 backdrop-blur-md rounded-2xl p-3 sm:p-3.5 text-center border border-white/10">
+              <div className="p-3 text-center sm:p-3.5">
                 <div className="text-xs text-stone-300 font-medium flex items-center justify-center gap-1 mb-1">
                   <span>Tích luỹ</span>
                 </div>
@@ -328,14 +341,51 @@ export default function ShopProfile() {
           </div>
         </div>
 
+        {/* Thống kê và điều hướng nhanh riêng cho mobile */}
+        <nav className="grid grid-cols-4 border-b-8 border-stone-100 bg-white lg:hidden" aria-label="Lối tắt tài khoản">
+          <Link to="/orders" className="border-r border-stone-100 px-1 py-3 text-center">
+            <strong className="block text-lg text-[#4A2C2A]">{stats.totalOrders}</strong>
+            <span className="mt-0.5 block text-[10px] text-stone-500">Đơn mua</span>
+          </Link>
+          <Link to="/orders" className="border-r border-stone-100 px-1 py-3 text-center">
+            <strong className="block text-lg text-sky-700">{stats.activeOrders}</strong>
+            <span className="mt-0.5 block text-[10px] text-stone-500">Đang giao</span>
+          </Link>
+          <Link to="/wishlist" className="border-r border-stone-100 px-1 py-3 text-center">
+            <strong className="block text-lg text-rose-600">{wishlistCount}</strong>
+            <span className="mt-0.5 block text-[10px] text-stone-500">Yêu thích</span>
+          </Link>
+          <span className="px-1 py-3 text-center">
+            <strong className="block text-[13px] leading-7 text-emerald-700">{formatPrice(stats.totalSpent)}</strong>
+            <span className="mt-0.5 block text-[10px] text-stone-500">Tích luỹ</span>
+          </span>
+        </nav>
+
+        <nav className="grid grid-cols-2 border-b-8 border-stone-100 bg-white lg:hidden" aria-label="Cài đặt tài khoản">
+          <button
+            type="button"
+            onClick={() => setActiveTab('info')}
+            className={`border-b-2 px-3 py-3.5 text-xs font-bold ${activeTab === 'info' ? 'border-[#8C4A32] text-[#4A2C2A]' : 'border-transparent text-stone-500'}`}
+          >
+            Hồ sơ & Địa chỉ
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('password')}
+            className={`border-b-2 px-3 py-3.5 text-xs font-bold ${activeTab === 'password' ? 'border-[#8C4A32] text-[#4A2C2A]' : 'border-transparent text-stone-500'}`}
+          >
+            Mật khẩu & Bảo mật
+          </button>
+        </nav>
+
         {/* ======================================================== */}
         {/* MAIN BODY: SIDEBAR ĐIỀU HƯỚNG & KHU VỰC CÀI ĐẶT           */}
         {/* ======================================================== */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div className="grid grid-cols-1 items-start lg:grid-cols-12 lg:gap-8">
 
           {/* CỘT TRÁI: MENU ĐIỀU HƯỚNG TÀI KHOẢN (4 COLS) */}
-          <div className="lg:col-span-4 space-y-4">
-            <div className="bg-white rounded-3xl p-5 sm:p-6 border border-stone-200/90 shadow-sm space-y-2">
+          <div className="hidden border-b-8 border-stone-100 bg-white lg:col-span-4 lg:block lg:border-b-0">
+            <div className="space-y-1 border-b border-stone-200 px-4 py-4 sm:px-6">
               <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 px-3 pb-2 border-b border-stone-100">
                 Quản lý tài khoản
               </div>
@@ -343,9 +393,9 @@ export default function ShopProfile() {
               {/* Tab Hồ sơ */}
               <button
                 onClick={() => setActiveTab('info')}
-                className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${activeTab === 'info'
-                  ? 'bg-[#FAF5EE] text-[#4A2C2A] shadow-xs'
-                  : 'text-stone-600 hover:bg-stone-50 hover:text-stone-900'
+                className={`w-full flex items-center justify-between border-l-2 px-3 py-3 text-xs sm:text-sm font-bold transition-colors cursor-pointer ${activeTab === 'info'
+                  ? 'border-[#8C4A32] bg-[#FAF5EE] text-[#4A2C2A]'
+                  : 'border-transparent text-stone-600 hover:bg-stone-50 hover:text-stone-900'
                   }`}
               >
                 <div className="flex items-center gap-3">
@@ -361,9 +411,9 @@ export default function ShopProfile() {
               {/* Tab Bảo mật */}
               <button
                 onClick={() => setActiveTab('password')}
-                className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${activeTab === 'password'
-                  ? 'bg-[#FAF5EE] text-[#4A2C2A] shadow-xs'
-                  : 'text-stone-600 hover:bg-stone-50 hover:text-stone-900'
+                className={`w-full flex items-center justify-between border-l-2 px-3 py-3 text-xs sm:text-sm font-bold transition-colors cursor-pointer ${activeTab === 'password'
+                  ? 'border-[#8C4A32] bg-[#FAF5EE] text-[#4A2C2A]'
+                  : 'border-transparent text-stone-600 hover:bg-stone-50 hover:text-stone-900'
                   }`}
               >
                 <div className="flex items-center gap-3">
@@ -379,7 +429,7 @@ export default function ShopProfile() {
               {/* Link Xem Lịch sử Đơn Hàng */}
               <Link
                 to="/orders"
-                className="w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-xs sm:text-sm font-bold text-stone-600 hover:bg-stone-50 hover:text-stone-900 transition-all cursor-pointer"
+                className="flex w-full items-center justify-between border-l-2 border-transparent px-3 py-3 text-xs font-bold text-stone-600 transition-colors hover:bg-stone-50 hover:text-stone-900 sm:text-sm"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-xl bg-stone-100 text-stone-500 flex items-center justify-center text-base">
@@ -397,7 +447,7 @@ export default function ShopProfile() {
               {/* Link Xem Sản Phẩm Yêu Thích */}
               <Link
                 to="/wishlist"
-                className="w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-xs sm:text-sm font-bold text-stone-600 hover:bg-stone-50 hover:text-stone-900 transition-all cursor-pointer"
+                className="flex w-full items-center justify-between border-l-2 border-transparent px-3 py-3 text-xs font-bold text-stone-600 transition-colors hover:bg-stone-50 hover:text-stone-900 sm:text-sm"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-base">
@@ -414,7 +464,7 @@ export default function ShopProfile() {
             </div>
 
             {/* Quick Box: Hỗ trợ khách hàng */}
-            <div className="bg-gradient-to-br from-[#FAF5EE] to-[#F3E8DB] rounded-3xl p-5 sm:p-6 border border-[#EADBCA] text-[#4A2C2A] space-y-3 shadow-xs">
+            <div className="space-y-3 border-b border-stone-200 bg-[#faf5ee] px-5 py-5 text-[#4A2C2A] sm:px-6">
               <div className="flex items-center gap-2.5 font-serif-display font-bold text-sm">
                 <i className="ph-fill ph-heart text-rose-500 text-base"></i>
                 <span>Chăm Sóc Khách Hàng</span>
@@ -441,7 +491,7 @@ export default function ShopProfile() {
             {/* Nút Đăng xuất */}
             <button
               onClick={() => setShowLogoutModal(true)}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl text-xs font-bold text-stone-500 hover:text-rose-600 hover:bg-rose-50/60 border border-stone-200/80 hover:border-rose-200 transition-all cursor-pointer"
+              className="flex w-full items-center justify-center gap-2 border-b border-stone-200 px-4 py-3.5 text-xs font-bold text-stone-500 transition-colors hover:bg-rose-50/60 hover:text-rose-600"
             >
               <i className="ph-bold ph-sign-out text-base"></i>
               <span>Đăng xuất tài khoản</span>
@@ -449,8 +499,8 @@ export default function ShopProfile() {
           </div>
 
           {/* CỘT PHẢI: CHI TIẾT TỪNG TAB NỘI DUNG (8 COLS) */}
-          <div className="lg:col-span-8">
-            <div className="bg-white rounded-3xl p-6 sm:p-8 lg:p-10 border border-stone-200/90 shadow-sm">
+          <div className="bg-white lg:col-span-8">
+            <div className="px-4 py-6 sm:px-8 sm:py-8 lg:px-10 lg:py-10">
 
               {/* TAB 1: THÔNG TIN CÁ NHÂN */}
               {activeTab === 'info' && (

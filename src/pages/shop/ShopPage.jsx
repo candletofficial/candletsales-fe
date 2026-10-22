@@ -160,9 +160,9 @@ export default function ShopPage() {
   };
 
   return (
-    <div className="bg-[#f9f9f9] min-h-screen pb-20 sm:pb-24">
+    <main className="min-h-screen bg-[#F6F2ED] sm:bg-[#f9f9f9]">
       {/* Header Area (Thiết kế tinh gọn cho Mobile & trang nhã cho Desktop) */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 pt-5 sm:pt-8 pb-5 sm:pb-6 border-b border-dashed border-stone-300">
+      <div className="mx-auto hidden max-w-7xl border-b border-dashed border-stone-300 px-8 pb-6 pt-8 md:block">
         <div className="flex items-center text-[10px] sm:text-xs font-bold uppercase tracking-widest text-stone-500 mb-2 sm:mb-4">
           <Link to="/" className="hover:text-brand-burgundy transition-colors">Trang Chủ</Link>
           <span className="mx-2">/</span>
@@ -198,7 +198,7 @@ export default function ShopPage() {
       </div>
 
       {/* Categories Navigation Bar (Pills cuộn ngang mượt mà với icon sinh động) */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-8 py-3 sm:py-5 border-b border-dashed border-stone-300">
+      <section className="mx-auto max-w-7xl border-b border-stone-200 bg-[#FFFCF8] px-3 py-3 sm:bg-transparent sm:px-8 sm:py-5">
         <div className="flex items-center gap-2 sm:gap-2.5 overflow-x-auto no-scrollbar py-0.5 -mx-1 px-1">
           {CATEGORIES.map(cat => {
             const count = cat.name === 'Tất cả' 
@@ -227,11 +227,11 @@ export default function ShopPage() {
             );
           })}
         </div>
-      </div>
+      </section>
 
       {/* Promo Voucher Alert trên Mobile (Nếu có coupon) */}
       {activeCoupons.length > 0 && (
-        <div className="lg:hidden max-w-7xl mx-auto px-4 pt-3 pb-1">
+        <section className="mx-auto max-w-7xl border-b-[8px] border-[#F6F2ED] bg-white px-4 py-3 lg:hidden">
           {(() => {
             const bestCoupon = activeCoupons[0];
             return (
@@ -260,13 +260,13 @@ export default function ShopPage() {
               </div>
             );
           })()}
-        </div>
+        </section>
       )}
 
       {/* Toolbar (Tìm kiếm & Sắp xếp & Nút Mở Bộ Lọc Mobile) */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 py-3.5 sm:py-4 border-b border-dashed border-stone-300">
+      <section className="mx-auto max-w-7xl border-b border-stone-200 bg-white px-3 py-2.5 sm:border-dashed sm:border-stone-300 sm:bg-transparent sm:px-8 sm:py-4">
         {/* Hàng tìm kiếm (Full width trên mobile) */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-4">
+        <div className="flex items-center justify-between gap-2 sm:gap-4">
           {/* Ô tìm kiếm */}
           <div className="relative flex-1">
             <i className="ph ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 text-sm"></i>
@@ -274,8 +274,8 @@ export default function ShopPage() {
               type="text" 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Tìm tên nến, nốt hương thảo mộc..." 
-              className="w-full bg-white border border-stone-200/90 text-xs py-2.5 pl-9 pr-8 rounded-xl focus:ring-1 focus:ring-brand-burgundy focus:border-brand-burgundy outline-none placeholder:text-stone-400 shadow-2xs"
+              placeholder="Tìm sản phẩm..."
+              className="w-full rounded-xl border border-stone-200/90 bg-white py-2.5 pl-9 pr-8 text-xs outline-none placeholder:text-stone-400 focus:border-brand-burgundy focus:ring-1 focus:ring-brand-burgundy sm:shadow-2xs"
             />
             {searchQuery && (
               <button
@@ -290,33 +290,33 @@ export default function ShopPage() {
           </div>
 
           {/* Hàng nút công cụ điều khiển: Nút Bộ Lọc Mobile + Sắp Xếp + Đổi View */}
-          <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0">
+          <div className="flex shrink-0 items-center justify-end gap-1.5 sm:gap-2">
             {/* Nút Bộ Lọc (Hiển thị nổi bật trên Mobile/Tablet) */}
             <button
               type="button"
               onClick={() => setIsMobileFilterOpen(true)}
-              className={`lg:hidden flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer shadow-2xs select-none active:scale-95 ${
+              className={`relative flex h-9 w-9 items-center justify-center rounded-xl border text-xs font-bold transition-all cursor-pointer select-none active:scale-95 lg:hidden sm:h-auto sm:w-auto sm:gap-1.5 sm:px-3 sm:py-2 sm:shadow-2xs ${
                 activeFiltersCount > 0
                   ? 'bg-amber-500/15 border-amber-500/50 text-amber-950 font-bold'
                   : 'bg-white border-stone-200/90 text-stone-700 hover:bg-stone-50'
               }`}
             >
               <i className="ph-bold ph-sliders-horizontal text-xs text-amber-700"></i>
-              <span>Bộ Lọc</span>
+              <span className="hidden sm:inline">Bộ lọc</span>
               {activeFiltersCount > 0 && (
-                <span className="w-4 h-4 rounded-full bg-brand-burgundy text-white text-[9px] font-mono flex items-center justify-center font-bold">
+                <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-burgundy px-1 font-mono text-[9px] font-bold text-white sm:static sm:px-0">
                   {activeFiltersCount}
                 </span>
               )}
             </button>
 
             {/* Dropdown Sắp xếp */}
-            <div className="flex items-center gap-1.5 bg-white border border-stone-200/90 rounded-xl px-2.5 py-1.5 shadow-2xs">
+            <div className="flex h-9 items-center gap-1 rounded-xl border border-stone-200/90 bg-white px-2 sm:gap-1.5 sm:px-2.5 sm:py-1.5 sm:shadow-2xs">
               <span className="text-[11px] text-stone-400 font-medium hidden xs:inline">Xếp:</span>
               <select 
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="bg-transparent border-none text-xs font-semibold text-stone-800 outline-none cursor-pointer pr-1"
+                className="max-w-[112px] cursor-pointer border-none bg-transparent pr-0 text-[11px] font-semibold text-stone-800 outline-none sm:max-w-none sm:pr-1 sm:text-xs"
               >
                 <option value="popular">Bán chạy nhất</option>
                 <option value="price-asc">Giá: Thấp → Cao</option>
@@ -327,7 +327,7 @@ export default function ShopPage() {
             </div>
 
             {/* Nút chuyển đổi View Mode (Grid / List) */}
-            <div className="flex items-center border border-stone-200/90 rounded-xl p-0.5 bg-white shadow-2xs">
+            <div className="hidden items-center rounded-xl border border-stone-200/90 bg-white p-0.5 shadow-2xs sm:flex">
               <button 
                 type="button"
                 onClick={() => setViewMode('grid')}
@@ -406,10 +406,10 @@ export default function ShopPage() {
             </button>
           </div>
         )}
-      </div>
+      </section>
 
       {/* Main Layout Grid */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-8 py-5 sm:py-8 grid grid-cols-1 lg:grid-cols-4 gap-6 sm:gap-8">
+      <section className="mx-auto grid max-w-7xl grid-cols-1 gap-6 bg-[#FFFCF8] px-3 py-4 sm:gap-8 sm:bg-transparent sm:px-8 sm:py-8 lg:grid-cols-4">
         
         {/* Left Sidebar - Filters (Desktop Chỉ Định) */}
         <div className="hidden lg:block lg:col-span-1 space-y-6">
@@ -576,12 +576,14 @@ export default function ShopPage() {
             /* Skeleton Loading Grid (2 cột mobile, 3 cột desktop) */
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-6">
               {[1, 2, 3, 4, 5, 6].map((n) => (
-                <div key={n} className="rounded-2xl bg-white border border-stone-200/70 p-3 sm:p-4 animate-pulse flex flex-col justify-between">
-                  <div className="w-full aspect-square rounded-xl bg-stone-200/70 mb-3"></div>
-                  <div className="h-3 bg-stone-200/70 rounded w-1/2 mb-2"></div>
-                  <div className="h-4 bg-stone-200/70 rounded w-3/4 mb-3"></div>
-                  <div className="h-8 bg-stone-200/50 rounded-full mt-2"></div>
-                </div>
+                <article key={n} className="flex flex-col justify-between overflow-hidden rounded-[18px] border border-stone-200/80 bg-white animate-pulse sm:p-4">
+                  <div className="mb-3 aspect-square w-full bg-stone-200/70 sm:rounded-xl"></div>
+                  <div className="px-3 pb-3 sm:p-0">
+                    <div className="mb-2 h-3 w-1/2 rounded bg-stone-200/70"></div>
+                    <div className="mb-3 h-4 w-3/4 rounded bg-stone-200/70"></div>
+                    <div className="mt-2 h-8 rounded-full bg-stone-200/50"></div>
+                  </div>
+                </article>
               ))}
             </div>
           ) : filteredProducts.length === 0 ? (
@@ -609,12 +611,12 @@ export default function ShopPage() {
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-6">
               {filteredProducts.map((product) => {
                 return (
-                  <div 
+                  <article
                     key={product._id} 
-                    className="bg-white border border-stone-200/80 rounded-2xl p-2.5 sm:p-4 shadow-2xs hover:shadow-md transition-all group flex flex-col justify-between"
+                    className="group flex flex-col justify-between overflow-hidden rounded-[18px] border border-[#E8DED5] bg-white shadow-[0_3px_14px_rgba(74,44,42,0.06)] transition-all hover:-translate-y-0.5 hover:shadow-md sm:p-4"
                   >
                     {/* Image Area with badges & wishlist button */}
-                    <div className="relative aspect-square rounded-xl bg-[#F5EFE6] mb-2.5 sm:mb-3.5 overflow-hidden">
+                    <div className="relative mb-2.5 aspect-square overflow-hidden bg-[#F5EFE6] sm:mb-3.5 sm:rounded-xl">
                       {/* Product Tag */}
                       {product.tag && (
                         <div 
@@ -660,7 +662,7 @@ export default function ShopPage() {
                     </div>
                     
                     {/* Info Area */}
-                    <div className="flex flex-col flex-1">
+                    <div className="flex flex-1 flex-col px-3 pb-3 sm:p-0">
                       {/* Category & Star Rating */}
                       <div className="flex items-center justify-between gap-1 mb-1 sm:mb-1.5">
                         <span className="text-[8.5px] sm:text-[9.5px] font-mono uppercase tracking-wider text-stone-500 truncate">
@@ -681,11 +683,6 @@ export default function ShopPage() {
                           {product.name}
                         </h3>
                       </Link>
-                      
-                      {/* Nốt Hương (Ẩn trên mobile để card thon gọn, hiện trên desktop) */}
-                      <p className="hidden sm:block text-xs text-stone-500 italic leading-relaxed mb-3 line-clamp-2 h-[34px] overflow-hidden">
-                        Nốt hương: {product.description || 'Oải hương Provence, Xô thơm Clary Sage, Gỗ tuyết tùng trầm ấm.'}
-                      </p>
                       
                       {/* Footer: Giá & Nút Mua Ngay */}
                       <div className="mt-auto pt-2 sm:pt-3 border-t border-stone-200/80 flex flex-col gap-1.5 sm:gap-2">
@@ -716,7 +713,7 @@ export default function ShopPage() {
                         </button>
                       </div>
                     </div>
-                  </div>
+                  </article>
                 );
               })}
             </div>
@@ -725,9 +722,9 @@ export default function ShopPage() {
             <div className="flex flex-col space-y-3 sm:space-y-4">
               {filteredProducts.map((product) => {
                 return (
-                  <div 
+                  <article
                     key={product._id} 
-                    className="bg-white border border-stone-200/80 rounded-2xl p-3 sm:p-4 shadow-2xs hover:shadow-md transition-all group flex gap-3 sm:gap-5 items-stretch"
+                    className="group flex items-stretch gap-3 overflow-hidden rounded-[18px] border border-[#E8DED5] bg-white p-2.5 shadow-[0_3px_14px_rgba(74,44,42,0.06)] transition-all hover:shadow-md sm:gap-5 sm:p-4"
                   >
                     {/* Image Area (Compact Square on Mobile) */}
                     <div className="relative w-24 sm:w-44 md:w-52 aspect-square rounded-xl bg-[#F5EFE6] overflow-hidden shrink-0">
@@ -793,11 +790,6 @@ export default function ShopPage() {
                           </h3>
                         </Link>
 
-                        {/* Description */}
-                        <p className="text-[11px] sm:text-xs text-stone-500 leading-relaxed mb-2 line-clamp-1 sm:line-clamp-2">
-                          {product.description || 'Hương thơm thanh tao từ tinh dầu tự nhiên, thanh lọc không gian và mang lại cảm giác thư thái.'}
-                        </p>
-
                         {/* Specs Badges (Desktop) */}
                         <div className="hidden sm:flex flex-wrap items-center gap-1.5 mb-2 text-[10.5px] text-stone-500">
                           {product.volume && (
@@ -836,13 +828,13 @@ export default function ShopPage() {
                         </button>
                       </div>
                     </div>
-                  </div>
+                  </article>
                 );
               })}
             </div>
           )}
         </div>
-      </div>
+      </section>
 
       {/* =================== MOBILE FILTER DRAWER (MODAL TRƯỢT TỪ ĐÁY) =================== */}
       {isMobileFilterOpen && (
@@ -1043,6 +1035,6 @@ export default function ShopPage() {
           </div>
         </div>
       )}
-    </div>
+    </main>
   );
 }

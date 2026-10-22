@@ -35,8 +35,10 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
       // Website: total_price = tiền hàng + shipping_fee - discount
       return order.total_price - (order.shipping_fee || 0) + (order.discount_amount || 0);
     }
-    // Non-website (backward compat): total_price đã bao gồm logistics_cost
-    return order.total_price - (order.logistics_cost || 0) + (order.discount_amount || 0);
+    // Legacy admin orders included shop-paid shipping in total_price. After the
+    // next save, this flag prevents subtracting the shipping cost a second time.
+    const legacyShipping = order.total_excludes_logistics === true ? 0 : (order.logistics_cost || 0);
+    return order.total_price - legacyShipping + (order.discount_amount || 0);
   })() : 0);
   const [logisticsCost, setLogisticsCost] = useState(order?.logistics_cost ?? 0);
   // shipping_fee: chỉ dùng cho đơn website — phí vận chuyển khách trả (hỏa tốc / thường)
@@ -151,7 +153,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
         const finalPrice = isReplacement ? 0 : isSeeding ? totalPrice : Math.max(0, (() => {
           const base = totalPrice - appliedDiscount.amount;
           if (source === 'website') return base + shippingFee;
-          return base + newLogisticsCost;
+          return base;
         })());
 
         const payload = {
@@ -330,13 +332,11 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
 
       // Tính final total_price (số tiền khách phải trả)
       // Website: tiền hàng + shipping_fee - discount (logistics_cost không cộng vào khách trả)
-      // Non-website: giữ backward compat (logistics_cost đã bại vào total cũ)
+      // Non-website: logistics_cost là chi phí shop, không nằm trong tiền khách trả.
       const finalPrice = isReplacement ? 0 : isSeeding ? totalPrice : Math.max(0, (() => {
         const base = totalPrice - appliedDiscount.amount;
         if (source === 'website') return base + shippingFee;
-        // Non-website edit: round-trip để giữ nguyên total_price cũ
-        if (isEdit) return base + logisticsCost;
-        // Non-website mới: logistics không cộng vào total khách trả
+        // Phí vận chuyển ngoài website do shop chịu.
         return base;
       })());
 
@@ -450,7 +450,6 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                   total_price: isReplacement ? 0 : isSeeding ? totalPrice : Math.max(0, (() => {
                     const base = totalPrice - appliedDiscount.amount;
                     if (source === 'website') return base + shippingFee;
-                    if (isEdit) return base + logisticsCost;
                     return base;
                   })()),
                   shipping_fee: source === 'website' ? shippingFee : (order.shipping_fee || 0),
@@ -1123,7 +1122,6 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                         (isReplacement ? 0 : isSeeding ? totalPrice : Math.max(0, (() => {
                           const base = totalPrice - appliedDiscount.amount;
                           if (source === 'website') return base + shippingFee;
-                          if (isEdit) return base + logisticsCost;
                           return base;
                         })())) - logisticsCost
                       ).toLocaleString('vi-VN')}đ
@@ -1394,10 +1392,9 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                         <span className="font-mono font-semibold text-stone-900">+{formatPrice(shippingFee)}</span>
                       </div>
                     ) : logisticsCost > 0 && (
-                      // Non-website: logistics đã bại vào total cũ, hiện thị để rõ
-                      <div className="flex justify-between text-stone-600">
+                      <div className="flex justify-between text-rose-700">
                         <span className="flex items-center gap-1">
-                          <span>Phí vận chuyển:</span>
+                          <span>Phí vận chuyển (shop chịu):</span>
                           {shippingMethod === 'express' && (
                             <span className="text-[10px] font-black text-orange-600 bg-orange-100 px-1.5 py-0.2 rounded flex items-center gap-0.5">
                               <span className="material-symbols-outlined text-[11px]">bolt</span>
@@ -1405,7 +1402,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                             </span>
                           )}
                         </span>
-                        <span className="font-mono font-semibold text-stone-900">+{formatPrice(logisticsCost)}</span>
+                        <span className="font-mono font-semibold">-{formatPrice(logisticsCost)}</span>
                       </div>
                     )}
 
@@ -1419,13 +1416,12 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                     <div className="pt-3 border-t border-blue-100 flex items-baseline justify-between">
                       <div>
                         <span className="text-sm font-bold text-stone-900 block">TỔNG KHÁCH PHẢI TRẢ:</span>
-                        <span className="text-[11px] text-stone-500 font-normal">Đã bao gồm thuế và phí giao hàng</span>
+                        <span className="text-[11px] text-stone-500 font-normal">Không bao gồm phí ship do shop chi trả</span>
                       </div>
                       <span className="text-xl sm:text-2xl font-black font-mono text-primary">
                         {formatPrice(Math.max(0, (() => {
                           const base = totalPrice - appliedDiscount.amount;
                           if (source === 'website') return base + shippingFee;
-                          if (isEdit) return base + logisticsCost;
                           return base;
                         })()))}
                       </span>
@@ -1441,7 +1437,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                         <span className="font-mono font-semibold text-stone-700">
                           {formatPrice(Math.max(0, (() => {
                             const base = totalPrice - appliedDiscount.amount;
-                            const gross = source === 'website' ? base + shippingFee : isEdit ? base + logisticsCost : base;
+                            const gross = source === 'website' ? base + shippingFee : base;
                             return gross - logisticsCost;
                           })()))}
                         </span>
@@ -1637,7 +1633,6 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
           finalPrice={isReplacement ? 0 : isSeeding ? totalPrice : Math.max(0, (() => {
             const base = totalPrice - appliedDiscount.amount;
             if (source === 'website') return base + shippingFee;
-            if (isEdit) return base + logisticsCost;
             return base;
           })())}
           note={note}
@@ -1935,7 +1930,7 @@ function AcceptOrderModal({
                 <input
                   type="number"
                   min="0"
-                  step="500"
+                  step="1"
                   value={newLogisticsCost}
                   onChange={e => setNewLogisticsCost(Number(e.target.value))}
                   placeholder="0"
@@ -2781,6 +2776,8 @@ export default function OrderManagement() {
                   currentOrders.map(order => {
                     const isExpress = order.shippingMethod === 'express';
                     const isReturned = order.status === 'returned';
+                    const isManualTransfer = order.payment_method === 'transfer' && order.source !== 'website';
+                    const isTransferPaid = order.payment_status === 'paid' || isManualTransfer;
 
                     return (
                       <tr
@@ -2902,13 +2899,13 @@ export default function OrderManagement() {
                             <span className={`block mt-1 text-[10px] font-bold uppercase ${
                               order.payment_status === 'refunded'
                                 ? 'text-stone-500'
-                                : order.payment_status === 'paid'
+                                : isTransferPaid
                                   ? 'text-emerald-600'
                                   : 'text-amber-600'
                             }`}>
                               {order.payment_status === 'refunded'
                                 ? '↩ Đã hoàn tiền'
-                                : order.payment_status === 'paid'
+                                : isTransferPaid
                                   ? '✓ Đã nhận tiền'
                                   : 'Chờ SePay xác nhận'}
                             </span>
@@ -3011,7 +3008,7 @@ export default function OrderManagement() {
                         {/* 7. Thao tác */}
                         <td className="px-4 py-3.5 text-center align-middle">
                           <div className="flex items-center justify-center gap-1.5">
-                            {order.payment_method === 'transfer' && order.payment_status === 'paid' && (order.status === 'cancelled' || order.delivery_status === 'cancelled') && (
+                            {order.payment_method === 'transfer' && isTransferPaid && (order.status === 'cancelled' || order.delivery_status === 'cancelled') && (
                               <button
                                 type="button"
                                 onClick={(e) => {

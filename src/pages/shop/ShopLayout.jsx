@@ -4,6 +4,7 @@ import { useCart } from '../../hooks/useCart';
 import { useWishlist } from '../../hooks/useWishlist';
 import { useAuth } from '../../hooks/useAuth';
 import systemConfigService from '../../services/systemConfigService';
+import { orderService } from '../../services/orderService';
 
 export default function ShopLayout() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -11,6 +12,7 @@ export default function ShopLayout() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [shopAddress, setShopAddress] = useState('');
+  const [unfinishedOrderCount, setUnfinishedOrderCount] = useState(0);
   const dropdownRef = useRef(null);
 
   const { cartItemCount } = useCart();
@@ -18,9 +20,14 @@ export default function ShopLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const userId = user?._id || user?.id;
 
   // Ẩn thanh Bottom Nav 5 tab ở trang chi tiết sản phẩm, giỏ hàng và thanh toán
-  const isBottomNavHidden = location.pathname.startsWith('/product/') || location.pathname === '/cart' || location.pathname === '/checkout';
+  const isBottomNavHidden = location.pathname.startsWith('/product/')
+    || location.pathname.startsWith('/order-success/')
+    || location.pathname.startsWith('/payment/')
+    || location.pathname === '/cart'
+    || location.pathname === '/checkout';
 
   // Dùng cùng cấu hình địa chỉ shop với trang Cài đặt website của admin.
   useEffect(() => {
@@ -37,6 +44,32 @@ export default function ShopLayout() {
       });
     return () => { active = false; };
   }, []);
+
+  // Hiển thị số đơn còn đang xử lý trên nút theo dõi đơn hàng ở header.
+  useEffect(() => {
+    let active = true;
+
+    if (!userId) {
+      setUnfinishedOrderCount(0);
+      return () => { active = false; };
+    }
+
+    orderService.getShopOrders({ user_id: userId })
+      .then((response) => {
+        if (!active) return;
+        const orderList = response?.data?.data || [];
+        const count = orderList.filter((order) => {
+          const status = order.delivery_status || (order.source === 'website' ? 'pending' : 'delivered');
+          return !['delivered', 'cancelled', 'failed'].includes(status) && order.status !== 'returned';
+        }).length;
+        setUnfinishedOrderCount(count);
+      })
+      .catch(() => {
+        if (active) setUnfinishedOrderCount(0);
+      });
+
+    return () => { active = false; };
+  }, [userId, location.pathname]);
 
   // Đóng dropdown khi click ra ngoài
   useEffect(() => {
@@ -186,16 +219,21 @@ export default function ShopLayout() {
                 )}
               </Link>
 
-              {/* Nút Giỏ hàng cao cấp */}
+              {/* Nút theo dõi đơn hàng */}
               <Link
-                to="/cart"
-                className="relative p-2 sm:p-2.5 text-[#2C1810] hover:text-[#4A2C2A] hover:bg-[#4A2C2A]/5 rounded-full transition-all group focus:outline-none"
-                title="Giỏ hàng của bạn"
+                to="/orders"
+                className={`relative rounded-full p-2 transition-all focus:outline-none sm:p-2.5 ${
+                  location.pathname === '/orders'
+                    ? 'bg-[#4A2C2A]/8 text-[#8C4A32]'
+                    : 'text-[#2C1810] hover:bg-[#4A2C2A]/5 hover:text-[#4A2C2A]'
+                }`}
+                title="Theo dõi đơn hàng"
+                aria-label="Theo dõi đơn hàng"
               >
-                <i className="ph ph-shopping-bag-open text-[22px] sm:text-[26px] group-hover:scale-110 transition-transform"></i>
-                {cartItemCount > 0 && (
-                  <span className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 min-w-[18px] h-[18px] sm:min-w-[19px] sm:h-[19px] bg-gradient-to-tr from-[#8C4A32] to-[#B45309] text-white text-[9px] sm:text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white shadow-sm px-1 animate-[scaleIn_0.2s_ease-out]">
-                    {cartItemCount}
+                <i className={`text-[22px] transition-transform sm:text-[26px] ${location.pathname === '/orders' ? 'ph-fill ph-package' : 'ph ph-package'}`}></i>
+                {unfinishedOrderCount > 0 && (
+                  <span className="absolute right-0 top-0 flex min-h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-white bg-rose-500 px-1 text-[9px] font-bold leading-none text-white shadow-sm sm:right-0.5 sm:top-0.5 sm:min-h-[19px] sm:min-w-[19px] sm:text-[10px]">
+                    {unfinishedOrderCount > 99 ? '99+' : unfinishedOrderCount}
                   </span>
                 )}
               </Link>
@@ -495,12 +533,103 @@ export default function ShopLayout() {
         </div>
       )}
 
-      <main className={`flex-1 ${isBottomNavHidden ? 'pb-0' : 'pb-16 lg:pb-0'}`}>
+      <main
+        className={`flex-1 ${
+          isBottomNavHidden
+            ? 'pb-0'
+            : 'pb-[calc(5rem+env(safe-area-inset-bottom,0px))] lg:pb-0'
+        }`}
+      >
         <Outlet />
       </main>
 
+      {/* Mobile footer */}
+      {location.pathname !== '/checkout' && (
+        <footer
+          className="hidden"
+          data-purpose="mobile-footer"
+        >
+        <div className="h-px bg-gradient-to-r from-transparent via-amber-300/60 to-transparent"></div>
+
+        <div className="px-4 pb-4 pt-5">
+          <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-4">
+            <Link to="/" className="min-w-0">
+              <img
+                src="/logo.png"
+                alt="Candlet"
+                className="h-8 w-auto object-contain brightness-0 invert"
+              />
+              <p className="mt-1 truncate text-[10px] text-stone-400">
+                Nến thơm thủ công · Thắp hương thơm, giữ khoảnh khắc
+              </p>
+            </Link>
+
+            <button
+              type="button"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/15 text-amber-200 transition-colors active:bg-white/10"
+              aria-label="Lên đầu trang"
+            >
+              <i className="ph-bold ph-arrow-up text-sm"></i>
+            </button>
+          </div>
+
+          <nav className="grid grid-cols-2 gap-1.5 border-b border-white/10 py-3.5 text-[10.5px] font-semibold" aria-label="Liên kết cuối trang">
+            <Link to="/shop" className="flex min-h-9 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.06] px-2.5 py-2 text-stone-100 transition-colors active:bg-white/15">
+              <i className="ph-bold ph-storefront text-sm text-amber-300"></i>
+              <span>Cửa hàng</span>
+            </Link>
+            <Link to="/orders" className="flex min-h-9 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.06] px-2.5 py-2 text-stone-100 transition-colors active:bg-white/15">
+              <i className="ph-bold ph-package text-sm text-amber-300"></i>
+              <span>Tra cứu đơn</span>
+            </Link>
+            <Link to="/guide" className="flex min-h-9 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.06] px-2.5 py-2 text-stone-100 transition-colors active:bg-white/15">
+              <i className="ph-bold ph-book-open text-sm text-amber-300"></i>
+              <span>Cẩm nang</span>
+            </Link>
+            <Link to="/stories" className="flex min-h-9 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.06] px-2.5 py-2 text-stone-100 transition-colors active:bg-white/15">
+              <i className="ph-bold ph-article text-sm text-amber-300"></i>
+              <span>Câu chuyện</span>
+            </Link>
+          </nav>
+
+          <address className="border-b border-white/10 py-3.5 text-[10.5px] not-italic text-stone-300">
+            <div className="grid grid-cols-2 gap-3">
+              <a href="tel:0328624761" className="flex items-center gap-2">
+                <i className="ph-bold ph-phone text-sm text-amber-300"></i>
+                <span>032.862.4761</span>
+              </a>
+              <a href="mailto:candlet.official@gmail.com" className="flex items-center justify-end gap-2">
+                <i className="ph-bold ph-envelope-simple text-sm text-amber-300"></i>
+                <span>Gửi email</span>
+              </a>
+            </div>
+            <div className="mt-2.5 flex min-w-0 items-center gap-2 text-stone-400">
+              <i className="ph-bold ph-map-pin shrink-0 text-sm text-amber-300"></i>
+              <span className="truncate">{shopAddress || 'Địa chỉ cửa hàng đang được cập nhật'}</span>
+            </div>
+          </address>
+
+          <div className="flex items-center justify-between gap-3 pt-3.5">
+            <p className="text-[10px] text-stone-400">© 2026 Candlet Vietnam</p>
+            <div className="flex items-center gap-3 text-lg text-amber-200">
+              <a href="https://facebook.com" target="_blank" rel="noreferrer" aria-label="Facebook">
+                <i className="ph ph-facebook-logo"></i>
+              </a>
+              <a href="https://instagram.com" target="_blank" rel="noreferrer" aria-label="Instagram">
+                <i className="ph ph-instagram-logo"></i>
+              </a>
+              <a href="https://tiktok.com" target="_blank" rel="noreferrer" aria-label="TikTok">
+                <i className="ph ph-tiktok-logo"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+        </footer>
+      )}
+
       {/* BEGIN: MainFooter (Thiết kế sang trọng, ấm áp phong cách Atelier Nến Thủ Công) */}
-      <footer className="bg-gradient-to-b from-[#2B0C10] via-[#21070A] to-[#150406] text-[#E8D9D5] text-xs mt-auto relative overflow-hidden pb-16 lg:pb-0" data-purpose="main-footer">
+      <footer className="relative mt-auto hidden overflow-hidden bg-gradient-to-b from-[#2B0C10] via-[#21070A] to-[#150406] text-xs text-[#E8D9D5] lg:block" data-purpose="main-footer">
         {/* Họa tiết quầng sáng vàng ấm nghệ thuật */}
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute bottom-0 right-10 w-80 h-80 bg-red-900/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -802,9 +931,6 @@ export default function ShopLayout() {
           >
             <i className={`text-xl transition-transform ${location.pathname === '/' ? 'ph-fill ph-house scale-110 text-[#4A2C2A]' : 'ph ph-house'}`}></i>
             <span className="text-[10px] mt-0.5 tracking-tight">Trang chủ</span>
-            {location.pathname === '/' && (
-              <span className="w-1 h-1 rounded-full bg-[#4A2C2A] mt-0.5"></span>
-            )}
           </Link>
 
           {/* 2. Cửa hàng */}
@@ -816,9 +942,6 @@ export default function ShopLayout() {
           >
             <i className={`text-xl transition-transform ${location.pathname.startsWith('/shop') ? 'ph-fill ph-flame scale-110 text-amber-700' : 'ph ph-flame'}`}></i>
             <span className="text-[10px] mt-0.5 tracking-tight">Cửa hàng</span>
-            {location.pathname.startsWith('/shop') && (
-              <span className="w-1 h-1 rounded-full bg-[#4A2C2A] mt-0.5"></span>
-            )}
           </Link>
 
           {/* 3. Yêu thích */}
@@ -837,9 +960,6 @@ export default function ShopLayout() {
               )}
             </div>
             <span className="text-[10px] mt-0.5 tracking-tight">Yêu thích</span>
-            {location.pathname === '/wishlist' && (
-              <span className="w-1 h-1 rounded-full bg-rose-500 mt-0.5"></span>
-            )}
           </Link>
 
           {/* 4. Giỏ hàng */}
@@ -858,9 +978,6 @@ export default function ShopLayout() {
               )}
             </div>
             <span className="text-[10px] mt-0.5 tracking-tight">Giỏ hàng</span>
-            {location.pathname === '/cart' && (
-              <span className="w-1 h-1 rounded-full bg-[#4A2C2A] mt-0.5"></span>
-            )}
           </Link>
 
           {/* 5. Tài khoản */}
@@ -872,9 +989,6 @@ export default function ShopLayout() {
           >
             <i className={`text-xl transition-transform ${location.pathname === '/profile' || location.pathname === '/login' ? 'ph-fill ph-user-circle scale-110 text-[#4A2C2A]' : 'ph ph-user'}`}></i>
             <span className="text-[10px] mt-0.5 tracking-tight">{user ? 'Tài khoản' : 'Đăng nhập'}</span>
-            {(location.pathname === '/profile' || location.pathname === '/login') && (
-              <span className="w-1 h-1 rounded-full bg-[#4A2C2A] mt-0.5"></span>
-            )}
           </Link>
         </div>
       </nav>

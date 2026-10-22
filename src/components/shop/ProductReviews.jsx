@@ -119,18 +119,18 @@ export default function ProductReviews({ productId }) {
 
   if (loading) {
     return (
-      <div className="bg-[#FFFDF9] pt-10 sm:pt-16 pb-6 sm:pb-8 mt-12 sm:mt-16 border-t border-stone-200 flex justify-center">
+      <div className="mt-0 flex justify-center border-t-8 border-stone-100 bg-white py-10 sm:mt-16 sm:border-t sm:border-stone-200 sm:bg-[#FFFDF9] sm:pb-8 sm:pt-16">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4A2C2A]"></div>
       </div>
     );
   }
 
   return (
-    <div className="bg-[#FFFDF9] pt-10 sm:pt-16 pb-4 sm:pb-8 mt-12 sm:mt-16 border-t border-stone-200 relative">
+    <section className="relative mt-0 border-t-8 border-stone-100 bg-white pb-4 pt-8 sm:mt-16 sm:border-t sm:border-stone-200 sm:bg-[#FFFDF9] sm:pb-8 sm:pt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-8">
         
         {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6">
+        <header className="mb-7 flex flex-col items-start justify-between gap-5 md:mb-10 md:flex-row md:items-end md:gap-6">
           <div>
             <span className="text-[10px] font-bold tracking-widest text-[#B45309] uppercase mb-2 block">
               Trải Nghiệm Khách Hàng
@@ -146,10 +146,10 @@ export default function ProductReviews({ productId }) {
             <i className="ph-bold ph-pencil-simple text-base"></i>
             Viết đánh giá của bạn
           </button>
-        </div>
+        </header>
 
         {/* Summary Card */}
-        <div className="bg-white rounded-xl shadow-sm border border-stone-100 p-8 md:p-12 mb-10 flex flex-col md:flex-row items-center gap-12">
+        <section className="mb-8 flex flex-col items-center gap-7 border-y border-stone-200 py-7 md:mb-10 md:flex-row md:gap-12 md:rounded-xl md:border md:border-stone-100 md:bg-white md:p-12 md:shadow-sm">
           
           {/* Left: Overall Rating */}
           <div className="flex flex-col items-center justify-center text-center w-full md:w-1/3 md:border-r border-stone-100 md:pr-12">
@@ -187,7 +187,7 @@ export default function ProductReviews({ productId }) {
             })}
           </div>
 
-        </div>
+        </section>
 
         {/* Bộ lọc số sao (Filter Chips) */}
         {totalReviews > 0 && (
@@ -249,7 +249,7 @@ export default function ProductReviews({ productId }) {
 
           if (currentFilteredCount === 0) {
             return (
-              <div className="text-center py-12 bg-white rounded-xl border border-stone-100">
+              <div className="border-y border-stone-200 py-12 text-center md:rounded-xl md:border md:border-stone-100 md:bg-white">
                 <p className="text-sm text-stone-500">Chưa có đánh giá {selectedRating} sao nào.</p>
                 <button
                   type="button"
@@ -267,9 +267,9 @@ export default function ProductReviews({ productId }) {
 
           return (
             <div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="divide-y divide-stone-200 md:grid md:grid-cols-3 md:gap-6 md:divide-y-0">
                 {visibleReviews.map(review => (
-                  <div key={review._id} className="bg-white rounded-xl shadow-sm border border-stone-100 p-8 flex flex-col transition-all duration-300 hover:shadow-md animate-in fade-in">
+                  <article key={review._id} className="animate-in fade-in flex flex-col py-6 transition-all duration-300 md:rounded-xl md:border md:border-stone-100 md:bg-white md:p-8 md:shadow-sm md:hover:shadow-md">
                     
                     <div className="flex justify-between items-start mb-4">
                       <div className="flex gap-0.5 text-[#B45309] text-sm">
@@ -304,7 +304,7 @@ export default function ProductReviews({ productId }) {
                       )}
                     </div>
                     
-                  </div>
+                  </article>
                 ))}
               </div>
 
@@ -425,6 +425,6 @@ export default function ProductReviews({ productId }) {
           </div>
         </div>
       )}
-    </div>
+    </section>
   );
 }

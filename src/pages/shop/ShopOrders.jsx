@@ -230,16 +230,36 @@ export default function ShopOrders() {
     }
   };
 
+  const getMobileStatus = (status) => {
+    const statuses = {
+      pending: { label: 'Chờ xác nhận', icon: 'ph-clock', iconClass: 'bg-amber-50 text-amber-700' },
+      confirmed: { label: 'Đang chuẩn bị', icon: 'ph-package', iconClass: 'bg-sky-50 text-sky-700' },
+      shipping: { label: 'Đang giao hàng', icon: 'ph-truck', iconClass: 'bg-indigo-50 text-indigo-700' },
+      delivered: { label: 'Giao thành công', icon: 'ph-check', iconClass: 'bg-emerald-50 text-emerald-700' },
+      cancelled: { label: 'Đã huỷ', icon: 'ph-x', iconClass: 'bg-stone-100 text-stone-500' },
+      failed: { label: 'Giao thất bại', icon: 'ph-warning', iconClass: 'bg-rose-50 text-rose-700' }
+    };
+    return statuses[status] || statuses.pending;
+  };
+
   return (
-    <div className="bg-[#fbf9f6] min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-5xl mx-auto space-y-7 animate-[fadeIn_0.25s_ease-out]">
+    <div className="min-h-screen bg-white px-4 py-5 sm:bg-[#fbf9f6] sm:px-6 sm:py-12 lg:px-8">
+      <div className="mx-auto max-w-5xl space-y-4 animate-[fadeIn_0.25s_ease-out] sm:space-y-7">
 
         {/* ======================================================== */}
         {/* BREADCRUMB & TIÊU ĐỀ TRANG                                */}
         {/* ======================================================== */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-200/80">
+        <header className="grid grid-cols-[36px_1fr_36px] items-center gap-2 border-b border-[#EEE7E2] pb-3 sm:flex sm:items-center sm:justify-between sm:gap-3 sm:pb-4">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="flex size-9 items-center justify-center rounded-full text-[#4A2C2A] active:bg-[#F4ECE7] sm:hidden"
+            aria-label="Quay lại"
+          >
+            <i className="ph-bold ph-arrow-left text-lg"></i>
+          </button>
           <div>
-            <div className="flex items-center flex-wrap text-[11px] font-bold uppercase tracking-widest text-stone-400 mb-1">
+            <div className="mb-1 hidden flex-wrap items-center text-[11px] font-bold uppercase tracking-widest text-stone-400 sm:flex">
               <Link to="/" className="hover:text-[#4A2C2A] transition-colors">
                 Trang Chủ
               </Link>
@@ -250,31 +270,38 @@ export default function ShopOrders() {
               <span className="mx-2 text-stone-300">/</span>
               <span className="text-[#8C4A32]">Đơn Mua</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-serif-display font-bold text-[#4A2C2A]">
-              Lịch Sử Đơn Hàng
+            <h1 className="text-center text-base font-bold leading-tight text-[#3B2422] sm:text-left sm:font-serif-display sm:text-3xl">
+              Đơn hàng của bạn
             </h1>
-            <p className="text-xs sm:text-sm text-stone-500 mt-1">
+            <p className="mt-1 hidden text-xs text-stone-500 sm:block sm:text-sm">
               Theo dõi lộ trình giao nhận nến thơm quà tặng và quản lý các đơn hàng của bạn
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center justify-end gap-2 sm:gap-3">
             <Link
               to="/profile"
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-white border border-stone-200 text-stone-700 text-xs font-bold hover:bg-stone-50 transition-colors shadow-2xs"
+              className="hidden items-center gap-1.5 rounded-2xl border border-stone-200 bg-white px-4 py-2.5 text-xs font-bold text-stone-700 shadow-2xs transition-colors hover:bg-stone-50 sm:inline-flex"
             >
               <i className="ph-bold ph-user text-sm"></i>
               <span>Hồ sơ của bạn</span>
             </Link>
             <Link
               to="/shop"
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-[#4A2C2A] text-white text-xs font-bold hover:bg-[#381B18] transition-colors shadow-2xs"
+              className="hidden h-9 items-center gap-1.5 rounded-xl bg-[#4A2C2A] px-3 text-[11px] font-bold text-white shadow-2xs transition-colors hover:bg-[#381B18] sm:inline-flex sm:h-auto sm:rounded-2xl sm:px-4 sm:py-2.5 sm:text-xs"
             >
               <span>Mua thêm nến</span>
               <i className="ph-bold ph-arrow-right text-xs"></i>
             </Link>
+            <Link
+              to="/shop"
+              className="flex size-9 items-center justify-center rounded-full text-[#4A2C2A] active:bg-[#F4ECE7] sm:hidden"
+              aria-label="Đến cửa hàng"
+            >
+              <i className="ph-bold ph-storefront text-lg"></i>
+            </Link>
           </div>
-        </div>
+        </header>
 
         {/* ======================================================== */}
         {/* FORM TRA CỨU NHANH CHO KHÁCH CHƯA ĐĂNG NHẬP              */}
@@ -335,7 +362,7 @@ export default function ShopOrders() {
         {/* ======================================================== */}
         {/* THANH TÌM KIẾM & BỘ LỌC ĐƠN HÀNG                         */}
         {/* ======================================================== */}
-        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+        <div className="flex items-center justify-between gap-2 sm:gap-3">
           {/* Ô tìm kiếm từ khoá */}
           <div className="relative flex-1">
             <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400">
@@ -345,8 +372,8 @@ export default function ShopOrders() {
               type="text"
               value={searchKeyword}
               onChange={e => setSearchKeyword(e.target.value)}
-              placeholder="Tìm theo mã đơn #DH, tên nến thơm, hoặc số điện thoại..."
-              className="w-full pl-10 pr-10 py-2.5 text-xs rounded-2xl bg-white border border-stone-200/90 text-stone-800 placeholder-stone-400 focus:outline-none focus:border-[#4A2C2A] shadow-2xs font-medium"
+              placeholder="Tìm mã đơn hoặc sản phẩm..."
+              className="w-full rounded-xl border border-transparent bg-[#F7F3EF] py-2.5 pl-10 pr-10 text-xs font-medium text-stone-800 outline-none placeholder-stone-400 focus:border-[#DCC9BD] focus:bg-white sm:rounded-2xl sm:border-[#E8DED7] sm:bg-white sm:shadow-2xs"
             />
             {searchKeyword && (
               <button
@@ -361,21 +388,21 @@ export default function ShopOrders() {
           {/* Nút lọc nhanh đơn Hỏa tốc 4h */}
           <button
             onClick={() => setFilterExpressOnly(!filterExpressOnly)}
-            className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap border ${
+            className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border text-xs font-bold transition-all cursor-pointer whitespace-nowrap sm:h-auto sm:w-auto sm:gap-2 sm:rounded-2xl sm:px-4 sm:py-2.5 ${
               filterExpressOnly
                 ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white border-orange-400 shadow-xs'
-                : 'bg-white text-stone-700 border-stone-200/90 hover:bg-stone-50'
+                : 'bg-[#F7F3EF] text-[#6D514B] border-transparent hover:bg-[#F0E8E2] sm:bg-[#FFF9F4] sm:border-[#E8DED7]'
             }`}
           >
             <i className={`ph-fill ph-lightning text-xs ${filterExpressOnly ? 'text-white' : 'text-orange-500'}`}></i>
-            <span>Chỉ đơn Hỏa tốc 4h</span>
+            <span className="hidden sm:inline">Chỉ đơn Hỏa tốc 4h</span>
           </button>
         </div>
 
         {/* ======================================================== */}
         {/* TABS TRẠNG THÁI GIAO HÀNG VỚI SỐ ĐẾM ĐỘNG                */}
         {/* ======================================================== */}
-        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar pb-1 text-xs font-semibold -mx-2 px-2 sm:mx-0 sm:px-0">
+        <div className="-mx-4 flex items-center gap-0 overflow-x-auto border-b border-[#E9E0DA] px-4 text-xs font-semibold no-scrollbar sm:mx-0 sm:gap-2 sm:border-0 sm:px-0 sm:pb-1">
           {[
             { key: 'all', label: 'Tất cả', icon: 'ph-squares-four', count: counts.all },
             { key: 'pending', label: 'Chờ duyệt', icon: 'ph-clock', count: counts.pending },
@@ -387,18 +414,18 @@ export default function ShopOrders() {
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 border active:scale-95 text-xs shadow-2xs ${
+              className={`flex items-center gap-1.5 whitespace-nowrap border-b-2 px-3 py-3 text-[11px] transition-all cursor-pointer sm:rounded-full sm:border sm:px-4 sm:py-2.5 sm:text-xs sm:shadow-2xs ${
                 activeTab === tab.key
-                  ? 'bg-[#4A2C2A] text-white border-[#4A2C2A] font-bold'
-                  : 'bg-white text-stone-600 hover:text-stone-900 border-stone-200/80 hover:bg-stone-50'
+                  ? 'border-[#8C4A32] bg-transparent text-[#6B3D35] font-bold sm:bg-[#4A2C2A] sm:text-white sm:border-[#4A2C2A]'
+                  : 'border-transparent bg-transparent text-stone-500 hover:text-stone-900 sm:bg-white sm:border-stone-200/80 sm:hover:bg-stone-50'
               }`}
             >
-              <i className={`ph-bold ${tab.icon} text-xs ${activeTab === tab.key ? 'text-amber-300' : 'text-stone-400'}`}></i>
+              <i className={`ph-bold ${tab.icon} text-xs ${activeTab === tab.key ? 'text-[#A45D45] sm:text-amber-300' : 'text-stone-400'}`}></i>
               <span>{tab.label}</span>
               {tab.count > 0 && (
                 <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
                   activeTab === tab.key
-                    ? 'bg-white/20 text-white'
+                    ? 'bg-[#F3E8E2] text-[#6B3D35] sm:bg-white/20 sm:text-white'
                     : 'bg-stone-100 text-stone-600'
                 }`}>
                   {tab.count}
@@ -455,30 +482,145 @@ export default function ShopOrders() {
             </div>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-3 sm:space-y-6">
             {filteredOrders.map(order => {
               const dStatus = order.delivery_status || 'pending';
               const isCancelled = dStatus === 'cancelled';
               const isFailed = dStatus === 'failed';
               const isExpress = order.shippingMethod === 'express';
+              const mobileStatus = getMobileStatus(dStatus);
+              const firstItem = order.items?.[0];
+              const remainingItems = Math.max((order.items?.length || 0) - 1, 0);
 
               return (
+                <React.Fragment key={order._id || order.orderId}>
+                <article className="overflow-hidden rounded-2xl border border-[#E8E0DB] bg-white sm:hidden">
+                  <header className="flex items-center justify-between gap-3 border-b border-[#F0EAE6] px-3.5 py-3">
+                    <div className="flex min-w-0 items-center gap-2.5">
+                      <span className={`flex size-9 shrink-0 items-center justify-center rounded-full ${mobileStatus.iconClass}`}>
+                        <i className={`ph-bold ${mobileStatus.icon} text-base`}></i>
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-stone-900">{mobileStatus.label}</p>
+                        <p className="mt-0.5 truncate text-[10px] text-stone-400">{formatDate(order.ordered_at)}</p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedOrderDetail(order)}
+                      className="flex size-8 shrink-0 items-center justify-center rounded-full text-stone-500 active:bg-stone-100"
+                      aria-label={`Xem chi tiết đơn ${order.orderId}`}
+                    >
+                      <i className="ph-bold ph-caret-right text-sm"></i>
+                    </button>
+                  </header>
+
+                  <div className="px-3.5 py-3">
+                    <div className="mb-3 flex items-center justify-between gap-2">
+                      <p className="font-mono text-[11px] font-bold tracking-wide text-[#6B3D35]">#{order.orderId}</p>
+                      <div className="flex items-center gap-1.5">
+                        {order.payment_method === 'transfer' && order.payment_status === 'paid' && (
+                          <span className="text-[9px] font-bold uppercase tracking-wide text-emerald-700">Đã thanh toán</span>
+                        )}
+                        {isExpress && (
+                          <span className="inline-flex items-center gap-0.5 rounded-full bg-orange-50 px-2 py-1 text-[9px] font-bold uppercase text-orange-700">
+                            <i className="ph-fill ph-lightning"></i> 4h
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex min-w-0 items-center gap-3">
+                      {firstItem?.product_image ? (
+                        <img
+                          src={getImageUrl(firstItem.product_image)}
+                          alt={firstItem.product_name}
+                          className="size-16 shrink-0 rounded-xl bg-[#F8F4F0] object-cover"
+                        />
+                      ) : (
+                        <span className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-[#F8F4F0] text-[#A06A53]">
+                          <i className="ph-light ph-flame text-2xl"></i>
+                        </span>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <p className="line-clamp-2 text-[13px] font-bold leading-snug text-stone-900">
+                          {firstItem?.product_name || 'Đơn hàng Candlet'}
+                        </p>
+                        {firstItem?.sku_label && (
+                          <p className="mt-1 truncate text-[10px] text-stone-500">{firstItem.sku_label}</p>
+                        )}
+                        <p className="mt-1 text-[10px] text-stone-400">
+                          {firstItem ? `Số lượng: ${firstItem.quantity || 1}` : 'Thông tin sản phẩm'}
+                          {remainingItems > 0 ? ` · Thêm ${remainingItems} sản phẩm` : ''}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <footer className="border-t border-[#F0EAE6] bg-[#FCFAF8] px-3.5 py-3">
+                    <div className="mb-3 flex items-end justify-between gap-3">
+                      <div>
+                        <p className="text-[9px] uppercase tracking-[0.12em] text-stone-400">
+                          {isExpress ? 'Giao hỏa tốc 4h' : 'Giao hàng tiêu chuẩn'}
+                        </p>
+                        <p className="mt-1 text-[10px] font-medium text-stone-500">
+                          {order.payment_method === 'transfer' ? 'Chuyển khoản' : 'Thanh toán khi nhận hàng'}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[9px] text-stone-400">Tổng thanh toán</p>
+                        <p className="font-mono text-base font-bold text-[#8C4A32]">{formatPrice(order.total_price)}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-2">
+                      {canCancel(order) && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCancelModalOrder(order);
+                            setCancelReason('');
+                            setCancelError('');
+                          }}
+                          className="rounded-full border border-[#E4D9D2] bg-white px-4 py-2 text-[11px] font-bold text-stone-600"
+                        >
+                          Huỷ đơn
+                        </button>
+                      )}
+                      {(dStatus === 'delivered' || isCancelled) && (
+                        <Link
+                          to="/shop"
+                          className="rounded-full border border-[#E4D9D2] bg-white px-4 py-2 text-[11px] font-bold text-stone-600"
+                        >
+                          Mua lại
+                        </Link>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setSelectedOrderDetail(order)}
+                        className="rounded-full bg-[#4A2C2A] px-5 py-2 text-[11px] font-bold text-white"
+                      >
+                        Xem chi tiết
+                      </button>
+                    </div>
+                  </footer>
+                </article>
+
                 <div
-                  key={order._id || order.orderId}
-                  className={`bg-white rounded-3xl border shadow-sm hover:shadow-md transition-all overflow-hidden ${
+                  className={`hidden overflow-hidden rounded-3xl border bg-white shadow-sm transition-all hover:shadow-md sm:block ${
                     isExpress
                       ? 'border-l-4 border-l-orange-500 border-stone-200/90 ring-1 ring-orange-400/20'
-                      : 'border-stone-200/90'
+                      : 'border-[#E6DDD7]'
                   }`}
                 >
                   {/* CARD HEADER: MÃ ĐƠN, HỎA TỐC, NGÀY ĐẶT, TRẠNG THÁI */}
-                  <div className={`p-4 sm:p-5 border-b flex flex-wrap items-center justify-between gap-3 ${
+                  <div className={`flex flex-wrap items-center justify-between gap-2 border-b p-3 sm:gap-3 sm:p-5 ${
                     isExpress
                       ? 'bg-gradient-to-r from-orange-50/60 via-amber-50/30 to-white border-orange-100'
-                      : 'bg-stone-50/60 border-stone-100'
+                      : 'bg-white border-[#EEE6E1]'
                   }`}>
-                    <div className="flex items-center gap-2.5 flex-wrap">
-                      <span className="font-mono text-xs sm:text-sm font-bold text-[#4A2C2A] bg-white px-3 py-1 rounded-xl border border-stone-200 shadow-2xs">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+                      <span className="font-mono text-[11px] font-bold tracking-wide text-[#4A2C2A] sm:text-sm">
                         #{order.orderId}
                       </span>
 
@@ -502,20 +644,20 @@ export default function ShopOrders() {
                         </span>
                       )}
 
-                      <span className="text-[11px] sm:text-xs text-stone-400 flex items-center gap-1">
+                      <span className="flex items-center gap-1 text-[10px] text-stone-400 sm:text-xs">
                         <i className="ph-light ph-clock"></i>
                         {formatDate(order.ordered_at)}
                       </span>
                     </div>
 
-                    <div>
+                    <div className="shrink-0">
                       {getStatusBadge(order)}
                     </div>
                   </div>
 
                   {/* VISUAL TIMELINE TIẾN ĐỘ VẬN CHUYỂN (Khi chưa bị huỷ / thất bại) */}
                   {!isCancelled && !isFailed && (
-                    <div className="px-6 py-4 bg-white border-b border-stone-100">
+                    <div className="hidden border-b border-stone-100 bg-white px-6 py-4 sm:block">
                       <div className="grid grid-cols-4 gap-2 text-center relative py-1">
                         {/* Thanh progress bar ngầm */}
                         <div className="absolute top-4 left-[12%] right-[12%] h-1 bg-stone-100 -z-0">
@@ -619,7 +761,30 @@ export default function ShopOrders() {
                   )}
 
                   {/* DANH SÁCH NẾN THƠM TRONG ĐƠN */}
-                  <div className="p-4 sm:p-6 divide-y divide-stone-100">
+                  <div className="flex items-center justify-between gap-3 p-3.5 sm:hidden">
+                    <div className="flex min-w-0 items-center gap-3">
+                      {order.items?.[0]?.product_image ? (
+                        <img
+                          src={getImageUrl(order.items[0].product_image)}
+                          alt={order.items[0].product_name}
+                          className="h-13 w-13 shrink-0 rounded-xl border border-[#E8DED7] object-cover"
+                        />
+                      ) : (
+                        <span className="flex h-13 w-13 shrink-0 items-center justify-center rounded-xl bg-[#F7EFE8] text-amber-700">
+                          <i className="ph-light ph-flame text-xl"></i>
+                        </span>
+                      )}
+                      <div className="min-w-0">
+                        <p className="truncate text-xs font-bold text-stone-900">{order.items?.[0]?.product_name || 'Đơn hàng Candlet'}</p>
+                        <p className="mt-0.5 text-[10px] text-stone-400">
+                          {order.items?.length || 0} sản phẩm · {isExpress ? 'Hỏa tốc 4h' : 'Giao tiêu chuẩn'}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="shrink-0 font-mono text-sm font-bold text-[#8C4A32]">{formatPrice(order.total_price)}</span>
+                  </div>
+
+                  <div className="hidden divide-y divide-stone-100 p-4 sm:block sm:p-6">
                     {order.items?.map((item, idx) => (
                       <div key={idx} className="py-3.5 flex items-center justify-between gap-4 first:pt-0 last:pb-0">
                         <div className="flex items-center gap-3.5 min-w-0">
@@ -664,7 +829,7 @@ export default function ShopOrders() {
 
                   {/* THÔNG ĐIỆP BÍ MẬT / GHI CHÚ QUÀ TẶNG (NẾU CÓ) */}
                   {order.note && (
-                    <div className="mx-4 sm:mx-6 mb-4 p-3.5 rounded-2xl bg-gradient-to-r from-[#FAF5EE] to-[#F5EFE6] border border-[#EADBCA] flex items-start gap-3 text-xs text-[#4A2C2A]">
+                    <div className="mx-4 mb-4 hidden items-start gap-3 rounded-2xl border border-[#EADBCA] bg-gradient-to-r from-[#FAF5EE] to-[#F5EFE6] p-3.5 text-xs text-[#4A2C2A] sm:mx-6 sm:flex">
                       <div className="w-7 h-7 rounded-xl bg-white text-[#8C4A32] flex items-center justify-center shrink-0 shadow-2xs">
                         <i className="ph-fill ph-chat-centered-text text-sm"></i>
                       </div>
@@ -678,9 +843,9 @@ export default function ShopOrders() {
                   )}
 
                   {/* CARD FOOTER: NGƯỜI NHẬN + TỔNG TIỀN + CÁC NÚT THAO TÁC */}
-                  <div className="p-4 sm:p-6 bg-[#FAF5EE]/40 border-t border-stone-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="flex flex-col justify-between gap-3 border-t border-[#EEE6E1] bg-[#FCFAF8] p-3 sm:gap-4 sm:border-stone-100 sm:bg-[#FAF5EE]/40 sm:p-6 md:flex-row md:items-center">
                     {/* Cột trái: Thông tin nhận hàng */}
-                    <div className="text-xs text-stone-600 space-y-1.5 flex-1 min-w-0">
+                    <div className="hidden min-w-0 flex-1 space-y-1.5 text-xs text-stone-600 sm:block">
                       <p className="font-bold text-stone-800 flex items-center gap-1.5 flex-wrap">
                         <i className="ph-bold ph-user text-xs text-stone-500 shrink-0"></i>
                         <span>{order.customer_name}</span>
@@ -710,8 +875,8 @@ export default function ShopOrders() {
                     </div>
 
                     {/* Cột phải: Tổng tiền và các nút bấm */}
-                    <div className="flex items-center justify-between md:justify-end gap-3 shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-stone-200/60">
-                      <div className="text-left md:text-right pr-2">
+                    <div className="flex shrink-0 items-center justify-end gap-2 sm:gap-3 sm:border-t sm:border-stone-200/60 sm:pt-3 md:border-t-0 md:pt-0">
+                      <div className="mr-auto hidden pr-2 text-left sm:block md:text-right">
                         <span className="text-[10px] text-stone-500 uppercase tracking-wider block">
                           Tổng thanh toán
                         </span>
@@ -723,7 +888,7 @@ export default function ShopOrders() {
                       {/* Nút Xem chi tiết */}
                       <button
                         onClick={() => setSelectedOrderDetail(order)}
-                        className="px-3.5 py-2 rounded-2xl text-xs font-bold text-stone-700 hover:text-[#4A2C2A] bg-white hover:bg-stone-50 border border-stone-200 shadow-2xs transition-all cursor-pointer"
+                        className="rounded-xl border border-[#DCCBC0] bg-[#FFF9F4] px-4 py-2 text-xs font-bold text-[#5B3732] transition-all hover:bg-[#F4E8DF] sm:rounded-2xl sm:shadow-2xs"
                       >
                         Chi tiết
                       </button>
@@ -769,6 +934,7 @@ export default function ShopOrders() {
                   </div>
 
                 </div>
+                </React.Fragment>
               );
             })}
           </div>

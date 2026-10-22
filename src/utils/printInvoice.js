@@ -1,3 +1,5 @@
+import { buildSpxInvoiceHtml } from './spxInvoiceTemplate';
+
 export const printInvoice = (order) => {
   const formatPrice = (n) =>
     Math.round(n ?? 0).toLocaleString('vi-VN') + ' đ';
@@ -14,12 +16,37 @@ export const printInvoice = (order) => {
   const isWebsite = order.source === 'website';
   const orderCode = order.orderId || (order._id ? order._id.toString().slice(-8).toUpperCase() : 'DH-CHUA-CO-MA');
   const isExpress = order.shippingMethod === 'express';
+  const carrierName = String(order.pancake_details?.carrier || order.carrier || '');
+  const explicitlySpx = /\bspx\b|shopee\s*express/i.test(carrierName);
+  const usesSpx = isWebsite || explicitlySpx || (!carrierName && (
+    isExpress
+    || Number(order.logistics_cost || 0) > 0
+    || (order.tracking_enabled && Boolean(order.customer_address))
+  ));
   const isCOD = order.payment_method === 'cash';
+  const isTransfer = order.payment_method === 'transfer';
+  const isManualTransfer = isTransfer && !isWebsite;
+  const isRefunded = order.payment_status === 'refunded';
+  const isTransferPaid = isTransfer && (order.payment_status === 'paid' || isManualTransfer);
+  const paymentStatusLabel = isRefunded
+    ? 'Đã hoàn tiền'
+    : isTransferPaid
+      ? 'Đã thanh toán'
+      : isTransfer
+        ? 'Chờ xác nhận chuyển khoản'
+        : order.status === 'completed'
+          ? 'Đã thu tiền'
+          : 'Thu tiền khi nhận hàng';
+  const receiptItemCount = Math.max(1, order.items?.length || 0);
+  const receiptScale = Math.max(0.7, 1 - (Math.max(0, receiptItemCount - 1) * 0.055));
+  const spxScale = Math.max(0.52, 0.7 - (Math.max(0, receiptItemCount - 1) * 0.04));
+  const paidAmount = isTransferPaid ? Number(order.total_price || 0) : 0;
+  const amountDue = isTransferPaid || isRefunded ? 0 : Number(order.total_price || 0);
 
   // Tính tiền hàng tạm tính cho đơn website
   const subtotal = isWebsite 
     ? ((order.total_price || 0) - (order.shipping_fee || 0) + (order.discount_amount || 0))
-    : ((order.total_price || 0) - (order.logistics_cost || 0) + (order.discount_amount || 0));
+    : ((order.total_price || 0) + (order.discount_amount || 0));
 
   // Render danh sách sản phẩm theo bảng đen trắng rõ nét
   const itemsRows = (order.items || []).map((item, index) => `
@@ -44,10 +71,9 @@ export const printInvoice = (order) => {
   `).join('');
 
   // ══════════════════════════════════════════════════════════════════
-  // TEMPLATE CHO ĐƠN WEBSITE: PHIẾU GIAO HÀNG ĐỒNG BỘ SPX EXPRESS
-  // CHỈ SỬ DỤNG MÀU ĐEN - TRẮNG (CHUẨN IN NHIỆT VẬN CHUYỂN 100x150mm / A6)
+  // PHIẾU GIAO HÀNG KẾT HỢP HÓA ĐƠN SPX, GÓI GỌN TRÊN MỘT TỜ A7.
   // ══════════════════════════════════════════════════════════════════
-  const websiteInvoiceHtml = `
+  const spxInvoiceHtml = `
     <!DOCTYPE html>
     <html lang="vi">
     <head>
@@ -55,8 +81,8 @@ export const printInvoice = (order) => {
       <title>Phiếu Gửi Hàng SPX Express - ${orderCode}</title>
       <style>
         @page {
-          size: 100mm 150mm;
-          margin: 2mm 3mm;
+          size: A7 portrait;
+          margin: 1.5mm;
         }
         * {
           box-sizing: border-box;
@@ -68,11 +94,12 @@ export const printInvoice = (order) => {
           color: #000;
           background: #fff;
           margin: 0 auto;
-          padding: 2mm;
+          padding: 0;
           font-size: 9.5px;
           line-height: 1.3;
-          width: 98mm;
-          max-width: 100mm;
+          width: ${68 / spxScale}mm;
+          max-width: none;
+          zoom: ${spxScale};
         }
 
         /* Thanh công cụ xem trước (ẩn khi in) */
@@ -105,13 +132,15 @@ export const printInvoice = (order) => {
 
         @media print {
           .no-print-toolbar { display: none !important; }
-          body { padding: 0 !important; width: 100% !important; max-width: 100% !important; }
+          body { padding: 0 !important; }
         }
 
         /* Khung bao viền phiếu giao hàng */
         .spx-container {
-          border: 2px solid #000;
-          padding: 4px;
+          border: 1.5px solid #000;
+          padding: 3px;
+          break-inside: avoid;
+          page-break-inside: avoid;
         }
 
         /* 1. Header: Đơn vị vận chuyển & Thương hiệu */
@@ -312,7 +341,7 @@ export const printInvoice = (order) => {
 
         /* 8. Chữ ký xác nhận */
         .signatures-section {
-          display: flex;
+          display: none;
           justify-content: space-between;
           border-top: 1px dashed #000;
           padding-top: 3px;
@@ -378,7 +407,7 @@ export const printInvoice = (order) => {
           <div class="waybill-number">${orderCode}</div>
           <svg id="barcode" class="barcode-svg"></svg>
           <div class="ref-order-row">
-            Mã tham chiếu Website: <strong>#${orderCode}</strong> • Ngày tạo: ${formatDate(order.ordered_at)}
+            Mã đơn Candlet: <strong>#${orderCode}</strong> • Ngày tạo: ${formatDate(order.ordered_at)}
           </div>
         </div>
 
@@ -414,16 +443,23 @@ export const printInvoice = (order) => {
         <!-- 4. Hộp Thu Tiền COD (Chống thu nhầm tiền của SPX) -->
         <div class="cod-box">
           <div class="cod-title">
-            ${isCOD ? 'TIỀN THU NGƯỜI NHẬN (COD)' : 'ĐÃ THANH TOÁN (COD: 0 VNĐ)'}
+            ${isCOD
+              ? 'TIỀN THU NGƯỜI NHẬN (COD)'
+              : isRefunded
+                ? 'ĐÃ HOÀN TIỀN (COD: 0 VNĐ)'
+                : isTransferPaid
+                  ? 'ĐÃ THANH TOÁN CHUYỂN KHOẢN (COD: 0 VNĐ)'
+                  : 'CHỜ XÁC NHẬN CHUYỂN KHOẢN (COD: 0 VNĐ)'}
           </div>
           <div class="cod-amount">
             ${isCOD ? formatPrice(order.total_price) : '0 VNĐ'}
           </div>
           <div class="cod-note">
-            ${isCOD 
-              ? 'BƯU TÁ SPX VUI LÒNG THU ĐÚNG SỐ TIỀN TRÊN KHI GIAO' 
-              : 'BƯU TÁ SPX TUYỆT ĐỐI KHÔNG THU THÊM TIỀN CỦA NGƯỜI NHẬN'
-            }
+            ${isCOD
+              ? 'BƯU TÁ SPX VUI LÒNG THU ĐÚNG SỐ TIỀN TRÊN KHI GIAO'
+              : isTransferPaid || isRefunded
+                ? 'BƯU TÁ SPX TUYỆT ĐỐI KHÔNG THU THÊM TIỀN CỦA NGƯỜI NHẬN'
+                : 'ĐƠN CHUYỂN KHOẢN CHƯA ĐƯỢC XÁC NHẬN - KHÔNG THU COD'}
           </div>
         </div>
 
@@ -465,9 +501,19 @@ export const printInvoice = (order) => {
               <span><strong>- ${formatPrice(order.discount_amount)}</strong></span>
             </div>
           ` : ''}
+          ${isTransferPaid ? `
+            <div class="calc-row">
+              <span>Tổng giá trị đơn hàng:</span>
+              <span><strong>${formatPrice(order.total_price)}</strong></span>
+            </div>
+            <div class="calc-row">
+              <span>Đã thanh toán chuyển khoản:</span>
+              <span><strong>- ${formatPrice(paidAmount)}</strong></span>
+            </div>
+          ` : ''}
           <div class="calc-total-row">
-            <span>TỔNG CỘNG ĐƠN HÀNG:</span>
-            <span><strong>${formatPrice(order.total_price)}</strong></span>
+            <span>${isTransferPaid || isRefunded ? 'CÒN PHẢI THU:' : 'TỔNG CỘNG ĐƠN HÀNG:'}</span>
+            <span><strong>${formatPrice(amountDue)}</strong></span>
           </div>
         </div>
 
@@ -530,7 +576,7 @@ export const printInvoice = (order) => {
       <meta charset="UTF-8">
       <title>Hóa đơn bán hàng - ${orderCode}</title>
       <style>
-        @page { size: 76mm 120mm; margin: 0; }
+        @page { size: A7 portrait; margin: 2mm; }
         body {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
           color: #000;
@@ -539,7 +585,9 @@ export const printInvoice = (order) => {
           margin: 0 auto;
           padding: 4mm 3mm;
           font-size: 9.5px;
-          width: 72mm;
+          width: ${70 / receiptScale}mm;
+          max-width: none;
+          zoom: ${receiptScale};
           box-sizing: border-box;
         }
         .divider { border-top: 1px dashed #000; margin: 5px 0; }
@@ -569,6 +617,7 @@ export const printInvoice = (order) => {
         <div class="info-row"><span class="label">Ngày:</span><span class="value">${formatDate(order.ordered_at)}</span></div>
         <div class="info-row"><span class="label">Khách:</span><span class="value">${order.customer_name || 'Khách lẻ'}</span></div>
         <div class="info-row"><span class="label">Hình thức:</span><span class="value">${order.payment_method === 'transfer' ? 'Chuyển khoản' : 'Tiền mặt'}</span></div>
+        <div class="info-row"><span class="label">Thanh toán:</span><span class="value">${paymentStatusLabel}</span></div>
       </div>
 
       <div class="divider"></div>
@@ -603,9 +652,12 @@ export const printInvoice = (order) => {
         ${(order.discount_amount || 0) > 0 ? `
           <div class="info-row"><span class="label">Giảm giá:</span><span class="value">- ${formatPrice(order.discount_amount)}</span></div>
         ` : ''}
+        ${isTransferPaid ? `
+          <div class="info-row"><span class="label">Đã thanh toán:</span><span class="value">- ${formatPrice(paidAmount)}</span></div>
+        ` : ''}
         <div class="grand-total">
-          <span>TỔNG CỘNG</span>
-          <span>${formatPrice(order.total_price)}</span>
+          <span>${isTransferPaid || isRefunded ? 'CÒN PHẢI THU' : 'TỔNG CỘNG'}</span>
+          <span>${formatPrice(amountDue)}</span>
         </div>
       </div>
 
@@ -636,6 +688,16 @@ export const printInvoice = (order) => {
     </html>
   `;
 
-  printWindow.document.write(isWebsite ? websiteInvoiceHtml : posInvoiceHtml);
+  const redesignedSpxInvoiceHtml = buildSpxInvoiceHtml({
+    order,
+    orderCode,
+    isExpress,
+    isCOD,
+    isTransferPaid,
+    isRefunded,
+    amountDue,
+  });
+
+  printWindow.document.write(usesSpx ? (redesignedSpxInvoiceHtml || spxInvoiceHtml) : posInvoiceHtml);
   printWindow.document.close();
 };

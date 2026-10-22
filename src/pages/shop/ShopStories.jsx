@@ -98,24 +98,24 @@ export default function ShopStories() {
   const gridPosts = featuredPost ? posts.slice(1) : posts;
 
   return (
-    <div className="bg-[#FAF7F2] text-[#2C1810] min-h-screen pb-24 font-jakarta selection:bg-[#4A2C2A] selection:text-white relative overflow-hidden">
+    <main className="relative min-h-screen overflow-hidden bg-white font-jakarta text-[#2C1810] selection:bg-[#4A2C2A] selection:text-white sm:bg-[#FAF7F2]">
       
       {/* Nền hiệu ứng hạt bụi sáng / sương mù ấm áp */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[400px] bg-gradient-to-b from-amber-200/20 via-orange-100/10 to-transparent blur-3xl pointer-events-none -z-10"></div>
 
       {/* 1. HERO HEADER (Phong cách Tạp Chí Nghệ Thuật / Kinfolk Editorial) */}
-      <div className="border-b border-stone-200/70 bg-gradient-to-b from-[#F5EFE6] via-[#FAF7F2] to-[#FAF7F2] pt-16 pb-16 sm:pb-20 relative">
-        <div className="max-w-5xl mx-auto px-4 sm:px-8 text-center">
+      <header className="relative border-b-8 border-stone-100 bg-white py-7 sm:border-b sm:border-stone-200/70 sm:bg-gradient-to-b sm:from-[#F5EFE6] sm:via-[#FAF7F2] sm:to-[#FAF7F2] sm:pb-20 sm:pt-16">
+        <div className="mx-auto max-w-5xl px-4 text-left sm:px-8 sm:text-center">
           
           {/* Breadcrumbs */}
-          <div className="flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-stone-500 mb-6">
+          <div className="mb-6 hidden items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-stone-500 sm:flex">
             <Link to="/" className="hover:text-[#4A2C2A] transition-colors">Trang Chủ</Link>
             <span className="text-stone-300">/</span>
             <span className="text-[#8C4A32]">Candlet Journal</span>
           </div>
 
           {/* Glowing Badge */}
-          <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/80 border border-amber-300/60 shadow-[0_2px_10px_rgba(217,119,6,0.1)] text-amber-900 text-xs font-bold tracking-wider uppercase mb-5 backdrop-blur-sm">
+          <div className="mb-5 hidden items-center gap-2.5 rounded-full border border-amber-300/60 bg-white/80 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-amber-900 shadow-[0_2px_10px_rgba(217,119,6,0.1)] backdrop-blur-sm sm:inline-flex">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
@@ -124,7 +124,7 @@ export default function ShopStories() {
           </div>
 
           {/* Main Title */}
-          <h1 className="font-serif-display text-4xl sm:text-6xl lg:text-7xl text-[#381B18] font-bold leading-[1.12] mb-6 tracking-tight">
+          <h1 className="mb-3 font-serif-display text-3xl font-bold leading-[1.12] tracking-tight text-[#381B18] sm:mb-6 sm:text-6xl lg:text-7xl">
             Những Câu Chuyện <br className="hidden sm:inline" />
             <span className="italic font-normal bg-gradient-to-r from-[#8C4A32] via-[#B45309] to-[#8C4A32] bg-clip-text text-transparent">
               Bên Ánh Lửa Trầm
@@ -132,12 +132,12 @@ export default function ShopStories() {
           </h1>
 
           {/* Subtitle */}
-          <p className="text-sm sm:text-base text-stone-600 max-w-2xl mx-auto leading-relaxed font-normal">
+          <p className="mx-auto max-w-2xl text-xs font-normal leading-relaxed text-stone-600 sm:text-base">
             Nơi ghi chép những rung động thanh thuần về nghệ thuật khứu giác, bí quyết chăm sóc nến bấc gỗ và những phút giây dừng lại để vỗ về tâm hồn.
           </p>
 
           {/* Search Box */}
-          <form onSubmit={handleSearchSubmit} className="max-w-md mx-auto mt-9 relative group">
+          <form onSubmit={handleSearchSubmit} className="group relative mx-auto mt-6 max-w-md sm:mt-9">
             <div className="absolute inset-0 rounded-full bg-gradient-to-r from-amber-400/20 to-orange-400/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity"></div>
             <div className="relative flex items-center">
               <i className="ph ph-magnifying-glass absolute left-4.5 text-stone-400 text-base"></i>
@@ -146,7 +146,7 @@ export default function ShopStories() {
                 value={searchKeyword}
                 onChange={(e) => setSearchKeyword(e.target.value)}
                 placeholder="Tìm kiếm chủ đề, mùi hương, bí quyết..."
-                className="w-full bg-white/95 backdrop-blur-sm border border-stone-200/90 rounded-full py-3.5 pl-12 pr-28 text-xs sm:text-sm text-stone-800 placeholder:text-stone-400 focus:outline-none focus:border-[#4A2C2A] focus:ring-2 focus:ring-[#4A2C2A]/10 shadow-[0_4px_20px_rgba(0,0,0,0.03)] transition-all"
+                className="w-full rounded-full border border-stone-200/90 bg-white/95 py-3 pl-11 pr-12 text-xs text-stone-800 shadow-sm outline-none backdrop-blur-sm transition-all placeholder:text-stone-400 focus:border-[#4A2C2A] focus:ring-2 focus:ring-[#4A2C2A]/10 sm:py-3.5 sm:pl-12 sm:pr-28 sm:text-sm"
               />
               {searchKeyword && (
                 <button
@@ -157,7 +157,7 @@ export default function ShopStories() {
                     newParams.delete('q');
                     setSearchParams(newParams);
                   }}
-                  className="absolute right-24 text-stone-400 hover:text-stone-600 text-xs p-1 cursor-pointer"
+                  className="absolute right-11 cursor-pointer p-1 text-xs text-stone-400 hover:text-stone-600 sm:right-24"
                   title="Xóa tìm kiếm"
                 >
                   <i className="ph-bold ph-x"></i>
@@ -165,18 +165,19 @@ export default function ShopStories() {
               )}
               <button
                 type="submit"
-                className="absolute right-1.5 px-5 py-2.5 bg-[#4A2C2A] text-amber-100 text-xs font-bold rounded-full hover:bg-[#2A1412] hover:text-white transition-all shadow-xs cursor-pointer flex items-center gap-1.5"
+                className="absolute right-1.5 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-[#4A2C2A] text-xs font-bold text-amber-100 shadow-xs transition-all hover:bg-[#2A1412] hover:text-white sm:h-auto sm:w-auto sm:gap-1.5 sm:px-5 sm:py-2.5"
               >
-                <span>Tìm kiếm</span>
+                <span className="hidden sm:inline">Tìm kiếm</span>
+                <i className="ph-bold ph-arrow-right sm:hidden"></i>
               </button>
             </div>
           </form>
 
         </div>
-      </div>
+      </header>
 
       {/* 2. CATEGORY PILLS (Organic Minimalist Filter) */}
-      <div className="sticky top-20 z-20 bg-[#FAF7F2]/90 backdrop-blur-md border-b border-stone-200/50 py-4 mb-8">
+      <nav className="sticky top-20 z-20 mb-0 border-b border-stone-200 bg-white/95 py-2 backdrop-blur-md sm:mb-8 sm:bg-[#FAF7F2]/90 sm:py-4">
         <div className="max-w-6xl mx-auto px-4 sm:px-8">
           <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar pb-1">
             {CATEGORIES.map((cat) => {
@@ -186,10 +187,10 @@ export default function ShopStories() {
                   key={cat.label}
                   type="button"
                   onClick={() => handleCategoryChange(cat.label)}
-                  className={`px-4.5 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-300 flex items-center gap-2 cursor-pointer ${
+                  className={`flex cursor-pointer items-center gap-2 whitespace-nowrap border-b-2 px-1 py-2.5 text-xs font-semibold transition-all duration-300 sm:rounded-full sm:border-b-0 sm:px-4.5 sm:py-2 ${
                     isSelected
-                      ? 'bg-[#381B18] text-amber-100 shadow-[0_4px_15px_rgba(56,27,24,0.2)] scale-[1.02]'
-                      : 'bg-white/80 border border-stone-200/70 text-stone-600 hover:text-[#381B18] hover:bg-white hover:border-stone-300'
+                      ? 'border-[#381B18] text-[#381B18] sm:bg-[#381B18] sm:text-amber-100 sm:shadow-[0_4px_15px_rgba(56,27,24,0.2)]'
+                      : 'border-transparent text-stone-500 hover:text-[#381B18] sm:border sm:border-stone-200/70 sm:bg-white/80 sm:text-stone-600 sm:hover:bg-white'
                   }`}
                 >
                   <i className={`ph ${cat.icon} text-sm ${isSelected ? 'text-amber-400' : 'text-stone-400'}`}></i>
@@ -199,7 +200,7 @@ export default function ShopStories() {
             })}
           </div>
         </div>
-      </div>
+      </nav>
 
       {/* 3. MAIN CONTENT CONTAINER */}
       <div className="max-w-6xl mx-auto px-4 sm:px-8">
@@ -210,7 +211,7 @@ export default function ShopStories() {
             <p className="font-serif-display italic text-base text-stone-600">Đang mở những trang sách bình yên...</p>
           </div>
         ) : posts.length === 0 ? (
-          <div className="py-20 text-center bg-white rounded-3xl border border-stone-200/80 p-10 max-w-xl mx-auto shadow-sm space-y-4">
+          <section className="mx-auto max-w-xl space-y-4 py-16 text-center sm:rounded-3xl sm:border sm:border-stone-200/80 sm:bg-white sm:p-10 sm:shadow-sm">
             <div className="w-16 h-16 rounded-full bg-amber-50 text-amber-800 flex items-center justify-center mx-auto text-3xl">
               <i className="ph-thin ph-book-open"></i>
             </div>
@@ -226,16 +227,16 @@ export default function ShopStories() {
               <span>Xem tất cả câu chuyện</span>
               <i className="ph-bold ph-arrow-right"></i>
             </button>
-          </div>
+          </section>
         ) : (
-          <div className="space-y-14">
+          <div className="space-y-8 sm:space-y-14">
             
             {/* 🌟 FEATURED STORY (BÀI TIÊU ĐIỂM - MAGAZINE SPREAD) */}
             {featuredPost && (
-              <div className="bg-white rounded-3xl border border-stone-200/90 overflow-hidden shadow-[0_10px_35px_rgba(74,44,42,0.06)] hover:shadow-[0_20px_45px_rgba(74,44,42,0.1)] transition-all duration-500 group grid grid-cols-1 lg:grid-cols-12 gap-0 relative">
+              <article className="group relative grid grid-cols-1 gap-0 overflow-hidden border-b-8 border-stone-100 bg-white transition-all duration-500 sm:rounded-3xl sm:border sm:border-stone-200/90 sm:shadow-[0_10px_35px_rgba(74,44,42,0.06)] sm:hover:shadow-[0_20px_45px_rgba(74,44,42,0.1)] lg:grid-cols-12">
                 
                 {/* Visual Image */}
-                <div className="lg:col-span-7 relative aspect-[16/10] lg:aspect-auto overflow-hidden bg-stone-100 min-h-[320px] lg:min-h-[460px]">
+                <div className="relative -mx-4 aspect-[16/10] min-h-[240px] overflow-hidden bg-stone-100 sm:mx-0 sm:min-h-[320px] lg:col-span-7 lg:aspect-auto lg:min-h-[460px]">
                   <img
                     src={featuredPost.thumbnail || 'https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=1200&q=80'}
                     alt={featuredPost.title}
@@ -251,7 +252,7 @@ export default function ShopStories() {
                 </div>
 
                 {/* Editorial Content */}
-                <div className="lg:col-span-5 p-8 sm:p-12 flex flex-col justify-between bg-gradient-to-b from-white via-white to-[#FAF7F2]/40">
+                <div className="flex flex-col justify-between bg-white py-6 sm:bg-gradient-to-b sm:from-white sm:via-white sm:to-[#FAF7F2]/40 sm:p-12 lg:col-span-5">
                   <div className="space-y-4">
                     <div className="flex flex-wrap items-center gap-2.5 text-xs text-stone-500">
                       <span className="font-bold text-[#8C4A32] uppercase tracking-widest text-[11px]">
@@ -312,27 +313,27 @@ export default function ShopStories() {
                     </Link>
                   </div>
                 </div>
-              </div>
+              </article>
             )}
 
             {/* 📖 GRID ARTICLES (CÁC BÀI VIẾT NGHỆ THUẬT) */}
             <div>
               {featuredPost && (
-                <div className="flex items-center justify-between mb-8 pb-3 border-b border-stone-200">
+                <div className="mb-5 flex items-center justify-between border-b border-stone-200 pb-3 sm:mb-8">
                   <h3 className="font-serif-display text-2xl font-bold text-[#381B18]">
                     Tất Cả Câu Chuyện ({pagination.total || posts.length})
                   </h3>
-                  <span className="text-xs text-stone-400 italic">Cập nhật liên tục từ xưởng nến</span>
+                  <span className="hidden text-xs italic text-stone-400 sm:inline">Cập nhật liên tục từ xưởng nến</span>
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid gap-3 md:grid-cols-2 md:gap-8 lg:grid-cols-3">
                 {gridPosts.map((post) => {
                   const themeColor = post.customDesign?.themeColor || '#4A2C2A';
                   return (
                     <article
                       key={post._id}
-                      className="bg-white rounded-3xl border border-stone-200/80 overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_15px_35px_rgba(74,44,42,0.1)] hover:-translate-y-1.5 transition-all duration-500 group flex flex-col h-full"
+                      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-stone-200/80 bg-white shadow-[0_3px_14px_rgba(74,44,42,0.06)] transition-all duration-500 md:rounded-3xl md:hover:-translate-y-1.5 md:hover:shadow-[0_15px_35px_rgba(74,44,42,0.1)]"
                     >
                       {/* Image Thumbnail */}
                       <Link to={`/stories/${post.slug}`} className="block relative aspect-[16/10] overflow-hidden bg-stone-100">
@@ -353,7 +354,7 @@ export default function ShopStories() {
                       </Link>
 
                       {/* Card Content */}
-                      <div className="p-7 flex-1 flex flex-col justify-between space-y-4">
+                      <div className="flex flex-1 flex-col justify-between space-y-4 p-4 md:p-7">
                         <div className="space-y-3">
                           <div className="flex items-center justify-between text-[11px] text-stone-400">
                             <span>{new Date(post.createdAt).toLocaleDateString('vi-VN', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
@@ -430,7 +431,7 @@ export default function ShopStories() {
             )}
 
             {/* 5. NEWSLETTER ATELIER (LÁ THƯ HƯƠNG THƠM) */}
-            <div className="mt-20 rounded-3xl bg-[#381B18] text-amber-100 p-8 sm:p-14 relative overflow-hidden shadow-xl">
+            <section className="relative -mx-4 mt-12 overflow-hidden bg-[#381B18] px-4 py-10 text-amber-100 sm:mx-0 sm:mt-20 sm:rounded-3xl sm:p-14 sm:shadow-xl">
               <div className="absolute right-0 bottom-0 opacity-10 translate-x-1/4 translate-y-1/4 pointer-events-none">
                 <i className="ph-fill ph-flame text-[300px] text-amber-200"></i>
               </div>
@@ -482,12 +483,12 @@ export default function ShopStories() {
                   <span>Huỷ đăng ký bất cứ lúc nào</span>
                 </div>
               </div>
-            </div>
+            </section>
 
           </div>
         )}
       </div>
 
-    </div>
+    </main>
   );
 }

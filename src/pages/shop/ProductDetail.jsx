@@ -390,15 +390,15 @@ export default function ProductDetail() {
   }
 
   return (
-    <div className="bg-[#f9f9f9] min-h-screen pb-16 lg:pb-0">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-8">
+    <div className="min-h-screen bg-white pb-16 md:pb-0 sm:bg-[#f9f9f9]">
+      <div className="mx-auto max-w-7xl px-4 pt-3 sm:px-6 sm:pt-8 lg:px-8">
         
         {/* Top Navigation & Breadcrumbs */}
-        <div className="flex items-center justify-between mb-4 sm:mb-8">
+        <div className="mb-3 flex items-center justify-between sm:mb-8">
           {/* Mobile Back Button */}
           <button 
             onClick={() => navigate(-1)} 
-            className="inline-flex md:hidden items-center gap-1.5 text-xs font-bold text-stone-600 active:text-[#4A2C2A] bg-white border border-stone-200/80 px-3.5 py-1.5 rounded-full shadow-2xs transition-all active:scale-95 cursor-pointer"
+            className="inline-flex cursor-pointer items-center gap-1.5 py-2 text-xs font-bold text-stone-600 transition-colors active:text-[#4A2C2A] md:hidden"
           >
             <i className="ph-bold ph-arrow-left text-sm"></i>
             <span>Quay lại</span>
@@ -421,7 +421,7 @@ export default function ProductDetail() {
           <div className="flex md:hidden items-center gap-2">
             <button
               onClick={() => toggleWishlist(product, navigate)}
-              className="w-8 h-8 rounded-full bg-white border border-stone-200/80 flex items-center justify-center text-stone-600 active:scale-90 transition-all shadow-2xs cursor-pointer"
+              className="flex size-9 cursor-pointer items-center justify-center text-stone-600 transition-colors active:text-rose-500"
               title={isInWishlist(product._id) ? "Bỏ yêu thích" : "Yêu thích"}
             >
               <i className={`text-base ${isInWishlist(product._id) ? 'ph-fill ph-heart text-rose-500' : 'ph-bold ph-heart text-stone-400'}`}></i>
@@ -429,11 +429,11 @@ export default function ProductDetail() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14">
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-12 lg:gap-14">
           {/* Cột Trái: Image Gallery */}
-          <div className="lg:col-span-7 h-fit flex flex-col md:flex-row-reverse gap-3 sm:gap-4">
+          <div className="flex h-fit flex-col gap-3 sm:gap-4 md:flex-row-reverse lg:col-span-7">
             {/* Ảnh chính - Carousel Hỗ Trợ Vuốt / Lướt Chạm Mượt Mà */}
-            <div className="w-full md:w-5/6 aspect-square bg-white rounded-2xl sm:rounded-3xl shadow-xs border border-stone-200/80 overflow-hidden relative group select-none">
+            <div className="group relative -mx-4 aspect-square w-[calc(100%+2rem)] select-none overflow-hidden bg-white sm:mx-0 sm:w-full sm:rounded-3xl sm:border sm:border-stone-200/80 sm:shadow-xs md:w-5/6">
               {product.tag && (
                 <div
                   className="absolute top-3.5 left-3.5 text-white text-[10px] font-bold tracking-widest px-3 py-1 uppercase z-20 rounded-full shadow-sm pointer-events-none"
@@ -489,7 +489,7 @@ export default function ProductDetail() {
                   <button
                     type="button"
                     onClick={handlePrevImage}
-                    className="absolute left-2.5 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/85 hover:bg-white backdrop-blur-md border border-stone-200/80 shadow-md flex items-center justify-center text-stone-700 hover:text-[#4A2C2A] active:scale-90 transition-all z-20 cursor-pointer"
+                    className="absolute left-2.5 top-1/2 z-20 hidden size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-stone-200/80 bg-white/85 text-stone-700 shadow-md backdrop-blur-md transition-all hover:bg-white hover:text-[#4A2C2A] active:scale-90 sm:flex"
                     aria-label="Xem ảnh trước"
                   >
                     <i className="ph-bold ph-caret-left text-base sm:text-lg"></i>
@@ -497,14 +497,14 @@ export default function ProductDetail() {
                   <button
                     type="button"
                     onClick={handleNextImage}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/85 hover:bg-white backdrop-blur-md border border-stone-200/80 shadow-md flex items-center justify-center text-stone-700 hover:text-[#4A2C2A] active:scale-90 transition-all z-20 cursor-pointer"
+                    className="absolute right-2.5 top-1/2 z-20 hidden size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-stone-200/80 bg-white/85 text-stone-700 shadow-md backdrop-blur-md transition-all hover:bg-white hover:text-[#4A2C2A] active:scale-90 sm:flex"
                     aria-label="Xem ảnh kế tiếp"
                   >
                     <i className="ph-bold ph-caret-right text-base sm:text-lg"></i>
                   </button>
 
                   {/* Dots Indicator ở đáy giữa ảnh */}
-                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-2.5 py-1 bg-black/40 backdrop-blur-md rounded-full z-20 pointer-events-auto">
+                  <div className="pointer-events-auto absolute bottom-3 left-1/2 z-20 hidden -translate-x-1/2 items-center gap-1.5 rounded-full bg-black/40 px-2.5 py-1 backdrop-blur-md md:flex">
                     {allImages.map((img, idx) => {
                       const isActive = allImages.indexOf(activeImage) === idx;
                       return (
@@ -537,7 +537,7 @@ export default function ProductDetail() {
                 {/* Mobile: Horizontal Scroll Thumbnails với auto-scroll theo ảnh đang xem */}
                 <div 
                   ref={mobileThumbRef}
-                  className="w-full md:hidden flex gap-2.5 overflow-x-auto pb-1 scrollbar-none"
+                  className="hidden"
                 >
                   {allImages.map((img, index) => {
                     const isSelected = activeImage === img;
@@ -584,11 +584,11 @@ export default function ProductDetail() {
           </div>
 
           {/* Cột Phải: Thông tin sản phẩm */}
-          <div className="lg:col-span-5 flex flex-col">
+          <section className="-mx-4 flex flex-col border-b-8 border-stone-100 px-4 pb-5 sm:mx-0 sm:border-b-0 sm:px-0 sm:pb-0 lg:col-span-5">
             {/* Category Pill */}
             {product.category && (
               <div className="mb-2">
-                <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-amber-800 bg-amber-50 border border-amber-200/60 px-2.5 py-0.5 rounded-full inline-block">
+                <span className="inline-block border-l-2 border-amber-600 pl-2 text-[10px] font-bold uppercase tracking-wider text-amber-800 sm:rounded-full sm:border sm:border-amber-200/60 sm:bg-amber-50 sm:px-2.5 sm:py-0.5 sm:text-xs">
                   {product.category}
                 </span>
               </div>
@@ -622,7 +622,7 @@ export default function ProductDetail() {
             </div>
 
             {/* Price Box */}
-            <div className="mb-5 p-3.5 sm:p-4 bg-stone-50/80 rounded-2xl border border-stone-200/60">
+            <div className="mb-4 border-y border-stone-100 py-3 sm:mb-5 sm:rounded-2xl sm:border sm:border-stone-200/60 sm:bg-stone-50/80 sm:p-4">
               <div className="flex items-baseline gap-3 flex-wrap">
                 <span className="text-2xl sm:text-3xl font-extrabold text-[#B45309]">
                   {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(displayPrice)}
@@ -646,7 +646,7 @@ export default function ProductDetail() {
             {product.variant_groups && product.variant_groups.length > 0 && (
               <div 
                 onClick={() => openVariantSheet('both')}
-                className="md:hidden flex items-center justify-between p-3.5 bg-stone-50/90 rounded-2xl border border-stone-200/80 cursor-pointer active:bg-stone-100 transition-all mb-4 shadow-2xs"
+                className="mb-4 flex cursor-pointer items-center justify-between border-b border-stone-100 px-0 pb-3 transition-colors active:bg-stone-50 md:hidden"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider shrink-0">
@@ -706,8 +706,8 @@ export default function ProductDetail() {
 
             {/* Best Voucher Banner */}
             {bestCoupon && (
-              <div className="mb-6 bg-gradient-to-r from-[#FFF9F2] to-amber-50/50 border border-amber-200/90 rounded-2xl p-3.5 flex items-start gap-3 shadow-2xs">
-                <div className="w-9 h-9 rounded-xl bg-[#F59E0B] text-white flex items-center justify-center shrink-0 shadow-xs">
+              <aside className="mb-5 flex items-start gap-3 border-y border-amber-200/80 bg-amber-50/50 py-3.5 sm:mb-6 sm:rounded-2xl sm:border sm:bg-gradient-to-r sm:from-[#FFF9F2] sm:to-amber-50/50 sm:p-3.5 sm:shadow-2xs">
+                <div className="flex size-8 shrink-0 items-center justify-center text-amber-600 sm:size-9 sm:rounded-xl sm:bg-[#F59E0B] sm:text-white sm:shadow-xs">
                   <i className="ph-fill ph-ticket text-lg"></i>
                 </div>
                 <div className="flex-1 min-w-0">
@@ -725,7 +725,7 @@ export default function ProductDetail() {
                     </span> được áp dụng tự động cho sản phẩm này.
                   </p>
                 </div>
-              </div>
+              </aside>
             )}
 
             {/* Action Box: Số lượng, Thêm vào giỏ & Mua ngay (Chỉ hiển thị trên Desktop; Mobile dùng Sticky Bar & Bottom Sheet chuẩn Shopee) */}
@@ -776,52 +776,52 @@ export default function ProductDetail() {
             </div>
 
             {/* Trust Badges */}
-            <div className="grid grid-cols-2 gap-3 mt-6 pt-5 border-t border-dashed border-stone-200">
-              <div className="flex items-center space-x-2.5 p-2 rounded-xl bg-stone-50 border border-stone-100">
+            <div className="mt-5 grid grid-cols-2 gap-0 border-y border-dashed border-stone-200 py-3 sm:mt-6 sm:gap-3 sm:border-b-0 sm:pt-5">
+              <div className="flex items-center space-x-2.5 border-r border-stone-200 px-1 py-1 sm:rounded-xl sm:border sm:border-stone-100 sm:bg-stone-50 sm:p-2">
                 <i className="ph-fill ph-leaf text-lg text-emerald-600"></i>
                 <span className="text-[10px] uppercase font-bold tracking-wider text-stone-600">100% Thuần Tự Nhiên</span>
               </div>
-              <div className="flex items-center space-x-2.5 p-2 rounded-xl bg-stone-50 border border-stone-100">
+              <div className="flex items-center space-x-2.5 px-3 py-1 sm:rounded-xl sm:border sm:border-stone-100 sm:bg-stone-50 sm:p-2">
                 <i className="ph-fill ph-fire text-lg text-amber-600"></i>
                 <span className="text-[10px] uppercase font-bold tracking-wider text-stone-600">Đốt Không Khói Đen</span>
               </div>
             </div>
 
-          </div>
+          </section>
         </div>
 
         {/* Tab Nội Dung Mở Rộng - Responsive & Mobile Friendly */}
-        <div className="mt-12 sm:mt-16">
+        <section className="-mx-4 mt-0 border-t-8 border-stone-100 px-4 pt-5 sm:mx-0 sm:mt-16 sm:border-t-0 sm:px-0 sm:pt-0">
           <div
             className="w-full transition-all duration-300"
             style={{ paddingLeft: `${thumbOffset}px` }}
           >
             <div className="w-full">
               {/* Header Tabs - Horizontal scrollable pills */}
-              <div className="flex border-b border-stone-200 overflow-x-auto scrollbar-none gap-2 pb-1">
+              <div className="scrollbar-none flex gap-5 overflow-x-auto border-b border-stone-200 sm:gap-2 sm:pb-1">
                 <button
                   onClick={() => setActiveTab('description')}
-                  className={`shrink-0 px-4 sm:px-6 py-2.5 sm:py-3 text-xs font-bold tracking-wider uppercase transition-all rounded-t-xl cursor-pointer ${activeTab === 'description'
-                      ? 'bg-[#4A2C2A] text-white shadow-xs'
-                      : 'text-stone-500 hover:text-stone-800 hover:bg-stone-100'
+                  className={`shrink-0 cursor-pointer border-b-2 px-0 py-3 text-[11px] font-bold uppercase tracking-wider transition-all sm:rounded-t-xl sm:border-b-0 sm:px-6 sm:text-xs ${activeTab === 'description'
+                      ? 'border-[#4A2C2A] text-[#4A2C2A] sm:bg-[#4A2C2A] sm:text-white sm:shadow-xs'
+                      : 'border-transparent text-stone-500 hover:text-stone-800 sm:hover:bg-stone-100'
                     }`}
                 >
                   Mô Tả Sản Phẩm
                 </button>
                 <button
                   onClick={() => setActiveTab('ingredients')}
-                  className={`shrink-0 px-4 sm:px-6 py-2.5 sm:py-3 text-xs font-bold tracking-wider uppercase transition-all rounded-t-xl cursor-pointer ${activeTab === 'ingredients'
-                      ? 'bg-[#4A2C2A] text-white shadow-xs'
-                      : 'text-stone-500 hover:text-stone-800 hover:bg-stone-100'
+                  className={`shrink-0 cursor-pointer border-b-2 px-0 py-3 text-[11px] font-bold uppercase tracking-wider transition-all sm:rounded-t-xl sm:border-b-0 sm:px-6 sm:text-xs ${activeTab === 'ingredients'
+                      ? 'border-[#4A2C2A] text-[#4A2C2A] sm:bg-[#4A2C2A] sm:text-white sm:shadow-xs'
+                      : 'border-transparent text-stone-500 hover:text-stone-800 sm:hover:bg-stone-100'
                     }`}
                 >
                   Thành Phần & Xuất Xứ
                 </button>
                 <button
                   onClick={() => setActiveTab('care')}
-                  className={`shrink-0 px-4 sm:px-6 py-2.5 sm:py-3 text-xs font-bold tracking-wider uppercase transition-all rounded-t-xl cursor-pointer ${activeTab === 'care'
-                      ? 'bg-[#4A2C2A] text-white shadow-xs'
-                      : 'text-stone-500 hover:text-stone-800 hover:bg-stone-100'
+                  className={`shrink-0 cursor-pointer border-b-2 px-0 py-3 text-[11px] font-bold uppercase tracking-wider transition-all sm:rounded-t-xl sm:border-b-0 sm:px-6 sm:text-xs ${activeTab === 'care'
+                      ? 'border-[#4A2C2A] text-[#4A2C2A] sm:bg-[#4A2C2A] sm:text-white sm:shadow-xs'
+                      : 'border-transparent text-stone-500 hover:text-stone-800 sm:hover:bg-stone-100'
                     }`}
                 >
                   Nghệ Thuật Chăm Sóc Nến
@@ -829,7 +829,7 @@ export default function ProductDetail() {
               </div>
 
               {/* Nội Dung Tabs */}
-              <div className="pt-6 sm:pt-8 bg-white p-5 sm:p-8 rounded-b-2xl border-x border-b border-stone-200/80 shadow-2xs">
+              <div className="bg-white px-0 py-6 sm:rounded-b-2xl sm:border-x sm:border-b sm:border-stone-200/80 sm:p-8 sm:shadow-2xs">
                 {activeTab === 'description' ? (
                   <div className="animate-in fade-in duration-300">
                     <h2 className="font-serif-display text-2xl sm:text-3xl text-[#4A2C2A] mb-4 leading-tight">
@@ -851,9 +851,9 @@ export default function ProductDetail() {
                     <p className="text-stone-600 leading-relaxed mb-6 text-sm">
                       Tại Candlet, chúng tôi nói không với hóa chất công nghiệp và sáp khoáng paraffin phụ phẩm dầu mỏ. Từng hũ nến {product.name} được pha trộn từ {ingredientDetails?.waxSummary ? `${ingredientDetails.waxSummary.toLowerCase()} tự nhiên` : 'sáp tự nhiên'} cùng tinh dầu thực vật thượng hạng.
                     </p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="divide-y divide-stone-200 md:grid md:grid-cols-2 md:gap-4 md:divide-y-0">
                       {ingredientDetails?.items.map((item, idx) => (
-                        <div key={idx} className="flex items-start p-3.5 bg-stone-50 rounded-xl border border-stone-200/70">
+                        <div key={idx} className="flex items-start py-4 md:rounded-xl md:border md:border-stone-200/70 md:bg-stone-50 md:p-3.5">
                           <i className="ph-bold ph-check-circle text-[#B45309] text-lg mr-2.5 mt-0.5 shrink-0"></i>
                           <div>
                             <strong className="text-stone-800 text-xs sm:text-sm block mb-1">{item.title}</strong>
@@ -868,8 +868,8 @@ export default function ProductDetail() {
                     <h2 className="font-serif-display text-2xl sm:text-3xl text-[#4A2C2A] mb-4 leading-tight">
                       Bí Quyết Giữ Trọn Hương Thơm
                     </h2>
-                    <div className="space-y-4">
-                      <div className="flex items-start p-3.5 bg-stone-50 rounded-xl border border-stone-200/70">
+                    <div className="divide-y divide-stone-200 md:space-y-4 md:divide-y-0">
+                      <div className="flex items-start py-4 md:rounded-xl md:border md:border-stone-200/70 md:bg-stone-50 md:p-3.5">
                         <i className="ph-bold ph-fire text-[#B45309] text-xl mr-3 mt-0.5 shrink-0"></i>
                         <div>
                           <strong className="text-stone-800 text-xs sm:text-sm block mb-1">Lần Đốt Đầu Tiên</strong>
@@ -878,7 +878,7 @@ export default function ProductDetail() {
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-start p-3.5 bg-stone-50 rounded-xl border border-stone-200/70">
+                      <div className="flex items-start py-4 md:rounded-xl md:border md:border-stone-200/70 md:bg-stone-50 md:p-3.5">
                         <i className="ph-bold ph-scissors text-[#B45309] text-xl mr-3 mt-0.5 shrink-0"></i>
                         <div>
                           <strong className="text-stone-800 text-xs sm:text-sm block mb-1">Cắt Bấc Nến</strong>
@@ -887,7 +887,7 @@ export default function ProductDetail() {
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-start p-3.5 bg-stone-50 rounded-xl border border-stone-200/70">
+                      <div className="flex items-start py-4 md:rounded-xl md:border md:border-stone-200/70 md:bg-stone-50 md:p-3.5">
                         <i className="ph-bold ph-wind text-[#B45309] text-xl mr-3 mt-0.5 shrink-0"></i>
                         <div>
                           <strong className="text-stone-800 text-xs sm:text-sm block mb-1">Tắt Nến Đúng Cách</strong>
@@ -902,7 +902,7 @@ export default function ProductDetail() {
               </div>
             </div>
           </div>
-        </div>
+        </section>
 
       </div>
 
@@ -913,7 +913,7 @@ export default function ProductDetail() {
 
       {/* SHOPEE-STYLE MOBILE STICKY BOTTOM ACTION BAR (Chuẩn trải nghiệm Shopee trên Mobile) */}
       <div 
-        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-stone-200/90 shadow-[0_-4px_25px_rgba(0,0,0,0.12)] flex items-stretch h-[54px]"
+        className="fixed bottom-0 left-0 right-0 z-50 flex h-[58px] items-stretch border-t border-stone-200/90 bg-white shadow-[0_-4px_25px_rgba(0,0,0,0.12)] md:hidden"
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       >
         {/* 1. Nút Yêu thích (Wishlist) */}

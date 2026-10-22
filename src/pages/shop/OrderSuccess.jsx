@@ -235,16 +235,16 @@ export default function OrderSuccess({ paymentFlow = false }) {
   }
 
   return (
-    <div className="bg-[#fbf9f6] min-h-screen py-10 sm:py-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto space-y-8 animate-[fadeIn_0.3s_ease-out]">
+    <div className="min-h-screen bg-[#F3EFEA] px-4 py-2 sm:bg-[#fbf9f6] sm:px-6 sm:py-16 lg:px-8">
+      <div className="mx-auto max-w-3xl space-y-2 animate-[fadeIn_0.3s_ease-out] sm:space-y-8">
         
         {/* 1. Header Banner & Success Confirmation */}
-        <div className="bg-white rounded-3xl p-6 sm:p-10 border border-stone-200/90 shadow-sm text-center relative overflow-hidden">
+        <section className="relative -mx-4 overflow-hidden border-y border-stone-200/90 bg-white px-5 py-6 text-center sm:mx-0 sm:rounded-3xl sm:border sm:p-10 sm:shadow-sm">
           {/* Subtle decorative background glow */}
           <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-48 h-48 bg-emerald-100/50 rounded-full blur-3xl pointer-events-none"></div>
 
-          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-50 text-emerald-600 border-2 border-emerald-200 rounded-full flex items-center justify-center mx-auto mb-5 shadow-xs">
-            <i className="ph-bold ph-check text-3xl sm:text-4xl"></i>
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border-2 border-emerald-200 bg-emerald-50 text-emerald-600 shadow-xs sm:mb-5 sm:h-20 sm:w-20">
+            <i className="ph-bold ph-check text-2xl sm:text-4xl"></i>
           </div>
 
           <span className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-bold uppercase tracking-widest text-emerald-700 bg-emerald-50 border border-emerald-200 px-4 py-1 rounded-full">
@@ -252,7 +252,7 @@ export default function OrderSuccess({ paymentFlow = false }) {
             Đặt Hàng Thành Công
           </span>
 
-          <h1 className="text-2xl sm:text-4xl font-serif-display font-bold text-[#4A2C2A] mt-4 mb-3">
+          <h1 className="mb-2 mt-3 font-serif-display text-2xl font-bold text-[#4A2C2A] sm:mb-3 sm:mt-4 sm:text-4xl">
             Cảm Ơn Bạn Đã Tin Chọn Candlet
           </h1>
           <p className="text-xs sm:text-sm text-stone-600 max-w-lg mx-auto leading-relaxed">
@@ -260,7 +260,7 @@ export default function OrderSuccess({ paymentFlow = false }) {
           </p>
 
           {/* Order ID Pill with Copy */}
-          <div className="mt-6 inline-flex items-center gap-3 bg-[#FAF5EE] border border-amber-200/80 rounded-2xl px-5 py-2.5">
+          <div className="mt-5 inline-flex items-center gap-3 rounded-xl border border-amber-200/80 bg-[#FAF5EE] px-4 py-2 sm:mt-6 sm:rounded-2xl sm:px-5 sm:py-2.5">
             <div className="text-left">
               <p className="text-[10px] uppercase font-bold tracking-wider text-amber-800">Mã đơn hàng</p>
               <p className="font-mono font-bold text-sm sm:text-base text-[#4A2C2A]">{order.orderId}</p>
@@ -273,11 +273,11 @@ export default function OrderSuccess({ paymentFlow = false }) {
               <i className={`ph-bold ${copied ? 'ph-check text-emerald-600' : 'ph-copy'} text-base`}></i>
             </button>
           </div>
-        </div>
+        </section>
 
         {/* Priority Express Banner (Nếu là đơn hỏa tốc) */}
         {order.shippingMethod === 'express' && (
-          <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 rounded-3xl p-5 text-white shadow-lg shadow-orange-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-[fadeIn_0.3s_ease]">
+          <section className="-mx-4 flex flex-col items-start justify-between gap-4 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 p-4 text-white shadow-lg shadow-orange-500/20 animate-[fadeIn_0.3s_ease] sm:mx-0 sm:flex-row sm:items-center sm:rounded-3xl sm:p-5">
             <div className="flex items-center gap-3.5">
               <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center shrink-0">
                 <i className="ph-fill ph-lightning text-2xl text-yellow-300 animate-bounce"></i>
@@ -300,12 +300,12 @@ export default function OrderSuccess({ paymentFlow = false }) {
                 <i className="ph-bold ph-clock"></i> Giao nhanh 4h
               </span>
             </div>
-          </div>
+          </section>
         )}
 
         {/* 2. Delivery Stepper / Timeline Progress */}
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-stone-200/90 shadow-sm">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-stone-700 mb-6 flex items-center gap-2">
+        <section className="-mx-4 border-y border-stone-200/90 bg-white p-4 sm:mx-0 sm:rounded-3xl sm:border sm:p-8 sm:shadow-sm">
+          <h2 className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-stone-700 sm:mb-6 sm:text-sm">
             <i className="ph-bold ph-path text-base text-[#8C4A32]"></i>
             Tiến trình đơn hàng
           </h2>
@@ -354,12 +354,12 @@ export default function OrderSuccess({ paymentFlow = false }) {
               </p>
             </div>
           </div>
-        </div>
+        </section>
 
         {/* 3. Delivery Address & Payment Method */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-2 sm:gap-6 md:grid-cols-2">
           {/* Shipping Address */}
-          <div className="bg-white rounded-3xl p-6 border border-stone-200/90 shadow-sm space-y-3">
+          <section className="-mx-4 space-y-3 border-y border-stone-200/90 bg-white p-4 sm:mx-0 sm:rounded-3xl sm:border sm:p-6 sm:shadow-sm">
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-stone-700">
               <i className="ph-bold ph-map-pin text-base text-[#8C4A32]"></i>
               <span>Địa chỉ nhận hàng</span>
@@ -376,10 +376,10 @@ export default function OrderSuccess({ paymentFlow = false }) {
                 </p>
               )}
             </div>
-          </div>
+          </section>
 
           {/* Payment & Shipping Method */}
-          <div className="bg-white rounded-3xl p-6 border border-stone-200/90 shadow-sm space-y-4">
+          <section className="-mx-4 space-y-4 border-y border-stone-200/90 bg-white p-4 sm:mx-0 sm:rounded-3xl sm:border sm:p-6 sm:shadow-sm">
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-stone-700">
               <i className="ph-bold ph-credit-card text-base text-[#8C4A32]"></i>
               <span>Thanh toán & Vận chuyển</span>
@@ -435,11 +435,11 @@ export default function OrderSuccess({ paymentFlow = false }) {
                 </span>
               </div>
             </div>
-          </div>
+          </section>
         </div>
 
         {isTransfer && order.payment_status !== 'paid' && (
-          <section className="bg-[#FAF5EE] rounded-3xl p-6 sm:p-8 border border-amber-200/90 shadow-sm">
+          <section className="-mx-4 border-y border-amber-200/90 bg-[#FAF5EE] p-4 sm:mx-0 sm:rounded-3xl sm:border sm:p-8 sm:shadow-sm">
             <div className="flex flex-col sm:flex-row gap-6 items-center">
               <img src={vietQrUrl} alt="Mã VietQR thanh toán đơn hàng" className="w-52 h-52 rounded-2xl bg-white border border-stone-200 p-2 shadow-sm" />
               <div className="flex-1 text-center sm:text-left space-y-2">
@@ -469,7 +469,7 @@ export default function OrderSuccess({ paymentFlow = false }) {
         )}
 
         {/* 4. Order Items Receipt & Price Breakdown */}
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-stone-200/90 shadow-sm space-y-6">
+        <section className="-mx-4 space-y-5 border-y border-stone-200/90 bg-white p-4 sm:mx-0 sm:space-y-6 sm:rounded-3xl sm:border sm:p-8 sm:shadow-sm">
           <h2 className="text-sm font-bold uppercase tracking-wider text-stone-700 flex items-center justify-between">
             <span className="flex items-center gap-2">
               <i className="ph-bold ph-bag-simple text-base text-[#8C4A32]"></i>
@@ -542,10 +542,10 @@ export default function OrderSuccess({ paymentFlow = false }) {
               </span>
             </div>
           </div>
-        </div>
+        </section>
 
         {/* 5. Action Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2 pb-8">
+        <div className="flex flex-col items-center justify-center gap-2 pb-3 pt-2 sm:flex-row sm:gap-4 sm:pb-8">
           <button
             onClick={() => navigate('/orders')}
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#4A2C2A] hover:bg-[#381B18] text-white text-xs font-bold uppercase tracking-wider py-3.5 px-8 rounded-full shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-98 transition-all cursor-pointer"

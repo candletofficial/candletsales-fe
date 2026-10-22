@@ -33,70 +33,70 @@ export default function ShopGuide() {
   ];
 
   return (
-    <div className="bg-[#FFFDF9] text-[#2C1810] min-h-screen pb-24 font-jakarta selection:bg-[#4A2C2A] selection:text-white">
+    <main className="min-h-screen bg-white font-jakarta text-[#2C1810] selection:bg-[#4A2C2A] selection:text-white sm:bg-[#FFFDF9]">
       
       {/* 1. HERO HEADER */}
-      <div className="relative border-b border-stone-200/80 bg-gradient-to-b from-[#F7EFE8]/70 via-[#FFFDF9] to-[#FFFDF9] py-16 sm:py-20">
-        <div className="max-w-5xl mx-auto px-4 sm:px-8 text-center">
+      <header className="relative border-b-8 border-stone-100 bg-white py-7 sm:border-b sm:border-stone-200/80 sm:bg-gradient-to-b sm:from-[#F7EFE8]/70 sm:via-[#FFFDF9] sm:to-[#FFFDF9] sm:py-20">
+        <div className="mx-auto max-w-5xl px-4 text-left sm:px-8 sm:text-center">
           
           {/* Breadcrumbs */}
-          <div className="flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest text-stone-500 mb-6">
+          <div className="mb-6 hidden items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest text-stone-500 sm:flex">
             <Link to="/" className="hover:text-[#4A2C2A] transition-colors">Trang Chủ</Link>
             <span>/</span>
             <span className="text-[#8C4A32]">Cẩm Nang Nến Thơm Nghệ Thuật</span>
           </div>
 
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200/80 text-amber-900 text-xs font-bold tracking-wider uppercase mb-5">
+          <div className="mb-5 hidden items-center gap-2 rounded-full border border-amber-200/80 bg-amber-50 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-amber-900 sm:inline-flex">
             <i className="ph-fill ph-flame text-amber-500 text-sm"></i>
             The Art of Mindful Candle Rituals
           </div>
 
-          <h1 className="font-serif-display text-4xl sm:text-5xl lg:text-6xl text-[#4A2C2A] font-bold leading-tight mb-6">
+          <h1 className="mb-3 font-serif-display text-3xl font-bold leading-tight text-[#4A2C2A] sm:mb-6 sm:text-5xl lg:text-6xl">
             Cẩm Nang Thắp Nến & Nghệ Thuật Mùi Hương
           </h1>
 
-          <p className="text-base sm:text-lg text-stone-600 max-w-2xl mx-auto leading-relaxed">
+          <p className="mx-auto max-w-2xl text-sm leading-relaxed text-stone-600 sm:text-lg">
             Học cách chăm sóc ngọn nến thủ công như một nghệ nhân: từ kỹ thuật giữ phẳng mặt sáp, cắt tỉa bấc gỗ cho đến nghệ thuật chọn hương thơm khơi gợi xúc cảm an yên.
           </p>
 
           {/* Quick Navigation Anchor Tabs */}
-          <div className="flex flex-wrap items-center justify-center gap-2.5 mt-10">
+          <nav className="no-scrollbar -mx-4 mt-6 flex items-center gap-5 overflow-x-auto border-t border-stone-100 px-4 pt-3 sm:mx-0 sm:mt-10 sm:flex-wrap sm:justify-center sm:gap-2.5 sm:overflow-visible sm:border-t-0 sm:px-0 sm:pt-0">
             <a
               href="#golden-rules"
-              className="px-5 py-2.5 rounded-full bg-white border border-stone-200 text-stone-700 text-xs font-bold hover:border-[#4A2C2A] hover:text-[#4A2C2A] transition-all shadow-2xs flex items-center gap-2"
+              className="flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 border-transparent py-2 text-left text-[11px] font-bold text-stone-700 transition-all hover:border-[#4A2C2A] hover:text-[#4A2C2A] sm:rounded-full sm:border sm:bg-white sm:px-5 sm:py-2.5 sm:text-xs sm:shadow-2xs"
             >
               <i className="ph-bold ph-shield-check text-[#B45309]"></i>
               <span>4 Quy Tắc Vàng</span>
             </a>
             <a
               href="#scent-families"
-              className="px-5 py-2.5 rounded-full bg-white border border-stone-200 text-stone-700 text-xs font-bold hover:border-[#4A2C2A] hover:text-[#4A2C2A] transition-all shadow-2xs flex items-center gap-2"
+              className="flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 border-transparent py-2 text-left text-[11px] font-bold text-stone-700 transition-all hover:border-[#4A2C2A] hover:text-[#4A2C2A] sm:rounded-full sm:border sm:bg-white sm:px-5 sm:py-2.5 sm:text-xs sm:shadow-2xs"
             >
               <i className="ph-bold ph-flower-lotus text-[#B45309]"></i>
               <span>Chọn Mùi Theo Không Gian</span>
             </a>
             <a
               href="#upcycle-candle"
-              className="px-5 py-2.5 rounded-full bg-white border border-stone-200 text-stone-700 text-xs font-bold hover:border-[#4A2C2A] hover:text-[#4A2C2A] transition-all shadow-2xs flex items-center gap-2"
+              className="flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 border-transparent py-2 text-left text-[11px] font-bold text-stone-700 transition-all hover:border-[#4A2C2A] hover:text-[#4A2C2A] sm:rounded-full sm:border sm:bg-white sm:px-5 sm:py-2.5 sm:text-xs sm:shadow-2xs"
             >
               <i className="ph-bold ph-recycle text-[#B45309]"></i>
               <span>Tái Sinh Hũ Nến</span>
             </a>
             <a
               href="#faq-section"
-              className="px-5 py-2.5 rounded-full bg-white border border-stone-200 text-stone-700 text-xs font-bold hover:border-[#4A2C2A] hover:text-[#4A2C2A] transition-all shadow-2xs flex items-center gap-2"
+              className="flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 border-transparent py-2 text-left text-[11px] font-bold text-stone-700 transition-all hover:border-[#4A2C2A] hover:text-[#4A2C2A] sm:rounded-full sm:border sm:bg-white sm:px-5 sm:py-2.5 sm:text-xs sm:shadow-2xs"
             >
               <i className="ph-bold ph-question text-[#B45309]"></i>
               <span>Hỏi & Đáp (FAQ)</span>
             </a>
-          </div>
+          </nav>
 
         </div>
-      </div>
+      </header>
 
       {/* 2. SECTION: 4 QUY TẮC VÀNG (THE 4 GOLDEN RULES) */}
-      <section id="golden-rules" className="max-w-6xl mx-auto px-4 sm:px-8 py-20 border-b border-stone-200/60">
-        <div className="text-center max-w-2xl mx-auto mb-14">
+      <section id="golden-rules" className="mx-auto max-w-6xl border-b-8 border-stone-100 px-4 py-12 sm:border-b sm:border-stone-200/60 sm:px-8 sm:py-20">
+        <div className="mx-auto mb-8 max-w-2xl text-center sm:mb-14">
           <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#B45309] block mb-2">
             Nền Tảng Căn Bản
           </span>
@@ -108,11 +108,11 @@ export default function ShopGuide() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="divide-y divide-stone-200 md:grid md:grid-cols-2 md:gap-8 md:divide-y-0">
           
           {/* Quy tắc 1 */}
-          <div className="bg-white rounded-2xl p-8 border border-stone-200 shadow-xs hover:shadow-md transition-all group relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-[#FFF9F2] rounded-bl-full -z-0 group-hover:scale-110 transition-transform"></div>
+          <article className="group relative overflow-hidden py-7 transition-all md:rounded-2xl md:border md:border-stone-200 md:bg-white md:p-8 md:shadow-xs md:hover:shadow-md">
+            <div className="absolute right-0 top-0 -z-0 hidden size-24 rounded-bl-full bg-[#FFF9F2] transition-transform group-hover:scale-110 md:block"></div>
             <div className="relative z-10">
               <div className="w-12 h-12 rounded-xl bg-[#4A2C2A] text-white font-serif-display font-bold text-xl flex items-center justify-center mb-6 shadow-sm">
                 01
@@ -123,16 +123,16 @@ export default function ShopGuide() {
               <p className="text-sm text-stone-600 leading-relaxed mb-4">
                 Hãy dành đủ <strong>2 đến 3 tiếng</strong> cho lần châm lửa đầu tiên. Cần đảm bảo lớp sáp trên bề mặt tan chảy hoàn toàn đến sát viền cốc nến.
               </p>
-              <div className="p-3 bg-[#FFF9F2] rounded-lg border border-amber-200/60 text-xs text-amber-900 flex items-start gap-2.5">
+              <div className="flex items-start gap-2.5 border-l-2 border-amber-400 py-1 pl-3 text-xs text-amber-900 md:rounded-lg md:border md:border-amber-200/60 md:bg-[#FFF9F2] md:p-3">
                 <i className="ph-fill ph-lightbulb text-amber-600 text-base shrink-0 mt-0.5"></i>
                 <span><strong>Tại sao?</strong> Sáp nến có trí nhớ hình dạng. Nếu tắt quá sớm khi sáp chưa tràn viền, nến sẽ bị thụt ngòi ở những lần sau.</span>
               </div>
             </div>
-          </div>
+          </article>
 
           {/* Quy tắc 2 */}
-          <div className="bg-white rounded-2xl p-8 border border-stone-200 shadow-xs hover:shadow-md transition-all group relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-[#FFF9F2] rounded-bl-full -z-0 group-hover:scale-110 transition-transform"></div>
+          <article className="group relative overflow-hidden py-7 transition-all md:rounded-2xl md:border md:border-stone-200 md:bg-white md:p-8 md:shadow-xs md:hover:shadow-md">
+            <div className="absolute right-0 top-0 -z-0 hidden size-24 rounded-bl-full bg-[#FFF9F2] transition-transform group-hover:scale-110 md:block"></div>
             <div className="relative z-10">
               <div className="w-12 h-12 rounded-xl bg-[#4A2C2A] text-white font-serif-display font-bold text-xl flex items-center justify-center mb-6 shadow-sm">
                 02
@@ -143,16 +143,16 @@ export default function ShopGuide() {
               <p className="text-sm text-stone-600 leading-relaxed mb-4">
                 Trước mỗi lần thắp lại, hãy dùng kéo chuyên dụng cắt bớt phần bấc đen đã cháy than, giữ chiều dài bấc còn khoảng <strong>3 đến 5mm</strong>.
               </p>
-              <div className="p-3 bg-[#FFF9F2] rounded-lg border border-amber-200/60 text-xs text-amber-900 flex items-start gap-2.5">
+              <div className="flex items-start gap-2.5 border-l-2 border-amber-400 py-1 pl-3 text-xs text-amber-900 md:rounded-lg md:border md:border-amber-200/60 md:bg-[#FFF9F2] md:p-3">
                 <i className="ph-fill ph-scissors text-amber-600 text-base shrink-0 mt-0.5"></i>
                 <span><strong>Hiệu quả:</strong> Bấc gọn gàng giúp ngọn lửa cháy êm dịu, không bập bùng dữ dội và hoàn toàn không sinh khói đen ám cốc.</span>
               </div>
             </div>
-          </div>
+          </article>
 
           {/* Quy tắc 3 */}
-          <div className="bg-white rounded-2xl p-8 border border-stone-200 shadow-xs hover:shadow-md transition-all group relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-[#FFF9F2] rounded-bl-full -z-0 group-hover:scale-110 transition-transform"></div>
+          <article className="group relative overflow-hidden py-7 transition-all md:rounded-2xl md:border md:border-stone-200 md:bg-white md:p-8 md:shadow-xs md:hover:shadow-md">
+            <div className="absolute right-0 top-0 -z-0 hidden size-24 rounded-bl-full bg-[#FFF9F2] transition-transform group-hover:scale-110 md:block"></div>
             <div className="relative z-10">
               <div className="w-12 h-12 rounded-xl bg-[#4A2C2A] text-white font-serif-display font-bold text-xl flex items-center justify-center mb-6 shadow-sm">
                 03
@@ -163,16 +163,16 @@ export default function ShopGuide() {
               <p className="text-sm text-stone-600 leading-relaxed mb-4">
                 Đừng thổi trực tiếp vào tim nến. Hãy dùng <strong>chuông dập nến</strong> hoặc nhẹ nhàng <strong>đậy nắp hũ</strong> lại để dập tắt ngọn lửa bằng cách ngắt oxy.
               </p>
-              <div className="p-3 bg-[#FFF9F2] rounded-lg border border-amber-200/60 text-xs text-amber-900 flex items-start gap-2.5">
+              <div className="flex items-start gap-2.5 border-l-2 border-amber-400 py-1 pl-3 text-xs text-amber-900 md:rounded-lg md:border md:border-amber-200/60 md:bg-[#FFF9F2] md:p-3">
                 <i className="ph-fill ph-bell-simple text-amber-600 text-base shrink-0 mt-0.5"></i>
                 <span><strong>Bí quyết:</strong> Thổi nến sẽ làm tàn tro văng ra bề mặt sáp lụa và để lại mùi khét khó chịu làm mất đi hương thơm tinh tế trong phòng.</span>
               </div>
             </div>
-          </div>
+          </article>
 
           {/* Quy tắc 4 */}
-          <div className="bg-white rounded-2xl p-8 border border-stone-200 shadow-xs hover:shadow-md transition-all group relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-[#FFF9F2] rounded-bl-full -z-0 group-hover:scale-110 transition-transform"></div>
+          <article className="group relative overflow-hidden py-7 transition-all md:rounded-2xl md:border md:border-stone-200 md:bg-white md:p-8 md:shadow-xs md:hover:shadow-md">
+            <div className="absolute right-0 top-0 -z-0 hidden size-24 rounded-bl-full bg-[#FFF9F2] transition-transform group-hover:scale-110 md:block"></div>
             <div className="relative z-10">
               <div className="w-12 h-12 rounded-xl bg-[#4A2C2A] text-white font-serif-display font-bold text-xl flex items-center justify-center mb-6 shadow-sm">
                 04
@@ -183,19 +183,19 @@ export default function ShopGuide() {
               <p className="text-sm text-stone-600 leading-relaxed mb-4">
                 Không nên thắp nến quá <strong>4 giờ liên tục</strong>. Luôn đặt hũ nến trên bề mặt phẳng, tránh xa rèm cửa và các luồng gió thổi trực tiếp từ điều hòa hay quạt máy.
               </p>
-              <div className="p-3 bg-[#FFF9F2] rounded-lg border border-amber-200/60 text-xs text-amber-900 flex items-start gap-2.5">
+              <div className="flex items-start gap-2.5 border-l-2 border-amber-400 py-1 pl-3 text-xs text-amber-900 md:rounded-lg md:border md:border-amber-200/60 md:bg-[#FFF9F2] md:p-3">
                 <i className="ph-fill ph-timer text-amber-600 text-base shrink-0 mt-0.5"></i>
                 <span><strong>Lưu ý:</strong> Khi lớp sáp đáy chỉ còn khoảng 1cm, hãy ngừng đốt để đảm bảo an toàn cho đáy ly và chuẩn bị tái chế hũ nến.</span>
               </div>
             </div>
-          </div>
+          </article>
 
         </div>
       </section>
 
       {/* 3. SECTION: PHÂN LOẠI TẦNG HƯƠNG & KHÔNG GIAN (FRAGRANCE FAMILIES) */}
-      <section id="scent-families" className="max-w-6xl mx-auto px-4 sm:px-8 py-20 border-b border-stone-200/60">
-        <div className="text-center max-w-2xl mx-auto mb-14">
+      <section id="scent-families" className="mx-auto max-w-6xl border-b-8 border-stone-100 px-4 py-12 sm:border-b sm:border-stone-200/60 sm:px-8 sm:py-20">
+        <div className="mx-auto mb-8 max-w-2xl text-center sm:mb-14">
           <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#B45309] block mb-2">
             Khứu Giác & Không Gian
           </span>
@@ -207,10 +207,10 @@ export default function ShopGuide() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="divide-y divide-stone-200 md:grid md:grid-cols-3 md:gap-8 md:divide-y-0">
           
           {/* Nhóm Gỗ & Hổ Phách */}
-          <div className="bg-[#FAF5EE] rounded-2xl p-8 border border-amber-200/50 flex flex-col justify-between">
+          <article className="flex flex-col justify-between py-7 md:rounded-2xl md:border md:border-amber-200/50 md:bg-[#FAF5EE] md:p-8">
             <div>
               <div className="w-12 h-12 rounded-full bg-[#EFE3D3] text-[#8C4A32] flex items-center justify-center text-2xl mb-6">
                 <i className="ph-fill ph-tree"></i>
@@ -243,10 +243,10 @@ export default function ShopGuide() {
                 <i className="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
               </Link>
             </div>
-          </div>
+          </article>
 
           {/* Nhóm Hoa Cỏ & Trái Cây */}
-          <div className="bg-[#FAF5EE] rounded-2xl p-8 border border-amber-200/50 flex flex-col justify-between">
+          <article className="flex flex-col justify-between py-7 md:rounded-2xl md:border md:border-amber-200/50 md:bg-[#FAF5EE] md:p-8">
             <div>
               <div className="w-12 h-12 rounded-full bg-[#EFE3D3] text-[#8C4A32] flex items-center justify-center text-2xl mb-6">
                 <i className="ph-fill ph-flower-lotus"></i>
@@ -279,10 +279,10 @@ export default function ShopGuide() {
                 <i className="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
               </Link>
             </div>
-          </div>
+          </article>
 
           {/* Nhóm Thảo Mộc & Trà Trắng */}
-          <div className="bg-[#FAF5EE] rounded-2xl p-8 border border-amber-200/50 flex flex-col justify-between">
+          <article className="flex flex-col justify-between py-7 md:rounded-2xl md:border md:border-amber-200/50 md:bg-[#FAF5EE] md:p-8">
             <div>
               <div className="w-12 h-12 rounded-full bg-[#EFE3D3] text-[#8C4A32] flex items-center justify-center text-2xl mb-6">
                 <i className="ph-fill ph-leaf"></i>
@@ -315,13 +315,13 @@ export default function ShopGuide() {
                 <i className="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
               </Link>
             </div>
-          </div>
+          </article>
 
         </div>
       </section>
 
       {/* 5. SECTION: TÁI SINH HŨ NẾN (UPCYCLING) */}
-      <section id="upcycle-candle" className="max-w-6xl mx-auto px-4 sm:px-8 py-20 border-b border-stone-200/60">
+      <section id="upcycle-candle" className="mx-auto max-w-6xl border-b-8 border-stone-100 px-4 py-12 sm:border-b sm:border-stone-200/60 sm:px-8 sm:py-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           
           <div className="lg:col-span-6 space-y-5">
@@ -375,7 +375,7 @@ export default function ShopGuide() {
           </div>
 
           <div className="lg:col-span-6">
-            <div className="bg-gradient-to-tr from-[#EBE3D5] to-[#F5EFE6] rounded-3xl p-8 sm:p-10 border border-stone-200 flex flex-col justify-center items-center text-center space-y-6 shadow-sm">
+            <aside className="flex flex-col items-center justify-center space-y-6 border-y border-stone-200 py-8 text-center sm:rounded-3xl sm:border sm:bg-gradient-to-tr sm:from-[#EBE3D5] sm:to-[#F5EFE6] sm:p-10 sm:shadow-sm">
               <div className="w-20 h-20 rounded-full bg-white shadow-sm flex items-center justify-center text-4xl text-[#4A2C2A]">
                 <i className="ph-fill ph-plant"></i>
               </div>
@@ -385,15 +385,15 @@ export default function ShopGuide() {
               <span className="text-xs font-bold text-[#8C4A32] uppercase tracking-widest">
                 — Triết lý thủ công xanh tại Candlet
               </span>
-            </div>
+            </aside>
           </div>
 
         </div>
       </section>
 
       {/* 6. SECTION: FAQ ACCORDION (HỎI ĐÁP THƯỜNG GẶP) */}
-      <section id="faq-section" className="max-w-4xl mx-auto px-4 sm:px-8 py-20">
-        <div className="text-center max-w-2xl mx-auto mb-12">
+      <section id="faq-section" className="mx-auto max-w-4xl px-4 py-12 sm:px-8 sm:py-20">
+        <div className="mx-auto mb-8 max-w-2xl text-center sm:mb-12">
           <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#B45309] block mb-2">
             Giải Đáp Thắc Mắc
           </span>
@@ -405,18 +405,18 @@ export default function ShopGuide() {
           </p>
         </div>
 
-        <div className="space-y-4">
+        <div className="divide-y divide-stone-200 border-y border-stone-200 sm:space-y-4 sm:divide-y-0 sm:border-y-0">
           {FAQS.map((faq, index) => {
             const isOpen = openFaq === index;
             return (
               <div 
                 key={index}
-                className="bg-white border border-stone-200 rounded-2xl overflow-hidden transition-all duration-200 shadow-2xs"
+                className="overflow-hidden bg-white transition-all duration-200 sm:rounded-2xl sm:border sm:border-stone-200 sm:shadow-2xs"
               >
                 <button
                   type="button"
                   onClick={() => toggleFaq(index)}
-                  className="w-full px-6 py-5 text-left flex items-center justify-between gap-4 hover:bg-stone-50/80 transition-colors focus:outline-none"
+                  className="flex w-full items-center justify-between gap-4 py-5 text-left transition-colors hover:bg-stone-50/80 focus:outline-none sm:px-6"
                 >
                   <span className="font-serif-display text-base sm:text-lg font-bold text-[#4A2C2A]">
                     {faq.q}
@@ -427,7 +427,7 @@ export default function ShopGuide() {
                 </button>
 
                 {isOpen && (
-                  <div className="px-6 pb-6 pt-1 text-sm text-stone-600 leading-relaxed border-t border-stone-100 animate-in fade-in duration-200">
+                  <div className="animate-in fade-in border-t border-stone-100 pb-6 pt-4 text-sm leading-relaxed text-stone-600 duration-200 sm:px-6 sm:pt-1">
                     {faq.a}
                   </div>
                 )}
@@ -437,7 +437,7 @@ export default function ShopGuide() {
         </div>
 
         {/* Support Hotline Box */}
-        <div className="mt-12 p-6 rounded-2xl bg-[#FAF5EE] border border-amber-200/60 text-center flex flex-col sm:flex-row items-center justify-between gap-4">
+        <aside className="mt-10 flex flex-col items-center justify-between gap-4 border-y border-amber-200/60 py-6 text-center sm:mt-12 sm:flex-row sm:rounded-2xl sm:border sm:bg-[#FAF5EE] sm:p-6">
           <div className="text-left">
             <h4 className="font-serif-display text-lg font-bold text-[#4A2C2A]">Bạn vẫn còn câu hỏi cần tư vấn?</h4>
             <p className="text-xs text-stone-600 mt-1">Đội ngũ nghệ nhân của Candlet luôn sẵn sàng hỗ trợ bạn bất cứ lúc nào.</p>
@@ -449,12 +449,12 @@ export default function ShopGuide() {
             <i className="ph-bold ph-phone-call"></i>
             <span>Hotline: 032.862.4761</span>
           </a>
-        </div>
+        </aside>
       </section>
 
       {/* 7. CTA SECTION */}
       <div className="max-w-6xl mx-auto px-4 sm:px-8 mt-10">
-        <div className="bg-gradient-to-r from-[#FAF5EE] via-[#FFF9F2] to-[#FAF5EE] rounded-3xl p-10 sm:p-14 border border-amber-200/80 text-center space-y-5 shadow-xs">
+        <section className="space-y-5 border-y border-amber-200/80 py-10 text-center sm:rounded-3xl sm:border sm:bg-gradient-to-r sm:from-[#FAF5EE] sm:via-[#FFF9F2] sm:to-[#FAF5EE] sm:p-14 sm:shadow-xs">
           <span className="text-xs font-bold uppercase tracking-widest text-[#B45309]">
             Khởi Đầu Hành Trình Thư Thái
           </span>
@@ -473,9 +473,9 @@ export default function ShopGuide() {
               <span>Ghé Thăm Cửa Hàng Nến</span>
             </Link>
           </div>
-        </div>
+        </section>
       </div>
 
-    </div>
+    </main>
   );
 }

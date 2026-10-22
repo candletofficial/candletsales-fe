@@ -12,13 +12,13 @@ const steps = [
 ];
 
 const statusDetails = {
-  pending: { label: 'Chờ xác nhận', eyebrow: 'Shop đã nhận được đơn', description: 'Shop đang kiểm tra thông tin và sẽ sớm xác nhận đơn hàng của bạn.', icon: 'schedule', tone: 'border-amber-200 bg-amber-50 text-amber-950', iconTone: 'bg-amber-500 text-white shadow-amber-200' },
-  confirmed: { label: 'Đơn hàng đã được chấp nhận', eyebrow: 'Đang chuẩn bị hàng', description: 'Shop đang chuẩn bị sản phẩm trước khi bàn giao cho đơn vị vận chuyển.', icon: 'inventory_2', tone: 'border-sky-200 bg-sky-50 text-sky-950', iconTone: 'bg-sky-600 text-white shadow-sky-200' },
-  shipping: { label: 'Đơn hàng đang được giao', eyebrow: 'Đang vận chuyển', description: 'Đơn hàng đang trên đường đến bạn. Vui lòng để ý điện thoại khi tài xế liên hệ.', icon: 'local_shipping', tone: 'border-blue-200 bg-blue-50 text-blue-950', iconTone: 'bg-blue-600 text-white shadow-blue-200' },
-  delivered: { label: 'Giao hàng thành công', eyebrow: 'Đơn hàng đã hoàn tất', description: 'Cảm ơn bạn đã mua sắm cùng shop. Chúc bạn có trải nghiệm thật vui!', icon: 'task_alt', tone: 'border-emerald-200 bg-emerald-50 text-emerald-950', iconTone: 'bg-emerald-600 text-white shadow-emerald-200' },
-  failed: { label: 'Giao hàng chưa thành công', eyebrow: 'Cần hỗ trợ', description: 'Đơn hàng chưa thể giao thành công. Vui lòng liên hệ shop để được hỗ trợ.', icon: 'error', tone: 'border-rose-200 bg-rose-50 text-rose-950', iconTone: 'bg-rose-600 text-white shadow-rose-200' },
-  returned: { label: 'Đơn hàng đã hoàn về shop', eyebrow: 'Đã hoàn hàng', description: 'Đơn hàng đã được ghi nhận hoàn về shop. Vui lòng liên hệ nếu bạn cần hỗ trợ.', icon: 'keyboard_return', tone: 'border-orange-200 bg-orange-50 text-orange-950', iconTone: 'bg-orange-600 text-white shadow-orange-200' },
-  cancelled: { label: 'Đơn hàng đã huỷ', eyebrow: 'Đã kết thúc', description: 'Đơn hàng này đã được huỷ. Vui lòng liên hệ shop nếu bạn cần hỗ trợ.', icon: 'cancel', tone: 'border-stone-200 bg-stone-100 text-stone-900', iconTone: 'bg-stone-600 text-white shadow-stone-200' },
+  pending: { label: 'Chờ xác nhận', eyebrow: 'Shop đã nhận được đơn', description: 'Shop đang kiểm tra thông tin và sẽ sớm xác nhận đơn hàng của bạn.', icon: 'schedule', tone: 'bg-amber-50 text-amber-950', iconTone: 'bg-amber-500 text-white shadow-amber-200' },
+  confirmed: { label: 'Đơn hàng đã được chấp nhận', eyebrow: 'Đang chuẩn bị hàng', description: 'Shop đang chuẩn bị sản phẩm trước khi bàn giao cho đơn vị vận chuyển.', icon: 'inventory_2', tone: 'bg-sky-50 text-sky-950', iconTone: 'bg-sky-600 text-white shadow-sky-200' },
+  shipping: { label: 'Đơn hàng đang được giao', eyebrow: 'Đang vận chuyển', description: 'Đơn hàng đang trên đường đến bạn. Vui lòng để ý điện thoại khi tài xế liên hệ.', icon: 'local_shipping', tone: 'bg-blue-50 text-blue-950', iconTone: 'bg-blue-600 text-white shadow-blue-200' },
+  delivered: { label: 'Giao hàng thành công', eyebrow: 'Đơn hàng đã hoàn tất', description: 'Cảm ơn bạn đã mua sắm cùng shop. Chúc bạn có trải nghiệm thật vui!', icon: 'task_alt', tone: 'bg-emerald-50 text-emerald-950', iconTone: 'bg-emerald-600 text-white shadow-emerald-200' },
+  failed: { label: 'Giao hàng chưa thành công', eyebrow: 'Cần hỗ trợ', description: 'Đơn hàng chưa thể giao thành công. Vui lòng liên hệ shop để được hỗ trợ.', icon: 'error', tone: 'bg-rose-50 text-rose-950', iconTone: 'bg-rose-600 text-white shadow-rose-200' },
+  returned: { label: 'Đơn hàng đã hoàn về shop', eyebrow: 'Đã hoàn hàng', description: 'Đơn hàng đã được ghi nhận hoàn về shop. Vui lòng liên hệ shop nếu bạn cần hỗ trợ.', icon: 'keyboard_return', tone: 'bg-orange-50 text-orange-950', iconTone: 'bg-orange-600 text-white shadow-orange-200' },
+  cancelled: { label: 'Đơn hàng đã huỷ', eyebrow: 'Đã kết thúc', description: 'Đơn hàng này đã được huỷ. Vui lòng liên hệ shop nếu bạn cần hỗ trợ.', icon: 'cancel', tone: 'bg-stone-100 text-stone-900', iconTone: 'bg-stone-600 text-white shadow-stone-200' },
 };
 
 const dateText = value => value && !Number.isNaN(new Date(value).getTime())
@@ -77,69 +77,117 @@ export default function OrderTracking() {
   };
 
   return (
-    <main className="min-h-[70vh] bg-gradient-to-b from-[#faf8f5] to-white px-4 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-6 sm:px-6 sm:py-12">
-      <div className="mx-auto max-w-5xl">
-        <header className="mb-5 sm:mb-8">
-          <Link to="/shop" className="mb-5 inline-flex min-h-11 items-center gap-2 rounded-full pr-3 text-sm font-semibold text-stone-600 transition-colors hover:text-stone-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-400">
-            <span aria-hidden="true" className="material-symbols-outlined text-xl">arrow_back</span>Về cửa hàng
+    <main className="bg-[#f5f5f5] sm:px-6 sm:py-10">
+      <article className="mx-auto max-w-3xl overflow-hidden bg-white sm:border sm:border-stone-200 sm:shadow-sm">
+        <header className="flex min-h-14 items-center gap-2 border-b border-stone-200 bg-white px-3 sm:px-5">
+          <Link to="/shop" aria-label="Về cửa hàng" className="inline-flex size-10 shrink-0 items-center justify-center rounded-full text-stone-700 transition hover:bg-stone-100">
+            <span aria-hidden="true" className="material-symbols-outlined">arrow_back</span>
           </Link>
-          <div className="flex items-end justify-between gap-4">
-            <div><p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#a3724d]">Đơn hàng của bạn</p><h1 className="mt-1.5 font-serif-display text-[2rem] leading-tight text-stone-950 sm:text-4xl">Theo dõi đơn hàng</h1></div>
-            <button type="button" disabled={loading} onClick={() => setRefresh(value => value + 1)} aria-label="Cập nhật trạng thái đơn hàng" className="inline-flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-stone-200 bg-white text-stone-600 shadow-sm transition hover:border-stone-300 hover:bg-stone-50 disabled:cursor-wait disabled:opacity-60 sm:size-auto sm:min-h-11 sm:gap-2 sm:px-4">
-              <span aria-hidden="true" className={`material-symbols-outlined text-xl ${loading ? 'animate-spin' : ''}`}>refresh</span><span className="hidden text-sm font-semibold sm:inline">{loading ? 'Đang cập nhật' : 'Cập nhật'}</span>
-            </button>
-          </div>
+          <h1 className="min-w-0 flex-1 text-[17px] font-extrabold text-stone-900">Theo dõi đơn hàng</h1>
+          <button type="button" disabled={loading} onClick={() => setRefresh(value => value + 1)} aria-label="Cập nhật trạng thái đơn hàng" className="inline-flex size-10 shrink-0 items-center justify-center rounded-full text-stone-600 transition hover:bg-stone-100 disabled:cursor-wait disabled:opacity-50">
+            <span aria-hidden="true" className={`material-symbols-outlined text-[21px] ${loading ? 'animate-spin' : ''}`}>refresh</span>
+          </button>
         </header>
 
-        {error && <div role="alert" className="mb-5 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-relaxed text-amber-950"><span aria-hidden="true" className="material-symbols-outlined mt-0.5 text-xl">warning</span><span className="flex-1">{error}</span>{order && <button type="button" onClick={() => setRefresh(value => value + 1)} className="shrink-0 font-bold underline underline-offset-2">Thử lại</button>}</div>}
+        {error && <aside role="alert" className="mx-3 mt-3 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm leading-5 text-amber-950 sm:mx-0"><span aria-hidden="true" className="material-symbols-outlined text-xl">warning</span><p className="flex-1">{error}</p>{order && <button type="button" onClick={() => setRefresh(value => value + 1)} className="shrink-0 font-bold text-amber-900">Thử lại</button>}</aside>}
 
         {loading && !order ? (
-          <div role="status" aria-label="Đang tải đơn hàng" className="space-y-4"><div className="h-56 animate-pulse rounded-3xl bg-stone-200/70" /><div className="h-72 animate-pulse rounded-3xl bg-stone-100" /></div>
-        ) : order && (
-          <div className="space-y-4 sm:space-y-6">
-            <section aria-live="polite" className={`overflow-hidden rounded-3xl border shadow-sm ${statusDetail.tone}`}>
-              <div className="p-5 sm:p-7"><div className="flex items-start gap-4">
-                <span aria-hidden="true" className={`material-symbols-outlined flex size-12 shrink-0 items-center justify-center rounded-2xl text-2xl shadow-lg ${statusDetail.iconTone}`}>{statusDetail.icon}</span>
-                <div className="min-w-0 flex-1"><p className="text-[11px] font-bold uppercase tracking-[0.16em] opacity-65">{statusDetail.eyebrow}</p><h2 className="mt-1 text-xl font-extrabold leading-snug sm:text-2xl">{statusDetail.label}</h2><p className="mt-2 text-sm leading-6 opacity-80 sm:max-w-2xl">{statusDetail.description}</p></div>
-              </div></div>
-              <div className="flex items-center gap-2 border-t border-current/10 bg-white/40 px-5 py-3 text-xs font-medium opacity-75 sm:px-7"><span className="relative flex size-2"><span className="absolute inline-flex size-full animate-ping rounded-full bg-current opacity-40" /><span className="relative inline-flex size-2 rounded-full bg-current" /></span>Tự động cập nhật mỗi 30 giây{order.updated_at && <span className="ml-auto hidden sm:inline">Cập nhật lúc {dateText(order.updated_at)}</span>}</div>
+          <section role="status" aria-label="Đang tải đơn hàng" className="space-y-3 p-3 sm:p-0">
+            <span className="block h-44 animate-pulse rounded-2xl bg-stone-200" />
+            <span className="block h-52 animate-pulse rounded-2xl bg-white" />
+          </section>
+        ) : !order ? (
+          <section className="m-3 rounded-2xl bg-white px-5 py-12 text-center shadow-sm sm:m-0">
+            <span aria-hidden="true" className="material-symbols-outlined text-5xl text-stone-300">package_2</span>
+            <h2 className="mt-3 text-lg font-bold text-stone-900">Không tìm thấy đơn hàng</h2>
+            <p className="mt-2 text-sm leading-6 text-stone-500">Đường dẫn có thể đã hết hiệu lực hoặc đơn hàng không còn tồn tại.</p>
+            <Link to="/shop" className="mt-5 inline-flex min-h-11 items-center rounded-xl bg-[#4a2c2a] px-5 text-sm font-bold text-white">Về cửa hàng</Link>
+          </section>
+        ) : (
+          <section>
+            <section aria-live="polite" className={`overflow-hidden border-b-8 border-stone-100 ${statusDetail.tone}`}>
+              <header className="flex items-start gap-3 p-4 sm:p-6">
+                <span aria-hidden="true" className={`material-symbols-outlined flex size-11 shrink-0 items-center justify-center rounded-xl text-2xl shadow-sm ${statusDetail.iconTone}`}>{statusDetail.icon}</span>
+                <hgroup className="min-w-0">
+                  <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] opacity-60">{statusDetail.eyebrow}</p>
+                  <h2 className="mt-1 text-lg font-extrabold leading-6 sm:text-xl">{statusDetail.label}</h2>
+                  <p className="mt-1.5 text-[13px] leading-5 opacity-75">{statusDetail.description}</p>
+                </hgroup>
+              </header>
+              <footer className="flex items-center gap-2 border-t border-current/10 bg-white/45 px-4 py-2.5 text-[11px] font-semibold opacity-70 sm:px-6">
+                <span aria-hidden="true" className="size-1.5 rounded-full bg-current shadow-[0_0_0_3px_rgba(255,255,255,0.65)]" />
+                Tự động cập nhật mỗi 30 giây
+                {order.updated_at && <time className="ml-auto" dateTime={order.updated_at}>{dateText(order.updated_at)}</time>}
+              </footer>
             </section>
 
-            <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(340px,0.82fr)] lg:gap-6">
-              <section className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm sm:p-7">
-                <div className="mb-6 flex items-center gap-3"><span aria-hidden="true" className="material-symbols-outlined flex size-9 items-center justify-center rounded-xl bg-[#f5eee8] text-xl text-[#8c5e3c]">route</span><div><h2 className="font-bold text-stone-900">Hành trình đơn hàng</h2><p className="mt-0.5 text-xs text-stone-500">Theo dõi tiến trình mới nhất</p></div></div>
-                <ol>{steps.map((step, index) => {
-                  const isCurrent = index === stepIndex;
-                  const isDone = stepIndex >= 0 ? index < stepIndex : index <= exceptionProgress;
-                  const lineActive = stepIndex >= 0 ? index < stepIndex : index < exceptionProgress;
-                  return <li key={step.value} aria-current={isCurrent ? 'step' : undefined} className="relative flex gap-4 pb-7 last:pb-0">
-                    {index < steps.length - 1 && <span aria-hidden="true" className={`absolute left-[17px] top-9 h-[calc(100%-1.5rem)] w-0.5 rounded-full ${lineActive ? 'bg-[#b98056]' : 'bg-stone-200'}`} />}
-                    <span aria-hidden="true" className={`material-symbols-outlined relative z-10 flex size-9 shrink-0 items-center justify-center rounded-full text-[19px] ring-4 ring-white ${isCurrent ? 'bg-[#4a2c2a] text-white shadow-md' : isDone ? 'bg-[#c8956c] text-white' : 'bg-stone-100 text-stone-400'}`}>{isDone ? 'check' : step.icon}</span>
-                    <div className={`min-w-0 flex-1 pt-0.5 ${isCurrent || isDone ? 'text-stone-900' : 'text-stone-400'}`}><div className="flex flex-wrap items-center gap-2"><p className="text-sm font-bold sm:text-[15px]">{step.label}</p>{isCurrent && <span className="rounded-full bg-[#f3e6dc] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#7b4a2f]">Hiện tại</span>}</div><p className="mt-1 text-xs leading-5 opacity-70">{step.description}</p></div>
-                  </li>;
-                })}</ol>
-                {order.updated_at && <p className="mt-6 border-t border-stone-100 pt-4 text-xs text-stone-400 sm:hidden">Cập nhật gần nhất: {dateText(order.updated_at)}</p>}
-              </section>
+            <section className="border-b-8 border-stone-100 bg-white">
+              <header className="flex items-center justify-between gap-3 border-b border-stone-100 px-4 py-3.5 sm:px-5">
+                <h2 className="text-sm font-extrabold text-stone-900">Thông tin đơn hàng</h2>
+                <button type="button" onClick={copyOrderId} className="inline-flex min-h-9 items-center gap-1 rounded-lg bg-stone-100 px-2.5 text-[11px] font-bold text-stone-600" aria-label="Sao chép mã đơn hàng">
+                  <span aria-hidden="true" className="material-symbols-outlined text-base">{copied ? 'check' : 'content_copy'}</span>{copied ? 'Đã chép' : 'Sao chép'}
+                </button>
+              </header>
+              <dl className="grid grid-cols-[auto_1fr] gap-x-5 gap-y-3 px-4 py-4 text-[13px] sm:px-5">
+                <dt className="text-stone-500">Mã đơn</dt><dd className="min-w-0 break-all text-right font-mono font-bold text-stone-900">{order.orderId}</dd>
+                <dt className="text-stone-500">Ngày đặt</dt><dd className="text-right font-semibold text-stone-800">{dateText(order.ordered_at) || '—'}</dd>
+                <dt className="text-stone-500">Vận chuyển</dt><dd className="text-right font-semibold text-stone-800">{order.shippingMethod === 'express' ? 'Hỏa tốc 4h' : 'Tiêu chuẩn'}</dd>
+              </dl>
+              <address className="flex gap-3 border-t border-stone-100 px-4 py-4 not-italic sm:px-5">
+                <span aria-hidden="true" className="material-symbols-outlined flex size-9 shrink-0 items-center justify-center rounded-full bg-orange-50 text-lg text-[#c45e37]">location_on</span>
+                <p className="min-w-0 flex-1 text-[13px] leading-5 text-stone-600">
+                  <strong className="block text-sm text-stone-900">Thông tin người nhận</strong>
+                  <span className="mt-1 block font-semibold text-stone-800">{order.customer?.name || 'Chưa cập nhật'}{order.customer?.phone && ` · ${order.customer.phone}`}</span>
+                  <span className="mt-0.5 block break-words">{order.customer?.address || 'Chưa cập nhật địa chỉ giao hàng'}</span>
+                </p>
+              </address>
+            </section>
 
-              <div className="space-y-4 lg:sticky lg:top-24">
-                <section className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm sm:p-6">
-                  <div className="flex items-start justify-between gap-3 border-b border-stone-100 pb-4"><div className="min-w-0"><p className="text-[11px] font-bold uppercase tracking-wider text-stone-400">Mã đơn hàng</p><p className="mt-1.5 break-all font-mono text-base font-bold text-stone-900">{order.orderId}</p></div><button type="button" onClick={copyOrderId} className="inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-xl bg-stone-100 px-3 text-xs font-bold text-stone-600 transition hover:bg-stone-200" aria-label="Sao chép mã đơn hàng"><span aria-hidden="true" className="material-symbols-outlined text-lg">{copied ? 'check' : 'content_copy'}</span>{copied ? 'Đã chép' : 'Sao chép'}</button></div>
-                  <dl className="grid grid-cols-2 gap-x-4 gap-y-4 pt-4 text-sm"><div><dt className="text-xs text-stone-400">Ngày đặt hàng</dt><dd className="mt-1 font-semibold text-stone-700">{dateText(order.ordered_at) || '—'}</dd></div><div><dt className="text-xs text-stone-400">Vận chuyển</dt><dd className="mt-1 font-semibold text-stone-700">{order.shippingMethod === 'express' ? 'Hỏa tốc 4h' : 'Tiêu chuẩn'}</dd></div></dl>
-                </section>
+            <section className="border-b-8 border-stone-100 bg-white px-4 py-5 sm:px-6 sm:py-6">
+              <header className="mb-5 flex items-center gap-2.5">
+                <span aria-hidden="true" className="material-symbols-outlined flex size-9 items-center justify-center rounded-lg bg-orange-50 text-xl text-[#a45f32]">local_shipping</span>
+                <hgroup>
+                  <h2 className="text-[15px] font-extrabold text-stone-900">Hành trình đơn hàng</h2>
+                  <p className="text-[11px] text-stone-500">Trạng thái vận chuyển mới nhất</p>
+                </hgroup>
+              </header>
+              <ol className="pl-0.5">{steps.map((step, index) => {
+                const isCurrent = index === stepIndex;
+                const isDone = stepIndex >= 0 ? index < stepIndex : index <= exceptionProgress;
+                const lineActive = stepIndex >= 0 ? index < stepIndex : index < exceptionProgress;
+                return <li key={step.value} aria-current={isCurrent ? 'step' : undefined} className="relative flex gap-3 pb-5 last:pb-0">
+                  {index < steps.length - 1 && <span aria-hidden="true" className={`absolute left-[15px] top-8 h-[calc(100%-1rem)] w-0.5 ${lineActive ? 'bg-[#c78455]' : 'bg-stone-200'}`} />}
+                  <span aria-hidden="true" className={`material-symbols-outlined relative z-10 flex size-8 shrink-0 items-center justify-center rounded-full text-[17px] ring-[3px] ring-white ${isCurrent ? 'bg-[#ee4d2d] text-white shadow-sm' : isDone ? 'bg-[#c78455] text-white' : 'bg-stone-100 text-stone-400'}`}>{isDone ? 'check' : step.icon}</span>
+                  <article className={`min-w-0 flex-1 pt-0.5 ${isCurrent || isDone ? 'text-stone-900' : 'text-stone-400'}`}>
+                    <header className="flex flex-wrap items-center gap-2"><h3 className="text-[13px] font-bold">{step.label}</h3>{isCurrent && <mark className="rounded bg-orange-50 px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wide text-[#c34c2b]">Hiện tại</mark>}</header>
+                    <p className="mt-0.5 text-[11px] leading-4 opacity-70">{step.description}</p>
+                  </article>
+                </li>;
+              })}</ol>
+            </section>
 
-                <section className="overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-sm">
-                  <div className="flex items-center justify-between gap-3 px-5 pb-3 pt-5 sm:px-6"><h2 className="font-bold text-stone-900">Sản phẩm</h2><span className="rounded-full bg-stone-100 px-2.5 py-1 text-xs font-bold text-stone-500">{order.items.length} sản phẩm</span></div>
-                  <ul className="divide-y divide-stone-100 px-5 sm:px-6">{order.items.map((item, index) => <li key={`${item.product_name}-${index}`} className="flex items-start gap-3 py-4">
-                    {item.product_image ? <img src={getImageUrl(item.product_image)} alt="" className="size-16 shrink-0 rounded-2xl border border-stone-100 object-cover" /> : <span aria-hidden="true" className="material-symbols-outlined flex size-16 shrink-0 items-center justify-center rounded-2xl bg-stone-50 text-stone-300">inventory_2</span>}
-                    <div className="min-w-0 flex-1"><p className="break-words text-sm font-bold leading-5 text-stone-800">{item.product_name}</p>{item.sku_label && <p className="mt-1 truncate text-xs text-stone-500">{item.sku_label}</p>}<div className="mt-2 flex items-end justify-between gap-2"><span className="rounded-md bg-stone-100 px-2 py-1 text-[11px] font-semibold text-stone-500">SL: {item.quantity}</span><span className="text-sm font-bold text-stone-800">{formatPrice(item.unit_price * item.quantity)}</span></div></div>
-                  </li>)}</ul>
-                  <div className="flex items-end justify-between gap-4 bg-[#faf8f5] px-5 py-4 sm:px-6"><span className="text-sm font-semibold text-stone-600">Tổng đơn hàng</span><strong className="text-xl text-[#4a2c2a]">{formatPrice(order.total_price)}</strong></div>
-                </section>
-              </div>
-            </div>
-          </div>
+            <section className="overflow-hidden border-b border-stone-200 bg-white">
+              <header className="flex items-center justify-between border-b border-stone-100 px-4 py-3.5 sm:px-5">
+                <h2 className="text-sm font-extrabold text-stone-900">Sản phẩm đã đặt</h2>
+                <span className="text-xs font-semibold text-stone-500">{(order.items || []).length} sản phẩm</span>
+              </header>
+              <ul className="divide-y divide-stone-100 px-4 sm:px-5">{(order.items || []).map((item, index) => <li key={`${item.product_name}-${index}`} className="flex gap-3 py-3.5">
+                {item.product_image ? <img src={getImageUrl(item.product_image)} alt="" className="size-[68px] shrink-0 rounded-xl border border-stone-100 object-cover" /> : <span aria-hidden="true" className="material-symbols-outlined flex size-[68px] shrink-0 items-center justify-center rounded-xl bg-stone-100 text-stone-300">inventory_2</span>}
+                <article className="min-w-0 flex-1">
+                  <h3 className="line-clamp-2 text-[13px] font-bold leading-5 text-stone-900">{item.product_name}</h3>
+                  {item.sku_label && <p className="mt-0.5 truncate text-[11px] text-stone-500">Phân loại: {item.sku_label}</p>}
+                  <footer className="mt-2 flex items-center justify-between gap-2"><span className="text-xs text-stone-500">x{item.quantity}</span><strong className="text-[13px] text-stone-900">{formatPrice(item.unit_price * item.quantity)}</strong></footer>
+                </article>
+              </li>)}</ul>
+              <footer className="flex items-center justify-between bg-stone-50 px-4 py-3.5 sm:px-5"><span className="text-[13px] text-stone-600">Thành tiền</span><strong className="text-lg text-[#ee4d2d]">{formatPrice(order.total_price)}</strong></footer>
+            </section>
+
+            <footer className="px-2 py-2 text-center text-xs text-stone-500">
+              Cần hỗ trợ? <a href="tel:0328624761" className="font-bold text-[#8c4a32]">Gọi shop 032.862.4761</a>
+            </footer>
+          </section>
         )}
-      </div>
+      </article>
     </main>
   );
 }

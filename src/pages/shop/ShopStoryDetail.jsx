@@ -153,7 +153,7 @@ export default function ShopStoryDetail() {
   }[fontSize];
 
   return (
-    <div className="bg-[#FAF7F2] text-[#2C1810] min-h-screen pb-32 font-jakarta selection:bg-[#4A2C2A] selection:text-white relative">
+    <div className="relative min-h-screen bg-white pb-32 font-jakarta text-[#2C1810] selection:bg-[#4A2C2A] selection:text-white sm:bg-[#FAF7F2]">
       
       {/* 1. READING PROGRESS BAR (Thanh tiến trình cuộn) */}
       <div className="fixed top-0 left-0 right-0 h-1 z-50 bg-stone-200/50">
@@ -170,7 +170,7 @@ export default function ShopStoryDetail() {
       <header className="pt-12 sm:pt-16 pb-10 max-w-4xl mx-auto px-4 sm:px-8 text-center relative">
         
         {/* Breadcrumb Navigation */}
-        <div className="flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-stone-500 mb-6">
+        <div className="mb-6 hidden items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-stone-500 sm:flex">
           <Link to="/" className="hover:text-[#4A2C2A] transition-colors">Trang Chủ</Link>
           <span className="text-stone-300">/</span>
           <Link to="/stories" className="hover:text-[#4A2C2A] transition-colors">Câu Chuyện</Link>
@@ -203,7 +203,7 @@ export default function ShopStoryDetail() {
         </h1>
 
         {/* Summary Lead Block */}
-        <div className="max-w-2xl mx-auto my-8 p-6 rounded-2xl bg-white/70 border border-stone-200/80 shadow-2xs backdrop-blur-xs">
+        <div className="mx-auto my-7 max-w-2xl border-y border-stone-200 py-5 sm:my-8 sm:rounded-2xl sm:border sm:bg-white/70 sm:p-6 sm:shadow-2xs sm:backdrop-blur-xs">
           <p className="text-base sm:text-lg text-stone-700 leading-relaxed font-serif-display italic">
             "{post.summary}"
           </p>
@@ -291,8 +291,8 @@ export default function ShopStoryDetail() {
 
       {/* 3. COVER IMAGE CINEMATIC */}
       {post.thumbnail && (
-        <div className="max-w-5xl mx-auto px-4 sm:px-8 mb-12">
-          <div className="rounded-3xl overflow-hidden aspect-[16/9] sm:aspect-[21/9] bg-stone-100 shadow-[0_15px_40px_rgba(56,27,24,0.08)] border border-stone-200/80 group">
+        <div className="mx-auto mb-10 max-w-5xl sm:mb-12 sm:px-8">
+          <div className="group aspect-[16/9] overflow-hidden bg-stone-100 sm:aspect-[21/9] sm:rounded-3xl sm:border sm:border-stone-200/80 sm:shadow-[0_15px_40px_rgba(56,27,24,0.08)]">
             <img
               src={post.thumbnail}
               alt={post.title}
@@ -310,8 +310,8 @@ export default function ShopStoryDetail() {
         
         {/* Quote Highlight Banner (Khối danh ngôn tâm đắc) */}
         {post.customDesign?.quoteHighlight && (
-          <div
-            className="my-12 p-8 sm:p-10 rounded-3xl relative overflow-hidden shadow-sm border border-stone-200/70"
+          <aside
+            className="relative my-10 overflow-hidden border-y border-stone-200/70 py-7 pl-5 sm:my-12 sm:rounded-3xl sm:border sm:p-10 sm:shadow-sm"
             style={{
               backgroundColor: '#FFFFFF',
               borderLeft: `5px solid ${themeColor}`,
@@ -326,7 +326,7 @@ export default function ShopStoryDetail() {
             <blockquote className="font-serif-display text-2xl sm:text-3xl italic leading-snug text-[#2C1810]">
               "{post.customDesign.quoteHighlight}"
             </blockquote>
-          </div>
+          </aside>
         )}
 
         {/* HTML Article Content */}
@@ -335,7 +335,7 @@ export default function ShopStoryDetail() {
         >
           <div
             dangerouslySetInnerHTML={{ __html: post.content }}
-            className={`space-y-6 [&>h2]:font-serif-display [&>h2]:text-2xl sm:[&>h2]:text-3xl [&>h2]:font-bold [&>h2]:text-[#2A1412] [&>h2]:mt-12 [&>h2]:mb-4 [&>h2]:pb-2 [&>h2]:border-b [&>h2]:border-stone-200/60 [&>h3]:font-serif-display [&>h3]:text-xl sm:[&>h3]:text-2xl [&>h3]:font-bold [&>h3]:text-[#2A1412] [&>h3]:mt-8 [&>h3]:mb-3 [&>p]:mb-5 [&>p]:leading-relaxed [&>blockquote]:font-serif-display [&>blockquote]:italic [&>blockquote]:border-l-4 [&>blockquote]:border-amber-600 [&>blockquote]:pl-6 [&>blockquote]:py-3 [&>blockquote]:my-8 [&>blockquote]:text-xl [&>blockquote]:text-[#2C1810] [&>blockquote]:bg-[#F7EFE8] [&>blockquote]:rounded-r-2xl [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:space-y-3 [&>ol]:list-decimal [&>ol]:pl-6 [&>ol]:space-y-3 [&>img]:rounded-3xl [&>img]:my-8 [&>img]:shadow-md [&>figure>img]:rounded-3xl [&>figure>img]:my-6 [&>figure>img]:shadow-md [&>.candle-tip]:bg-amber-50 [&>.candle-tip]:border-l-4 [&>.candle-tip]:border-amber-500 [&>.candle-tip]:p-5 [&>.candle-tip]:rounded-r-2xl [&>.candle-tip]:my-6 [&>.scent-callout]:p-6 [&>.scent-callout]:rounded-2xl [&>.scent-callout]:bg-amber-50/80 [&>.scent-callout]:border [&>.scent-callout]:border-amber-200/80 [&>.scent-callout]:my-8 ${
+            className={`space-y-6 [&>h2]:font-serif-display [&>h2]:text-2xl sm:[&>h2]:text-3xl [&>h2]:font-bold [&>h2]:text-[#2A1412] [&>h2]:mt-12 [&>h2]:mb-4 [&>h2]:pb-2 [&>h2]:border-b [&>h2]:border-stone-200/60 [&>h3]:font-serif-display [&>h3]:text-xl sm:[&>h3]:text-2xl [&>h3]:font-bold [&>h3]:text-[#2A1412] [&>h3]:mt-8 [&>h3]:mb-3 [&>p]:mb-5 [&>p]:leading-relaxed [&>blockquote]:font-serif-display [&>blockquote]:italic [&>blockquote]:border-l-4 [&>blockquote]:border-amber-600 [&>blockquote]:pl-5 [&>blockquote]:py-3 [&>blockquote]:my-8 [&>blockquote]:text-xl [&>blockquote]:text-[#2C1810] sm:[&>blockquote]:bg-[#F7EFE8] sm:[&>blockquote]:rounded-r-2xl [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:space-y-3 [&>ol]:list-decimal [&>ol]:pl-6 [&>ol]:space-y-3 [&>img]:my-8 sm:[&>img]:rounded-3xl sm:[&>img]:shadow-md [&>figure>img]:my-6 sm:[&>figure>img]:rounded-3xl sm:[&>figure>img]:shadow-md [&>.candle-tip]:border-l-4 [&>.candle-tip]:border-amber-500 [&>.candle-tip]:py-2 [&>.candle-tip]:pl-4 [&>.candle-tip]:my-6 sm:[&>.candle-tip]:bg-amber-50 sm:[&>.candle-tip]:p-5 sm:[&>.candle-tip]:rounded-r-2xl [&>.scent-callout]:border-y [&>.scent-callout]:border-amber-200/80 [&>.scent-callout]:py-5 [&>.scent-callout]:my-8 sm:[&>.scent-callout]:rounded-2xl sm:[&>.scent-callout]:bg-amber-50/80 sm:[&>.scent-callout]:border sm:[&>.scent-callout]:p-6 ${
               post.customDesign?.enableDropCap !== false
                 ? '[&>p:first-of-type::first-letter]:text-5xl [&>p:first-of-type::first-letter]:font-serif-display [&>p:first-of-type::first-letter]:font-bold [&>p:first-of-type::first-letter]:float-left [&>p:first-of-type::first-letter]:mr-3 [&>p:first-of-type::first-letter]:leading-none [&>p:first-of-type::first-letter]:text-[#381B18]'
                 : ''
@@ -362,7 +362,7 @@ export default function ShopStoryDetail() {
         )}
 
         {/* 4.5. READER REACTION & ENGAGEMENT BOX */}
-        <div className="mt-12 p-6 sm:p-8 rounded-3xl bg-white border border-stone-200/90 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
+        <section className="mt-12 flex flex-col items-center justify-between gap-6 border-y border-stone-200 py-7 text-center sm:flex-row sm:rounded-3xl sm:border sm:border-stone-200/90 sm:bg-white sm:p-8 sm:text-left sm:shadow-2xs">
           <div className="space-y-1">
             <div className="flex items-center justify-center sm:justify-start gap-2 text-rose-600 text-xs font-bold uppercase tracking-wider">
               <i className="ph-fill ph-sparkle text-sm"></i>
@@ -400,10 +400,10 @@ export default function ShopStoryDetail() {
               <span>{copied ? 'Đã copy' : 'Chia sẻ'}</span>
             </button>
           </div>
-        </div>
+        </section>
 
         {/* 5. AUTHOR POSTCARD (BƯU THIẾP TÁC GIẢ CANDLET) */}
-        <div className="mt-14 p-8 sm:p-10 rounded-3xl bg-white border border-stone-200/90 shadow-[0_10px_30px_rgba(0,0,0,0.03)] relative overflow-hidden">
+        <aside className="relative mt-14 overflow-hidden border-y border-stone-200 py-8 sm:rounded-3xl sm:border sm:border-stone-200/90 sm:bg-white sm:p-10 sm:shadow-[0_10px_30px_rgba(0,0,0,0.03)]">
           
           {/* Con dấu sáp đỏ rượu vang giả lập (Wax Seal) */}
           <div className="absolute top-6 right-6 w-14 h-14 rounded-full bg-[#50131A] text-amber-200 flex flex-col items-center justify-center shadow-md border-2 border-amber-400/40 transform rotate-12">
@@ -443,10 +443,10 @@ export default function ShopStoryDetail() {
               </div>
             </div>
           </div>
-        </div>
+        </aside>
 
         {/* 6. INVITATION BANNER (TRẢI NGHIỆM MÙI HƯƠNG TẬN TAY) */}
-        <div className="mt-12 p-8 rounded-3xl bg-gradient-to-r from-[#381B18] to-[#5A2722] text-amber-100 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-lg">
+        <aside className="-mx-4 mt-12 flex flex-col items-center justify-between gap-6 bg-gradient-to-r from-[#381B18] to-[#5A2722] px-4 py-9 text-amber-100 sm:mx-0 sm:flex-row sm:rounded-3xl sm:p-8 sm:shadow-lg">
           <div className="space-y-1.5 text-center sm:text-left">
             <h4 className="font-serif-display text-2xl font-bold text-white">
               Cảm Nhận Mùi Hương Ngay Hôm Nay
@@ -461,7 +461,7 @@ export default function ShopStoryDetail() {
           >
             Ghé Thăm Cửa Hàng
           </Link>
-        </div>
+        </aside>
 
         {/* Navigation Back */}
         <div className="mt-12 text-center">
@@ -488,11 +488,11 @@ export default function ShopStoryDetail() {
             </h3>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="divide-y divide-stone-200 md:grid md:grid-cols-3 md:gap-8 md:divide-y-0">
             {relatedPosts.map((rel) => (
               <article
                 key={rel._id}
-                className="bg-white rounded-3xl border border-stone-200/80 overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_15px_35px_rgba(74,44,42,0.1)] hover:-translate-y-1.5 transition-all duration-500 group flex flex-col"
+                className="group flex flex-col overflow-hidden bg-white py-7 transition-all duration-500 md:rounded-3xl md:border md:border-stone-200/80 md:p-0 md:shadow-[0_4px_20px_rgba(0,0,0,0.03)] md:hover:-translate-y-1.5 md:hover:shadow-[0_15px_35px_rgba(74,44,42,0.1)]"
               >
                 <Link to={`/stories/${rel.slug}`} className="block relative aspect-[16/10] overflow-hidden bg-stone-100">
                   <img
@@ -503,7 +503,7 @@ export default function ShopStoryDetail() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 </Link>
 
-                <div className="p-6 flex-1 flex flex-col justify-between space-y-3">
+                <div className="flex flex-1 flex-col justify-between space-y-3 pt-5 md:p-6">
                   <div className="space-y-2">
                     <span className="text-[11px] text-stone-400 font-medium">{rel.readTime}</span>
                     <Link to={`/stories/${rel.slug}`}>
