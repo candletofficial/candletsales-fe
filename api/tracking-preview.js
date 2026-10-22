@@ -34,10 +34,18 @@ export default function handler(request, response) {
 
   const safeToken = escapeHtml(token);
   const origin = getPublicOrigin(request);
-  const route = request.query.route === 't' ? 't' : 'd';
-  const shareUrl = `${origin}/${route}/${safeToken}`;
+  const shareUrl = `${origin}/s/${safeToken}`;
   const appUrl = `/theo-doi-don/${encodeURIComponent(token)}`;
   const previewImageUrl = `${origin}/og-order-tracking-v7.jpg`;
+  const userAgent = String(request.headers['user-agent'] || '');
+  const isSocialCrawler = /facebookexternalhit|facebot|twitterbot|linkedinbot|zalo|telegrambot|discordbot|whatsapp|slackbot|pinterest|googlebot|bingbot/i.test(userAgent);
+
+  if (!isSocialCrawler) {
+    response.setHeader('Location', appUrl);
+    response.setHeader('Cache-Control', 'private, no-store');
+    response.status(302).end();
+    return;
+  }
 
   response.setHeader("Content-Type", "text/html; charset=utf-8");
   response.setHeader("Cache-Control", "public, s-maxage=3600, stale-while-revalidate=86400");
@@ -75,7 +83,6 @@ export default function handler(request, response) {
       body { margin: 0; min-height: 100vh; display: grid; place-items: center; font-family: system-ui, sans-serif; color: #371814; background: #fffaf3; }
       a { color: inherit; font-weight: 700; }
     </style>
-    <script>window.location.replace(${JSON.stringify(appUrl)});</script>
   </head>
   <body>
     <p>Đang mở hành trình đơn hàng… <a href="${appUrl}">Xem đơn hàng</a></p>

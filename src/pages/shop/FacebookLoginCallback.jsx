@@ -35,7 +35,7 @@ export default function FacebookLoginCallback() {
             </div>
             <h1 className="font-serif-display text-xl font-bold">Đăng nhập chưa hoàn tất</h1>
             <p className="mt-2 text-sm leading-relaxed text-stone-500">{error}</p>
-            <Link to="/login" className="mt-6 inline-flex px-5 py-2.5 rounded-xl bg-[#4A2C2A] text-sm font-bold text-white hover:bg-[#341816]">
+            <Link to="/login" className="mt-6 inline-flex px-5 py-2.5 rounded-xl bg-[#4A2C2A] text-sm font-bold text-white sm:hover:bg-[#341816]">
               Quay lại đăng nhập
             </Link>
           </>

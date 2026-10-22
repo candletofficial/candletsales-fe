@@ -32,7 +32,7 @@ export default function GoogleLoginCallback() {
             <div className="mx-auto mb-4 w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center"><i className="ph-fill ph-warning-circle text-2xl" /></div>
             <h1 className="font-serif-display text-xl font-bold">Đăng nhập chưa hoàn tất</h1>
             <p className="mt-2 text-sm leading-relaxed text-stone-500">{error}</p>
-            <Link to="/login" className="mt-6 inline-flex px-5 py-2.5 rounded-xl bg-[#4A2C2A] text-sm font-bold text-white hover:bg-[#341816]">Quay lại đăng nhập</Link>
+            <Link to="/login" className="mt-6 inline-flex px-5 py-2.5 rounded-xl bg-[#4A2C2A] text-sm font-bold text-white sm:hover:bg-[#341816]">Quay lại đăng nhập</Link>
           </>
         ) : (
           <>

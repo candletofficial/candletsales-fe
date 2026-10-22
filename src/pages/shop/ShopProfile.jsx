@@ -215,7 +215,7 @@ export default function ShopProfile() {
 
         {/* Breadcrumbs */}
         <div className="hidden flex-wrap items-center text-[11px] font-bold uppercase tracking-widest text-stone-400 sm:flex">
-          <Link to="/" className="hover:text-[#4A2C2A] transition-colors">
+          <Link to="/" className="sm:hover:text-[#4A2C2A] transition-colors">
             Trang Chủ
           </Link>
           <span className="mx-2 text-stone-300">/</span>
@@ -285,13 +285,13 @@ export default function ShopProfile() {
               {/* Tổng đơn */}
               <Link
                 to="/orders"
-                className="group border-b border-r border-white/10 p-3 text-center transition-colors hover:bg-white/10 sm:border-b-0 sm:p-3.5"
+                className="group border-b border-r border-white/10 p-3 text-center transition-colors sm:hover:bg-white/10 sm:border-b-0 sm:p-3.5"
               >
                 <div className="text-xs text-stone-300 font-medium flex items-center justify-center gap-1 mb-1">
                   <i className="ph-light ph-receipt"></i>
                   <span>Tổng đơn</span>
                 </div>
-                <div className="text-xl sm:text-2xl font-mono font-bold text-amber-200 group-hover:text-white">
+                <div className="text-xl sm:text-2xl font-mono font-bold text-amber-200 sm:group-hover:text-white">
                   {stats.totalOrders}
                 </div>
                 <div className="text-[10px] text-stone-400 mt-0.5">Đã đặt</div>
@@ -300,13 +300,13 @@ export default function ShopProfile() {
               {/* Đang giao */}
               <Link
                 to="/orders"
-                className="group border-b border-white/10 p-3 text-center transition-colors hover:bg-white/10 sm:border-b-0 sm:border-r sm:p-3.5"
+                className="group border-b border-white/10 p-3 text-center transition-colors sm:hover:bg-white/10 sm:border-b-0 sm:border-r sm:p-3.5"
               >
                 <div className="text-xs text-stone-300 font-medium flex items-center justify-center gap-1 mb-1">
                   <i className="ph-light ph-truck"></i>
                   <span>Đang giao</span>
                 </div>
-                <div className="text-xl sm:text-2xl font-mono font-bold text-sky-200 group-hover:text-white">
+                <div className="text-xl sm:text-2xl font-mono font-bold text-sky-200 sm:group-hover:text-white">
                   {stats.activeOrders}
                 </div>
                 <div className="text-[10px] text-stone-400 mt-0.5">Tiến trình</div>
@@ -315,13 +315,13 @@ export default function ShopProfile() {
               {/* Yêu thích */}
               <Link
                 to="/wishlist"
-                className="group border-r border-white/10 p-3 text-center transition-colors hover:bg-white/10 sm:p-3.5"
+                className="group border-r border-white/10 p-3 text-center transition-colors sm:hover:bg-white/10 sm:p-3.5"
               >
                 <div className="text-xs text-stone-300 font-medium flex items-center justify-center gap-1 mb-1">
                   <i className="ph-light ph-heart text-rose-300"></i>
                   <span>Yêu thích</span>
                 </div>
-                <div className="text-xl sm:text-2xl font-mono font-bold text-rose-300 group-hover:text-white">
+                <div className="text-xl sm:text-2xl font-mono font-bold text-rose-300 sm:group-hover:text-white">
                   {wishlistCount}
                 </div>
                 <div className="text-[10px] text-stone-400 mt-0.5">Nến đã lưu</div>
@@ -395,7 +395,7 @@ export default function ShopProfile() {
                 onClick={() => setActiveTab('info')}
                 className={`w-full flex items-center justify-between border-l-2 px-3 py-3 text-xs sm:text-sm font-bold transition-colors cursor-pointer ${activeTab === 'info'
                   ? 'border-[#8C4A32] bg-[#FAF5EE] text-[#4A2C2A]'
-                  : 'border-transparent text-stone-600 hover:bg-stone-50 hover:text-stone-900'
+                  : 'border-transparent text-stone-600 sm:hover:bg-stone-50 sm:hover:text-stone-900'
                   }`}
               >
                 <div className="flex items-center gap-3">
@@ -413,7 +413,7 @@ export default function ShopProfile() {
                 onClick={() => setActiveTab('password')}
                 className={`w-full flex items-center justify-between border-l-2 px-3 py-3 text-xs sm:text-sm font-bold transition-colors cursor-pointer ${activeTab === 'password'
                   ? 'border-[#8C4A32] bg-[#FAF5EE] text-[#4A2C2A]'
-                  : 'border-transparent text-stone-600 hover:bg-stone-50 hover:text-stone-900'
+                  : 'border-transparent text-stone-600 sm:hover:bg-stone-50 sm:hover:text-stone-900'
                   }`}
               >
                 <div className="flex items-center gap-3">
@@ -429,7 +429,7 @@ export default function ShopProfile() {
               {/* Link Xem Lịch sử Đơn Hàng */}
               <Link
                 to="/orders"
-                className="flex w-full items-center justify-between border-l-2 border-transparent px-3 py-3 text-xs font-bold text-stone-600 transition-colors hover:bg-stone-50 hover:text-stone-900 sm:text-sm"
+                className="flex w-full items-center justify-between border-l-2 border-transparent px-3 py-3 text-xs font-bold text-stone-600 transition-colors sm:hover:bg-stone-50 sm:hover:text-stone-900 sm:text-sm"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-xl bg-stone-100 text-stone-500 flex items-center justify-center text-base">
@@ -447,7 +447,7 @@ export default function ShopProfile() {
               {/* Link Xem Sản Phẩm Yêu Thích */}
               <Link
                 to="/wishlist"
-                className="flex w-full items-center justify-between border-l-2 border-transparent px-3 py-3 text-xs font-bold text-stone-600 transition-colors hover:bg-stone-50 hover:text-stone-900 sm:text-sm"
+                className="flex w-full items-center justify-between border-l-2 border-transparent px-3 py-3 text-xs font-bold text-stone-600 transition-colors sm:hover:bg-stone-50 sm:hover:text-stone-900 sm:text-sm"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-base">
@@ -475,13 +475,13 @@ export default function ShopProfile() {
               <div className="pt-1 flex items-center gap-2">
                 <a
                   href="tel:0987654321"
-                  className="flex-1 text-center py-2 px-3 rounded-xl bg-white text-xs font-bold text-[#4A2C2A] border border-[#EADBCA] hover:bg-stone-50 transition-colors shadow-2xs"
+                  className="flex-1 text-center py-2 px-3 rounded-xl bg-white text-xs font-bold text-[#4A2C2A] border border-[#EADBCA] sm:hover:bg-stone-50 transition-colors shadow-2xs"
                 >
                   Hotline Hỗ Trợ
                 </a>
                 <Link
                   to="/shop"
-                  className="flex-1 text-center py-2 px-3 rounded-xl bg-[#4A2C2A] text-white text-xs font-bold hover:bg-[#381B18] transition-colors shadow-2xs"
+                  className="flex-1 text-center py-2 px-3 rounded-xl bg-[#4A2C2A] text-white text-xs font-bold sm:hover:bg-[#381B18] transition-colors shadow-2xs"
                 >
                   Mua Thêm Nến
                 </Link>
@@ -491,7 +491,7 @@ export default function ShopProfile() {
             {/* Nút Đăng xuất */}
             <button
               onClick={() => setShowLogoutModal(true)}
-              className="flex w-full items-center justify-center gap-2 border-b border-stone-200 px-4 py-3.5 text-xs font-bold text-stone-500 transition-colors hover:bg-rose-50/60 hover:text-rose-600"
+              className="flex w-full items-center justify-center gap-2 border-b border-stone-200 px-4 py-3.5 text-xs font-bold text-stone-500 transition-colors sm:hover:bg-rose-50/60 sm:hover:text-rose-600"
             >
               <i className="ph-bold ph-sign-out text-base"></i>
               <span>Đăng xuất tài khoản</span>
@@ -610,7 +610,7 @@ export default function ShopProfile() {
                       <button
                         type="submit"
                         disabled={savingInfo}
-                        className="px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[#4A2C2A] hover:bg-[#381B18] text-white transition-all shadow-sm hover:shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[#4A2C2A] sm:hover:bg-[#381B18] text-white transition-all shadow-sm sm:hover:shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                       >
                         {savingInfo ? (
                           <>
@@ -662,7 +662,7 @@ export default function ShopProfile() {
                         <button
                           type="button"
                           onClick={() => setShowCurrentPass(!showCurrentPass)}
-                          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 p-1 cursor-pointer"
+                          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 sm:hover:text-stone-700 p-1 cursor-pointer"
                         >
                           <i className={`ph-bold ${showCurrentPass ? 'ph-eye-slash' : 'ph-eye'} text-base`}></i>
                         </button>
@@ -690,7 +690,7 @@ export default function ShopProfile() {
                         <button
                           type="button"
                           onClick={() => setShowNewPass(!showNewPass)}
-                          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 p-1 cursor-pointer"
+                          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 sm:hover:text-stone-700 p-1 cursor-pointer"
                         >
                           <i className={`ph-bold ${showNewPass ? 'ph-eye-slash' : 'ph-eye'} text-base`}></i>
                         </button>
@@ -717,7 +717,7 @@ export default function ShopProfile() {
                         <button
                           type="button"
                           onClick={() => setShowConfirmPass(!showConfirmPass)}
-                          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 p-1 cursor-pointer"
+                          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 sm:hover:text-stone-700 p-1 cursor-pointer"
                         >
                           <i className={`ph-bold ${showConfirmPass ? 'ph-eye-slash' : 'ph-eye'} text-base`}></i>
                         </button>
@@ -729,7 +729,7 @@ export default function ShopProfile() {
                       <button
                         type="submit"
                         disabled={savingPass}
-                        className="px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[#4A2C2A] hover:bg-[#381B18] text-white transition-all shadow-sm hover:shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[#4A2C2A] sm:hover:bg-[#381B18] text-white transition-all shadow-sm sm:hover:shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                       >
                         {savingPass ? (
                           <>
@@ -776,7 +776,7 @@ export default function ShopProfile() {
             <div className="flex items-center justify-center gap-3 pt-2">
               <button
                 onClick={() => setShowLogoutModal(false)}
-                className="flex-1 py-2.5 rounded-full text-xs font-bold text-stone-600 hover:bg-stone-100 transition-colors cursor-pointer"
+                className="flex-1 py-2.5 rounded-full text-xs font-bold text-stone-600 sm:hover:bg-stone-100 transition-colors cursor-pointer"
               >
                 Ở lại
               </button>
@@ -786,7 +786,7 @@ export default function ShopProfile() {
                   logout();
                   navigate('/');
                 }}
-                className="flex-1 py-2.5 rounded-full text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 transition-colors shadow-sm cursor-pointer"
+                className="flex-1 py-2.5 rounded-full text-xs font-bold text-white bg-rose-600 sm:hover:bg-rose-700 transition-colors shadow-sm cursor-pointer"
               >
                 Đăng xuất
               </button>

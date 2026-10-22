@@ -185,7 +185,7 @@ export default function ShopHome() {
           <div className="group relative -mx-4 overflow-hidden border-y border-stone-200/80 bg-stone-100 sm:mx-0 sm:rounded-2xl sm:border sm:shadow-md">
             <img
               alt="Bộ sưu tập nến thơm thủ công Candlet"
-              className="w-full h-auto object-cover transition-transform duration-500 ease-out group-hover:scale-102"
+              className="w-full h-auto object-cover transition-transform duration-500 ease-out sm:group-hover:scale-102"
               src="/hero-banner.png"
             />
             {/* Overlay Gradient at Bottom */}
@@ -215,18 +215,18 @@ export default function ShopHome() {
           <div className="flex flex-col gap-2 pt-1">
             <a
               href="#collection"
-              className="w-full py-3.5 px-6 rounded-full bg-brand-charcoal text-white hover:bg-black text-xs font-bold uppercase tracking-widest text-center transition-all shadow-md active:scale-98 flex items-center justify-center gap-2 btn-shimmer"
+              className="w-full py-3.5 px-6 rounded-full bg-brand-charcoal text-white sm:hover:bg-black text-xs font-bold uppercase tracking-widest text-center transition-all shadow-md active:scale-98 flex items-center justify-center gap-2 btn-shimmer"
             >
               <span>Khám Phá Bộ Sưu Tập</span>
               <i className="ph-bold ph-arrow-right text-xs"></i>
             </a>
             <div className="flex items-center justify-center gap-4 text-xs font-medium text-stone-600 pt-1">
-              <a href="#special-offers" className="hover:text-amber-800 flex items-center gap-1">
+              <a href="#special-offers" className="sm:hover:text-amber-800 flex items-center gap-1">
                 <i className="ph-fill ph-ticket text-amber-600"></i>
                 <span>Voucher giảm giá</span>
               </a>
               <span className="text-stone-300">•</span>
-              <a href="#story" className="hover:text-amber-800 flex items-center gap-1">
+              <a href="#story" className="sm:hover:text-amber-800 flex items-center gap-1">
                 <i className="ph-fill ph-heart text-rose-600"></i>
                 <span>Câu chuyện Candlet</span>
               </a>
@@ -266,7 +266,7 @@ export default function ShopHome() {
                   <div className="absolute inset-1 bg-amber-500/25 rounded-full blur-xl scale-125 animate-pulse-glow pointer-events-none"></div>
                   <img
                     alt="Mini Promo"
-                    className="relative w-auto h-full object-contain transition-transform duration-500 ease-out group-hover:-translate-y-1.5 group-hover:scale-105 z-10 drop-shadow-md"
+                    className="relative w-auto h-full object-contain transition-transform duration-500 ease-out sm:group-hover:-translate-y-1.5 sm:group-hover:scale-105 z-10 drop-shadow-md"
                     src="/banner-nho.png"
                   />
                 </div>
@@ -275,18 +275,18 @@ export default function ShopHome() {
                     Thắp sáng không gian sống bằng nghệ thuật hương thơm.
                   </p>
                   <a
-                    className="inline-flex items-center text-[11px] font-bold text-stone-500 hover:text-brand-burgundy mt-2 transition-colors uppercase tracking-wider group"
+                    className="inline-flex items-center text-[11px] font-bold text-stone-500 sm:hover:text-brand-burgundy mt-2 transition-colors uppercase tracking-wider group"
                     href="#collection"
                   >
                     <span>Sở Hữu Ngay</span>
-                    <i className="ph ph-arrow-right ml-1 text-sm transition-transform duration-300 group-hover:translate-x-1"></i>
+                    <i className="ph ph-arrow-right ml-1 text-sm transition-transform duration-300 sm:group-hover:translate-x-1"></i>
                   </a>
                   {/* Avatars & Rating Score */}
                   <div className="mt-4 flex items-center justify-between">
                     <div className="flex -space-x-2 overflow-hidden">
-                      <img alt="Khách hàng" className="inline-block h-6 w-6 rounded-full ring-2 ring-[#f9f9f9] object-cover hover:scale-110 transition-transform" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCc7nFY_CgHNNkx49ODLx1LVbeVRkdbJi3Gf1ReF5B9_LBEWqJgCwU37UHyfeXadz1PAMrUQPQaTA2STlbhnqp3KXJu6LGE11jzHzX6P-KrcoGOlzTdE3ZRzkHqkuOgUxGA3KjulKQpdzAYmKXZAn-9ey3blh0WpoVi3U4LyKhKsFokxKGvWROTLQ1sLdRYOCD_s_LYMNs2Y6C-Rahu7go1NszvDol0HRQbJWZATw7u7mEIAnzNTJbEig" />
-                      <img alt="Khách hàng" className="inline-block h-6 w-6 rounded-full ring-2 ring-[#f9f9f9] object-cover hover:scale-110 transition-transform" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9McRw5tXWNfB_G5BUhWZq-tJeevRcogl57irvu3h2BzLUXRqCecIMajg-p-_UuvoRLDCelwLUublKk8mWKTpNsEKu3EA7DepSvlAjoNEhCud1ze0nMZk-30C2X9kIiaTgWCQRkpq1AJcAvgba8a_ndOKK7oC6T7jRhXuIOesPXVxY1Ift9UAn6T3t6OgNPS4kYrCZ4jyuLJXxA7N5mN-YWhaDW9CfmcqoXTyeVxkBCfHQxwSdAL5b7w" />
-                      <img alt="Khách hàng" className="inline-block h-6 w-6 rounded-full ring-2 ring-[#f9f9f9] object-cover hover:scale-110 transition-transform" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAoWdYjYTfNhBmx8ZyZsj0_sFFY8HZpNC8F0MD1K9zlIcAoLY5BWfrz9P4g2SsJrNLyKpqVVnqtjJ57hp7ueV_1ExKaAurV-uCaTBjuLu3iDAZ_LqncUj1K1VQPn5Tkl-fAqFDYseKn3VeUMJt9HdM6ELPXgl-pEJrSf02cYBUelcXLGYC4mqDXwNppM7Q6DB62Eq1Rj13ZUhuRl4o5NpbxsVhFLCbxHgNZixtcd2Jlc4_k49YnoVHxCw" />
+                      <img alt="Khách hàng" className="inline-block h-6 w-6 rounded-full ring-2 ring-[#f9f9f9] object-cover sm:hover:scale-110 transition-transform" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCc7nFY_CgHNNkx49ODLx1LVbeVRkdbJi3Gf1ReF5B9_LBEWqJgCwU37UHyfeXadz1PAMrUQPQaTA2STlbhnqp3KXJu6LGE11jzHzX6P-KrcoGOlzTdE3ZRzkHqkuOgUxGA3KjulKQpdzAYmKXZAn-9ey3blh0WpoVi3U4LyKhKsFokxKGvWROTLQ1sLdRYOCD_s_LYMNs2Y6C-Rahu7go1NszvDol0HRQbJWZATw7u7mEIAnzNTJbEig" />
+                      <img alt="Khách hàng" className="inline-block h-6 w-6 rounded-full ring-2 ring-[#f9f9f9] object-cover sm:hover:scale-110 transition-transform" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9McRw5tXWNfB_G5BUhWZq-tJeevRcogl57irvu3h2BzLUXRqCecIMajg-p-_UuvoRLDCelwLUublKk8mWKTpNsEKu3EA7DepSvlAjoNEhCud1ze0nMZk-30C2X9kIiaTgWCQRkpq1AJcAvgba8a_ndOKK7oC6T7jRhXuIOesPXVxY1Ift9UAn6T3t6OgNPS4kYrCZ4jyuLJXxA7N5mN-YWhaDW9CfmcqoXTyeVxkBCfHQxwSdAL5b7w" />
+                      <img alt="Khách hàng" className="inline-block h-6 w-6 rounded-full ring-2 ring-[#f9f9f9] object-cover sm:hover:scale-110 transition-transform" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAoWdYjYTfNhBmx8ZyZsj0_sFFY8HZpNC8F0MD1K9zlIcAoLY5BWfrz9P4g2SsJrNLyKpqVVnqtjJ57hp7ueV_1ExKaAurV-uCaTBjuLu3iDAZ_LqncUj1K1VQPn5Tkl-fAqFDYseKn3VeUMJt9HdM6ELPXgl-pEJrSf02cYBUelcXLGYC4mqDXwNppM7Q6DB62Eq1Rj13ZUhuRl4o5NpbxsVhFLCbxHgNZixtcd2Jlc4_k49YnoVHxCw" />
                     </div>
                     <div className="flex items-center text-xs space-x-1">
                       <span className="font-bold text-brand-charcoal">4.9</span>
@@ -304,10 +304,10 @@ export default function ShopHome() {
               </p>
               <div className="mt-8">
                 <a
-                  className="inline-flex items-center justify-center bg-[#1A1A1A] text-white hover:bg-black px-12 py-3.5 text-xs font-mono font-semibold tracking-wide transition-all duration-300 relative group btn-shimmer shadow-sm hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
+                  className="inline-flex items-center justify-center bg-[#1A1A1A] text-white sm:hover:bg-black px-12 py-3.5 text-xs font-mono font-semibold tracking-wide transition-all duration-300 relative group btn-shimmer shadow-sm sm:hover:shadow-lg sm:hover:scale-[1.02] active:scale-[0.98]"
                   href="#collection"
                 >
-                  <div className="absolute inset-0 border-[3px] border-dotted border-[#f9f9f9] m-1 pointer-events-none opacity-50 group-hover:opacity-90 transition-opacity"></div>
+                  <div className="absolute inset-0 border-[3px] border-dotted border-[#f9f9f9] m-1 pointer-events-none opacity-50 sm:group-hover:opacity-90 transition-opacity"></div>
                   Mua Ngay
                 </a>
               </div>
@@ -315,17 +315,17 @@ export default function ShopHome() {
 
             {/* Bottom 3 Pillars Icons */}
             <div className="pt-8 grid grid-cols-3 gap-2 text-center mt-auto">
-              <div className="flex flex-col items-center group cursor-default p-2 rounded-xl hover:bg-white/80 transition-all duration-300 hover:-translate-y-1">
-                <i className="ph-light ph-flame text-4xl text-brand-charcoal mb-3 transition-transform duration-300 group-hover:scale-110 group-hover:text-amber-600 animate-flame-flicker"></i>
-                <span className="text-xs font-mono font-semibold text-brand-charcoal group-hover:text-amber-900 transition-colors">Hương Cuốn Hút</span>
+              <div className="flex flex-col items-center group cursor-default p-2 rounded-xl sm:hover:bg-white/80 transition-all duration-300 sm:hover:-translate-y-1">
+                <i className="ph-light ph-flame text-4xl text-brand-charcoal mb-3 transition-transform duration-300 sm:group-hover:scale-110 sm:group-hover:text-amber-600 animate-flame-flicker"></i>
+                <span className="text-xs font-mono font-semibold text-brand-charcoal sm:group-hover:text-amber-900 transition-colors">Hương Cuốn Hút</span>
               </div>
-              <div className="flex flex-col items-center group cursor-default p-2 rounded-xl hover:bg-white/80 transition-all duration-300 hover:-translate-y-1">
-                <i className="ph-light ph-flask text-4xl text-brand-charcoal mb-3 transition-transform duration-300 group-hover:scale-110 group-hover:text-emerald-700"></i>
-                <span className="text-xs font-mono font-semibold text-brand-charcoal group-hover:text-emerald-900 transition-colors">Không Khói Độc</span>
+              <div className="flex flex-col items-center group cursor-default p-2 rounded-xl sm:hover:bg-white/80 transition-all duration-300 sm:hover:-translate-y-1">
+                <i className="ph-light ph-flask text-4xl text-brand-charcoal mb-3 transition-transform duration-300 sm:group-hover:scale-110 sm:group-hover:text-emerald-700"></i>
+                <span className="text-xs font-mono font-semibold text-brand-charcoal sm:group-hover:text-emerald-900 transition-colors">Không Khói Độc</span>
               </div>
-              <div className="flex flex-col items-center group cursor-default p-2 rounded-xl hover:bg-white/80 transition-all duration-300 hover:-translate-y-1">
-                <i className="ph-light ph-plant text-4xl text-brand-charcoal mb-3 transition-transform duration-300 group-hover:scale-110 group-hover:text-teal-700"></i>
-                <span className="text-xs font-mono font-semibold text-brand-charcoal group-hover:text-teal-900 transition-colors">Sáp Hữu Cơ</span>
+              <div className="flex flex-col items-center group cursor-default p-2 rounded-xl sm:hover:bg-white/80 transition-all duration-300 sm:hover:-translate-y-1">
+                <i className="ph-light ph-plant text-4xl text-brand-charcoal mb-3 transition-transform duration-300 sm:group-hover:scale-110 sm:group-hover:text-teal-700"></i>
+                <span className="text-xs font-mono font-semibold text-brand-charcoal sm:group-hover:text-teal-900 transition-colors">Sáp Hữu Cơ</span>
               </div>
             </div>
           </div>
@@ -334,7 +334,7 @@ export default function ShopHome() {
           <div className="lg:col-span-8 flex overflow-hidden group">
             <img
               alt="Banner Candlet"
-              className="w-full h-auto object-contain transition-transform duration-700 ease-out group-hover:scale-[1.01]"
+              className="w-full h-auto object-contain transition-transform duration-700 ease-out sm:group-hover:scale-[1.01]"
               src="/hero-banner.png"
             />
           </div>
@@ -368,10 +368,10 @@ export default function ShopHome() {
               <div className="flex items-center gap-6">
                 <a
                   href="#story"
-                  className="group inline-flex items-center gap-2.5 text-xs font-semibold tracking-widest uppercase text-brand-burgundy hover:text-amber-900 transition-colors pb-1 border-b-2 border-brand-burgundy/30 hover:border-amber-900"
+                  className="group inline-flex items-center gap-2.5 text-xs font-semibold tracking-widest uppercase text-brand-burgundy sm:hover:text-amber-900 transition-colors pb-1 border-b-2 border-brand-burgundy/30 sm:hover:border-amber-900"
                 >
                   <span>Khám phá câu chuyện Candlet</span>
-                  <i className="ph-bold ph-arrow-right text-sm transition-transform duration-300 group-hover:translate-x-1.5"></i>
+                  <i className="ph-bold ph-arrow-right text-sm transition-transform duration-300 sm:group-hover:translate-x-1.5"></i>
                 </a>
               </div>
             </div>
@@ -382,21 +382,21 @@ export default function ShopHome() {
             {/* Card 01: Hero Feature Spotlight (Pure Botanical Wax & Aromatherapy) */}
             <div className="card-hover-lift group reveal-on-scroll reveal-delay-100 relative flex flex-col justify-between overflow-hidden py-7 lg:col-span-7 lg:rounded-3xl lg:border lg:border-stone-200/80 lg:bg-white/85 lg:p-12 lg:pb-12 lg:shadow-xs lg:backdrop-blur-xs lg:hover:border-emerald-600/40">
               {/* Background Artful Number Watermark */}
-              <span className="absolute -top-3 right-3 font-serif-display text-6xl sm:text-9xl font-light text-stone-200/50 select-none group-hover:text-emerald-950/10 transition-colors pointer-events-none">
+              <span className="absolute -top-3 right-3 font-serif-display text-6xl sm:text-9xl font-light text-stone-200/50 select-none sm:group-hover:text-emerald-950/10 transition-colors pointer-events-none">
                 01
               </span>
 
               <div>
                 {/* Header Badge */}
                 <div className="flex items-center gap-3 mb-4 sm:mb-6">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-800 transition-all duration-400 group-hover:scale-110 group-hover:bg-emerald-500/20 group-hover:-rotate-3">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-800 transition-all duration-400 sm:group-hover:scale-110 sm:group-hover:bg-emerald-500/20 sm:group-hover:-rotate-3">
                     <i className="ph-duotone ph-leaf text-xl sm:text-2xl"></i>
                   </div>
                   <div>
                     <span className="text-[10px] font-mono tracking-widest uppercase text-emerald-800 font-semibold block">
                       Cam Kết Nguồn Gốc
                     </span>
-                    <h3 className="font-serif-display text-xl sm:text-3xl font-bold text-brand-charcoal group-hover:text-emerald-950 transition-colors">
+                    <h3 className="font-serif-display text-xl sm:text-3xl font-bold text-brand-charcoal sm:group-hover:text-emerald-950 transition-colors">
                       Nguyên Liệu Thuần Khiết
                     </h3>
                   </div>
@@ -430,19 +430,19 @@ export default function ShopHome() {
               {/* Card 02: Multi-layer Scent Symphony */}
               <div className="card-hover-lift group reveal-on-scroll reveal-delay-200 relative flex-1 overflow-hidden py-7 lg:rounded-3xl lg:border lg:border-stone-200/80 lg:bg-white/85 lg:p-8 lg:pb-9 lg:shadow-xs lg:backdrop-blur-xs lg:hover:border-amber-400/40">
                 {/* Background Watermark */}
-                <span className="absolute -top-3 right-3 font-serif-display text-5xl sm:text-8xl font-light text-stone-200/50 select-none group-hover:text-amber-950/10 transition-colors pointer-events-none">
+                <span className="absolute -top-3 right-3 font-serif-display text-5xl sm:text-8xl font-light text-stone-200/50 select-none sm:group-hover:text-amber-950/10 transition-colors pointer-events-none">
                   02
                 </span>
 
                 <div className="flex items-center gap-3.5 mb-4">
-                  <div className="w-11 h-11 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-700 transition-all duration-400 group-hover:scale-110 group-hover:bg-amber-500/20 group-hover:rotate-3">
+                  <div className="w-11 h-11 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-700 transition-all duration-400 sm:group-hover:scale-110 sm:group-hover:bg-amber-500/20 sm:group-hover:rotate-3">
                     <i className="ph-duotone ph-wind text-xl"></i>
                   </div>
                   <div>
                     <span className="text-[10px] font-mono tracking-widest uppercase text-amber-800 font-semibold block">
                       Nghệ Thuật Mùi Hương
                     </span>
-                    <h3 className="font-serif-display text-xl sm:text-2xl font-bold text-brand-charcoal group-hover:text-amber-950 transition-colors">
+                    <h3 className="font-serif-display text-xl sm:text-2xl font-bold text-brand-charcoal sm:group-hover:text-amber-950 transition-colors">
                       Hương Thơm Nồng Nàn
                     </h3>
                   </div>
@@ -477,19 +477,19 @@ export default function ShopHome() {
               {/* Card 03: Hidden Message Ritual & Self-Care */}
               <div className="card-hover-lift group reveal-on-scroll reveal-delay-300 relative flex-1 overflow-hidden py-7 lg:rounded-3xl lg:border lg:border-stone-200/80 lg:bg-white/85 lg:p-8 lg:pb-9 lg:shadow-xs lg:backdrop-blur-xs lg:hover:border-rose-400/40">
                 {/* Background Watermark */}
-                <span className="absolute -top-3 right-3 font-serif-display text-5xl sm:text-8xl font-light text-stone-200/50 select-none group-hover:text-rose-950/10 transition-colors pointer-events-none">
+                <span className="absolute -top-3 right-3 font-serif-display text-5xl sm:text-8xl font-light text-stone-200/50 select-none sm:group-hover:text-rose-950/10 transition-colors pointer-events-none">
                   03
                 </span>
 
                 <div className="flex items-center gap-3.5 mb-4">
-                  <div className="w-11 h-11 rounded-2xl bg-rose-500/10 border border-rose-500/25 flex items-center justify-center text-brand-burgundy transition-all duration-400 group-hover:scale-110 group-hover:bg-rose-500/20 group-hover:rotate-3">
+                  <div className="w-11 h-11 rounded-2xl bg-rose-500/10 border border-rose-500/25 flex items-center justify-center text-brand-burgundy transition-all duration-400 sm:group-hover:scale-110 sm:group-hover:bg-rose-500/20 sm:group-hover:rotate-3">
                     <i className="ph-duotone ph-flower-lotus text-xl"></i>
                   </div>
                   <div>
                     <span className="text-[10px] font-mono tracking-widest uppercase text-brand-burgundy font-semibold block">
                       Nghi Thức Chữa Lành
                     </span>
-                    <h3 className="font-serif-display text-xl sm:text-2xl font-bold text-brand-charcoal group-hover:text-brand-burgundy transition-colors">
+                    <h3 className="font-serif-display text-xl sm:text-2xl font-bold text-brand-charcoal sm:group-hover:text-brand-burgundy transition-colors">
                       Nuông Chiều Bản Thân
                     </h3>
                   </div>
@@ -537,7 +537,7 @@ export default function ShopHome() {
                   className={`flex-1 py-1.5 px-2.5 rounded-full text-[11px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1 shadow-2xs ${
                     activeMobileCoupon === 0
                       ? 'bg-brand-charcoal text-amber-300 font-bold border border-amber-400/40 scale-102 shadow-sm'
-                      : 'bg-white/80 text-stone-600 border border-stone-200/80 hover:bg-white'
+                      : 'bg-white/80 text-stone-600 border border-stone-200/80 sm:hover:bg-white'
                   }`}
                 >
                   <span>🎟️</span>
@@ -552,7 +552,7 @@ export default function ShopHome() {
                   className={`flex-1 py-1.5 px-2.5 rounded-full text-[11px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1 shadow-2xs ${
                     activeMobileCoupon === 1
                       ? 'bg-[#4A0E13] text-amber-200 font-bold border border-amber-400/40 scale-102 shadow-sm'
-                      : 'bg-white/80 text-stone-600 border border-stone-200/80 hover:bg-white'
+                      : 'bg-white/80 text-stone-600 border border-stone-200/80 sm:hover:bg-white'
                   }`}
                 >
                   <span>✦</span>
@@ -646,7 +646,7 @@ export default function ShopHome() {
                     </div>
 
                     {/* Con dấu sáp thủ công tròn */}
-                    <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full border-2 border-dashed border-amber-900/40 bg-amber-600/10 flex flex-col items-center justify-center text-center p-0.5 select-none transform rotate-6 shrink-0 shadow-2xs group-hover:rotate-12 transition-transform duration-500">
+                    <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full border-2 border-dashed border-amber-900/40 bg-amber-600/10 flex flex-col items-center justify-center text-center p-0.5 select-none transform rotate-6 shrink-0 shadow-2xs sm:group-hover:rotate-12 transition-transform duration-500">
                       <span className="font-serif-display font-black text-xs sm:text-[13px] text-amber-950 leading-none">
                         {primaryCoupon.type === 'percent' ? `${primaryCoupon.value}%` : 'CANDLET'}
                       </span>
@@ -688,7 +688,7 @@ export default function ShopHome() {
                   <button
                     type="button"
                     onClick={(e) => handleCopyCoupon(primaryCoupon.code, primaryCoupon._id || 'primary', e)}
-                    className="w-full bg-amber-950/10 hover:bg-amber-950/20 active:scale-95 border border-amber-900/25 py-1 px-1 rounded text-[11px] sm:text-xs font-mono font-bold tracking-widest text-amber-950 text-center transition-all cursor-pointer shadow-2xs"
+                    className="w-full bg-amber-950/10 sm:hover:bg-amber-950/20 active:scale-95 border border-amber-900/25 py-1 px-1 rounded text-[11px] sm:text-xs font-mono font-bold tracking-widest text-amber-950 text-center transition-all cursor-pointer shadow-2xs"
                     title="Bấm để sao chép mã ưu đãi"
                   >
                     {copiedCouponId === (primaryCoupon._id || 'primary') ? (
@@ -787,7 +787,7 @@ export default function ShopHome() {
                       </div>
 
                       {/* Con dấu sáp thủ công tròn */}
-                      <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full border-2 border-dashed border-amber-400/40 bg-white/5 flex flex-col items-center justify-center text-center p-0.5 select-none transform -rotate-6 shrink-0 shadow-2xs group-hover:-rotate-12 transition-transform duration-500">
+                      <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full border-2 border-dashed border-amber-400/40 bg-white/5 flex flex-col items-center justify-center text-center p-0.5 select-none transform -rotate-6 shrink-0 shadow-2xs sm:group-hover:-rotate-12 transition-transform duration-500">
                         <span className="font-serif-display font-black text-xs sm:text-[13px] text-amber-200 leading-none">
                           {secondaryCoupon.type === 'freeship' ? 'SHIP' : secondaryCoupon.type === 'percent' ? `${secondaryCoupon.value}%` : '10K'}
                         </span>
@@ -829,7 +829,7 @@ export default function ShopHome() {
                     <button
                       type="button"
                       onClick={(e) => handleCopyCoupon(secondaryCoupon.code, secondaryCoupon._id || 'secondary', e)}
-                      className="w-full bg-white/10 hover:bg-white/20 active:scale-95 border border-amber-400/30 py-1 px-1 rounded text-[11px] sm:text-xs font-mono font-bold tracking-widest text-amber-300 text-center transition-all cursor-pointer shadow-2xs"
+                      className="w-full bg-white/10 sm:hover:bg-white/20 active:scale-95 border border-amber-400/30 py-1 px-1 rounded text-[11px] sm:text-xs font-mono font-bold tracking-widest text-amber-300 text-center transition-all cursor-pointer shadow-2xs"
                       title="Bấm để sao chép mã ưu đãi"
                     >
                       {copiedCouponId === (secondaryCoupon._id || 'secondary') ? (
@@ -870,14 +870,14 @@ export default function ShopHome() {
             <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
               <Link
                 to="/shop"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-brand-charcoal text-white hover:bg-black px-7 py-3.5 sm:py-3 rounded-full text-xs tracking-widest uppercase font-bold transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-0.5 btn-shimmer active:scale-[0.98]"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-brand-charcoal text-white sm:hover:bg-black px-7 py-3.5 sm:py-3 rounded-full text-xs tracking-widest uppercase font-bold transition-all duration-300 shadow-md sm:hover:shadow-xl sm:hover:-translate-y-0.5 btn-shimmer active:scale-[0.98]"
               >
                 <span>Mua Sắm & Dùng Mã</span>
                 <i className="ph-bold ph-arrow-right"></i>
               </Link>
               <a
                 href="#collection"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 border border-stone-400 text-stone-700 hover:border-brand-charcoal hover:text-brand-charcoal px-6 py-3.5 sm:py-3 rounded-full text-xs tracking-widest uppercase font-medium transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 border border-stone-400 text-stone-700 sm:hover:border-brand-charcoal sm:hover:text-brand-charcoal px-6 py-3.5 sm:py-3 rounded-full text-xs tracking-widest uppercase font-medium transition-all duration-300 sm:hover:scale-[1.02] active:scale-[0.98]"
               >
                 <span>Xem Bộ Sưu Tập</span>
               </a>
@@ -912,10 +912,10 @@ export default function ShopHome() {
             <div className="reveal-on-scroll reveal-delay-200 hidden sm:flex items-center gap-4 shrink-0">
               <Link
                 to="/shop"
-                className="group inline-flex items-center gap-3 px-6 py-3 rounded-full bg-brand-charcoal text-white hover:bg-brand-burgundy text-xs font-semibold tracking-widest uppercase transition-all duration-300 shadow-sm hover:shadow-lg hover:-translate-y-0.5"
+                className="group inline-flex items-center gap-3 px-6 py-3 rounded-full bg-brand-charcoal text-white sm:hover:bg-brand-burgundy text-xs font-semibold tracking-widest uppercase transition-all duration-300 shadow-sm sm:hover:shadow-lg sm:hover:-translate-y-0.5"
               >
                 <span>Xem Tất Cả Sản Phẩm</span>
-                <i className="ph-bold ph-arrow-right transition-transform duration-300 group-hover:translate-x-1"></i>
+                <i className="ph-bold ph-arrow-right transition-transform duration-300 sm:group-hover:translate-x-1"></i>
               </Link>
             </div>
           </div>
@@ -934,7 +934,7 @@ export default function ShopHome() {
                 className={`inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full text-xs font-semibold shrink-0 transition-all cursor-pointer ${
                   selectedCategoryFilter === cat.id
                     ? 'bg-brand-charcoal text-white shadow-sm'
-                    : 'bg-white/80 hover:bg-white text-stone-600 border border-stone-200/80'
+                    : 'bg-white/80 sm:hover:bg-white text-stone-600 border border-stone-200/80'
                 }`}
               >
                 <i className={`ph-bold ${cat.icon} text-xs ${selectedCategoryFilter === cat.id ? 'text-amber-300' : 'text-stone-400'}`}></i>
@@ -984,7 +984,7 @@ export default function ShopHome() {
                 return (
                   <div
                     key={product._id}
-                    className={`card-hover-lift group relative flex h-full flex-col justify-between overflow-hidden rounded-[18px] border border-[#E8DED5] bg-[#FFFCF8] p-2.5 shadow-[0_5px_18px_rgba(74,44,42,0.06)] transition-all duration-500 hover:border-[#CFAF99] hover:shadow-[0_16px_30px_-10px_rgba(74,44,42,0.2)] sm:rounded-3xl sm:bg-white/90 sm:p-5 sm:backdrop-blur-xs reveal-on-scroll reveal-delay-${((index % 4) + 1) * 100}`}
+                    className={`card-hover-lift group relative flex h-full flex-col justify-between overflow-hidden rounded-[18px] border border-[#E8DED5] bg-[#FFFCF8] p-2.5 shadow-[0_5px_18px_rgba(74,44,42,0.06)] transition-all duration-500 sm:hover:border-[#CFAF99] sm:hover:shadow-[0_16px_30px_-10px_rgba(74,44,42,0.2)] sm:rounded-3xl sm:bg-white/90 sm:p-5 sm:backdrop-blur-xs reveal-on-scroll reveal-delay-${((index % 4) + 1) * 100}`}
                   >
                     <div>
                       {/* Image Frame with Badges */}
@@ -993,7 +993,7 @@ export default function ShopHome() {
                           {product.image ? (
                             <img
                               alt={product.name}
-                              className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                              className="h-full w-full object-cover transition-transform duration-700 ease-out sm:group-hover:scale-105"
                               src={getImageUrl(product.image)}
                             />
                           ) : (
@@ -1016,7 +1016,7 @@ export default function ShopHome() {
                         {/* Top Right Floating Wishlist Button */}
                         <button
                           aria-label="Thêm vào yêu thích"
-                          className="absolute right-1.5 top-1.5 z-10 flex size-8 cursor-pointer items-center justify-center rounded-full border border-white/80 bg-white/90 text-stone-500 shadow-sm backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white hover:text-rose-500 active:scale-90 sm:right-3 sm:top-3"
+                          className="absolute right-1.5 top-1.5 z-10 flex size-8 cursor-pointer items-center justify-center rounded-full border border-white/80 bg-white/90 text-stone-500 shadow-sm backdrop-blur-md transition-all duration-300 sm:hover:scale-110 sm:hover:bg-white sm:hover:text-rose-500 active:scale-90 sm:right-3 sm:top-3"
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -1026,7 +1026,7 @@ export default function ShopHome() {
                         >
                           <i className={`text-sm sm:text-base transition-transform duration-300 ${isInWishlist(product._id)
                             ? 'ph-fill ph-heart text-rose-500 scale-110'
-                            : 'ph-bold ph-heart text-stone-600 hover:text-rose-500'
+                            : 'ph-bold ph-heart text-stone-600 sm:hover:text-rose-500'
                             }`}></i>
                         </button>
                       </div>
@@ -1045,7 +1045,7 @@ export default function ShopHome() {
                       </div>
 
                       {/* Product Name */}
-                      <Link to={`/product/${product._id}`} className="block group-hover:text-amber-950 transition-colors">
+                      <Link to={`/product/${product._id}`} className="block sm:group-hover:text-amber-950 transition-colors">
                         <h3
                           className="mb-1.5 line-clamp-2 min-h-[38px] overflow-hidden font-serif-display text-[13px] font-bold leading-[1.45] text-brand-charcoal sm:mb-2 sm:h-[48px] sm:min-h-0 sm:text-lg sm:leading-snug"
                           title={product.name}
@@ -1069,14 +1069,14 @@ export default function ShopHome() {
                         <span className="pb-0.5 font-mono text-[8px] font-semibold uppercase tracking-wider text-stone-400 sm:text-[11px]">
                           Từ
                         </span>
-                        <span className="font-serif-display text-[17px] font-bold leading-none text-[#8C4A32] transition-colors group-hover:text-brand-burgundy sm:text-xl">
+                        <span className="font-serif-display text-[17px] font-bold leading-none text-[#8C4A32] transition-colors sm:group-hover:text-brand-burgundy sm:text-xl">
                           {product.base_price?.toLocaleString('vi-VN')}đ
                         </span>
                       </div>
 
                       <button
                         onClick={(e) => handleBuyNow(e, product)}
-                        className="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#6B3530] to-[#4A2C2A] px-2 py-2.5 text-[9px] font-bold uppercase tracking-[0.12em] text-white shadow-sm transition-all duration-300 hover:from-[#7C4038] hover:to-brand-burgundy hover:shadow-md active:scale-[0.98] sm:rounded-full sm:px-3 sm:text-[11px] sm:tracking-wider"
+                        className="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#6B3530] to-[#4A2C2A] px-2 py-2.5 text-[9px] font-bold uppercase tracking-[0.12em] text-white shadow-sm transition-all duration-300 sm:hover:from-[#7C4038] sm:hover:to-brand-burgundy sm:hover:shadow-md active:scale-[0.98] sm:rounded-full sm:px-3 sm:text-[11px] sm:tracking-wider"
                       >
                         <i className="ph-bold ph-shopping-bag-open text-xs"></i>
                         <span>Mua Ngay</span>
@@ -1100,7 +1100,7 @@ export default function ShopHome() {
           <div className="mt-6 text-center sm:hidden">
             <Link
               to="/shop"
-              className="inline-flex items-center justify-center gap-2 w-full py-3 rounded-full border border-brand-charcoal text-brand-charcoal text-xs font-bold uppercase tracking-wider hover:bg-brand-charcoal hover:text-white transition-all shadow-2xs active:scale-98"
+              className="inline-flex items-center justify-center gap-2 w-full py-3 rounded-full border border-brand-charcoal text-brand-charcoal text-xs font-bold uppercase tracking-wider sm:hover:bg-brand-charcoal sm:hover:text-white transition-all shadow-2xs active:scale-98"
             >
               <span>Xem Tất Cả Nến Thơm ({products.length})</span>
               <i className="ph-bold ph-arrow-right"></i>
@@ -1140,39 +1140,39 @@ export default function ShopHome() {
 
               {/* 3 Core Pillars List */}
               <div className="space-y-2.5 sm:space-y-3.5 pt-1">
-                <div className="flex items-start gap-2.5 sm:gap-3 text-xs sm:text-[13px] text-[#D8C0B8] p-2 rounded-xl hover:bg-white/5 transition-all duration-300 group">
-                  <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-amber-400/15 text-amber-300 flex items-center justify-center shrink-0 mt-0.5 border border-amber-400/20 group-hover:scale-110 group-hover:bg-amber-400/25 transition-all duration-300">
+                <div className="flex items-start gap-2.5 sm:gap-3 text-xs sm:text-[13px] text-[#D8C0B8] p-2 rounded-xl sm:hover:bg-white/5 transition-all duration-300 group">
+                  <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-amber-400/15 text-amber-300 flex items-center justify-center shrink-0 mt-0.5 border border-amber-400/20 sm:group-hover:scale-110 sm:group-hover:bg-amber-400/25 transition-all duration-300">
                     <i className="ph-bold ph-check text-xs"></i>
                   </span>
-                  <span><strong className="text-white font-semibold group-hover:text-amber-200 transition-colors">100% Sáp Thực Vật & Sáp Ong:</strong> Không chứa paraffin độc hại, độ tan chảy chậm và không sinh muội than.</span>
+                  <span><strong className="text-white font-semibold sm:group-hover:text-amber-200 transition-colors">100% Sáp Thực Vật & Sáp Ong:</strong> Không chứa paraffin độc hại, độ tan chảy chậm và không sinh muội than.</span>
                 </div>
 
-                <div className="flex items-start gap-2.5 sm:gap-3 text-xs sm:text-[13px] text-[#D8C0B8] p-2 rounded-xl hover:bg-white/5 transition-all duration-300 group">
-                  <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-amber-400/15 text-amber-300 flex items-center justify-center shrink-0 mt-0.5 border border-amber-400/20 group-hover:scale-110 group-hover:bg-amber-400/25 transition-all duration-300">
+                <div className="flex items-start gap-2.5 sm:gap-3 text-xs sm:text-[13px] text-[#D8C0B8] p-2 rounded-xl sm:hover:bg-white/5 transition-all duration-300 group">
+                  <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-amber-400/15 text-amber-300 flex items-center justify-center shrink-0 mt-0.5 border border-amber-400/20 sm:group-hover:scale-110 sm:group-hover:bg-amber-400/25 transition-all duration-300">
                     <i className="ph-bold ph-check text-xs"></i>
                   </span>
-                  <span><strong className="text-white font-semibold group-hover:text-amber-200 transition-colors">Bấc Nến Tự Nhiên Không Chì:</strong> Ngọn lửa êm dịu, âm thanh tí tách thư thái và an toàn cho phòng kín.</span>
+                  <span><strong className="text-white font-semibold sm:group-hover:text-amber-200 transition-colors">Bấc Nến Tự Nhiên Không Chì:</strong> Ngọn lửa êm dịu, âm thanh tí tách thư thái và an toàn cho phòng kín.</span>
                 </div>
 
-                <div className="flex items-start gap-2.5 sm:gap-3 text-xs sm:text-[13px] text-[#D8C0B8] p-2 rounded-xl hover:bg-white/5 transition-all duration-300 group">
-                  <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-amber-400/15 text-amber-300 flex items-center justify-center shrink-0 mt-0.5 border border-amber-400/20 group-hover:scale-110 group-hover:bg-amber-400/25 transition-all duration-300">
+                <div className="flex items-start gap-2.5 sm:gap-3 text-xs sm:text-[13px] text-[#D8C0B8] p-2 rounded-xl sm:hover:bg-white/5 transition-all duration-300 group">
+                  <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-amber-400/15 text-amber-300 flex items-center justify-center shrink-0 mt-0.5 border border-amber-400/20 sm:group-hover:scale-110 sm:group-hover:bg-amber-400/25 transition-all duration-300">
                     <i className="ph-bold ph-check text-xs"></i>
                   </span>
-                  <span><strong className="text-white font-semibold group-hover:text-amber-200 transition-colors">Rót Tay Thủ Công Tỉ Mẩn:</strong> Mỗi hũ nến là một tác phẩm được chăm chút tỉ mẩn bởi đôi bàn tay nghệ nhân Việt.</span>
+                  <span><strong className="text-white font-semibold sm:group-hover:text-amber-200 transition-colors">Rót Tay Thủ Công Tỉ Mẩn:</strong> Mỗi hũ nến là một tác phẩm được chăm chút tỉ mẩn bởi đôi bàn tay nghệ nhân Việt.</span>
                 </div>
               </div>
 
               <div className="pt-2 sm:pt-3 flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
                 <a
                   href="#collection"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#FDE68A] to-[#F59E0B] hover:from-white hover:to-amber-100 text-[#381B18] px-7 py-3.5 text-xs font-bold tracking-widest uppercase rounded-full shadow-lg shadow-black/25 hover:shadow-amber-500/25 hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 btn-shimmer"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#FDE68A] to-[#F59E0B] sm:hover:from-white sm:hover:to-amber-100 text-[#381B18] px-7 py-3.5 text-xs font-bold tracking-widest uppercase rounded-full shadow-lg shadow-black/25 sm:hover:shadow-amber-500/25 sm:hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 btn-shimmer"
                 >
                   <span>Khám Phá Bộ Sưu Tập</span>
                   <i className="ph-bold ph-arrow-right text-xs"></i>
                 </a>
                 <Link
                   to="/shop"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-bold text-amber-200/90 hover:text-white uppercase tracking-widest px-4 py-3 transition-all duration-300 underline-offset-4 hover:underline"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-bold text-amber-200/90 sm:hover:text-white uppercase tracking-widest px-4 py-3 transition-all duration-300 underline-offset-4 sm:hover:underline"
                 >
                   <span>Xem Cửa Hàng</span>
                   <i className="ph ph-caret-right text-xs"></i>
@@ -1184,28 +1184,28 @@ export default function ShopHome() {
             <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-7">
 
               {/* Card 1: Nguồn Thảo Dược & Chiết Xuất Bản Địa */}
-              <div className="card-hover-lift group reveal-on-scroll reveal-delay-100 relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/15 bg-white/[0.06] p-0 shadow-xl backdrop-blur-md transition-all duration-500 hover:border-amber-400/50 hover:bg-white/[0.1] hover:shadow-2xl hover:shadow-amber-950/50 sm:p-5">
+              <div className="card-hover-lift group reveal-on-scroll reveal-delay-100 relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/15 bg-white/[0.06] p-0 shadow-xl backdrop-blur-md transition-all duration-500 sm:hover:border-amber-400/50 sm:hover:bg-white/[0.1] sm:hover:shadow-2xl sm:hover:shadow-amber-950/50 sm:p-5">
                 <div className="relative mb-0 aspect-[16/10] overflow-hidden bg-stone-900 shadow-inner sm:mb-4 sm:aspect-[4/5] sm:rounded-xl">
                   <img
                     alt="Nguồn thảo mộc và sáp đậu nành thiên nhiên Candlet"
-                    className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 ease-out"
+                    className="w-full h-full object-cover sm:group-hover:scale-108 transition-transform duration-700 ease-out"
                     src="/story-botanicals.jpg"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 opacity-80 group-hover:opacity-60 transition-opacity"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 opacity-80 sm:group-hover:opacity-60 transition-opacity"></div>
 
                   {/* Glass Tag Badge */}
-                  <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 bg-black/45 backdrop-blur-md border border-white/20 text-white text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full flex items-center gap-1.5 shadow-sm group-hover:border-amber-400/40 transition-colors">
+                  <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 bg-black/45 backdrop-blur-md border border-white/20 text-white text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full flex items-center gap-1.5 shadow-sm sm:group-hover:border-amber-400/40 transition-colors">
                     <i className="ph-fill ph-leaf text-amber-300 text-xs"></i>
                     <span>Nguồn An Toàn</span>
                   </div>
 
-                  <div className="absolute bottom-2.5 right-2.5 sm:bottom-3 sm:right-3 bg-amber-400/90 text-stone-950 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 sm:px-2.5 rounded-full shadow-md font-mono group-hover:scale-105 transition-transform">
+                  <div className="absolute bottom-2.5 right-2.5 sm:bottom-3 sm:right-3 bg-amber-400/90 text-stone-950 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 sm:px-2.5 rounded-full shadow-md font-mono sm:group-hover:scale-105 transition-transform">
                     100% Organic
                   </div>
                 </div>
 
                 <div className="space-y-1.5 p-4 sm:p-0">
-                  <h4 className="font-serif-display text-xl sm:text-2xl font-semibold text-white group-hover:text-amber-200 transition-colors">
+                  <h4 className="font-serif-display text-xl sm:text-2xl font-semibold text-white sm:group-hover:text-amber-200 transition-colors">
                     Chiết Xuất Bản Địa
                   </h4>
                   <p className="text-xs sm:text-[13px] text-[#D8C0B8] leading-relaxed font-normal">
@@ -1215,28 +1215,28 @@ export default function ShopHome() {
               </div>
 
               {/* Card 2: Rót Nến Thủ Công & Bền Vững (Staggered offset) */}
-              <div className="card-hover-lift group reveal-on-scroll reveal-delay-200 relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/15 bg-white/[0.06] p-0 shadow-xl backdrop-blur-md transition-all duration-500 hover:border-amber-400/50 hover:bg-white/[0.1] hover:shadow-2xl hover:shadow-amber-950/50 sm:translate-y-8 sm:p-5">
+              <div className="card-hover-lift group reveal-on-scroll reveal-delay-200 relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/15 bg-white/[0.06] p-0 shadow-xl backdrop-blur-md transition-all duration-500 sm:hover:border-amber-400/50 sm:hover:bg-white/[0.1] sm:hover:shadow-2xl sm:hover:shadow-amber-950/50 sm:translate-y-8 sm:p-5">
                 <div className="relative mb-0 aspect-[16/10] overflow-hidden bg-stone-900 shadow-inner sm:mb-4 sm:aspect-[4/5] sm:rounded-xl">
                   <img
                     alt="Nghệ nhân rót nến thủ công Candlet"
-                    className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 ease-out"
+                    className="w-full h-full object-cover sm:group-hover:scale-108 transition-transform duration-700 ease-out"
                     src="/story-craft.png"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 opacity-80 group-hover:opacity-60 transition-opacity"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 opacity-80 sm:group-hover:opacity-60 transition-opacity"></div>
 
                   {/* Glass Tag Badge */}
-                  <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 bg-black/45 backdrop-blur-md border border-white/20 text-white text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full flex items-center gap-1.5 shadow-sm group-hover:border-amber-400/40 transition-colors">
+                  <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 bg-black/45 backdrop-blur-md border border-white/20 text-white text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full flex items-center gap-1.5 shadow-sm sm:group-hover:border-amber-400/40 transition-colors">
                     <i className="ph-fill ph-hands-clapping text-amber-300 text-xs"></i>
                     <span>Nghệ Thuật Thủ Công</span>
                   </div>
 
-                  <div className="absolute bottom-2.5 right-2.5 sm:bottom-3 sm:right-3 bg-amber-400/90 text-stone-950 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 sm:px-2.5 rounded-full shadow-md font-mono group-hover:scale-105 transition-transform">
+                  <div className="absolute bottom-2.5 right-2.5 sm:bottom-3 sm:right-3 bg-amber-400/90 text-stone-950 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 sm:px-2.5 rounded-full shadow-md font-mono sm:group-hover:scale-105 transition-transform">
                     Handmade in VN
                   </div>
                 </div>
 
                 <div className="space-y-1.5 p-4 sm:p-0">
-                  <h4 className="font-serif-display text-xl sm:text-2xl font-semibold text-white group-hover:text-amber-200 transition-colors">
+                  <h4 className="font-serif-display text-xl sm:text-2xl font-semibold text-white sm:group-hover:text-amber-200 transition-colors">
                     Rót Tay Tỉ Mỉ
                   </h4>
                   <p className="text-xs sm:text-[13px] text-[#D8C0B8] leading-relaxed font-normal">
@@ -1265,8 +1265,8 @@ export default function ShopHome() {
           </p>
           <form onSubmit={submitNewsletter} className="max-w-[448px] mx-auto flex items-center border-b border-stone-800 focus-within:border-brand-burgundy pb-2.5 transition-colors group/form" data-purpose="email-form">
             <input className="w-full bg-transparent border-none text-stone-900 placeholder:text-stone-400 text-sm focus:ring-0 focus:outline-none px-2" placeholder="Nhập địa chỉ email của bạn..." required="" type="email" />
-            <button aria-label="Đăng ký nhận tin" className="text-brand-charcoal hover:text-brand-burgundy transition-all p-2 group-hover/form:scale-110 hover:scale-125 active:scale-95 cursor-pointer" type="submit">
-              <i className="ph ph-arrow-up-right text-xl font-bold transition-transform group-hover/form:translate-x-0.5 group-hover/form:-translate-y-0.5"></i>
+            <button aria-label="Đăng ký nhận tin" className="text-brand-charcoal sm:hover:text-brand-burgundy transition-all p-2 sm:group-hover/form:scale-110 sm:hover:scale-125 active:scale-95 cursor-pointer" type="submit">
+              <i className="ph ph-arrow-up-right text-xl font-bold transition-transform sm:group-hover/form:translate-x-0.5 sm:group-hover/form:-translate-y-0.5"></i>
             </button>
           </form>
           <p className="text-[10.5px] sm:text-[11px] text-stone-400 mt-4">Cam kết không gửi thư rác. Bạn có thể hủy nhận bất kỳ lúc nào.</p>

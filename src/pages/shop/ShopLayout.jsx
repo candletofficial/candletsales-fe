@@ -134,7 +134,7 @@ export default function ShopLayout() {
 
           <div className="flex items-center space-x-3 sm:space-x-4 shrink-0">
             <span className="hidden sm:inline text-stone-300">Hotline: <strong className="text-white">032.862.4761</strong></span>
-            <Link to="/orders" className="text-amber-200 hover:text-white font-medium transition-colors underline-offset-2 hover:underline">
+            <Link to="/orders" className="text-amber-200 sm:hover:text-white font-medium transition-colors underline-offset-2 sm:hover:underline">
               Tra cứu đơn
             </Link>
           </div>
@@ -162,12 +162,12 @@ export default function ShopLayout() {
                   <img
                     src="/logo.png"
                     alt="Candlet"
-                    className={`w-auto object-contain transition-transform duration-300 group-hover:scale-105 ${isScrolled ? 'h-8 sm:h-10' : 'h-10 sm:h-12'
+                    className={`h-10 w-auto object-contain transition-transform duration-300 sm:group-hover:scale-105 ${isScrolled ? 'sm:h-10' : 'sm:h-12'
                       }`}
                   />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[9px] uppercase tracking-[0.25em] text-[#8C4A32] font-semibold mt-0.5 opacity-80 group-hover:opacity-100 transition-opacity hidden xs:inline">
+                  <span className="text-[9px] uppercase tracking-[0.25em] text-[#8C4A32] font-semibold mt-0.5 opacity-80 sm:group-hover:opacity-100 transition-opacity hidden xs:inline">
                     Botanical Candles
                   </span>
                 </div>
@@ -184,7 +184,7 @@ export default function ShopLayout() {
                     to={link.path}
                     className={`relative px-4 py-2 rounded-full transition-all duration-300 ${isActive
                       ? 'text-[#4A2C2A] bg-[#4A2C2A]/8 font-bold shadow-2xs'
-                      : 'text-stone-700 hover:text-[#4A2C2A] hover:bg-stone-100/80'
+                      : 'text-stone-700 sm:hover:text-[#4A2C2A] sm:hover:bg-stone-100/80'
                       }`}
                   >
                     <span>{link.label}</span>
@@ -197,21 +197,23 @@ export default function ShopLayout() {
             <div className="flex items-center space-x-1 sm:space-x-3">
 
               {/* Nút Tìm kiếm nhanh / Khám phá trên mobile */}
-              <Link
-                to="/shop"
-                className="p-2 sm:p-2.5 text-[#2C1810] hover:text-[#4A2C2A] hover:bg-stone-100/80 rounded-full transition-all lg:hidden"
-                title="Khám phá nến thơm"
-              >
-                <i className="ph ph-magnifying-glass text-[22px]"></i>
-              </Link>
+              {user && (
+                <Link
+                  to="/shop"
+                  className="p-2 sm:p-2.5 text-[#2C1810] sm:hover:text-[#4A2C2A] sm:hover:bg-stone-100/80 rounded-full transition-all lg:hidden"
+                  title="Khám phá nến thơm"
+                >
+                  <i className="ph ph-magnifying-glass text-[22px]"></i>
+                </Link>
+              )}
 
               {/* Nút Yêu Thích (Wishlist) - Hiển thị từ màn hình sm trở lên (mobile dùng Bottom Nav) */}
               <Link
                 to="/wishlist"
-                className="hidden sm:flex relative p-2.5 text-[#2C1810] hover:text-rose-600 hover:bg-rose-50 rounded-full transition-all group focus:outline-none"
+                className="hidden sm:flex relative p-2.5 text-[#2C1810] sm:hover:text-rose-600 sm:hover:bg-rose-50 rounded-full transition-all group focus:outline-none"
                 title="Sản phẩm yêu thích"
               >
-                <i className="ph ph-heart text-[24px] sm:text-[26px] group-hover:scale-110 transition-transform"></i>
+                <i className="ph ph-heart text-[24px] sm:text-[26px] sm:group-hover:scale-110 transition-transform"></i>
                 {wishlistCount > 0 && (
                   <span className="absolute top-1 right-1 min-w-[19px] h-[19px] bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white shadow-sm px-1 animate-[scaleIn_0.2s_ease-out]">
                     {wishlistCount}
@@ -222,10 +224,10 @@ export default function ShopLayout() {
               {/* Nút theo dõi đơn hàng */}
               <Link
                 to="/orders"
-                className={`relative rounded-full p-2 transition-all focus:outline-none sm:p-2.5 ${
+                className={`relative rounded-full p-2 transition-all focus:outline-none sm:p-2.5 ${!user ? 'hidden lg:inline-flex' : ''} ${
                   location.pathname === '/orders'
                     ? 'bg-[#4A2C2A]/8 text-[#8C4A32]'
-                    : 'text-[#2C1810] hover:bg-[#4A2C2A]/5 hover:text-[#4A2C2A]'
+                    : 'text-[#2C1810] sm:hover:bg-[#4A2C2A]/5 sm:hover:text-[#4A2C2A]'
                 }`}
                 title="Theo dõi đơn hàng"
                 aria-label="Theo dõi đơn hàng"
@@ -242,7 +244,7 @@ export default function ShopLayout() {
               {user?.role === 'admin' && (
                 <Link
                   to="/admin/dashboard"
-                  className="hidden xl:inline-flex min-h-10 items-center gap-2 rounded-full bg-[#1f2937] px-4 text-xs font-bold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-[#111827] hover:shadow-md"
+                  className="hidden xl:inline-flex min-h-10 items-center gap-2 rounded-full bg-[#1f2937] px-4 text-xs font-bold text-white shadow-sm transition-all sm:hover:-translate-y-0.5 sm:hover:bg-[#111827] sm:hover:shadow-md"
                   title="Vào trang quản trị"
                 >
                   <i className="ph-bold ph-gauge text-base"></i>
@@ -257,7 +259,7 @@ export default function ShopLayout() {
                 <div className="relative hidden sm:block" ref={dropdownRef}>
                   <button
                     onClick={() => setShowDropdown(!showDropdown)}
-                    className="flex items-center gap-2 p-1 sm:pr-3 rounded-full hover:bg-stone-100 transition-colors border border-stone-200/80 focus:outline-none shadow-2xs"
+                    className="flex items-center gap-2 p-1 sm:pr-3 rounded-full sm:hover:bg-stone-100 transition-colors border border-stone-200/80 focus:outline-none shadow-2xs"
                   >
                     <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#4A2C2A] to-[#6A382C] text-white flex items-center justify-center font-bold text-xs shadow-xs">
                       {user.name ? user.name.charAt(0).toUpperCase() : <i className="ph-bold ph-user text-sm"></i>}
@@ -281,7 +283,7 @@ export default function ShopLayout() {
                         <Link
                           to="/admin/dashboard"
                           onClick={() => setShowDropdown(false)}
-                          className="mx-2 mb-1 flex items-center gap-3 rounded-xl bg-stone-900 px-3 py-2.5 text-xs font-bold text-white transition-colors hover:bg-stone-800"
+                          className="mx-2 mb-1 flex items-center gap-3 rounded-xl bg-stone-900 px-3 py-2.5 text-xs font-bold text-white transition-colors sm:hover:bg-stone-800"
                         >
                           <i className="ph-bold ph-gauge text-base text-amber-300"></i>
                           Vào trang quản trị
@@ -292,7 +294,7 @@ export default function ShopLayout() {
                       <Link
                         to="/profile"
                         onClick={() => setShowDropdown(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-xs font-semibold text-stone-700 hover:text-[#8C4A32] hover:bg-[#FAF5EE] transition-colors"
+                        className="flex items-center gap-3 px-4 py-2.5 text-xs font-semibold text-stone-700 sm:hover:text-[#8C4A32] sm:hover:bg-[#FAF5EE] transition-colors"
                       >
                         <i className="ph-bold ph-user-circle text-base text-[#8C4A32]"></i>
                         Tài khoản của tôi
@@ -301,7 +303,7 @@ export default function ShopLayout() {
                       <Link
                         to="/orders"
                         onClick={() => setShowDropdown(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-xs font-semibold text-stone-700 hover:text-[#8C4A32] hover:bg-[#FAF5EE] transition-colors"
+                        className="flex items-center gap-3 px-4 py-2.5 text-xs font-semibold text-stone-700 sm:hover:text-[#8C4A32] sm:hover:bg-[#FAF5EE] transition-colors"
                       >
                         <i className="ph-bold ph-receipt text-base text-[#8C4A32]"></i>
                         Lịch sử đơn hàng
@@ -310,7 +312,7 @@ export default function ShopLayout() {
                       <Link
                         to="/wishlist"
                         onClick={() => setShowDropdown(false)}
-                        className="flex items-center justify-between px-4 py-2.5 text-xs font-semibold text-stone-700 hover:text-rose-600 hover:bg-rose-50/50 transition-colors"
+                        className="flex items-center justify-between px-4 py-2.5 text-xs font-semibold text-stone-700 sm:hover:text-rose-600 sm:hover:bg-rose-50/50 transition-colors"
                       >
                         <div className="flex items-center gap-3">
                           <i className="ph-bold ph-heart text-base text-rose-500"></i>
@@ -331,7 +333,7 @@ export default function ShopLayout() {
                           logout();
                           navigate('/login');
                         }}
-                        className="w-full flex items-center gap-3 px-4 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors text-left"
+                        className="w-full flex items-center gap-3 px-4 py-2 text-xs font-semibold text-red-600 sm:hover:bg-red-50 transition-colors text-left"
                       >
                         <i className="ph-bold ph-sign-out text-base"></i>
                         Đăng xuất
@@ -342,17 +344,17 @@ export default function ShopLayout() {
               ) : (
                 <Link
                   to="/login"
-                  className="inline-flex items-center gap-2 bg-gradient-to-r from-[#4A2C2A] to-[#6A382C] hover:from-[#3D1E1C] hover:to-[#552B23] text-white text-[11px] sm:text-xs font-bold uppercase tracking-wider py-2.5 px-4 sm:px-5 rounded-full shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-98 transition-all group"
+                  className="inline-flex items-center gap-2 bg-gradient-to-r from-[#4A2C2A] to-[#6A382C] sm:hover:from-[#3D1E1C] sm:hover:to-[#552B23] text-white text-[11px] sm:text-xs font-bold uppercase tracking-wider py-2.5 px-4 sm:px-5 rounded-full shadow-sm sm:hover:shadow-md sm:hover:scale-[1.02] active:scale-98 transition-all group"
                 >
                   <span>Đăng nhập</span>
-                  <i className="ph-bold ph-arrow-right text-xs group-hover:translate-x-0.5 transition-transform"></i>
+                  <i className="ph-bold ph-arrow-right text-xs sm:group-hover:translate-x-0.5 transition-transform"></i>
                 </Link>
               )}
 
               {/* Nút Hamburger Menu (Mobile/Tablet) */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="lg:hidden p-2 text-stone-700 hover:text-[#4A2C2A] rounded-xl hover:bg-stone-100 transition-colors focus:outline-none"
+                className="lg:hidden p-2 text-stone-700 sm:hover:text-[#4A2C2A] rounded-xl sm:hover:bg-stone-100 transition-colors focus:outline-none"
                 aria-label="Menu"
               >
                 <i className={`ph-bold ${mobileMenuOpen ? 'ph-x' : 'ph-list'} text-2xl`}></i>
@@ -396,7 +398,7 @@ export default function ShopLayout() {
               </Link>
               <button
                 onClick={() => setMobileMenuOpen(false)}
-                className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center text-stone-500 hover:text-stone-800 cursor-pointer"
+                className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center text-stone-500 sm:hover:text-stone-800 cursor-pointer"
                 aria-label="Đóng menu"
               >
                 <i className="ph-bold ph-x text-base"></i>
@@ -414,7 +416,7 @@ export default function ShopLayout() {
                     onClick={() => setMobileMenuOpen(false)}
                     className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${isActive
                       ? 'bg-[#FAF5EE] text-[#4A2C2A] font-bold border border-amber-200/60'
-                      : 'text-stone-700 hover:bg-stone-50'
+                      : 'text-stone-700 sm:hover:bg-stone-50'
                       }`}
                   >
                     <span>{link.label}</span>
@@ -428,7 +430,7 @@ export default function ShopLayout() {
                 <Link
                   to="/admin/dashboard"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-between rounded-xl bg-stone-900 px-4 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-stone-800"
+                  className="flex items-center justify-between rounded-xl bg-stone-900 px-4 py-3 text-sm font-bold text-white shadow-sm transition-colors sm:hover:bg-stone-800"
                 >
                   <span className="flex items-center gap-2.5">
                     <i className="ph-bold ph-gauge text-base text-amber-300"></i>
@@ -444,7 +446,7 @@ export default function ShopLayout() {
                 className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${
                   location.pathname === '/profile'
                     ? 'bg-[#FAF5EE] text-[#4A2C2A] font-bold border border-amber-200/60'
-                    : 'text-stone-700 hover:bg-stone-50'
+                    : 'text-stone-700 sm:hover:bg-stone-50'
                 }`}
               >
                 <div className="flex items-center gap-2.5">
@@ -457,7 +459,7 @@ export default function ShopLayout() {
               <Link
                 to="/orders"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold text-stone-700 hover:bg-stone-50 transition-colors"
+                className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold text-stone-700 sm:hover:bg-stone-50 transition-colors"
               >
                 <span>Tra Cứu Đơn Hàng</span>
                 <i className="ph-bold ph-receipt text-base text-stone-400"></i>
@@ -466,7 +468,7 @@ export default function ShopLayout() {
               <Link
                 to="/wishlist"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold text-stone-700 hover:bg-stone-50 transition-colors"
+                className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold text-stone-700 sm:hover:bg-stone-50 transition-colors"
               >
                 <div className="flex items-center gap-2.5">
                   <i className="ph-bold ph-heart text-base text-rose-500"></i>
@@ -487,15 +489,15 @@ export default function ShopLayout() {
                   <Link
                     to="/profile"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 bg-stone-50 hover:bg-[#FAF5EE] active:scale-98 p-3 rounded-xl border border-stone-200/80 transition-all group cursor-pointer"
+                    className="flex items-center gap-3 bg-stone-50 sm:hover:bg-[#FAF5EE] active:scale-98 p-3 rounded-xl border border-stone-200/80 transition-all group cursor-pointer"
                   >
                     <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#4A2C2A] to-[#6A382C] text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
                       {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between">
-                        <p className="text-xs font-bold text-stone-900 truncate group-hover:text-[#4A2C2A] transition-colors">{user.name}</p>
-                        <span className="text-[10px] text-amber-800 font-bold group-hover:underline flex items-center gap-0.5">
+                        <p className="text-xs font-bold text-stone-900 truncate sm:group-hover:text-[#4A2C2A] transition-colors">{user.name}</p>
+                        <span className="text-[10px] text-amber-800 font-bold sm:group-hover:underline flex items-center gap-0.5">
                           Hồ sơ <i className="ph-bold ph-caret-right text-[10px]"></i>
                         </span>
                       </div>
@@ -508,7 +510,7 @@ export default function ShopLayout() {
                       logout();
                       navigate('/login');
                     }}
-                    className="w-full bg-stone-100 hover:bg-red-50 hover:text-red-600 text-stone-700 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                    className="w-full bg-stone-100 sm:hover:bg-red-50 sm:hover:text-red-600 text-stone-700 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                   >
                     <i className="ph-bold ph-sign-out text-sm"></i>
                     <span>Đăng xuất</span>
@@ -640,7 +642,7 @@ export default function ShopLayout() {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
 
               <div className="flex items-start gap-3.5 group">
-                <div className="w-10 h-10 rounded-xl bg-white/5 border border-amber-400/20 flex items-center justify-center shrink-0 text-amber-300 group-hover:scale-110 group-hover:border-amber-400/50 group-hover:bg-amber-400/10 transition-all duration-300">
+                <div className="w-10 h-10 rounded-xl bg-white/5 border border-amber-400/20 flex items-center justify-center shrink-0 text-amber-300 sm:group-hover:scale-110 sm:group-hover:border-amber-400/50 sm:group-hover:bg-amber-400/10 transition-all duration-300">
                   <i className="ph-duotone ph-plant text-xl"></i>
                 </div>
                 <div>
@@ -650,7 +652,7 @@ export default function ShopLayout() {
               </div>
 
               <div className="flex items-start gap-3.5 group">
-                <div className="w-10 h-10 rounded-xl bg-white/5 border border-amber-400/20 flex items-center justify-center shrink-0 text-amber-300 group-hover:scale-110 group-hover:border-amber-400/50 group-hover:bg-amber-400/10 transition-all duration-300">
+                <div className="w-10 h-10 rounded-xl bg-white/5 border border-amber-400/20 flex items-center justify-center shrink-0 text-amber-300 sm:group-hover:scale-110 sm:group-hover:border-amber-400/50 sm:group-hover:bg-amber-400/10 transition-all duration-300">
                   <i className="ph-duotone ph-envelope-open text-xl"></i>
                 </div>
                 <div>
@@ -660,7 +662,7 @@ export default function ShopLayout() {
               </div>
 
               <div className="flex items-start gap-3.5 group">
-                <div className="w-10 h-10 rounded-xl bg-white/5 border border-amber-400/20 flex items-center justify-center shrink-0 text-amber-300 group-hover:scale-110 group-hover:border-amber-400/50 group-hover:bg-amber-400/10 transition-all duration-300">
+                <div className="w-10 h-10 rounded-xl bg-white/5 border border-amber-400/20 flex items-center justify-center shrink-0 text-amber-300 sm:group-hover:scale-110 sm:group-hover:border-amber-400/50 sm:group-hover:bg-amber-400/10 transition-all duration-300">
                   <i className="ph-duotone ph-drop text-xl"></i>
                 </div>
                 <div>
@@ -670,7 +672,7 @@ export default function ShopLayout() {
               </div>
 
               <div className="flex items-start gap-3.5 group">
-                <div className="w-10 h-10 rounded-xl bg-white/5 border border-amber-400/20 flex items-center justify-center shrink-0 text-amber-300 group-hover:scale-110 group-hover:border-amber-400/50 group-hover:bg-amber-400/10 transition-all duration-300">
+                <div className="w-10 h-10 rounded-xl bg-white/5 border border-amber-400/20 flex items-center justify-center shrink-0 text-amber-300 sm:group-hover:scale-110 sm:group-hover:border-amber-400/50 sm:group-hover:bg-amber-400/10 transition-all duration-300">
                   <i className="ph-duotone ph-gift text-xl"></i>
                 </div>
                 <div>
@@ -693,7 +695,7 @@ export default function ShopLayout() {
                 <img
                   src="/logo.png"
                   alt="CandletShop"
-                  className="h-10 sm:h-11 w-auto object-contain brightness-0 invert opacity-95 group-hover:opacity-100 transition-opacity"
+                  className="h-10 sm:h-11 w-auto object-contain brightness-0 invert opacity-95 sm:group-hover:opacity-100 transition-opacity"
                 />
                 <div className="flex flex-col">
                   <span className="font-serif-display text-xl font-bold tracking-wider text-amber-100">CANDLETSHOP</span>
@@ -718,7 +720,7 @@ export default function ShopLayout() {
                 </div>
                 <div>
                   <span className="text-[10px] uppercase tracking-wider text-stone-400 block font-medium">Hotline tư vấn hương:</span>
-                  <a href="tel:0328624761" className="text-sm font-bold text-white hover:text-amber-300 transition-colors font-mono">
+                  <a href="tel:0328624761" className="text-sm font-bold text-white sm:hover:text-amber-300 transition-colors font-mono">
                     032.862.4761
                   </a>
                 </div>
@@ -733,39 +735,39 @@ export default function ShopLayout() {
               </h4>
               <ul className="space-y-2.5 text-[12px]">
                 <li>
-                  <Link to="/shop" className="text-stone-300 hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
-                    <i className="ph ph-arrow-right text-[10px] text-amber-400/60 group-hover:translate-x-1 transition-transform"></i>
+                  <Link to="/shop" className="text-stone-300 sm:hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
+                    <i className="ph ph-arrow-right text-[10px] text-amber-400/60 sm:group-hover:translate-x-1 transition-transform"></i>
                     <span>Nến Thông Điệp Ẩn Giấu</span>
                     <span className="text-[9px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-bold uppercase ml-1">Signature</span>
                   </Link>
                 </li>
                 <li>
-                  <Link to="/shop?tag=Mới" className="text-stone-300 hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
-                    <i className="ph ph-arrow-right text-[10px] text-amber-400/60 group-hover:translate-x-1 transition-transform"></i>
+                  <Link to="/shop?tag=Mới" className="text-stone-300 sm:hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
+                    <i className="ph ph-arrow-right text-[10px] text-amber-400/60 sm:group-hover:translate-x-1 transition-transform"></i>
                     <span>Bộ Sưu Tập Mùa Đông (Winter)</span>
                   </Link>
                 </li>
                 <li>
-                  <Link to="/shop" className="text-stone-300 hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
-                    <i className="ph ph-arrow-right text-[10px] text-amber-400/60 group-hover:translate-x-1 transition-transform"></i>
+                  <Link to="/shop" className="text-stone-300 sm:hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
+                    <i className="ph ph-arrow-right text-[10px] text-amber-400/60 sm:group-hover:translate-x-1 transition-transform"></i>
                     <span>Nến Ly Hổ Phách Cổ Điển</span>
                   </Link>
                 </li>
                 <li>
-                  <Link to="/shop" className="text-stone-300 hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
-                    <i className="ph ph-arrow-right text-[10px] text-amber-400/60 group-hover:translate-x-1 transition-transform"></i>
+                  <Link to="/shop" className="text-stone-300 sm:hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
+                    <i className="ph ph-arrow-right text-[10px] text-amber-400/60 sm:group-hover:translate-x-1 transition-transform"></i>
                     <span>Tinh Dầu Tán Hương & Xịt Phòng</span>
                   </Link>
                 </li>
                 <li>
-                  <Link to="/shop" className="text-stone-300 hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
-                    <i className="ph ph-arrow-right text-[10px] text-amber-400/60 group-hover:translate-x-1 transition-transform"></i>
+                  <Link to="/shop" className="text-stone-300 sm:hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
+                    <i className="ph ph-arrow-right text-[10px] text-amber-400/60 sm:group-hover:translate-x-1 transition-transform"></i>
                     <span>Phụ Kiện Chăm Sóc Nến (Kéo & Dập)</span>
                   </Link>
                 </li>
                 <li>
-                  <Link to="/shop" className="text-stone-300 hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
-                    <i className="ph ph-arrow-right text-[10px] text-amber-400/60 group-hover:translate-x-1 transition-transform"></i>
+                  <Link to="/shop" className="text-stone-300 sm:hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
+                    <i className="ph ph-arrow-right text-[10px] text-amber-400/60 sm:group-hover:translate-x-1 transition-transform"></i>
                     <span>Hộp Quà Doanh Nghiệp & Đám Cưới</span>
                   </Link>
                 </li>
@@ -780,37 +782,37 @@ export default function ShopLayout() {
               </h4>
               <ul className="space-y-2.5 text-[12px]">
                 <li>
-                  <Link to="/orders" className="text-stone-300 hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
+                  <Link to="/orders" className="text-stone-300 sm:hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
                     <i className="ph ph-receipt text-xs text-amber-400/60"></i>
                     <span>Tra Cứu Đơn Hàng</span>
                   </Link>
                 </li>
                 <li>
-                  <Link to="/guide" className="text-stone-300 hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
+                  <Link to="/guide" className="text-stone-300 sm:hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
                     <i className="ph ph-book-open text-xs text-amber-400/60"></i>
                     <span>Cẩm Nang Chăm Sóc Nến</span>
                   </Link>
                 </li>
                 <li>
-                  <Link to="/stories" className="text-stone-300 hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
+                  <Link to="/stories" className="text-stone-300 sm:hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
                     <i className="ph ph-article text-xs text-amber-400/60"></i>
                     <span>Câu Chuyện & Blog Nến Thơm</span>
                   </Link>
                 </li>
                 <li>
-                  <Link to="/" className="text-stone-300 hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
+                  <Link to="/" className="text-stone-300 sm:hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
                     <i className="ph ph-arrows-clockwise text-xs text-amber-400/60"></i>
                     <span>Chính Sách Đổi Trả 1 - 1</span>
                   </Link>
                 </li>
                 <li>
-                  <Link to="/" className="text-stone-300 hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
+                  <Link to="/" className="text-stone-300 sm:hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
                     <i className="ph ph-truck text-xs text-amber-400/60"></i>
                     <span>Vận Chuyển Toàn Quốc</span>
                   </Link>
                 </li>
                 <li>
-                  <Link to="/" className="text-stone-300 hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
+                  <Link to="/" className="text-stone-300 sm:hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
                     <i className="ph ph-question text-xs text-amber-400/60"></i>
                     <span>Câu Hỏi Thường Gặp (FAQ)</span>
                   </Link>
@@ -831,7 +833,7 @@ export default function ShopLayout() {
                 </div>
                 <div className="flex items-center gap-2.5">
                   <i className="ph ph-envelope-simple text-amber-300 text-base shrink-0"></i>
-                  <a href="mailto:hello@candlet.vn" className="hover:text-amber-200 transition-colors font-mono">
+                  <a href="mailto:hello@candlet.vn" className="sm:hover:text-amber-200 transition-colors font-mono">
                     candlet.official@gmail.com
                   </a>
                 </div>
@@ -867,7 +869,7 @@ export default function ShopLayout() {
                 href="https://instagram.com"
                 target="_blank"
                 rel="noreferrer"
-                className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-amber-200/80 hover:text-white hover:bg-amber-500/20 hover:border-amber-400/40 hover:scale-110 transition-all"
+                className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-amber-200/80 sm:hover:text-white sm:hover:bg-amber-500/20 sm:hover:border-amber-400/40 sm:hover:scale-110 transition-all"
                 title="Theo dõi Candlet trên Instagram"
               >
                 <i className="ph ph-instagram-logo"></i>
@@ -876,7 +878,7 @@ export default function ShopLayout() {
                 href="https://facebook.com"
                 target="_blank"
                 rel="noreferrer"
-                className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-amber-200/80 hover:text-white hover:bg-amber-500/20 hover:border-amber-400/40 hover:scale-110 transition-all"
+                className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-amber-200/80 sm:hover:text-white sm:hover:bg-amber-500/20 sm:hover:border-amber-400/40 sm:hover:scale-110 transition-all"
                 title="Theo dõi Candlet trên Facebook"
               >
                 <i className="ph ph-facebook-logo"></i>
@@ -885,7 +887,7 @@ export default function ShopLayout() {
                 href="https://tiktok.com"
                 target="_blank"
                 rel="noreferrer"
-                className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-amber-200/80 hover:text-white hover:bg-amber-500/20 hover:border-amber-400/40 hover:scale-110 transition-all"
+                className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-amber-200/80 sm:hover:text-white sm:hover:bg-amber-500/20 sm:hover:border-amber-400/40 sm:hover:scale-110 transition-all"
                 title="Theo dõi Candlet trên TikTok"
               >
                 <i className="ph ph-tiktok-logo"></i>
@@ -894,7 +896,7 @@ export default function ShopLayout() {
                 href="https://pinterest.com"
                 target="_blank"
                 rel="noreferrer"
-                className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-amber-200/80 hover:text-white hover:bg-amber-500/20 hover:border-amber-400/40 hover:scale-110 transition-all"
+                className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-amber-200/80 sm:hover:text-white sm:hover:bg-amber-500/20 sm:hover:border-amber-400/40 sm:hover:scale-110 transition-all"
                 title="Khám phá cảm hứng trên Pinterest"
               >
                 <i className="ph ph-pinterest-logo"></i>
@@ -903,7 +905,7 @@ export default function ShopLayout() {
               {/* Nút cuộn nhanh lên đầu trang */}
               <button
                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                className="w-8 h-8 rounded-full bg-amber-500/10 border border-amber-400/30 flex items-center justify-center text-amber-300 hover:text-white hover:bg-amber-500/30 hover:scale-110 transition-all ml-2"
+                className="w-8 h-8 rounded-full bg-amber-500/10 border border-amber-400/30 flex items-center justify-center text-amber-300 sm:hover:text-white sm:hover:bg-amber-500/30 sm:hover:scale-110 transition-all ml-2"
                 title="Cuộn lên đầu trang"
               >
                 <i className="ph-bold ph-arrow-up text-xs"></i>
@@ -926,7 +928,7 @@ export default function ShopLayout() {
           <Link
             to="/"
             className={`flex flex-col items-center justify-center py-1 transition-all duration-200 active:scale-95 ${
-              location.pathname === '/' ? 'text-[#4A2C2A] font-bold' : 'text-stone-500 hover:text-stone-800'
+              location.pathname === '/' ? 'text-[#4A2C2A] font-bold' : 'text-stone-500 sm:hover:text-stone-800'
             }`}
           >
             <i className={`text-xl transition-transform ${location.pathname === '/' ? 'ph-fill ph-house scale-110 text-[#4A2C2A]' : 'ph ph-house'}`}></i>
@@ -937,7 +939,7 @@ export default function ShopLayout() {
           <Link
             to="/shop"
             className={`flex flex-col items-center justify-center py-1 transition-all duration-200 active:scale-95 ${
-              location.pathname.startsWith('/shop') ? 'text-[#4A2C2A] font-bold' : 'text-stone-500 hover:text-stone-800'
+              location.pathname.startsWith('/shop') ? 'text-[#4A2C2A] font-bold' : 'text-stone-500 sm:hover:text-stone-800'
             }`}
           >
             <i className={`text-xl transition-transform ${location.pathname.startsWith('/shop') ? 'ph-fill ph-flame scale-110 text-amber-700' : 'ph ph-flame'}`}></i>
@@ -948,7 +950,7 @@ export default function ShopLayout() {
           <Link
             to="/wishlist"
             className={`flex flex-col items-center justify-center py-1 transition-all duration-200 active:scale-95 ${
-              location.pathname === '/wishlist' ? 'text-rose-600 font-bold' : 'text-stone-500 hover:text-stone-800'
+              location.pathname === '/wishlist' ? 'text-rose-600 font-bold' : 'text-stone-500 sm:hover:text-stone-800'
             }`}
           >
             <div className="relative">
@@ -966,7 +968,7 @@ export default function ShopLayout() {
           <Link
             to="/cart"
             className={`flex flex-col items-center justify-center py-1 transition-all duration-200 active:scale-95 ${
-              location.pathname === '/cart' ? 'text-[#4A2C2A] font-bold' : 'text-stone-500 hover:text-stone-800'
+              location.pathname === '/cart' ? 'text-[#4A2C2A] font-bold' : 'text-stone-500 sm:hover:text-stone-800'
             }`}
           >
             <div className="relative">
@@ -984,7 +986,7 @@ export default function ShopLayout() {
           <Link
             to={user ? '/profile' : '/login'}
             className={`flex flex-col items-center justify-center py-1 transition-all duration-200 active:scale-95 ${
-              location.pathname === '/profile' || location.pathname === '/login' ? 'text-[#4A2C2A] font-bold' : 'text-stone-500 hover:text-stone-800'
+              location.pathname === '/profile' || location.pathname === '/login' ? 'text-[#4A2C2A] font-bold' : 'text-stone-500 sm:hover:text-stone-800'
             }`}
           >
             <i className={`text-xl transition-transform ${location.pathname === '/profile' || location.pathname === '/login' ? 'ph-fill ph-user-circle scale-110 text-[#4A2C2A]' : 'ph ph-user'}`}></i>

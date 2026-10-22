@@ -59,7 +59,7 @@ export default function ShopLogin() {
       <div className="hidden lg:flex lg:w-1/2 xl:w-[52%] relative bg-[#200B0E] overflow-hidden flex-col justify-between p-12 xl:p-16 text-white">
         {/* Ảnh nền nghệ thuật với các lớp gradient sang trọng */}
         <div
-          className="absolute inset-0 bg-cover bg-center opacity-65 scale-105 transition-transform duration-1000 ease-out hover:scale-100"
+          className="absolute inset-0 bg-cover bg-center opacity-65 scale-105 transition-transform duration-1000 ease-out sm:hover:scale-100"
           style={{ backgroundImage: "url('/login-candle-ambient.jpg')" }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#1A0709] via-[#2A0E13]/80 to-[#1A0709]/50" />
@@ -67,7 +67,7 @@ export default function ShopLogin() {
 
         {/* Header trái: Logo & Tagline */}
         <div className="relative z-10 flex items-center justify-between">
-          <Link to="/" className="inline-block group transition-transform hover:scale-[1.02]" title="Trở về trang chủ">
+          <Link to="/" className="inline-block group transition-transform sm:hover:scale-[1.02]" title="Trở về trang chủ">
             <img
               src="/logo.png"
               alt="Candlet Logo"
@@ -159,9 +159,9 @@ export default function ShopLogin() {
         <div className="flex items-center justify-between mb-8">
           <Link
             to="/"
-            className="inline-flex items-center gap-2 text-xs font-semibold text-stone-600 hover:text-[#4A2C2A] py-2 px-3.5 rounded-full bg-white/80 hover:bg-white border border-stone-200/80 shadow-2xs transition-all group"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-stone-600 sm:hover:text-[#4A2C2A] py-2 px-3.5 rounded-full bg-white/80 sm:hover:bg-white border border-stone-200/80 shadow-2xs transition-all group"
           >
-            <i className="ph-bold ph-arrow-left text-sm text-stone-400 group-hover:-translate-x-0.5 group-hover:text-[#4A2C2A] transition-transform" />
+            <i className="ph-bold ph-arrow-left text-sm text-stone-400 sm:group-hover:-translate-x-0.5 sm:group-hover:text-[#4A2C2A] transition-transform" />
             <span>Về trang chủ</span>
           </Link>
 
@@ -225,7 +225,7 @@ export default function ShopLogin() {
                 <button
                   type="button"
                   onClick={() => setShowForgotModal(true)}
-                  className="text-xs font-semibold text-[#8C4A32] hover:text-[#5F2C1D] hover:underline cursor-pointer"
+                  className="text-xs font-semibold text-[#8C4A32] sm:hover:text-[#5F2C1D] sm:hover:underline cursor-pointer"
                 >
                   Quên mật khẩu?
                 </button>
@@ -244,7 +244,7 @@ export default function ShopLogin() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 transition-colors p-1 cursor-pointer"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 sm:hover:text-stone-700 transition-colors p-1 cursor-pointer"
                   title={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                 >
                   <i className={`ph-bold ${showPassword ? 'ph-eye-slash' : 'ph-eye'} text-lg`} />
@@ -270,7 +270,7 @@ export default function ShopLogin() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#4A2C2A] hover:bg-[#341816] text-white text-xs sm:text-sm font-bold uppercase tracking-widest rounded-2xl py-3.5 px-6 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all transform active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                className="w-full bg-[#4A2C2A] sm:hover:bg-[#341816] text-white text-xs sm:text-sm font-bold uppercase tracking-widest rounded-2xl py-3.5 px-6 flex items-center justify-center gap-2 shadow-md sm:hover:shadow-lg transition-all transform active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
               >
                 {loading ? (
                   <>
@@ -303,7 +303,7 @@ export default function ShopLogin() {
               type="button"
               onClick={handleGoogleLogin}
               disabled={googleLoading}
-              className="flex items-center justify-center gap-2.5 py-3 px-4 rounded-2xl bg-white border border-stone-200 text-xs font-semibold text-stone-700 hover:bg-stone-50 hover:border-stone-300 shadow-2xs transition-all cursor-pointer disabled:opacity-60 disabled:cursor-wait"
+              className="flex items-center justify-center gap-2.5 py-3 px-4 rounded-2xl bg-white border border-stone-200 text-xs font-semibold text-stone-700 sm:hover:bg-stone-50 sm:hover:border-stone-300 shadow-2xs transition-all cursor-pointer disabled:opacity-60 disabled:cursor-wait"
             >
               {googleLoading ? <span className="w-4 h-4 border-2 border-[#4285F4]/30 border-t-[#4285F4] rounded-full animate-spin" /> : <svg className="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" /><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" /><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" /><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" /></svg>}
               <span>{googleLoading ? 'Đang chuyển hướng…' : 'Google'}</span>
@@ -313,7 +313,7 @@ export default function ShopLogin() {
               type="button"
               onClick={handleFacebookLogin}
               disabled={facebookLoading}
-              className="flex items-center justify-center gap-2.5 py-3 px-4 rounded-2xl bg-white border border-stone-200 text-xs font-semibold text-stone-700 hover:bg-stone-50 hover:border-stone-300 shadow-2xs transition-all cursor-pointer disabled:opacity-60 disabled:cursor-wait"
+              className="flex items-center justify-center gap-2.5 py-3 px-4 rounded-2xl bg-white border border-stone-200 text-xs font-semibold text-stone-700 sm:hover:bg-stone-50 sm:hover:border-stone-300 shadow-2xs transition-all cursor-pointer disabled:opacity-60 disabled:cursor-wait"
             >
               {facebookLoading ? <span className="w-4 h-4 border-2 border-[#1877F2]/30 border-t-[#1877F2] rounded-full animate-spin" /> : <i className="ph-fill ph-facebook-logo text-[#1877F2] text-base" />}
               <span>{facebookLoading ? 'Đang chuyển hướng…' : 'Facebook'}</span>
@@ -327,7 +327,7 @@ export default function ShopLogin() {
               <Link
                 to="/register"
                 state={{ from: location.state?.from }}
-                className="font-bold text-[#8C4A32] hover:text-[#4A2C2A] underline underline-offset-4 decoration-[#8C4A32]/40 hover:decoration-[#8C4A32] transition-colors"
+                className="font-bold text-[#8C4A32] sm:hover:text-[#4A2C2A] underline underline-offset-4 decoration-[#8C4A32]/40 sm:hover:decoration-[#8C4A32] transition-colors"
               >
                 Đăng ký thành viên ngay
               </Link>
@@ -360,7 +360,7 @@ export default function ShopLogin() {
             <button
               type="button"
               onClick={() => setShowForgotModal(false)}
-              className="w-full py-2.5 rounded-xl bg-[#4A2C2A] hover:bg-[#341816] text-white text-xs font-bold transition-colors cursor-pointer"
+              className="w-full py-2.5 rounded-xl bg-[#4A2C2A] sm:hover:bg-[#341816] text-white text-xs font-bold transition-colors cursor-pointer"
             >
               Đã hiểu
             </button>

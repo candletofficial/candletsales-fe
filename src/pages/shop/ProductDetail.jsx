@@ -406,11 +406,11 @@ export default function ProductDetail() {
 
           {/* Desktop & Tablet Breadcrumb */}
           <div className="hidden md:flex items-center flex-wrap text-[11px] font-bold uppercase tracking-wider text-stone-400">
-            <button onClick={() => navigate('/')} className="hover:text-brand-burgundy transition-colors whitespace-nowrap cursor-pointer">
+            <button onClick={() => navigate('/')} className="sm:hover:text-brand-burgundy transition-colors whitespace-nowrap cursor-pointer">
               TRANG CHỦ
             </button>
             <span className="mx-2 text-stone-300">/</span>
-            <button onClick={() => navigate('/shop')} className="hover:text-brand-burgundy transition-colors whitespace-nowrap cursor-pointer">
+            <button onClick={() => navigate('/shop')} className="sm:hover:text-brand-burgundy transition-colors whitespace-nowrap cursor-pointer">
               CỬA HÀNG NẾN THƠM NGHỆ THUẬT
             </button>
             <span className="mx-2 text-stone-300">/</span>
@@ -446,12 +446,12 @@ export default function ProductDetail() {
               {/* Nút Yêu Thích trên ảnh lớn (Desktop) */}
               <button
                 onClick={() => toggleWishlist(product, navigate)}
-                className="hidden md:flex absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-md rounded-full items-center justify-center shadow-md z-20 hover:scale-110 active:scale-90 transition-all focus:outline-none cursor-pointer"
+                className="hidden md:flex absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-md rounded-full items-center justify-center shadow-md z-20 sm:hover:scale-110 active:scale-90 transition-all focus:outline-none cursor-pointer"
                 title={isInWishlist(product._id) ? "Bỏ yêu thích" : "Thêm vào danh sách yêu thích"}
               >
                 <i className={`text-xl transition-colors ${isInWishlist(product._id)
                     ? 'ph-fill ph-heart text-rose-500'
-                    : 'ph-bold ph-heart text-stone-400 hover:text-rose-500'
+                    : 'ph-bold ph-heart text-stone-400 sm:hover:text-rose-500'
                   }`}></i>
               </button>
 
@@ -489,7 +489,7 @@ export default function ProductDetail() {
                   <button
                     type="button"
                     onClick={handlePrevImage}
-                    className="absolute left-2.5 top-1/2 z-20 hidden size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-stone-200/80 bg-white/85 text-stone-700 shadow-md backdrop-blur-md transition-all hover:bg-white hover:text-[#4A2C2A] active:scale-90 sm:flex"
+                    className="absolute left-2.5 top-1/2 z-20 hidden size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-stone-200/80 bg-white/85 text-stone-700 shadow-md backdrop-blur-md transition-all sm:hover:bg-white sm:hover:text-[#4A2C2A] active:scale-90 sm:flex"
                     aria-label="Xem ảnh trước"
                   >
                     <i className="ph-bold ph-caret-left text-base sm:text-lg"></i>
@@ -497,7 +497,7 @@ export default function ProductDetail() {
                   <button
                     type="button"
                     onClick={handleNextImage}
-                    className="absolute right-2.5 top-1/2 z-20 hidden size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-stone-200/80 bg-white/85 text-stone-700 shadow-md backdrop-blur-md transition-all hover:bg-white hover:text-[#4A2C2A] active:scale-90 sm:flex"
+                    className="absolute right-2.5 top-1/2 z-20 hidden size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-stone-200/80 bg-white/85 text-stone-700 shadow-md backdrop-blur-md transition-all sm:hover:bg-white sm:hover:text-[#4A2C2A] active:scale-90 sm:flex"
                     aria-label="Xem ảnh kế tiếp"
                   >
                     <i className="ph-bold ph-caret-right text-base sm:text-lg"></i>
@@ -515,7 +515,7 @@ export default function ProductDetail() {
                           className={`transition-all duration-300 rounded-full cursor-pointer ${
                             isActive
                               ? 'w-5 h-1.5 bg-white shadow-xs'
-                              : 'w-1.5 h-1.5 bg-white/50 hover:bg-white/80'
+                              : 'w-1.5 h-1.5 bg-white/50 sm:hover:bg-white/80'
                           }`}
                           aria-label={`Chuyển đến ảnh ${idx + 1}`}
                         />
@@ -549,7 +549,7 @@ export default function ProductDetail() {
                         className={`shrink-0 w-16 h-16 rounded-xl bg-white border-2 overflow-hidden transition-all cursor-pointer ${
                           isSelected
                             ? 'border-[#4A2C2A] shadow-xs scale-102 ring-2 ring-[#4A2C2A]/15'
-                            : 'border-stone-200/80 opacity-70 hover:opacity-100'
+                            : 'border-stone-200/80 opacity-70 sm:hover:opacity-100'
                         }`}
                       >
                         <img src={getImageUrl(img)} className="w-full h-full object-cover" alt={`${product.name} ${index + 1}`} />
@@ -570,7 +570,7 @@ export default function ProductDetail() {
                           className={`shrink-0 w-full aspect-square rounded-xl bg-white border-2 overflow-hidden transition-all cursor-pointer ${
                             isSelected
                               ? 'border-[#4A2C2A] shadow-md scale-102 ring-2 ring-[#4A2C2A]/15'
-                              : 'border-stone-200 opacity-60 hover:opacity-100'
+                              : 'border-stone-200 opacity-60 sm:hover:opacity-100'
                           }`}
                         >
                           <img src={getImageUrl(img)} className="w-full h-full object-cover" alt={`${product.name} ${index + 1}`} />
@@ -614,7 +614,7 @@ export default function ProductDetail() {
                   e.preventDefault();
                   document.getElementById('reviews-section')?.scrollIntoView({ behavior: 'smooth' });
                 }}
-                className="text-xs text-[#B45309] font-semibold hover:underline cursor-pointer flex items-center gap-1"
+                className="text-xs text-[#B45309] font-semibold sm:hover:underline cursor-pointer flex items-center gap-1"
               >
                 <span>{product.reviewCount || 0} đánh giá</span>
                 <i className="ph-bold ph-arrow-down text-[10px]"></i>
@@ -690,7 +690,7 @@ export default function ProductDetail() {
                             className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 cursor-pointer active:scale-95 ${
                               isSelected
                                 ? 'bg-[#4A2C2A] text-white border-2 border-[#4A2C2A] shadow-xs'
-                                : 'bg-white text-stone-700 border border-stone-200 hover:border-stone-400'
+                                : 'bg-white text-stone-700 border border-stone-200 sm:hover:border-stone-400'
                             }`}
                           >
                             {isSelected && <i className="ph-bold ph-check text-xs"></i>}
@@ -735,14 +735,14 @@ export default function ProductDetail() {
                 <div className="flex items-center bg-white border border-stone-200 rounded-xl p-0.5 shadow-2xs">
                   <button
                     onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                    className="w-10 h-10 flex items-center justify-center text-stone-500 hover:text-stone-800 hover:bg-stone-100 rounded-lg transition-colors cursor-pointer"
+                    className="w-10 h-10 flex items-center justify-center text-stone-500 sm:hover:text-stone-800 sm:hover:bg-stone-100 rounded-lg transition-colors cursor-pointer"
                   >
                     <i className="ph-bold ph-minus text-sm"></i>
                   </button>
                   <span className="w-12 text-center text-sm font-bold text-stone-800">{quantity}</span>
                   <button
                     onClick={() => setQuantity(q => q + 1)}
-                    className="w-10 h-10 flex items-center justify-center text-stone-500 hover:text-stone-800 hover:bg-stone-100 rounded-lg transition-colors cursor-pointer"
+                    className="w-10 h-10 flex items-center justify-center text-stone-500 sm:hover:text-stone-800 sm:hover:bg-stone-100 rounded-lg transition-colors cursor-pointer"
                   >
                     <i className="ph-bold ph-plus text-sm"></i>
                   </button>
@@ -753,7 +753,7 @@ export default function ProductDetail() {
                 <button
                   onClick={handleAddToCart}
                   disabled={isAdding}
-                  className="flex-1 border-2 border-[#4A2C2A] text-[#4A2C2A] bg-white hover:bg-[#4A2C2A]/5 active:bg-[#4A2C2A]/10 text-xs sm:text-sm font-bold uppercase tracking-wider rounded-xl py-3.5 px-4 flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed shadow-xs cursor-pointer"
+                  className="flex-1 border-2 border-[#4A2C2A] text-[#4A2C2A] bg-white sm:hover:bg-[#4A2C2A]/5 active:bg-[#4A2C2A]/10 text-xs sm:text-sm font-bold uppercase tracking-wider rounded-xl py-3.5 px-4 flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed shadow-xs cursor-pointer"
                 >
                   {isAdding ? (
                     <i className="ph-bold ph-spinner animate-spin text-lg"></i>
@@ -767,7 +767,7 @@ export default function ProductDetail() {
                 <button
                   onClick={handleBuyNow}
                   disabled={isAdding}
-                  className="flex-1 bg-[#4A2C2A] hover:bg-[#3A2221] active:bg-[#2A1817] text-white text-xs sm:text-sm font-bold uppercase tracking-wider rounded-xl py-3.5 px-4 flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed shadow-md cursor-pointer"
+                  className="flex-1 bg-[#4A2C2A] sm:hover:bg-[#3A2221] active:bg-[#2A1817] text-white text-xs sm:text-sm font-bold uppercase tracking-wider rounded-xl py-3.5 px-4 flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed shadow-md cursor-pointer"
                 >
                   <i className="ph-bold ph-tote text-base"></i>
                   <span>Mua Ngay</span>
@@ -803,7 +803,7 @@ export default function ProductDetail() {
                   onClick={() => setActiveTab('description')}
                   className={`shrink-0 cursor-pointer border-b-2 px-0 py-3 text-[11px] font-bold uppercase tracking-wider transition-all sm:rounded-t-xl sm:border-b-0 sm:px-6 sm:text-xs ${activeTab === 'description'
                       ? 'border-[#4A2C2A] text-[#4A2C2A] sm:bg-[#4A2C2A] sm:text-white sm:shadow-xs'
-                      : 'border-transparent text-stone-500 hover:text-stone-800 sm:hover:bg-stone-100'
+                      : 'border-transparent text-stone-500 sm:hover:text-stone-800 sm:hover:bg-stone-100'
                     }`}
                 >
                   Mô Tả Sản Phẩm
@@ -812,7 +812,7 @@ export default function ProductDetail() {
                   onClick={() => setActiveTab('ingredients')}
                   className={`shrink-0 cursor-pointer border-b-2 px-0 py-3 text-[11px] font-bold uppercase tracking-wider transition-all sm:rounded-t-xl sm:border-b-0 sm:px-6 sm:text-xs ${activeTab === 'ingredients'
                       ? 'border-[#4A2C2A] text-[#4A2C2A] sm:bg-[#4A2C2A] sm:text-white sm:shadow-xs'
-                      : 'border-transparent text-stone-500 hover:text-stone-800 sm:hover:bg-stone-100'
+                      : 'border-transparent text-stone-500 sm:hover:text-stone-800 sm:hover:bg-stone-100'
                     }`}
                 >
                   Thành Phần & Xuất Xứ
@@ -821,7 +821,7 @@ export default function ProductDetail() {
                   onClick={() => setActiveTab('care')}
                   className={`shrink-0 cursor-pointer border-b-2 px-0 py-3 text-[11px] font-bold uppercase tracking-wider transition-all sm:rounded-t-xl sm:border-b-0 sm:px-6 sm:text-xs ${activeTab === 'care'
                       ? 'border-[#4A2C2A] text-[#4A2C2A] sm:bg-[#4A2C2A] sm:text-white sm:shadow-xs'
-                      : 'border-transparent text-stone-500 hover:text-stone-800 sm:hover:bg-stone-100'
+                      : 'border-transparent text-stone-500 sm:hover:text-stone-800 sm:hover:bg-stone-100'
                     }`}
                 >
                   Nghệ Thuật Chăm Sóc Nến
@@ -919,7 +919,7 @@ export default function ProductDetail() {
         {/* 1. Nút Yêu thích (Wishlist) */}
         <button
           onClick={() => toggleWishlist(product, navigate)}
-          className="flex flex-col items-center justify-center w-14 shrink-0 text-stone-600 hover:text-rose-500 border-r border-stone-100 active:bg-stone-50 transition-colors cursor-pointer"
+          className="flex flex-col items-center justify-center w-14 shrink-0 text-stone-600 sm:hover:text-rose-500 border-r border-stone-100 active:bg-stone-50 transition-colors cursor-pointer"
           title={isInWishlist(product._id) ? "Bỏ yêu thích" : "Yêu thích"}
         >
           <i className={`text-xl ${isInWishlist(product._id) ? 'ph-fill ph-heart text-rose-500' : 'ph ph-heart'}`}></i>
@@ -929,7 +929,7 @@ export default function ProductDetail() {
         {/* 2. Nút Giỏ hàng (Có badge số lượng & Link trực tiếp tới /cart) */}
         <button
           onClick={() => navigate('/cart')}
-          className="flex flex-col items-center justify-center w-14 shrink-0 text-stone-600 hover:text-[#4A2C2A] border-r border-stone-100 active:bg-stone-50 transition-colors cursor-pointer relative"
+          className="flex flex-col items-center justify-center w-14 shrink-0 text-stone-600 sm:hover:text-[#4A2C2A] border-r border-stone-100 active:bg-stone-50 transition-colors cursor-pointer relative"
           title="Xem giỏ hàng"
         >
           <div className="relative">
@@ -1029,7 +1029,7 @@ export default function ProductDetail() {
               <button 
                 type="button"
                 onClick={closeVariantSheet}
-                className="absolute top-3.5 right-3.5 w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 flex items-center justify-center cursor-pointer transition-colors active:scale-95"
+                className="absolute top-3.5 right-3.5 w-8 h-8 rounded-full bg-stone-100 sm:hover:bg-stone-200 text-stone-500 flex items-center justify-center cursor-pointer transition-colors active:scale-95"
               >
                 <i className="ph-bold ph-x text-base"></i>
               </button>
@@ -1059,7 +1059,7 @@ export default function ProductDetail() {
                           className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 ${
                             isSelected
                               ? 'bg-[#4A2C2A] text-white border-2 border-[#4A2C2A] shadow-2xs'
-                              : 'bg-stone-50 text-stone-700 border border-stone-200/90 hover:border-stone-400'
+                              : 'bg-stone-50 text-stone-700 border border-stone-200/90 sm:hover:border-stone-400'
                           }`}
                         >
                           {isSelected && <i className="ph-bold ph-check text-xs"></i>}
@@ -1086,7 +1086,7 @@ export default function ProductDetail() {
                   <button
                     type="button"
                     onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                    className="w-8 h-8 flex items-center justify-center text-stone-500 hover:text-stone-800 rounded-lg active:bg-stone-200 transition-colors cursor-pointer"
+                    className="w-8 h-8 flex items-center justify-center text-stone-500 sm:hover:text-stone-800 rounded-lg active:bg-stone-200 transition-colors cursor-pointer"
                   >
                     <i className="ph-bold ph-minus text-xs"></i>
                   </button>
@@ -1094,7 +1094,7 @@ export default function ProductDetail() {
                   <button
                     type="button"
                     onClick={() => setQuantity(q => q + 1)}
-                    className="w-8 h-8 flex items-center justify-center text-stone-500 hover:text-stone-800 rounded-lg active:bg-stone-200 transition-colors cursor-pointer"
+                    className="w-8 h-8 flex items-center justify-center text-stone-500 sm:hover:text-stone-800 rounded-lg active:bg-stone-200 transition-colors cursor-pointer"
                   >
                     <i className="ph-bold ph-plus text-xs"></i>
                   </button>

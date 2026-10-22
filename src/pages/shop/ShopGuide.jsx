@@ -41,7 +41,7 @@ export default function ShopGuide() {
           
           {/* Breadcrumbs */}
           <div className="mb-6 hidden items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest text-stone-500 sm:flex">
-            <Link to="/" className="hover:text-[#4A2C2A] transition-colors">Trang Chủ</Link>
+            <Link to="/" className="sm:hover:text-[#4A2C2A] transition-colors">Trang Chủ</Link>
             <span>/</span>
             <span className="text-[#8C4A32]">Cẩm Nang Nến Thơm Nghệ Thuật</span>
           </div>
@@ -63,28 +63,28 @@ export default function ShopGuide() {
           <nav className="no-scrollbar -mx-4 mt-6 flex items-center gap-5 overflow-x-auto border-t border-stone-100 px-4 pt-3 sm:mx-0 sm:mt-10 sm:flex-wrap sm:justify-center sm:gap-2.5 sm:overflow-visible sm:border-t-0 sm:px-0 sm:pt-0">
             <a
               href="#golden-rules"
-              className="flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 border-transparent py-2 text-left text-[11px] font-bold text-stone-700 transition-all hover:border-[#4A2C2A] hover:text-[#4A2C2A] sm:rounded-full sm:border sm:bg-white sm:px-5 sm:py-2.5 sm:text-xs sm:shadow-2xs"
+              className="flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 border-transparent py-2 text-left text-[11px] font-bold text-stone-700 transition-all sm:hover:border-[#4A2C2A] sm:hover:text-[#4A2C2A] sm:rounded-full sm:border sm:bg-white sm:px-5 sm:py-2.5 sm:text-xs sm:shadow-2xs"
             >
               <i className="ph-bold ph-shield-check text-[#B45309]"></i>
               <span>4 Quy Tắc Vàng</span>
             </a>
             <a
               href="#scent-families"
-              className="flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 border-transparent py-2 text-left text-[11px] font-bold text-stone-700 transition-all hover:border-[#4A2C2A] hover:text-[#4A2C2A] sm:rounded-full sm:border sm:bg-white sm:px-5 sm:py-2.5 sm:text-xs sm:shadow-2xs"
+              className="flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 border-transparent py-2 text-left text-[11px] font-bold text-stone-700 transition-all sm:hover:border-[#4A2C2A] sm:hover:text-[#4A2C2A] sm:rounded-full sm:border sm:bg-white sm:px-5 sm:py-2.5 sm:text-xs sm:shadow-2xs"
             >
               <i className="ph-bold ph-flower-lotus text-[#B45309]"></i>
               <span>Chọn Mùi Theo Không Gian</span>
             </a>
             <a
               href="#upcycle-candle"
-              className="flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 border-transparent py-2 text-left text-[11px] font-bold text-stone-700 transition-all hover:border-[#4A2C2A] hover:text-[#4A2C2A] sm:rounded-full sm:border sm:bg-white sm:px-5 sm:py-2.5 sm:text-xs sm:shadow-2xs"
+              className="flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 border-transparent py-2 text-left text-[11px] font-bold text-stone-700 transition-all sm:hover:border-[#4A2C2A] sm:hover:text-[#4A2C2A] sm:rounded-full sm:border sm:bg-white sm:px-5 sm:py-2.5 sm:text-xs sm:shadow-2xs"
             >
               <i className="ph-bold ph-recycle text-[#B45309]"></i>
               <span>Tái Sinh Hũ Nến</span>
             </a>
             <a
               href="#faq-section"
-              className="flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 border-transparent py-2 text-left text-[11px] font-bold text-stone-700 transition-all hover:border-[#4A2C2A] hover:text-[#4A2C2A] sm:rounded-full sm:border sm:bg-white sm:px-5 sm:py-2.5 sm:text-xs sm:shadow-2xs"
+              className="flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 border-transparent py-2 text-left text-[11px] font-bold text-stone-700 transition-all sm:hover:border-[#4A2C2A] sm:hover:text-[#4A2C2A] sm:rounded-full sm:border sm:bg-white sm:px-5 sm:py-2.5 sm:text-xs sm:shadow-2xs"
             >
               <i className="ph-bold ph-question text-[#B45309]"></i>
               <span>Hỏi & Đáp (FAQ)</span>
@@ -112,7 +112,7 @@ export default function ShopGuide() {
           
           {/* Quy tắc 1 */}
           <article className="group relative overflow-hidden py-7 transition-all md:rounded-2xl md:border md:border-stone-200 md:bg-white md:p-8 md:shadow-xs md:hover:shadow-md">
-            <div className="absolute right-0 top-0 -z-0 hidden size-24 rounded-bl-full bg-[#FFF9F2] transition-transform group-hover:scale-110 md:block"></div>
+            <div className="absolute right-0 top-0 -z-0 hidden size-24 rounded-bl-full bg-[#FFF9F2] transition-transform sm:group-hover:scale-110 md:block"></div>
             <div className="relative z-10">
               <div className="w-12 h-12 rounded-xl bg-[#4A2C2A] text-white font-serif-display font-bold text-xl flex items-center justify-center mb-6 shadow-sm">
                 01
@@ -132,7 +132,7 @@ export default function ShopGuide() {
 
           {/* Quy tắc 2 */}
           <article className="group relative overflow-hidden py-7 transition-all md:rounded-2xl md:border md:border-stone-200 md:bg-white md:p-8 md:shadow-xs md:hover:shadow-md">
-            <div className="absolute right-0 top-0 -z-0 hidden size-24 rounded-bl-full bg-[#FFF9F2] transition-transform group-hover:scale-110 md:block"></div>
+            <div className="absolute right-0 top-0 -z-0 hidden size-24 rounded-bl-full bg-[#FFF9F2] transition-transform sm:group-hover:scale-110 md:block"></div>
             <div className="relative z-10">
               <div className="w-12 h-12 rounded-xl bg-[#4A2C2A] text-white font-serif-display font-bold text-xl flex items-center justify-center mb-6 shadow-sm">
                 02
@@ -152,7 +152,7 @@ export default function ShopGuide() {
 
           {/* Quy tắc 3 */}
           <article className="group relative overflow-hidden py-7 transition-all md:rounded-2xl md:border md:border-stone-200 md:bg-white md:p-8 md:shadow-xs md:hover:shadow-md">
-            <div className="absolute right-0 top-0 -z-0 hidden size-24 rounded-bl-full bg-[#FFF9F2] transition-transform group-hover:scale-110 md:block"></div>
+            <div className="absolute right-0 top-0 -z-0 hidden size-24 rounded-bl-full bg-[#FFF9F2] transition-transform sm:group-hover:scale-110 md:block"></div>
             <div className="relative z-10">
               <div className="w-12 h-12 rounded-xl bg-[#4A2C2A] text-white font-serif-display font-bold text-xl flex items-center justify-center mb-6 shadow-sm">
                 03
@@ -172,7 +172,7 @@ export default function ShopGuide() {
 
           {/* Quy tắc 4 */}
           <article className="group relative overflow-hidden py-7 transition-all md:rounded-2xl md:border md:border-stone-200 md:bg-white md:p-8 md:shadow-xs md:hover:shadow-md">
-            <div className="absolute right-0 top-0 -z-0 hidden size-24 rounded-bl-full bg-[#FFF9F2] transition-transform group-hover:scale-110 md:block"></div>
+            <div className="absolute right-0 top-0 -z-0 hidden size-24 rounded-bl-full bg-[#FFF9F2] transition-transform sm:group-hover:scale-110 md:block"></div>
             <div className="relative z-10">
               <div className="w-12 h-12 rounded-xl bg-[#4A2C2A] text-white font-serif-display font-bold text-xl flex items-center justify-center mb-6 shadow-sm">
                 04
@@ -238,9 +238,9 @@ export default function ShopGuide() {
             </div>
 
             <div className="mt-8 pt-4 border-t border-amber-200/60">
-              <Link to="/shop?category=Nến Hũ Đơn" className="text-xs font-bold text-[#4A2C2A] hover:text-[#8C4A32] inline-flex items-center gap-1.5 group">
+              <Link to="/shop?category=Nến Hũ Đơn" className="text-xs font-bold text-[#4A2C2A] sm:hover:text-[#8C4A32] inline-flex items-center gap-1.5 group">
                 <span>Khám phá nốt hương Gỗ</span>
-                <i className="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                <i className="ph-bold ph-arrow-right sm:group-hover:translate-x-1 transition-transform"></i>
               </Link>
             </div>
           </article>
@@ -274,9 +274,9 @@ export default function ShopGuide() {
             </div>
 
             <div className="mt-8 pt-4 border-t border-amber-200/60">
-              <Link to="/shop?category=Nến Hũ Đơn" className="text-xs font-bold text-[#4A2C2A] hover:text-[#8C4A32] inline-flex items-center gap-1.5 group">
+              <Link to="/shop?category=Nến Hũ Đơn" className="text-xs font-bold text-[#4A2C2A] sm:hover:text-[#8C4A32] inline-flex items-center gap-1.5 group">
                 <span>Khám phá nốt hương Hoa</span>
-                <i className="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                <i className="ph-bold ph-arrow-right sm:group-hover:translate-x-1 transition-transform"></i>
               </Link>
             </div>
           </article>
@@ -310,9 +310,9 @@ export default function ShopGuide() {
             </div>
 
             <div className="mt-8 pt-4 border-t border-amber-200/60">
-              <Link to="/shop?category=Nến Hũ Đơn" className="text-xs font-bold text-[#4A2C2A] hover:text-[#8C4A32] inline-flex items-center gap-1.5 group">
+              <Link to="/shop?category=Nến Hũ Đơn" className="text-xs font-bold text-[#4A2C2A] sm:hover:text-[#8C4A32] inline-flex items-center gap-1.5 group">
                 <span>Khám phá nốt hương Trà</span>
-                <i className="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                <i className="ph-bold ph-arrow-right sm:group-hover:translate-x-1 transition-transform"></i>
               </Link>
             </div>
           </article>
@@ -416,7 +416,7 @@ export default function ShopGuide() {
                 <button
                   type="button"
                   onClick={() => toggleFaq(index)}
-                  className="flex w-full items-center justify-between gap-4 py-5 text-left transition-colors hover:bg-stone-50/80 focus:outline-none sm:px-6"
+                  className="flex w-full items-center justify-between gap-4 py-5 text-left transition-colors sm:hover:bg-stone-50/80 focus:outline-none sm:px-6"
                 >
                   <span className="font-serif-display text-base sm:text-lg font-bold text-[#4A2C2A]">
                     {faq.q}
@@ -444,7 +444,7 @@ export default function ShopGuide() {
           </div>
           <a
             href="tel:0328624761"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#4A2C2A] text-white text-xs font-bold uppercase tracking-wider hover:bg-[#381B18] transition-colors shadow-xs shrink-0"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#4A2C2A] text-white text-xs font-bold uppercase tracking-wider sm:hover:bg-[#381B18] transition-colors shadow-xs shrink-0"
           >
             <i className="ph-bold ph-phone-call"></i>
             <span>Hotline: 032.862.4761</span>
@@ -467,7 +467,7 @@ export default function ShopGuide() {
           <div className="pt-2">
             <Link
               to="/shop"
-              className="inline-flex items-center gap-2 bg-[#4A2C2A] hover:bg-[#381B18] text-white font-bold text-xs uppercase tracking-widest px-8 py-4 rounded-full transition-all shadow-md hover:scale-105 active:scale-95"
+              className="inline-flex items-center gap-2 bg-[#4A2C2A] sm:hover:bg-[#381B18] text-white font-bold text-xs uppercase tracking-widest px-8 py-4 rounded-full transition-all shadow-md sm:hover:scale-105 active:scale-95"
             >
               <i className="ph-bold ph-tote text-base"></i>
               <span>Ghé Thăm Cửa Hàng Nến</span>

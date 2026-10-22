@@ -132,7 +132,7 @@ export default function ShopStoryDetail() {
           </p>
           <Link
             to="/stories"
-            className="inline-flex items-center gap-2 bg-[#381B18] text-amber-100 px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-[#25110F] transition-all shadow-xs mt-2"
+            className="inline-flex items-center gap-2 bg-[#381B18] text-amber-100 px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider sm:hover:bg-[#25110F] transition-all shadow-xs mt-2"
           >
             <i className="ph-bold ph-arrow-left"></i>
             <span>Về Danh Sách Câu Chuyện</span>
@@ -171,9 +171,9 @@ export default function ShopStoryDetail() {
         
         {/* Breadcrumb Navigation */}
         <div className="mb-6 hidden items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-stone-500 sm:flex">
-          <Link to="/" className="hover:text-[#4A2C2A] transition-colors">Trang Chủ</Link>
+          <Link to="/" className="sm:hover:text-[#4A2C2A] transition-colors">Trang Chủ</Link>
           <span className="text-stone-300">/</span>
-          <Link to="/stories" className="hover:text-[#4A2C2A] transition-colors">Câu Chuyện</Link>
+          <Link to="/stories" className="sm:hover:text-[#4A2C2A] transition-colors">Câu Chuyện</Link>
           <span className="text-stone-300">/</span>
           <span className="text-stone-400 truncate max-w-[180px] sm:max-w-none">{post.category}</span>
         </div>
@@ -240,7 +240,7 @@ export default function ShopStoryDetail() {
                 type="button"
                 onClick={() => setFontSize('normal')}
                 className={`px-2 py-0.5 text-xs font-bold rounded-full transition-colors ${
-                  fontSize === 'normal' ? 'bg-[#381B18] text-white' : 'text-stone-500 hover:text-stone-800'
+                  fontSize === 'normal' ? 'bg-[#381B18] text-white' : 'text-stone-500 sm:hover:text-stone-800'
                 }`}
                 title="Cỡ chữ tiêu chuẩn"
               >
@@ -250,7 +250,7 @@ export default function ShopStoryDetail() {
                 type="button"
                 onClick={() => setFontSize('large')}
                 className={`px-2 py-0.5 text-sm font-bold rounded-full transition-colors ${
-                  fontSize === 'large' ? 'bg-[#381B18] text-white' : 'text-stone-500 hover:text-stone-800'
+                  fontSize === 'large' ? 'bg-[#381B18] text-white' : 'text-stone-500 sm:hover:text-stone-800'
                 }`}
                 title="Cỡ chữ lớn"
               >
@@ -265,7 +265,7 @@ export default function ShopStoryDetail() {
               className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full border transition-all text-xs font-bold cursor-pointer shadow-2xs ${
                 isLiked
                   ? 'bg-rose-50 border-rose-300 text-rose-600 scale-105'
-                  : 'bg-white border-stone-200 hover:border-rose-300 text-stone-700 hover:text-rose-500'
+                  : 'bg-white border-stone-200 sm:hover:border-rose-300 text-stone-700 sm:hover:text-rose-500'
               }`}
               title="Yêu thích bài viết"
             >
@@ -277,7 +277,7 @@ export default function ShopStoryDetail() {
             <button
               type="button"
               onClick={handleShare}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-stone-200/90 hover:border-stone-400 bg-white hover:bg-stone-50 text-stone-700 font-bold transition-all text-xs shadow-2xs cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-stone-200/90 sm:hover:border-stone-400 bg-white sm:hover:bg-stone-50 text-stone-700 font-bold transition-all text-xs shadow-2xs cursor-pointer"
             >
               <i className={`ph-bold ${copied ? 'ph-check text-emerald-600' : 'ph-share-network'}`}></i>
               <span>{copied ? 'Đã sao chép link!' : 'Chia sẻ'}</span>
@@ -296,7 +296,7 @@ export default function ShopStoryDetail() {
             <img
               src={post.thumbnail}
               alt={post.title}
-              className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-1000 ease-out"
+              className="w-full h-full object-cover sm:group-hover:scale-103 transition-transform duration-1000 ease-out"
             />
           </div>
           <p className="text-center text-[11px] text-stone-400 mt-3 font-serif-display italic">
@@ -353,7 +353,7 @@ export default function ShopStoryDetail() {
               <Link
                 key={tag}
                 to={`/stories?q=${encodeURIComponent(tag)}`}
-                className="px-3.5 py-1 rounded-full bg-white border border-stone-200/90 text-stone-600 hover:text-[#4A2C2A] hover:border-[#4A2C2A] text-xs font-semibold transition-all shadow-2xs hover:scale-105"
+                className="px-3.5 py-1 rounded-full bg-white border border-stone-200/90 text-stone-600 sm:hover:text-[#4A2C2A] sm:hover:border-[#4A2C2A] text-xs font-semibold transition-all shadow-2xs sm:hover:scale-105"
               >
                 #{tag}
               </Link>
@@ -382,8 +382,8 @@ export default function ShopStoryDetail() {
               onClick={handleToggleLike}
               className={`inline-flex items-center gap-2.5 px-6 py-3 rounded-full text-xs font-bold transition-all shadow-sm cursor-pointer ${
                 isLiked
-                  ? 'bg-rose-600 text-white hover:bg-rose-700 scale-105 shadow-rose-200 ring-4 ring-rose-100'
-                  : 'bg-[#FAF7F2] border border-stone-300 hover:border-rose-300 text-stone-700 hover:text-rose-600 hover:bg-rose-50/60'
+                  ? 'bg-rose-600 text-white sm:hover:bg-rose-700 scale-105 shadow-rose-200 ring-4 ring-rose-100'
+                  : 'bg-[#FAF7F2] border border-stone-300 sm:hover:border-rose-300 text-stone-700 sm:hover:text-rose-600 sm:hover:bg-rose-50/60'
               }`}
             >
               <i className={`text-base ${isLiked ? 'ph-fill ph-heart animate-pulse' : 'ph-bold ph-heart'}`}></i>
@@ -393,7 +393,7 @@ export default function ShopStoryDetail() {
             <button
               type="button"
               onClick={handleShare}
-              className="inline-flex items-center gap-1.5 px-4 py-3 rounded-full border border-stone-200 hover:border-stone-400 bg-white hover:bg-stone-50 text-stone-600 text-xs font-bold transition-all shadow-2xs cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-4 py-3 rounded-full border border-stone-200 sm:hover:border-stone-400 bg-white sm:hover:bg-stone-50 text-stone-600 text-xs font-bold transition-all shadow-2xs cursor-pointer"
               title="Chia sẻ câu chuyện"
             >
               <i className={`ph-bold ${copied ? 'ph-check text-emerald-600' : 'ph-share-network'}`}></i>
@@ -431,12 +431,12 @@ export default function ShopStoryDetail() {
               </p>
 
               <div className="pt-3 flex flex-wrap items-center justify-center sm:justify-start gap-4 text-xs font-semibold text-[#8C4A32]">
-                <Link to="/shop" className="hover:underline flex items-center gap-1">
+                <Link to="/shop" className="sm:hover:underline flex items-center gap-1">
                   <i className="ph ph-shopping-bag"></i>
                   <span>Khám phá nến tại xưởng</span>
                 </Link>
                 <span>•</span>
-                <Link to="/guide" className="hover:underline flex items-center gap-1">
+                <Link to="/guide" className="sm:hover:underline flex items-center gap-1">
                   <i className="ph ph-book-bookmark"></i>
                   <span>Cẩm nang chăm sóc</span>
                 </Link>
@@ -457,7 +457,7 @@ export default function ShopStoryDetail() {
           </div>
           <Link
             to="/shop"
-            className="px-6 py-3 bg-amber-400 text-[#381B18] font-bold text-xs rounded-full hover:bg-amber-300 transition-all uppercase tracking-wider shrink-0 shadow-sm"
+            className="px-6 py-3 bg-amber-400 text-[#381B18] font-bold text-xs rounded-full sm:hover:bg-amber-300 transition-all uppercase tracking-wider shrink-0 shadow-sm"
           >
             Ghé Thăm Cửa Hàng
           </Link>
@@ -467,7 +467,7 @@ export default function ShopStoryDetail() {
         <div className="mt-12 text-center">
           <Link
             to="/stories"
-            className="inline-flex items-center gap-2 px-8 py-3 rounded-full border border-stone-300 text-stone-700 hover:border-[#381B18] hover:text-[#381B18] text-xs font-bold uppercase tracking-wider transition-all bg-white shadow-2xs"
+            className="inline-flex items-center gap-2 px-8 py-3 rounded-full border border-stone-300 text-stone-700 sm:hover:border-[#381B18] sm:hover:text-[#381B18] text-xs font-bold uppercase tracking-wider transition-all bg-white shadow-2xs"
           >
             <i className="ph-bold ph-arrow-left"></i>
             <span>Về Trang Danh Sách Câu Chuyện</span>
@@ -498,16 +498,16 @@ export default function ShopStoryDetail() {
                   <img
                     src={rel.thumbnail || 'https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=600&q=80'}
                     alt={rel.title}
-                    className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 ease-out"
+                    className="w-full h-full object-cover sm:group-hover:scale-108 transition-transform duration-700 ease-out"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent opacity-0 sm:group-hover:opacity-100 transition-opacity"></div>
                 </Link>
 
                 <div className="flex flex-1 flex-col justify-between space-y-3 pt-5 md:p-6">
                   <div className="space-y-2">
                     <span className="text-[11px] text-stone-400 font-medium">{rel.readTime}</span>
                     <Link to={`/stories/${rel.slug}`}>
-                      <h4 className="font-serif-display text-xl font-bold text-[#2C1810] group-hover:text-[#8C4A32] transition-colors leading-snug line-clamp-2">
+                      <h4 className="font-serif-display text-xl font-bold text-[#2C1810] sm:group-hover:text-[#8C4A32] transition-colors leading-snug line-clamp-2">
                         {rel.title}
                       </h4>
                     </Link>
@@ -519,10 +519,10 @@ export default function ShopStoryDetail() {
                   <div className="pt-3 border-t border-stone-100 mt-4 flex items-center justify-between">
                     <Link
                       to={`/stories/${rel.slug}`}
-                      className="text-xs font-bold text-[#4A2C2A] group-hover:text-[#8C4A32] flex items-center gap-1 transition-colors"
+                      className="text-xs font-bold text-[#4A2C2A] sm:group-hover:text-[#8C4A32] flex items-center gap-1 transition-colors"
                     >
                       <span>Đọc tiếp</span>
-                      <i className="ph-bold ph-caret-right text-xs transition-transform group-hover:translate-x-1"></i>
+                      <i className="ph-bold ph-caret-right text-xs transition-transform sm:group-hover:translate-x-1"></i>
                     </Link>
                   </div>
                 </div>

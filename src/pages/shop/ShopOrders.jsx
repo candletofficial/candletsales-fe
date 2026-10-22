@@ -261,11 +261,11 @@ export default function ShopOrders() {
           </button>
           <div>
             <div className="mb-1 hidden flex-wrap items-center text-[11px] font-bold uppercase tracking-widest text-stone-400 sm:flex">
-              <Link to="/" className="hover:text-[#4A2C2A] transition-colors">
+              <Link to="/" className="sm:hover:text-[#4A2C2A] transition-colors">
                 Trang Chủ
               </Link>
               <span className="mx-2 text-stone-300">/</span>
-              <Link to="/profile" className="hover:text-[#4A2C2A] transition-colors">
+              <Link to="/profile" className="sm:hover:text-[#4A2C2A] transition-colors">
                 Tài Khoản
               </Link>
               <span className="mx-2 text-stone-300">/</span>
@@ -282,14 +282,14 @@ export default function ShopOrders() {
           <div className="flex shrink-0 items-center justify-end gap-2 sm:gap-3">
             <Link
               to="/profile"
-              className="hidden items-center gap-1.5 rounded-2xl border border-stone-200 bg-white px-4 py-2.5 text-xs font-bold text-stone-700 shadow-2xs transition-colors hover:bg-stone-50 sm:inline-flex"
+              className="hidden items-center gap-1.5 rounded-2xl border border-stone-200 bg-white px-4 py-2.5 text-xs font-bold text-stone-700 shadow-2xs transition-colors sm:hover:bg-stone-50 sm:inline-flex"
             >
               <i className="ph-bold ph-user text-sm"></i>
               <span>Hồ sơ của bạn</span>
             </Link>
             <Link
               to="/shop"
-              className="hidden h-9 items-center gap-1.5 rounded-xl bg-[#4A2C2A] px-3 text-[11px] font-bold text-white shadow-2xs transition-colors hover:bg-[#381B18] sm:inline-flex sm:h-auto sm:rounded-2xl sm:px-4 sm:py-2.5 sm:text-xs"
+              className="hidden h-9 items-center gap-1.5 rounded-xl bg-[#4A2C2A] px-3 text-[11px] font-bold text-white shadow-2xs transition-colors sm:hover:bg-[#381B18] sm:inline-flex sm:h-auto sm:rounded-2xl sm:px-4 sm:py-2.5 sm:text-xs"
             >
               <span>Mua thêm nến</span>
               <i className="ph-bold ph-arrow-right text-xs"></i>
@@ -346,7 +346,7 @@ export default function ShopOrders() {
                 <button
                   type="submit"
                   disabled={searchingGuest}
-                  className="w-full bg-[#4A2C2A] hover:bg-[#381B18] text-white text-xs font-bold uppercase tracking-wider rounded-2xl py-3 px-4 flex items-center justify-center gap-2 cursor-pointer transition-all shadow-xs"
+                  className="w-full bg-[#4A2C2A] sm:hover:bg-[#381B18] text-white text-xs font-bold uppercase tracking-wider rounded-2xl py-3 px-4 flex items-center justify-center gap-2 cursor-pointer transition-all shadow-xs"
                 >
                   {searchingGuest ? (
                     <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
@@ -379,7 +379,7 @@ export default function ShopOrders() {
             {searchKeyword && (
               <button
                 onClick={() => setSearchKeyword('')}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 sm:hover:text-stone-700"
               >
                 <i className="ph-bold ph-x text-xs"></i>
               </button>
@@ -392,7 +392,7 @@ export default function ShopOrders() {
             className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border text-xs font-bold transition-all cursor-pointer whitespace-nowrap sm:h-auto sm:w-auto sm:gap-2 sm:rounded-2xl sm:px-4 sm:py-2.5 ${
               filterExpressOnly
                 ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white border-orange-400 shadow-xs'
-                : 'bg-[#F7F3EF] text-[#6D514B] border-transparent hover:bg-[#F0E8E2] sm:bg-[#FFF9F4] sm:border-[#E8DED7]'
+                : 'bg-[#F7F3EF] text-[#6D514B] border-transparent sm:hover:bg-[#F0E8E2] sm:bg-[#FFF9F4] sm:border-[#E8DED7]'
             }`}
           >
             <i className={`ph-fill ph-lightning text-xs ${filterExpressOnly ? 'text-white' : 'text-orange-500'}`}></i>
@@ -418,7 +418,7 @@ export default function ShopOrders() {
               className={`flex items-center gap-1.5 whitespace-nowrap border-b-2 px-3 py-3 text-[11px] transition-all cursor-pointer sm:rounded-full sm:border sm:px-4 sm:py-2.5 sm:text-xs sm:shadow-2xs ${
                 activeTab === tab.key
                   ? 'border-[#8C4A32] bg-transparent text-[#6B3D35] font-bold sm:bg-[#4A2C2A] sm:text-white sm:border-[#4A2C2A]'
-                  : 'border-transparent bg-transparent text-stone-500 hover:text-stone-900 sm:bg-white sm:border-stone-200/80 sm:hover:bg-stone-50'
+                  : 'border-transparent bg-transparent text-stone-500 sm:hover:text-stone-900 sm:bg-white sm:border-stone-200/80 sm:hover:bg-stone-50'
               }`}
             >
               <i className={`ph-bold ${tab.icon} text-xs ${activeTab === tab.key ? 'text-[#A45D45] sm:text-amber-300' : 'text-stone-400'}`}></i>
@@ -467,14 +467,14 @@ export default function ShopOrders() {
                     setFilterExpressOnly(false);
                     setActiveTab('all');
                   }}
-                  className="px-5 py-2.5 rounded-full text-xs font-bold text-[#4A2C2A] bg-stone-100 hover:bg-stone-200 transition-colors"
+                  className="px-5 py-2.5 rounded-full text-xs font-bold text-[#4A2C2A] bg-stone-100 sm:hover:bg-stone-200 transition-colors"
                 >
                   Xóa bộ lọc
                 </button>
               ) : (
                 <Link
                   to="/shop"
-                  className="inline-flex items-center gap-2 bg-[#4A2C2A] hover:bg-[#381B18] text-white text-xs font-bold uppercase tracking-wider py-3 px-6 rounded-full shadow-sm transition-all"
+                  className="inline-flex items-center gap-2 bg-[#4A2C2A] sm:hover:bg-[#381B18] text-white text-xs font-bold uppercase tracking-wider py-3 px-6 rounded-full shadow-sm transition-all"
                 >
                   <span>Khám phá nến thơm</span>
                   <i className="ph-bold ph-arrow-right text-xs"></i>
@@ -622,7 +622,7 @@ export default function ShopOrders() {
                 </article>
 
                 <div
-                  className={`hidden overflow-hidden rounded-3xl border bg-white shadow-sm transition-all hover:shadow-md sm:block ${
+                  className={`hidden overflow-hidden rounded-3xl border bg-white shadow-sm transition-all sm:hover:shadow-md sm:block ${
                     isExpress
                       ? 'border-l-4 border-l-orange-500 border-stone-200/90 ring-1 ring-orange-400/20'
                       : 'border-[#E6DDD7]'
@@ -807,7 +807,7 @@ export default function ShopOrders() {
                             <img
                               src={getImageUrl(item.product_image)}
                               alt={item.product_name}
-                              className="w-14 h-14 sm:w-16 sm:h-16 object-cover rounded-2xl border border-stone-200 shrink-0 shadow-2xs hover:scale-105 transition-transform"
+                              className="w-14 h-14 sm:w-16 sm:h-16 object-cover rounded-2xl border border-stone-200 shrink-0 shadow-2xs sm:hover:scale-105 transition-transform"
                             />
                           ) : (
                             <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-stone-100 flex items-center justify-center text-stone-400 shrink-0">
@@ -905,7 +905,7 @@ export default function ShopOrders() {
                           href={spxTrackingUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 rounded-2xl border border-orange-200 bg-orange-50 px-3.5 py-2 text-xs font-bold text-orange-700 transition-colors hover:bg-orange-100"
+                          className="inline-flex items-center gap-1.5 rounded-2xl border border-orange-200 bg-orange-50 px-3.5 py-2 text-xs font-bold text-orange-700 transition-colors sm:hover:bg-orange-100"
                         >
                           <i className="ph-bold ph-truck text-sm"></i>
                           SPX
@@ -915,7 +915,7 @@ export default function ShopOrders() {
                       {/* Nút Xem chi tiết */}
                       <button
                         onClick={() => setSelectedOrderDetail(order)}
-                        className="rounded-xl border border-[#DCCBC0] bg-[#FFF9F4] px-4 py-2 text-xs font-bold text-[#5B3732] transition-all hover:bg-[#F4E8DF] sm:rounded-2xl sm:shadow-2xs"
+                        className="rounded-xl border border-[#DCCBC0] bg-[#FFF9F4] px-4 py-2 text-xs font-bold text-[#5B3732] transition-all sm:hover:bg-[#F4E8DF] sm:rounded-2xl sm:shadow-2xs"
                       >
                         Chi tiết
                       </button>
@@ -928,7 +928,7 @@ export default function ShopOrders() {
                             setCancelReason('');
                             setCancelError('');
                           }}
-                          className="px-3.5 py-2 rounded-2xl text-xs font-bold text-rose-600 hover:text-white bg-rose-50 hover:bg-rose-600 border border-rose-200 transition-all cursor-pointer"
+                          className="px-3.5 py-2 rounded-2xl text-xs font-bold text-rose-600 sm:hover:text-white bg-rose-50 sm:hover:bg-rose-600 border border-rose-200 transition-all cursor-pointer"
                         >
                           Huỷ đơn
                         </button>
@@ -952,7 +952,7 @@ export default function ShopOrders() {
                       {(dStatus === 'delivered' || isCancelled) && (
                         <Link
                           to="/shop"
-                          className="px-3.5 py-2 rounded-2xl text-xs font-bold text-white bg-[#4A2C2A] hover:bg-[#381B18] transition-all shadow-2xs"
+                          className="px-3.5 py-2 rounded-2xl text-xs font-bold text-white bg-[#4A2C2A] sm:hover:bg-[#381B18] transition-all shadow-2xs"
                         >
                           Mua lại
                         </Link>
@@ -1000,7 +1000,7 @@ export default function ShopOrders() {
 
               <button
                 onClick={() => setSelectedOrderDetail(null)}
-                className="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 flex items-center justify-center transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-full bg-stone-100 sm:hover:bg-stone-200 text-stone-500 flex items-center justify-center transition-colors cursor-pointer"
               >
                 <i className="ph-bold ph-x text-sm"></i>
               </button>
@@ -1120,7 +1120,7 @@ export default function ShopOrders() {
             <div className="flex items-center justify-end gap-3 pt-2">
               <button
                 onClick={() => setSelectedOrderDetail(null)}
-                className="px-6 py-2.5 rounded-full text-xs font-bold text-stone-600 bg-stone-100 hover:bg-stone-200 transition-colors cursor-pointer"
+                className="px-6 py-2.5 rounded-full text-xs font-bold text-stone-600 bg-stone-100 sm:hover:bg-stone-200 transition-colors cursor-pointer"
               >
                 Đóng
               </button>
@@ -1168,7 +1168,7 @@ export default function ShopOrders() {
                     className={`text-[11px] px-2.5 py-1 rounded-xl transition-all cursor-pointer border ${
                       cancelReason === reason
                         ? 'bg-[#4A2C2A] text-white border-[#4A2C2A]'
-                        : 'bg-stone-50 text-stone-600 border-stone-200 hover:bg-stone-100'
+                        : 'bg-stone-50 text-stone-600 border-stone-200 sm:hover:bg-stone-100'
                     }`}
                   >
                     {reason}
@@ -1196,14 +1196,14 @@ export default function ShopOrders() {
               <button
                 onClick={() => setCancelModalOrder(null)}
                 disabled={cancelling}
-                className="px-5 py-2.5 rounded-full text-xs font-bold text-stone-600 hover:bg-stone-100 transition-colors cursor-pointer"
+                className="px-5 py-2.5 rounded-full text-xs font-bold text-stone-600 sm:hover:bg-stone-100 transition-colors cursor-pointer"
               >
                 Giữ lại đơn
               </button>
               <button
                 onClick={handleCancelOrder}
                 disabled={cancelling}
-                className="px-6 py-2.5 rounded-full text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 transition-colors flex items-center gap-2 cursor-pointer shadow-sm disabled:opacity-60"
+                className="px-6 py-2.5 rounded-full text-xs font-bold text-white bg-rose-600 sm:hover:bg-rose-700 transition-colors flex items-center gap-2 cursor-pointer shadow-sm disabled:opacity-60"
               >
                 {cancelling && (
                   <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>

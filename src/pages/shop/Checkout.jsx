@@ -620,14 +620,14 @@ export default function Checkout() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link 
               to="/shop" 
-              className="w-full sm:w-auto inline-flex bg-[#4A2C2A] hover:bg-[#341F1D] text-white text-xs font-bold uppercase tracking-widest rounded-xl py-4 px-8 items-center justify-center gap-2 transition-all shadow-md active:scale-98"
+              className="w-full sm:w-auto inline-flex bg-[#4A2C2A] sm:hover:bg-[#341F1D] text-white text-xs font-bold uppercase tracking-widest rounded-xl py-4 px-8 items-center justify-center gap-2 transition-all shadow-md active:scale-98"
             >
               <i className="ph-bold ph-storefront text-base"></i>
               Tiếp tục mua sắm
             </Link>
             <Link 
               to="/" 
-              className="w-full sm:w-auto inline-flex bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold uppercase tracking-widest rounded-xl py-4 px-6 items-center justify-center gap-2 transition-colors"
+              className="w-full sm:w-auto inline-flex bg-stone-100 sm:hover:bg-stone-200 text-stone-700 text-xs font-bold uppercase tracking-widest rounded-xl py-4 px-6 items-center justify-center gap-2 transition-colors"
             >
               Về trang chủ
             </Link>
@@ -853,7 +853,7 @@ export default function Checkout() {
                   </div>
                   <Link 
                     to="/shop" 
-                    className="shrink-0 text-xs font-bold text-[#8C4A32] hover:text-[#4A2C2A] bg-white border border-amber-300 px-3 py-1.5 rounded-lg shadow-2xs hover:bg-amber-50 transition-all flex items-center gap-1"
+                    className="shrink-0 text-xs font-bold text-[#8C4A32] sm:hover:text-[#4A2C2A] bg-white border border-amber-300 px-3 py-1.5 rounded-lg shadow-2xs sm:hover:bg-amber-50 transition-all flex items-center gap-1"
                   >
                     <span>Chọn thêm</span>
                     <i className="ph-bold ph-arrow-right text-[11px]"></i>
@@ -867,7 +867,7 @@ export default function Checkout() {
                   className={`flex items-start gap-3 rounded-xl border-2 p-3 cursor-pointer transition-all sm:p-4 ${
                     formData.shippingMethod === 'standard'
                       ? 'border-[#4A2C2A] bg-stone-50/70 shadow-xs'
-                      : 'border-stone-200 hover:border-stone-300'
+                      : 'border-stone-200 sm:hover:border-stone-300'
                   }`}
                 >
                   <input 
@@ -906,7 +906,7 @@ export default function Checkout() {
                       ? 'border-stone-200 bg-stone-50/60 opacity-75 cursor-not-allowed'
                       : formData.shippingMethod === 'express'
                       ? 'border-orange-500 bg-gradient-to-r from-orange-50/90 to-amber-50/50 shadow-xs ring-1 ring-orange-400 cursor-pointer'
-                      : 'border-stone-200 hover:border-orange-300 cursor-pointer'
+                      : 'border-stone-200 sm:hover:border-orange-300 cursor-pointer'
                   }`}
                 >
                   <input 
@@ -999,7 +999,7 @@ export default function Checkout() {
                   className={`flex cursor-pointer items-start gap-3 rounded-xl border-2 p-3 transition-all sm:gap-3.5 sm:p-4 ${
                     formData.payment_method === 'cash'
                       ? 'border-[#4A2C2A] bg-stone-50/70 shadow-xs'
-                      : 'border-stone-200 hover:border-stone-300'
+                      : 'border-stone-200 sm:hover:border-stone-300'
                   }`}
                 >
                   <input 
@@ -1026,7 +1026,7 @@ export default function Checkout() {
                   className={`flex cursor-pointer items-start gap-3 rounded-xl border-2 p-3 transition-all sm:gap-3.5 sm:p-4 ${
                     formData.payment_method === 'transfer'
                       ? 'border-[#4A2C2A] bg-stone-50/70 shadow-xs'
-                      : 'border-stone-200 hover:border-stone-300'
+                      : 'border-stone-200 sm:hover:border-stone-300'
                   }`}
                 >
                   <input 
@@ -1143,7 +1143,7 @@ export default function Checkout() {
                   <button 
                     type="button"
                     onClick={() => setShowCouponModal(true)}
-                    className="text-xs text-[#8C4A32] font-bold hover:underline flex items-center gap-0.5"
+                    className="text-xs text-[#8C4A32] font-bold sm:hover:underline flex items-center gap-0.5"
                   >
                     {selectedCouponCode ? 'Đổi mã khác' : 'Chọn mã'}
                     <i className="ph-bold ph-caret-right text-xs"></i>
@@ -1168,7 +1168,7 @@ export default function Checkout() {
                     <button 
                       type="button"
                       onClick={() => setSelectedCouponCode('')}
-                      className="w-7 h-7 rounded-full bg-white hover:bg-red-50 text-stone-400 hover:text-red-500 flex items-center justify-center transition-colors shadow-xs shrink-0"
+                      className="w-7 h-7 rounded-full bg-white sm:hover:bg-red-50 text-stone-400 sm:hover:text-red-500 flex items-center justify-center transition-colors shadow-xs shrink-0"
                       title="Gỡ mã giảm giá"
                     >
                       <i className="ph-bold ph-x text-sm"></i>
@@ -1178,7 +1178,7 @@ export default function Checkout() {
                   <button 
                     type="button"
                     onClick={() => setShowCouponModal(true)}
-                    className="w-full bg-stone-50 hover:bg-stone-100 border border-stone-200 border-dashed rounded-xl p-3.5 flex items-center justify-center gap-2 text-xs font-bold text-stone-600 transition-colors shadow-2xs"
+                    className="w-full bg-stone-50 sm:hover:bg-stone-100 border border-stone-200 border-dashed rounded-xl p-3.5 flex items-center justify-center gap-2 text-xs font-bold text-stone-600 transition-colors shadow-2xs"
                   >
                     <i className="ph-bold ph-ticket text-base text-[#8C4A32]"></i>
                     Bấm để áp dụng mã giảm giá voucher
@@ -1246,7 +1246,7 @@ export default function Checkout() {
                 type="button"
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="hidden lg:flex w-full bg-[#4A2C2A] hover:bg-[#341F1D] text-white text-xs font-bold uppercase tracking-widest rounded-xl py-4 px-6 items-center justify-center gap-2.5 transition-all shadow-md hover:shadow-lg active:scale-98 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                className="hidden lg:flex w-full bg-[#4A2C2A] sm:hover:bg-[#341F1D] text-white text-xs font-bold uppercase tracking-widest rounded-xl py-4 px-6 items-center justify-center gap-2.5 transition-all shadow-md sm:hover:shadow-lg active:scale-98 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
               >
                 {submitting ? (
                   <>
@@ -1325,7 +1325,7 @@ export default function Checkout() {
               </div>
               <button 
                 onClick={() => { setShowCouponModal(false); setCustomError(''); }}
-                className="w-8 h-8 flex items-center justify-center text-stone-400 hover:text-stone-700 hover:bg-stone-200 rounded-full transition-colors"
+                className="w-8 h-8 flex items-center justify-center text-stone-400 sm:hover:text-stone-700 sm:hover:bg-stone-200 rounded-full transition-colors"
               >
                 <i className="ph-bold ph-x"></i>
               </button>
@@ -1346,7 +1346,7 @@ export default function Checkout() {
                   <button 
                     onClick={handleApplyCustomCoupon}
                     disabled={validatingCustom || !customCouponCode.trim()}
-                    className="bg-[#4A2C2A] hover:bg-[#341F1D] text-white px-4 py-2 rounded-lg text-xs font-bold uppercase disabled:opacity-40 transition-colors shrink-0"
+                    className="bg-[#4A2C2A] sm:hover:bg-[#341F1D] text-white px-4 py-2 rounded-lg text-xs font-bold uppercase disabled:opacity-40 transition-colors shrink-0"
                   >
                     {validatingCustom ? 'Đang kiểm tra...' : 'Áp dụng'}
                   </button>
@@ -1392,7 +1392,7 @@ export default function Checkout() {
                             ? 'border-stone-200 opacity-60 cursor-not-allowed' 
                             : isSelected 
                               ? 'border-[#F59E0B] shadow-sm cursor-pointer ring-1 ring-[#F59E0B]/30' 
-                              : 'border-stone-200 hover:border-amber-300 hover:shadow-2xs cursor-pointer'
+                              : 'border-stone-200 sm:hover:border-amber-300 sm:hover:shadow-2xs cursor-pointer'
                         }`}
                         onClick={() => {
                           if (isApplicable) {
@@ -1486,7 +1486,7 @@ export default function Checkout() {
             <div className="p-4 border-t border-stone-100 bg-white">
               <button 
                 onClick={() => { setShowCouponModal(false); setCustomError(''); }}
-                className="w-full bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold uppercase tracking-wider rounded-xl py-3 transition-colors"
+                className="w-full bg-stone-100 sm:hover:bg-stone-200 text-stone-700 text-xs font-bold uppercase tracking-wider rounded-xl py-3 transition-colors"
               >
                 Đóng
               </button>

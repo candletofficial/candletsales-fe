@@ -132,7 +132,7 @@ export default function OrderSuccess({ paymentFlow = false }) {
         <p className="text-sm text-stone-500 max-w-sm mb-6">Mã đơn hàng không hợp lệ hoặc bạn không có quyền xem thông tin đơn hàng này.</p>
         <Link 
           to="/shop" 
-          className="bg-[#4A2C2A] text-white text-xs font-bold uppercase tracking-wider px-6 py-3 rounded-full hover:bg-[#381B18] transition-all shadow-sm"
+          className="bg-[#4A2C2A] text-white text-xs font-bold uppercase tracking-wider px-6 py-3 rounded-full sm:hover:bg-[#381B18] transition-all shadow-sm"
         >
           Quay lại cửa hàng
         </Link>
@@ -179,7 +179,7 @@ export default function OrderSuccess({ paymentFlow = false }) {
           <p className="mt-5 text-xs font-bold uppercase tracking-widest text-rose-600">Phiên thanh toán đã hết hạn</p>
           <h1 className="mt-3 font-serif-display text-3xl font-bold text-[#4A2C2A]">Mã QR không còn hiệu lực</h1>
           <p className="mt-3 text-sm leading-relaxed text-stone-600">Đơn hàng chưa được tạo và không có khoản tiền nào bị ghi nhận. Bạn có thể quay lại giỏ hàng để tạo mã QR mới.</p>
-          <button onClick={() => navigate('/cart')} className="mt-7 inline-flex items-center gap-2 rounded-xl bg-[#4A2C2A] px-6 py-3 text-xs font-bold uppercase tracking-wider text-white transition hover:bg-[#381b18]"><i className="ph-bold ph-arrow-left"></i> Quay lại giỏ hàng</button>
+          <button onClick={() => navigate('/cart')} className="mt-7 inline-flex items-center gap-2 rounded-xl bg-[#4A2C2A] px-6 py-3 text-xs font-bold uppercase tracking-wider text-white transition sm:hover:bg-[#381b18]"><i className="ph-bold ph-arrow-left"></i> Quay lại giỏ hàng</button>
         </main>
       </div>
     );
@@ -213,7 +213,7 @@ export default function OrderSuccess({ paymentFlow = false }) {
               <span className="absolute -right-2 -top-2 flex h-9 w-9 items-center justify-center rounded-full border-4 border-white bg-emerald-500 text-white shadow-sm"><i className="ph-bold ph-lock-key text-sm"></i></span>
             </div>
 
-            <button onClick={downloadQr} disabled={downloadingQr} className="mx-auto mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#4A2C2A]/15 bg-[#4A2C2A] px-5 py-3 text-xs font-bold uppercase tracking-wider text-white shadow-sm transition hover:bg-[#381b18] disabled:cursor-wait disabled:opacity-70">
+            <button onClick={downloadQr} disabled={downloadingQr} className="mx-auto mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#4A2C2A]/15 bg-[#4A2C2A] px-5 py-3 text-xs font-bold uppercase tracking-wider text-white shadow-sm transition sm:hover:bg-[#381b18] disabled:cursor-wait disabled:opacity-70">
               <i className={`ph-bold ${downloadingQr ? 'ph-spinner animate-spin' : 'ph-download-simple'} text-base`}></i>
               {downloadingQr ? 'Đang chuẩn bị ảnh QR...' : 'Tải mã QR về máy'}
             </button>
@@ -267,7 +267,7 @@ export default function OrderSuccess({ paymentFlow = false }) {
             </div>
             <button
               onClick={handleCopyCode}
-              className="p-1.5 rounded-lg hover:bg-amber-100 text-stone-500 hover:text-stone-800 transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg sm:hover:bg-amber-100 text-stone-500 sm:hover:text-stone-800 transition-colors cursor-pointer"
               title="Sao chép mã đơn"
             >
               <i className={`ph-bold ${copied ? 'ph-check text-emerald-600' : 'ph-copy'} text-base`}></i>
@@ -548,14 +548,14 @@ export default function OrderSuccess({ paymentFlow = false }) {
         <div className="flex flex-col items-center justify-center gap-2 pb-3 pt-2 sm:flex-row sm:gap-4 sm:pb-8">
           <button
             onClick={() => navigate('/orders')}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#4A2C2A] hover:bg-[#381B18] text-white text-xs font-bold uppercase tracking-wider py-3.5 px-8 rounded-full shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-98 transition-all cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#4A2C2A] sm:hover:bg-[#381B18] text-white text-xs font-bold uppercase tracking-wider py-3.5 px-8 rounded-full shadow-sm sm:hover:shadow-md sm:hover:scale-[1.02] active:scale-98 transition-all cursor-pointer"
           >
             <i className="ph-bold ph-receipt text-base"></i>
             <span>Xem lịch sử đơn hàng</span>
           </button>
           <Link
             to="/shop"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white hover:bg-stone-50 text-stone-700 border border-stone-300 text-xs font-bold uppercase tracking-wider py-3.5 px-8 rounded-full shadow-2xs hover:shadow-sm transition-all"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white sm:hover:bg-stone-50 text-stone-700 border border-stone-300 text-xs font-bold uppercase tracking-wider py-3.5 px-8 rounded-full shadow-2xs sm:hover:shadow-sm transition-all"
           >
             <i className="ph-bold ph-arrow-left text-base"></i>
             <span>Tiếp tục mua sắm</span>

@@ -287,10 +287,6 @@
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.hover-lift:hover {
-  transform: translateY(-4px);
-}
-
 /* ─────────────────────────────────────────────────────────────
  * CANDLET SMOOTH ARTISANAL ANIMATIONS (Home & Shop)
  * ───────────────────────────────────────────────────────────── */
@@ -396,10 +392,6 @@
   transform: translateX(-150%) skewX(-20deg);
   pointer-events: none;
 }
-.btn-shimmer:hover::after {
-  animation: shimmerSlide 1.1s ease-in-out;
-}
-
 /* Luxury Card Lift */
 .card-hover-lift {
   transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
@@ -408,9 +400,19 @@
               background-color 0.35s ease;
   will-change: transform, box-shadow;
 }
-.card-hover-lift:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 20px 35px -10px rgba(32, 11, 14, 0.12), 0 6px 16px -4px rgba(32, 11, 14, 0.06);
+@media (min-width: 640px) and (hover: hover) and (pointer: fine) {
+  .hover-lift:hover {
+    transform: translateY(-4px);
+  }
+
+  .btn-shimmer:hover::after {
+    animation: shimmerSlide 1.1s ease-in-out;
+  }
+
+  .card-hover-lift:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 35px -10px rgba(32, 11, 14, 0.12), 0 6px 16px -4px rgba(32, 11, 14, 0.06);
+  }
 }
 
 /* Scroll Reveal System */

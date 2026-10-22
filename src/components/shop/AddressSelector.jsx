@@ -104,7 +104,7 @@ function RealMapPicker({ coords, onCoordsChange, disabled, onRequestAddLocation,
             <span className="text-[11px] text-stone-500 font-medium">Không tìm được vị trí tự động</span>
             <div className="flex items-center gap-2">
               <button type="button" disabled={disabled} onClick={onRequestAddLocation}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-stone-300 hover:border-[#EE4D2D] text-stone-600 hover:text-[#EE4D2D] text-[11px] font-semibold shadow-xs transition-all cursor-pointer">
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-stone-300 sm:hover:border-[#EE4D2D] text-stone-600 sm:hover:text-[#EE4D2D] text-[11px] font-semibold shadow-xs transition-all cursor-pointer">
                 <i className="ph-bold ph-map-pin-plus text-sm" />
                 Thêm thủ công
               </button>
@@ -132,7 +132,7 @@ function RealMapPicker({ coords, onCoordsChange, disabled, onRequestAddLocation,
         <div ref={mapContainerRef} className="w-full h-full z-0" />
         <div className="absolute top-2 right-2 z-10">
           <button type="button" onClick={handleGPS} disabled={disabled || isLocatingGPS} title="Định vị GPS"
-            className="w-8 h-8 rounded-lg bg-white/95 text-stone-700 hover:text-[#EE4D2D] border border-stone-300 shadow-sm flex items-center justify-center transition-all cursor-pointer">
+            className="w-8 h-8 rounded-lg bg-white/95 text-stone-700 sm:hover:text-[#EE4D2D] border border-stone-300 shadow-sm flex items-center justify-center transition-all cursor-pointer">
             <i className={`ph-bold ${isLocatingGPS ? 'ph-spinner animate-spin text-[#EE4D2D]' : 'ph-crosshair'} text-sm`} />
           </button>
         </div>
@@ -144,7 +144,7 @@ function RealMapPicker({ coords, onCoordsChange, disabled, onRequestAddLocation,
       <div className="flex items-center justify-between text-[10px] text-stone-500 px-0.5">
         <span className="font-mono">📍 {coords.lat.toFixed(5)}, {coords.lng.toFixed(5)}</span>
         <a href={`https://www.google.com/maps?q=${coords.lat},${coords.lng}`} target="_blank" rel="noreferrer"
-          className="text-[#EE4D2D] hover:underline font-semibold flex items-center gap-0.5">
+          className="text-[#EE4D2D] sm:hover:underline font-semibold flex items-center gap-0.5">
           Xem Maps <i className="ph-bold ph-arrow-square-out text-[10px]" />
         </a>
       </div>
@@ -221,7 +221,7 @@ function AddressHierarchyPanel({
         <button
           type="button"
           onClick={() => { setIsCollapsed(false); setTimeout(() => searchRef.current?.focus(), 80); }}
-          className="shrink-0 text-[11px] font-bold text-[#EE4D2D] hover:underline cursor-pointer"
+          className="shrink-0 text-[11px] font-bold text-[#EE4D2D] sm:hover:underline cursor-pointer"
         >
           Thay đổi
         </button>
@@ -238,7 +238,7 @@ function AddressHierarchyPanel({
           {[{ label: 'Mới nhất (Sáp nhập)', val: true }, { label: 'Truyền thống (3 cấp)', val: false }].map(opt => (
             <button key={String(opt.val)} type="button"
               onClick={() => { if (isMergedMode !== opt.val) { setIsMergedMode(opt.val); setActiveStep('province'); } }}
-              className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${isMergedMode === opt.val ? 'bg-white text-[#EE4D2D] shadow-2xs' : 'text-stone-600 hover:text-stone-900'}`}>
+              className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${isMergedMode === opt.val ? 'bg-white text-[#EE4D2D] shadow-2xs' : 'text-stone-600 sm:hover:text-stone-900'}`}>
               {opt.label}
             </button>
           ))}
@@ -249,7 +249,7 @@ function AddressHierarchyPanel({
       <div className="flex border-b border-stone-100 bg-white text-[11px] font-bold overflow-x-auto">
         {/* Bước 1: Tỉnh */}
         <button type="button" onClick={() => handleStepClick('province')}
-          className={`flex-1 py-2.5 px-2 border-b-2 text-center transition-all truncate cursor-pointer ${activeStep === 'province' ? 'border-[#EE4D2D] text-[#EE4D2D] bg-orange-50/50' : selectedProvinceCode ? 'border-transparent text-stone-700 hover:text-stone-900' : 'border-transparent text-stone-400'}`}>
+          className={`flex-1 py-2.5 px-2 border-b-2 text-center transition-all truncate cursor-pointer ${activeStep === 'province' ? 'border-[#EE4D2D] text-[#EE4D2D] bg-orange-50/50' : selectedProvinceCode ? 'border-transparent text-stone-700 sm:hover:text-stone-900' : 'border-transparent text-stone-400'}`}>
           <span className="block text-[9px] uppercase text-stone-400 font-semibold">B1</span>
           <span className="truncate block">{currentProvince?.name || 'Tỉnh / Thành'}</span>
         </button>
@@ -257,7 +257,7 @@ function AddressHierarchyPanel({
         {/* Bước 2: Quận/Huyện (chỉ trong chế độ 3 cấp) */}
         {!isMergedMode && (
           <button type="button" onClick={() => handleStepClick('district')} disabled={!canGoDistrict}
-            className={`flex-1 py-2.5 px-2 border-b-2 text-center transition-all truncate ${!canGoDistrict ? 'border-transparent text-stone-300 cursor-not-allowed' : activeStep === 'district' ? 'border-[#EE4D2D] text-[#EE4D2D] bg-orange-50/50 cursor-pointer' : selectedDistrictCode ? 'border-transparent text-stone-700 hover:text-stone-900 cursor-pointer' : 'border-transparent text-stone-500 cursor-pointer'}`}>
+            className={`flex-1 py-2.5 px-2 border-b-2 text-center transition-all truncate ${!canGoDistrict ? 'border-transparent text-stone-300 cursor-not-allowed' : activeStep === 'district' ? 'border-[#EE4D2D] text-[#EE4D2D] bg-orange-50/50 cursor-pointer' : selectedDistrictCode ? 'border-transparent text-stone-700 sm:hover:text-stone-900 cursor-pointer' : 'border-transparent text-stone-500 cursor-pointer'}`}>
             <span className="block text-[9px] uppercase text-stone-400 font-semibold">B2</span>
             <span className="truncate block">{currentDistrict?.name || 'Quận / Huyện'}</span>
           </button>
@@ -265,7 +265,7 @@ function AddressHierarchyPanel({
 
         {/* Bước cuối: Phường/Xã */}
         <button type="button" onClick={() => handleStepClick('ward')} disabled={!canGoWard}
-          className={`flex-1 py-2.5 px-2 border-b-2 text-center transition-all truncate ${!canGoWard ? 'border-transparent text-stone-300 cursor-not-allowed' : activeStep === 'ward' ? 'border-[#EE4D2D] text-[#EE4D2D] bg-orange-50/50 cursor-pointer' : selectedWardCode ? 'border-transparent text-stone-700 hover:text-stone-900 cursor-pointer' : 'border-transparent text-stone-500 cursor-pointer'}`}>
+          className={`flex-1 py-2.5 px-2 border-b-2 text-center transition-all truncate ${!canGoWard ? 'border-transparent text-stone-300 cursor-not-allowed' : activeStep === 'ward' ? 'border-[#EE4D2D] text-[#EE4D2D] bg-orange-50/50 cursor-pointer' : selectedWardCode ? 'border-transparent text-stone-700 sm:hover:text-stone-900 cursor-pointer' : 'border-transparent text-stone-500 cursor-pointer'}`}>
           <span className="block text-[9px] uppercase text-stone-400 font-semibold">{isMergedMode ? 'B2' : 'B3'}</span>
           <span className="truncate block">{currentWard?.name || 'Phường / Xã'}</span>
         </button>
@@ -278,7 +278,7 @@ function AddressHierarchyPanel({
           <input ref={searchRef} type="text" value={search} onChange={e => setSearch(e.target.value)}
             placeholder={activeStep === 'province' ? 'Tìm Tỉnh / Thành...' : activeStep === 'district' ? 'Tìm Quận / Huyện...' : 'Tìm Phường / Xã...'}
             className="w-full bg-white border border-stone-200 rounded-lg pl-7 pr-7 py-1.5 text-xs text-stone-800 placeholder:text-stone-400 focus:outline-none focus:border-[#EE4D2D]" />
-          {search && <button type="button" onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"><i className="ph-bold ph-x text-xs" /></button>}
+          {search && <button type="button" onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-stone-400 sm:hover:text-stone-600"><i className="ph-bold ph-x text-xs" /></button>}
         </div>
       </div>
 
@@ -305,7 +305,7 @@ function AddressHierarchyPanel({
                 else if (activeStep === 'district') { onSelectDistrict(item.code); }
                 else { onSelectWard(item.code); }
               }}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs text-left transition-colors cursor-pointer ${isSelected ? 'bg-orange-50 text-[#EE4D2D] font-bold' : 'text-stone-700 hover:bg-stone-50'}`}>
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs text-left transition-colors cursor-pointer ${isSelected ? 'bg-orange-50 text-[#EE4D2D] font-bold' : 'text-stone-700 sm:hover:bg-stone-50'}`}>
               <div className="flex items-center gap-1.5 min-w-0">
                 <span className="truncate">{item.name}</span>
                 {item.division_type && <span className="text-[9px] uppercase font-bold text-stone-400 bg-stone-100 px-1 py-0.5 rounded shrink-0">{item.division_type}</span>}
@@ -593,7 +593,7 @@ function AddressEditModal({ isOpen, onClose, onSave, initialData, isMergedMode: 
             </div>
           </div>
           <button type="button" onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white text-stone-400 hover:text-stone-700 hover:bg-stone-100 flex items-center justify-center transition-colors cursor-pointer">
+            className="w-8 h-8 rounded-full bg-white text-stone-400 sm:hover:text-stone-700 sm:hover:bg-stone-100 flex items-center justify-center transition-colors cursor-pointer">
             <i className="ph-bold ph-x text-sm" />
           </button>
         </div>
@@ -651,7 +651,7 @@ function AddressEditModal({ isOpen, onClose, onSave, initialData, isMergedMode: 
                   </div>
                 ) : street ? (
                   <button type="button" onClick={() => { isUserTyping.current = false; setStreet(''); setStreetSuggestions([]); setShowStreetDropdown(false); }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 cursor-pointer">
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 sm:hover:text-stone-600 cursor-pointer">
                     <i className="ph-bold ph-x-circle text-base" />
                   </button>
                 ) : null}
@@ -675,12 +675,12 @@ function AddressEditModal({ isOpen, onClose, onSave, initialData, isMergedMode: 
                   <div className="max-h-52 overflow-y-auto custom-scrollbar p-1 space-y-0.5">
                     {streetSuggestions.map((item, i) => (
                       <button key={i} type="button" onClick={() => handleSelectSuggestion(item)}
-                        className="w-full flex items-start gap-2 p-2 rounded-lg hover:bg-orange-50/70 text-left transition-colors cursor-pointer group">
+                        className="w-full flex items-start gap-2 p-2 rounded-lg sm:hover:bg-orange-50/70 text-left transition-colors cursor-pointer group">
                         <div className="w-5 h-5 rounded-full bg-orange-100 text-[#EE4D2D] flex items-center justify-center shrink-0 mt-0.5">
                           <i className="ph-fill ph-map-pin text-[10px]" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="text-xs font-bold text-stone-900 group-hover:text-[#EE4D2D] truncate">{item.title}</h4>
+                          <h4 className="text-xs font-bold text-stone-900 sm:group-hover:text-[#EE4D2D] truncate">{item.title}</h4>
                           <p className="text-[10px] text-stone-500 line-clamp-1">{item.subtitle || item.description}</p>
                         </div>
                       </button>
@@ -731,11 +731,11 @@ function AddressEditModal({ isOpen, onClose, onSave, initialData, isMergedMode: 
         {/* Footer */}
         <div className="px-4 py-3 border-t border-stone-100 bg-stone-50 shrink-0 flex items-center gap-3">
           <button type="button" onClick={onClose}
-            className="flex-1 py-2.5 rounded-xl border border-stone-200 text-xs font-bold text-stone-600 hover:bg-stone-100 transition-colors cursor-pointer">
+            className="flex-1 py-2.5 rounded-xl border border-stone-200 text-xs font-bold text-stone-600 sm:hover:bg-stone-100 transition-colors cursor-pointer">
             Huỷ
           </button>
           <button type="button" onClick={handleSave} disabled={!canSave}
-            className="flex-1 py-2.5 rounded-xl bg-[#EE4D2D] hover:bg-[#d43d20] text-white text-xs font-bold transition-colors shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+            className="flex-1 py-2.5 rounded-xl bg-[#EE4D2D] sm:hover:bg-[#d43d20] text-white text-xs font-bold transition-colors shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
             <i className="ph-bold ph-check text-sm" />
             Xác nhận địa chỉ
           </button>
@@ -933,7 +933,7 @@ export default function AddressSelector({
               type="button"
               disabled={disabled}
               onClick={() => setIsModalOpen(true)}
-              className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-stone-300 hover:border-[#EE4D2D] text-xs font-semibold text-stone-600 hover:text-[#EE4D2D] bg-white hover:bg-orange-50 transition-all cursor-pointer"
+              className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-stone-300 sm:hover:border-[#EE4D2D] text-xs font-semibold text-stone-600 sm:hover:text-[#EE4D2D] bg-white sm:hover:bg-orange-50 transition-all cursor-pointer"
             >
               <i className="ph-bold ph-pencil-simple text-xs" />
               Sửa
@@ -946,9 +946,9 @@ export default function AddressSelector({
           type="button"
           disabled={disabled}
           onClick={() => setIsModalOpen(true)}
-          className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border-2 border-dashed border-stone-300 hover:border-[#EE4D2D] bg-white hover:bg-orange-50/40 text-stone-500 hover:text-[#EE4D2D] transition-all cursor-pointer group"
+          className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border-2 border-dashed border-stone-300 sm:hover:border-[#EE4D2D] bg-white sm:hover:bg-orange-50/40 text-stone-500 sm:hover:text-[#EE4D2D] transition-all cursor-pointer group"
         >
-          <div className="w-8 h-8 rounded-lg bg-stone-100 group-hover:bg-[#EE4D2D]/10 text-stone-400 group-hover:text-[#EE4D2D] flex items-center justify-center transition-all">
+          <div className="w-8 h-8 rounded-lg bg-stone-100 sm:group-hover:bg-[#EE4D2D]/10 text-stone-400 sm:group-hover:text-[#EE4D2D] flex items-center justify-center transition-all">
             <i className="ph-bold ph-map-pin-plus text-base" />
           </div>
           <div className="text-left">

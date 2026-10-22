@@ -141,7 +141,7 @@ export default function ProductReviews({ productId }) {
           </div>
           <button 
             onClick={handleWriteReviewClick}
-            className="bg-[#4A2C2A] hover:bg-[#3A2221] text-white text-xs font-bold uppercase tracking-widest px-6 py-3 rounded flex items-center gap-2 transition-colors shrink-0 shadow-sm"
+            className="bg-[#4A2C2A] sm:hover:bg-[#3A2221] text-white text-xs font-bold uppercase tracking-widest px-6 py-3 rounded flex items-center gap-2 transition-colors shrink-0 shadow-sm"
           >
             <i className="ph-bold ph-pencil-simple text-base"></i>
             Viết đánh giá của bạn
@@ -204,7 +204,7 @@ export default function ProductReviews({ productId }) {
               className={`px-4 py-2 rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer ${
                 selectedRating === 0
                   ? 'bg-[#4A2C2A] text-white shadow-xs'
-                  : 'bg-white text-stone-700 border border-stone-200 hover:border-stone-400'
+                  : 'bg-white text-stone-700 border border-stone-200 sm:hover:border-stone-400'
               }`}
             >
               Tất cả ({totalReviews})
@@ -223,7 +223,7 @@ export default function ProductReviews({ productId }) {
                   className={`px-4 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
                     selectedRating === star
                       ? 'bg-[#4A2C2A] text-white shadow-xs'
-                      : 'bg-white text-stone-700 border border-stone-200 hover:border-stone-400'
+                      : 'bg-white text-stone-700 border border-stone-200 sm:hover:border-stone-400'
                   }`}
                 >
                   <span>{star}</span>
@@ -257,7 +257,7 @@ export default function ProductReviews({ productId }) {
                     setSelectedRating(0);
                     setVisibleCount(INITIAL_COUNT);
                   }}
-                  className="mt-3 text-xs font-bold text-[#4A2C2A] hover:underline cursor-pointer"
+                  className="mt-3 text-xs font-bold text-[#4A2C2A] sm:hover:underline cursor-pointer"
                 >
                   Xem tất cả đánh giá
                 </button>
@@ -331,10 +331,10 @@ export default function ProductReviews({ productId }) {
                       <button
                         type="button"
                         onClick={() => setVisibleCount(prev => Math.min(currentFilteredCount, prev + STEP_COUNT))}
-                        className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full bg-white border-2 border-[#4A2C2A] text-[#4A2C2A] hover:bg-[#4A2C2A] hover:text-white font-semibold text-sm tracking-wide transition-all duration-300 shadow-sm hover:shadow-md active:scale-95 group cursor-pointer"
+                        className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full bg-white border-2 border-[#4A2C2A] text-[#4A2C2A] sm:hover:bg-[#4A2C2A] sm:hover:text-white font-semibold text-sm tracking-wide transition-all duration-300 shadow-sm sm:hover:shadow-md active:scale-95 group cursor-pointer"
                       >
                         <span>Xem thêm ({Math.min(STEP_COUNT, remainingCount)} đánh giá tiếp)</span>
-                        <i className="ph-bold ph-arrow-down text-base group-hover:translate-y-0.5 transition-transform"></i>
+                        <i className="ph-bold ph-arrow-down text-base sm:group-hover:translate-y-0.5 transition-transform"></i>
                       </button>
                     ) : (
                       <div className="flex flex-col sm:flex-row items-center gap-3">
@@ -345,7 +345,7 @@ export default function ProductReviews({ productId }) {
                         <button
                           type="button"
                           onClick={() => setVisibleCount(INITIAL_COUNT)}
-                          className="inline-flex items-center gap-1.5 text-xs font-bold text-[#4A2C2A] hover:underline px-3 py-1.5 cursor-pointer"
+                          className="inline-flex items-center gap-1.5 text-xs font-bold text-[#4A2C2A] sm:hover:underline px-3 py-1.5 cursor-pointer"
                         >
                           <i className="ph-bold ph-arrow-up text-xs"></i>
                           Thu gọn về {INITIAL_COUNT} đánh giá đầu
@@ -370,7 +370,7 @@ export default function ProductReviews({ productId }) {
             
             <button 
               onClick={() => setShowModal(false)}
-              className="absolute top-5 right-5 w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center text-stone-500 hover:text-stone-800 transition-colors cursor-pointer"
+              className="absolute top-5 right-5 w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center text-stone-500 sm:hover:text-stone-800 transition-colors cursor-pointer"
             >
               <i className="ph ph-x text-lg"></i>
             </button>
@@ -416,7 +416,7 @@ export default function ProductReviews({ productId }) {
                 <button 
                   type="submit"
                   disabled={submitting}
-                  className="w-full bg-[#4A2C2A] hover:bg-[#3A2221] active:bg-[#2A1817] text-white font-bold py-3.5 rounded-xl uppercase tracking-wider text-xs transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer shadow-md"
+                  className="w-full bg-[#4A2C2A] sm:hover:bg-[#3A2221] active:bg-[#2A1817] text-white font-bold py-3.5 rounded-xl uppercase tracking-wider text-xs transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer shadow-md"
                 >
                   {submitting ? 'Đang gửi đánh giá...' : 'Gửi Đánh Giá'}
                 </button>

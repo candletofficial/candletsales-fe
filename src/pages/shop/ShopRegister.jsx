@@ -65,7 +65,7 @@ export default function ShopRegister() {
       <div className="hidden lg:flex lg:w-1/2 xl:w-[52%] relative bg-[#200B0E] overflow-hidden flex-col justify-between p-12 xl:p-16 text-white">
         {/* Ảnh nền nghệ thuật nến thơm */}
         <div 
-          className="absolute inset-0 bg-cover bg-center opacity-65 scale-105 transition-transform duration-1000 ease-out hover:scale-100"
+          className="absolute inset-0 bg-cover bg-center opacity-65 scale-105 transition-transform duration-1000 ease-out sm:hover:scale-100"
           style={{ backgroundImage: "url('/login-candle-ambient.jpg')" }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#1A0709] via-[#2A0E13]/80 to-[#1A0709]/50" />
@@ -73,7 +73,7 @@ export default function ShopRegister() {
 
         {/* Header trái: Logo Shop duy nhất */}
         <div className="relative z-10 flex items-center justify-between">
-          <Link to="/" className="inline-block group transition-transform hover:scale-[1.02]" title="Trở về trang chủ">
+          <Link to="/" className="inline-block group transition-transform sm:hover:scale-[1.02]" title="Trở về trang chủ">
             <img 
               src="/logo.png" 
               alt="Candlet Logo" 
@@ -177,9 +177,9 @@ export default function ShopRegister() {
         <div className="flex items-center justify-between mb-6">
           <Link 
             to="/" 
-            className="inline-flex items-center gap-2 text-xs font-semibold text-stone-600 hover:text-[#4A2C2A] py-2 px-3.5 rounded-full bg-white/80 hover:bg-white border border-stone-200/80 shadow-2xs transition-all group"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-stone-600 sm:hover:text-[#4A2C2A] py-2 px-3.5 rounded-full bg-white/80 sm:hover:bg-white border border-stone-200/80 shadow-2xs transition-all group"
           >
-            <i className="ph-bold ph-arrow-left text-sm text-stone-400 group-hover:-translate-x-0.5 group-hover:text-[#4A2C2A] transition-transform" />
+            <i className="ph-bold ph-arrow-left text-sm text-stone-400 sm:group-hover:-translate-x-0.5 sm:group-hover:text-[#4A2C2A] transition-transform" />
             <span>Về trang chủ</span>
           </Link>
 
@@ -272,7 +272,7 @@ export default function ShopRegister() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 transition-colors p-1 cursor-pointer"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 sm:hover:text-stone-700 transition-colors p-1 cursor-pointer"
                   title={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                 >
                   <i className={`ph-bold ${showPassword ? 'ph-eye-slash' : 'ph-eye'} text-lg`} />
@@ -300,7 +300,7 @@ export default function ShopRegister() {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 transition-colors p-1 cursor-pointer"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 sm:hover:text-stone-700 transition-colors p-1 cursor-pointer"
                   title={showConfirmPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                 >
                   <i className={`ph-bold ${showConfirmPassword ? 'ph-eye-slash' : 'ph-eye'} text-lg`} />
@@ -325,7 +325,7 @@ export default function ShopRegister() {
                       e.preventDefault();
                       setShowTermsModal(true);
                     }}
-                    className="text-[#8C4A32] font-semibold hover:underline cursor-pointer"
+                    className="text-[#8C4A32] font-semibold sm:hover:underline cursor-pointer"
                   >
                     Điều khoản dịch vụ & Chính sách
                   </button>{' '}
@@ -339,7 +339,7 @@ export default function ShopRegister() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#4A2C2A] hover:bg-[#341816] text-white text-xs sm:text-sm font-bold uppercase tracking-widest rounded-2xl py-3.5 px-6 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all transform active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                className="w-full bg-[#4A2C2A] sm:hover:bg-[#341816] text-white text-xs sm:text-sm font-bold uppercase tracking-widest rounded-2xl py-3.5 px-6 flex items-center justify-center gap-2 shadow-md sm:hover:shadow-lg transition-all transform active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
               >
                 {loading ? (
                   <>
@@ -371,7 +371,7 @@ export default function ShopRegister() {
             <button
               type="button"
               onClick={() => alert('Tính năng đăng ký bằng Google đang được hoàn thiện.')}
-              className="flex items-center justify-center gap-2.5 py-2.5 sm:py-3 px-4 rounded-2xl bg-white border border-stone-200 text-xs font-semibold text-stone-700 hover:bg-stone-50 hover:border-stone-300 shadow-2xs transition-all cursor-pointer"
+              className="flex items-center justify-center gap-2.5 py-2.5 sm:py-3 px-4 rounded-2xl bg-white border border-stone-200 text-xs font-semibold text-stone-700 sm:hover:bg-stone-50 sm:hover:border-stone-300 shadow-2xs transition-all cursor-pointer"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -385,7 +385,7 @@ export default function ShopRegister() {
             <button
               type="button"
               onClick={() => alert('Tính năng đăng ký bằng Facebook đang được hoàn thiện.')}
-              className="flex items-center justify-center gap-2.5 py-2.5 sm:py-3 px-4 rounded-2xl bg-white border border-stone-200 text-xs font-semibold text-stone-700 hover:bg-stone-50 hover:border-stone-300 shadow-2xs transition-all cursor-pointer"
+              className="flex items-center justify-center gap-2.5 py-2.5 sm:py-3 px-4 rounded-2xl bg-white border border-stone-200 text-xs font-semibold text-stone-700 sm:hover:bg-stone-50 sm:hover:border-stone-300 shadow-2xs transition-all cursor-pointer"
             >
               <i className="ph-fill ph-facebook-logo text-[#1877F2] text-base" />
               <span>Facebook</span>
@@ -399,7 +399,7 @@ export default function ShopRegister() {
               <Link 
                 to="/login" 
                 state={{ from: location.state?.from }}
-                className="font-bold text-[#8C4A32] hover:text-[#4A2C2A] underline underline-offset-4 decoration-[#8C4A32]/40 hover:decoration-[#8C4A32] transition-colors"
+                className="font-bold text-[#8C4A32] sm:hover:text-[#4A2C2A] underline underline-offset-4 decoration-[#8C4A32]/40 sm:hover:decoration-[#8C4A32] transition-colors"
               >
                 Đăng nhập ngay
               </Link>
@@ -430,7 +430,7 @@ export default function ShopRegister() {
               <button
                 type="button"
                 onClick={() => setShowTermsModal(false)}
-                className="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 flex items-center justify-center transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-full bg-stone-100 sm:hover:bg-stone-200 text-stone-500 flex items-center justify-center transition-colors cursor-pointer"
               >
                 <i className="ph-bold ph-x text-sm" />
               </button>
@@ -474,7 +474,7 @@ export default function ShopRegister() {
                 setAgreeTerms(true);
                 setShowTermsModal(false);
               }}
-              className="w-full py-2.5 rounded-xl bg-[#4A2C2A] hover:bg-[#341816] text-white text-xs font-bold transition-colors cursor-pointer shadow-sm"
+              className="w-full py-2.5 rounded-xl bg-[#4A2C2A] sm:hover:bg-[#341816] text-white text-xs font-bold transition-colors cursor-pointer shadow-sm"
             >
               Tôi Đã Hiểu & Đồng Ý
             </button>

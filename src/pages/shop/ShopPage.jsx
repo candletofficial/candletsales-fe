@@ -164,7 +164,7 @@ export default function ShopPage() {
       {/* Header Area (Thiết kế tinh gọn cho Mobile & trang nhã cho Desktop) */}
       <div className="mx-auto hidden max-w-7xl border-b border-dashed border-stone-300 px-8 pb-6 pt-8 md:block">
         <div className="flex items-center text-[10px] sm:text-xs font-bold uppercase tracking-widest text-stone-500 mb-2 sm:mb-4">
-          <Link to="/" className="hover:text-brand-burgundy transition-colors">Trang Chủ</Link>
+          <Link to="/" className="sm:hover:text-brand-burgundy transition-colors">Trang Chủ</Link>
           <span className="mx-2">/</span>
           <span className="text-brand-charcoal">Cửa Hàng</span>
         </div>
@@ -213,7 +213,7 @@ export default function ShopPage() {
                 className={`transition-all duration-200 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs font-bold tracking-wider uppercase flex items-center gap-1.5 shrink-0 cursor-pointer shadow-2xs select-none active:scale-95 ${
                   isSelected 
                     ? 'bg-brand-charcoal text-white border border-brand-charcoal' 
-                    : 'bg-white text-stone-600 hover:text-stone-900 border border-stone-200/80 hover:bg-stone-50'
+                    : 'bg-white text-stone-600 sm:hover:text-stone-900 border border-stone-200/80 sm:hover:bg-stone-50'
                 }`}
               >
                 <i className={`ph-bold ${cat.icon} text-xs ${isSelected ? 'text-amber-300' : 'text-stone-400'}`}></i>
@@ -281,7 +281,7 @@ export default function ShopPage() {
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 p-0.5 cursor-pointer"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 sm:hover:text-stone-700 p-0.5 cursor-pointer"
                 title="Xóa tìm kiếm"
               >
                 <i className="ph-bold ph-x text-xs"></i>
@@ -298,7 +298,7 @@ export default function ShopPage() {
               className={`relative flex h-9 w-9 items-center justify-center rounded-xl border text-xs font-bold transition-all cursor-pointer select-none active:scale-95 lg:hidden sm:h-auto sm:w-auto sm:gap-1.5 sm:px-3 sm:py-2 sm:shadow-2xs ${
                 activeFiltersCount > 0
                   ? 'bg-amber-500/15 border-amber-500/50 text-amber-950 font-bold'
-                  : 'bg-white border-stone-200/90 text-stone-700 hover:bg-stone-50'
+                  : 'bg-white border-stone-200/90 text-stone-700 sm:hover:bg-stone-50'
               }`}
             >
               <i className="ph-bold ph-sliders-horizontal text-xs text-amber-700"></i>
@@ -331,7 +331,7 @@ export default function ShopPage() {
               <button 
                 type="button"
                 onClick={() => setViewMode('grid')}
-                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${viewMode === 'grid' ? 'bg-brand-charcoal text-white' : 'text-stone-400 hover:text-stone-700'}`}
+                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${viewMode === 'grid' ? 'bg-brand-charcoal text-white' : 'text-stone-400 sm:hover:text-stone-700'}`}
                 title="Xem dạng lưới"
               >
                 <i className="ph-fill ph-squares-four text-base block"></i>
@@ -339,7 +339,7 @@ export default function ShopPage() {
               <button 
                 type="button"
                 onClick={() => setViewMode('list')}
-                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${viewMode === 'list' ? 'bg-brand-charcoal text-white' : 'text-stone-400 hover:text-stone-700'}`}
+                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${viewMode === 'list' ? 'bg-brand-charcoal text-white' : 'text-stone-400 sm:hover:text-stone-700'}`}
                 title="Xem dạng danh sách"
               >
                 <i className="ph-bold ph-list text-base block"></i>
@@ -356,7 +356,7 @@ export default function ShopPage() {
             {selectedCategory !== 'Tất cả' && (
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-stone-100 border border-stone-200 text-stone-700 text-[11px]">
                 {selectedCategory}
-                <button onClick={() => setSelectedCategory('Tất cả')} className="hover:text-red-500 cursor-pointer">
+                <button onClick={() => setSelectedCategory('Tất cả')} className="sm:hover:text-red-500 cursor-pointer">
                   <i className="ph-bold ph-x text-[10px]"></i>
                 </button>
               </span>
@@ -365,7 +365,7 @@ export default function ShopPage() {
             {selectedVolume && (
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-stone-100 border border-stone-200 text-stone-700 text-[11px]">
                 {selectedVolume}
-                <button onClick={() => setSelectedVolume('')} className="hover:text-red-500 cursor-pointer">
+                <button onClick={() => setSelectedVolume('')} className="sm:hover:text-red-500 cursor-pointer">
                   <i className="ph-bold ph-x text-[10px]"></i>
                 </button>
               </span>
@@ -374,7 +374,7 @@ export default function ShopPage() {
             {selectedWaxes.map(wax => (
               <span key={wax} className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-stone-100 border border-stone-200 text-stone-700 text-[11px]">
                 {wax}
-                <button onClick={() => toggleFilter(setSelectedWaxes, wax)} className="hover:text-red-500 cursor-pointer">
+                <button onClick={() => toggleFilter(setSelectedWaxes, wax)} className="sm:hover:text-red-500 cursor-pointer">
                   <i className="ph-bold ph-x text-[10px]"></i>
                 </button>
               </span>
@@ -383,7 +383,7 @@ export default function ShopPage() {
             {selectedWicks.map(wick => (
               <span key={wick} className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-stone-100 border border-stone-200 text-stone-700 text-[11px]">
                 {wick}
-                <button onClick={() => toggleFilter(setSelectedWicks, wick)} className="hover:text-red-500 cursor-pointer">
+                <button onClick={() => toggleFilter(setSelectedWicks, wick)} className="sm:hover:text-red-500 cursor-pointer">
                   <i className="ph-bold ph-x text-[10px]"></i>
                 </button>
               </span>
@@ -392,7 +392,7 @@ export default function ShopPage() {
             {(priceRange[0] > 0 || priceRange[1] < 1500000) && (
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-stone-100 border border-stone-200 text-stone-700 text-[11px]">
                 {priceRange[0].toLocaleString('vi-VN')}đ - {priceRange[1].toLocaleString('vi-VN')}đ
-                <button onClick={() => setPriceRange([0, 1500000])} className="hover:text-red-500 cursor-pointer">
+                <button onClick={() => setPriceRange([0, 1500000])} className="sm:hover:text-red-500 cursor-pointer">
                   <i className="ph-bold ph-x text-[10px]"></i>
                 </button>
               </span>
@@ -400,7 +400,7 @@ export default function ShopPage() {
 
             <button
               onClick={resetAllFilters}
-              className="text-[11px] font-bold text-brand-burgundy hover:underline ml-1 cursor-pointer"
+              className="text-[11px] font-bold text-brand-burgundy sm:hover:underline ml-1 cursor-pointer"
             >
               Xóa tất cả
             </button>
@@ -428,7 +428,7 @@ export default function ShopPage() {
                   onChange={() => setSelectedVolume('')}
                   className="w-4 h-4 border-stone-300 text-brand-burgundy focus:ring-brand-burgundy" 
                 />
-                <span className="text-xs text-stone-700 group-hover:text-brand-charcoal">Tất cả dung tích</span>
+                <span className="text-xs text-stone-700 sm:group-hover:text-brand-charcoal">Tất cả dung tích</span>
               </label>
               {VOLUME_OPTIONS.map(vol => (
                 <label key={vol} className="flex items-center space-x-3 cursor-pointer group">
@@ -439,7 +439,7 @@ export default function ShopPage() {
                     onChange={() => setSelectedVolume(vol)}
                     className="w-4 h-4 border-stone-300 text-brand-burgundy focus:ring-brand-burgundy" 
                   />
-                  <span className={`text-xs ${selectedVolume === vol ? 'font-bold text-stone-900' : 'text-stone-700'} group-hover:text-brand-charcoal`}>
+                  <span className={`text-xs ${selectedVolume === vol ? 'font-bold text-stone-900' : 'text-stone-700'} sm:group-hover:text-brand-charcoal`}>
                     {vol}
                   </span>
                 </label>
@@ -482,14 +482,14 @@ export default function ShopPage() {
               <button 
                 type="button"
                 onClick={() => setPriceRange([0, 350000])}
-                className={`${priceRange[0] === 0 && priceRange[1] === 350000 ? 'bg-[#FFF9F2] text-[#B45309] border border-amber-300' : 'bg-stone-50 text-stone-600 border border-stone-200/80 hover:bg-stone-100'} text-[11px] font-medium py-1.5 rounded-lg transition-colors cursor-pointer`}
+                className={`${priceRange[0] === 0 && priceRange[1] === 350000 ? 'bg-[#FFF9F2] text-[#B45309] border border-amber-300' : 'bg-stone-50 text-stone-600 border border-stone-200/80 sm:hover:bg-stone-100'} text-[11px] font-medium py-1.5 rounded-lg transition-colors cursor-pointer`}
               >
                 Dưới 350k
               </button>
               <button 
                 type="button"
                 onClick={() => setPriceRange([350000, 600000])}
-                className={`${priceRange[0] === 350000 && priceRange[1] === 600000 ? 'bg-[#FFF9F2] text-[#B45309] border border-amber-300' : 'bg-stone-50 text-stone-600 border border-stone-200/80 hover:bg-stone-100'} text-[11px] font-medium py-1.5 rounded-lg transition-colors cursor-pointer`}
+                className={`${priceRange[0] === 350000 && priceRange[1] === 600000 ? 'bg-[#FFF9F2] text-[#B45309] border border-amber-300' : 'bg-stone-50 text-stone-600 border border-stone-200/80 sm:hover:bg-stone-100'} text-[11px] font-medium py-1.5 rounded-lg transition-colors cursor-pointer`}
               >
                 350k - 600k
               </button>
@@ -511,7 +511,7 @@ export default function ShopPage() {
                     onChange={() => toggleFilter(setSelectedWaxes, wax)}
                     className="w-4 h-4 rounded border-stone-300 text-brand-burgundy focus:ring-brand-burgundy mt-0.5" 
                   />
-                  <span className={`text-xs ${selectedWaxes.includes(wax) ? 'font-bold text-stone-900' : 'text-stone-700'} group-hover:text-brand-charcoal transition-colors`}>
+                  <span className={`text-xs ${selectedWaxes.includes(wax) ? 'font-bold text-stone-900' : 'text-stone-700'} sm:group-hover:text-brand-charcoal transition-colors`}>
                     {wax}
                   </span>
                 </label>
@@ -527,7 +527,7 @@ export default function ShopPage() {
                     onChange={() => toggleFilter(setSelectedWicks, wick)}
                     className="w-4 h-4 rounded border-stone-300 text-brand-burgundy focus:ring-brand-burgundy mt-0.5" 
                   />
-                  <span className={`text-xs ${selectedWicks.includes(wick) ? 'font-bold text-stone-900' : 'text-stone-700'} group-hover:text-brand-charcoal transition-colors`}>
+                  <span className={`text-xs ${selectedWicks.includes(wick) ? 'font-bold text-stone-900' : 'text-stone-700'} sm:group-hover:text-brand-charcoal transition-colors`}>
                     {wick}
                   </span>
                 </label>
@@ -560,7 +560,7 @@ export default function ShopPage() {
                   <button
                     type="button"
                     onClick={() => handleCopyCoupon(coupon.code, coupon._id || 'side')}
-                    className="px-2.5 py-1 bg-brand-charcoal hover:bg-black text-amber-200 rounded-lg text-[10px] font-bold tracking-wider uppercase transition-colors cursor-pointer"
+                    className="px-2.5 py-1 bg-brand-charcoal sm:hover:bg-black text-amber-200 rounded-lg text-[10px] font-bold tracking-wider uppercase transition-colors cursor-pointer"
                   >
                     {copiedCouponId === (coupon._id || 'side') ? 'Đã chép' : 'Sao chép'}
                   </button>
@@ -613,7 +613,7 @@ export default function ShopPage() {
                 return (
                   <article
                     key={product._id} 
-                    className="group flex flex-col justify-between overflow-hidden rounded-[18px] border border-[#E8DED5] bg-white shadow-[0_3px_14px_rgba(74,44,42,0.06)] transition-all hover:-translate-y-0.5 hover:shadow-md sm:p-4"
+                    className="group flex flex-col justify-between overflow-hidden rounded-[18px] border border-[#E8DED5] bg-white shadow-[0_3px_14px_rgba(74,44,42,0.06)] transition-all sm:hover:-translate-y-0.5 sm:hover:shadow-md sm:p-4"
                   >
                     {/* Image Area with badges & wishlist button */}
                     <div className="relative mb-2.5 aspect-square overflow-hidden bg-[#F5EFE6] sm:mb-3.5 sm:rounded-xl">
@@ -636,13 +636,13 @@ export default function ShopPage() {
                           e.stopPropagation();
                           toggleWishlist(product, navigate);
                         }} 
-                        className="absolute top-2 right-2 w-7 h-7 sm:w-8 sm:h-8 bg-white/95 backdrop-blur-xs rounded-full flex items-center justify-center shadow-xs z-20 hover:scale-110 active:scale-90 transition-all cursor-pointer"
+                        className="absolute top-2 right-2 w-7 h-7 sm:w-8 sm:h-8 bg-white/95 backdrop-blur-xs rounded-full flex items-center justify-center shadow-xs z-20 sm:hover:scale-110 active:scale-90 transition-all cursor-pointer"
                         title={isInWishlist(product._id) ? "Bỏ yêu thích" : "Lưu vào yêu thích"}
                       >
                         <i className={`text-sm sm:text-base transition-colors ${
                           isInWishlist(product._id)
                             ? 'ph-fill ph-heart text-rose-500'
-                            : 'ph-bold ph-heart text-stone-400 hover:text-rose-500'
+                            : 'ph-bold ph-heart text-stone-400 sm:hover:text-rose-500'
                         }`}></i>
                       </button>
                       
@@ -651,7 +651,7 @@ export default function ShopPage() {
                         {product.image ? (
                           <img 
                             alt={product.name} 
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                            className="w-full h-full object-cover sm:group-hover:scale-105 transition-transform duration-500" 
                             src={getImageUrl(product.image)}
                             loading="lazy"
                           />
@@ -675,7 +675,7 @@ export default function ShopPage() {
                       </div>
                       
                       {/* Tên Sản Phẩm (Line clamp 2 dòng cố định chiều cao) */}
-                      <Link to={`/product/${product._id}`} className="block mb-1 sm:mb-2 group-hover:text-brand-burgundy transition-colors">
+                      <Link to={`/product/${product._id}`} className="block mb-1 sm:mb-2 sm:group-hover:text-brand-burgundy transition-colors">
                         <h3 
                           className="font-serif-display text-xs sm:text-base font-bold text-brand-charcoal leading-snug line-clamp-2 h-[32px] sm:h-[44px] overflow-hidden" 
                           title={product.name}
@@ -691,7 +691,7 @@ export default function ShopPage() {
                             Giá
                           </span>
                           <div className="flex items-baseline gap-1">
-                            <span className="font-serif-display font-bold text-xs sm:text-base text-brand-charcoal group-hover:text-brand-burgundy transition-colors">
+                            <span className="font-serif-display font-bold text-xs sm:text-base text-brand-charcoal sm:group-hover:text-brand-burgundy transition-colors">
                               {product.base_price?.toLocaleString('vi-VN')}đ
                             </span>
                             {product.original_price > product.base_price && (
@@ -706,7 +706,7 @@ export default function ShopPage() {
                         <button 
                           type="button"
                           onClick={(e) => handleBuyNow(e, product)}
-                          className="w-full py-2 px-2.5 rounded-full bg-brand-charcoal hover:bg-brand-burgundy text-white text-[9.5px] sm:text-[11px] font-semibold tracking-wider uppercase transition-all duration-200 shadow-2xs hover:shadow-md active:scale-95 cursor-pointer flex items-center justify-center gap-1"
+                          className="w-full py-2 px-2.5 rounded-full bg-brand-charcoal sm:hover:bg-brand-burgundy text-white text-[9.5px] sm:text-[11px] font-semibold tracking-wider uppercase transition-all duration-200 shadow-2xs sm:hover:shadow-md active:scale-95 cursor-pointer flex items-center justify-center gap-1"
                         >
                           <i className="ph-bold ph-shopping-bag-open text-xs"></i>
                           <span>Mua Ngay</span>
@@ -724,7 +724,7 @@ export default function ShopPage() {
                 return (
                   <article
                     key={product._id} 
-                    className="group flex items-stretch gap-3 overflow-hidden rounded-[18px] border border-[#E8DED5] bg-white p-2.5 shadow-[0_3px_14px_rgba(74,44,42,0.06)] transition-all hover:shadow-md sm:gap-5 sm:p-4"
+                    className="group flex items-stretch gap-3 overflow-hidden rounded-[18px] border border-[#E8DED5] bg-white p-2.5 shadow-[0_3px_14px_rgba(74,44,42,0.06)] transition-all sm:hover:shadow-md sm:gap-5 sm:p-4"
                   >
                     {/* Image Area (Compact Square on Mobile) */}
                     <div className="relative w-24 sm:w-44 md:w-52 aspect-square rounded-xl bg-[#F5EFE6] overflow-hidden shrink-0">
@@ -745,13 +745,13 @@ export default function ShopPage() {
                           e.stopPropagation();
                           toggleWishlist(product, navigate);
                         }} 
-                        className="absolute top-1.5 right-1.5 w-6 h-6 sm:w-7 sm:h-7 bg-white/95 backdrop-blur-xs rounded-full flex items-center justify-center shadow-xs z-20 hover:scale-110 active:scale-90 transition-all cursor-pointer"
+                        className="absolute top-1.5 right-1.5 w-6 h-6 sm:w-7 sm:h-7 bg-white/95 backdrop-blur-xs rounded-full flex items-center justify-center shadow-xs z-20 sm:hover:scale-110 active:scale-90 transition-all cursor-pointer"
                         title={isInWishlist(product._id) ? "Bỏ yêu thích" : "Lưu vào yêu thích"}
                       >
                         <i className={`text-xs sm:text-sm transition-colors ${
                           isInWishlist(product._id)
                             ? 'ph-fill ph-heart text-rose-500'
-                            : 'ph-bold ph-heart text-stone-400 hover:text-rose-500'
+                            : 'ph-bold ph-heart text-stone-400 sm:hover:text-rose-500'
                         }`}></i>
                       </button>
 
@@ -759,7 +759,7 @@ export default function ShopPage() {
                         {product.image ? (
                           <img 
                             alt={product.name} 
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                            className="w-full h-full object-cover sm:group-hover:scale-105 transition-transform duration-500" 
                             src={getImageUrl(product.image)}
                             loading="lazy"
                           />
@@ -784,7 +784,7 @@ export default function ShopPage() {
                         </div>
 
                         {/* Title */}
-                        <Link to={`/product/${product._id}`} className="block mb-1 group-hover:text-brand-burgundy transition-colors">
+                        <Link to={`/product/${product._id}`} className="block mb-1 sm:group-hover:text-brand-burgundy transition-colors">
                           <h3 className="font-serif-display text-sm sm:text-xl font-bold text-brand-charcoal leading-snug line-clamp-1 sm:line-clamp-2">
                             {product.name}
                           </h3>
@@ -821,7 +821,7 @@ export default function ShopPage() {
                         <button 
                           type="button"
                           onClick={(e) => handleBuyNow(e, product)}
-                          className="bg-brand-charcoal hover:bg-brand-burgundy text-white text-[10px] sm:text-xs font-bold tracking-wider px-3 sm:px-4 py-1.5 sm:py-2 rounded-full transition-all flex items-center gap-1 cursor-pointer active:scale-95 shadow-2xs"
+                          className="bg-brand-charcoal sm:hover:bg-brand-burgundy text-white text-[10px] sm:text-xs font-bold tracking-wider px-3 sm:px-4 py-1.5 sm:py-2 rounded-full transition-all flex items-center gap-1 cursor-pointer active:scale-95 shadow-2xs"
                         >
                           <i className="ph-bold ph-shopping-bag-open text-xs"></i>
                           <span>Mua ngay</span>
@@ -863,7 +863,7 @@ export default function ShopPage() {
                   <button
                     type="button"
                     onClick={resetAllFilters}
-                    className="text-xs font-bold text-brand-burgundy hover:underline cursor-pointer"
+                    className="text-xs font-bold text-brand-burgundy sm:hover:underline cursor-pointer"
                   >
                     Đặt lại
                   </button>
@@ -871,7 +871,7 @@ export default function ShopPage() {
                 <button
                   type="button"
                   onClick={() => setIsMobileFilterOpen(false)}
-                  className="w-8 h-8 rounded-full bg-stone-100 text-stone-500 hover:text-stone-800 flex items-center justify-center cursor-pointer"
+                  className="w-8 h-8 rounded-full bg-stone-100 text-stone-500 sm:hover:text-stone-800 flex items-center justify-center cursor-pointer"
                 >
                   <i className="ph-bold ph-x text-sm"></i>
                 </button>
@@ -1026,7 +1026,7 @@ export default function ShopPage() {
               <button
                 type="button"
                 onClick={() => setIsMobileFilterOpen(false)}
-                className="w-full py-3.5 px-4 rounded-full bg-brand-charcoal text-white hover:bg-black text-xs font-bold uppercase tracking-widest transition-all shadow-md active:scale-98 flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-3.5 px-4 rounded-full bg-brand-charcoal text-white sm:hover:bg-black text-xs font-bold uppercase tracking-widest transition-all shadow-md active:scale-98 flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>Xem {filteredProducts.length} Sản Phẩm</span>
                 <i className="ph-bold ph-arrow-right text-xs"></i>

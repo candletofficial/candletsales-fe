@@ -92,11 +92,11 @@ export default function OrderTracking() {
     <main className="bg-[#f5f5f5] sm:px-6 sm:py-10">
       <article className="mx-auto max-w-3xl overflow-hidden bg-white sm:border sm:border-stone-200 sm:shadow-sm">
         <header className="flex min-h-14 items-center gap-2 border-b border-stone-200 bg-white px-3 sm:px-5">
-          <Link to="/shop" aria-label="Về cửa hàng" className="inline-flex size-10 shrink-0 items-center justify-center rounded-full text-stone-700 transition hover:bg-stone-100">
+          <Link to="/shop" aria-label="Về cửa hàng" className="inline-flex size-10 shrink-0 items-center justify-center rounded-full text-stone-700 transition sm:hover:bg-stone-100">
             <span aria-hidden="true" className="material-symbols-outlined">arrow_back</span>
           </Link>
           <h1 className="min-w-0 flex-1 text-[17px] font-extrabold text-stone-900">Theo dõi đơn hàng</h1>
-          <button type="button" disabled={loading} onClick={() => setRefresh(value => value + 1)} aria-label="Cập nhật trạng thái đơn hàng" className="inline-flex size-10 shrink-0 items-center justify-center rounded-full text-stone-600 transition hover:bg-stone-100 disabled:cursor-wait disabled:opacity-50">
+          <button type="button" disabled={loading} onClick={() => setRefresh(value => value + 1)} aria-label="Cập nhật trạng thái đơn hàng" className="inline-flex size-10 shrink-0 items-center justify-center rounded-full text-stone-600 transition sm:hover:bg-stone-100 disabled:cursor-wait disabled:opacity-50">
             <span aria-hidden="true" className={`material-symbols-outlined text-[21px] ${loading ? 'animate-spin' : ''}`}>refresh</span>
           </button>
         </header>

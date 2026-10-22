@@ -120,9 +120,9 @@ export default function Cart() {
 
         {/* Breadcrumb Navigation */}
         <div className="mb-6 hidden items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-stone-400 sm:flex">
-          <Link to="/" className="hover:text-[#4A2C2A] transition-colors">Trang Chủ</Link>
+          <Link to="/" className="sm:hover:text-[#4A2C2A] transition-colors">Trang Chủ</Link>
           <span className="text-stone-300">/</span>
-          <Link to="/shop" className="hover:text-[#4A2C2A] transition-colors">Cửa Hàng</Link>
+          <Link to="/shop" className="sm:hover:text-[#4A2C2A] transition-colors">Cửa Hàng</Link>
           <span className="text-stone-300">/</span>
           <span className="text-[#4A2C2A]">Giỏ Hàng ({cart?.items?.length || 0})</span>
         </div>
@@ -140,9 +140,9 @@ export default function Cart() {
           {hasItems && (
             <Link
               to="/shop"
-              className="mt-2.5 sm:mt-0 text-[11px] sm:text-xs font-bold text-[#8C4A32] hover:text-[#4A2C2A] uppercase tracking-wider flex items-center gap-1.5 group transition-colors"
+              className="mt-2.5 sm:mt-0 text-[11px] sm:text-xs font-bold text-[#8C4A32] sm:hover:text-[#4A2C2A] uppercase tracking-wider flex items-center gap-1.5 group transition-colors"
             >
-              <i className="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i>
+              <i className="ph-bold ph-arrow-left sm:group-hover:-translate-x-1 transition-transform"></i>
               Tiếp tục chọn thêm nến
             </Link>
           )}
@@ -163,13 +163,13 @@ export default function Cart() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link
                 to="/shop"
-                className="w-full sm:w-auto inline-flex bg-[#4A2C2A] hover:bg-[#341F1D] text-white text-xs font-bold uppercase tracking-widest rounded-full py-3.5 px-8 items-center justify-center gap-2 transition-all shadow-md active:scale-98"
+                className="w-full sm:w-auto inline-flex bg-[#4A2C2A] sm:hover:bg-[#341F1D] text-white text-xs font-bold uppercase tracking-widest rounded-full py-3.5 px-8 items-center justify-center gap-2 transition-all shadow-md active:scale-98"
               >
                 Khám phá bộ sưu tập nến
               </Link>
               <Link
                 to="/"
-                className="w-full sm:w-auto inline-flex bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold uppercase tracking-widest rounded-full py-3.5 px-6 items-center justify-center gap-2 transition-colors"
+                className="w-full sm:w-auto inline-flex bg-stone-100 sm:hover:bg-stone-200 text-stone-700 text-xs font-bold uppercase tracking-widest rounded-full py-3.5 px-6 items-center justify-center gap-2 transition-colors"
               >
                 Về trang chủ
               </Link>
@@ -240,7 +240,7 @@ export default function Cart() {
                       type="button"
                       onClick={handleDeleteSelected}
                       disabled={isDeletingMultiple}
-                      className="text-[11px] sm:text-xs font-semibold text-red-600 hover:text-red-700 flex items-center gap-1 hover:underline transition-colors disabled:opacity-50 cursor-pointer"
+                      className="text-[11px] sm:text-xs font-semibold text-red-600 sm:hover:text-red-700 flex items-center gap-1 sm:hover:underline transition-colors disabled:opacity-50 cursor-pointer"
                     >
                       <i className="ph-bold ph-trash text-xs sm:text-sm"></i>
                       <span>Xóa đã chọn</span>
@@ -291,7 +291,7 @@ export default function Cart() {
                             <img
                               src={getImageUrl(product.image)}
                               alt={product.name}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              className="w-full h-full object-cover sm:group-hover:scale-105 transition-transform duration-300"
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-stone-300">
@@ -312,14 +312,14 @@ export default function Cart() {
                         <div className="flex-1 min-w-0 flex flex-col justify-between self-stretch">
                           <div>
                             <div className="flex items-start justify-between gap-1.5">
-                              <h3 className="text-xs sm:text-lg font-serif-display font-bold text-stone-900 leading-snug hover:text-[#8C4A32] transition-colors line-clamp-2">
+                              <h3 className="text-xs sm:text-lg font-serif-display font-bold text-stone-900 leading-snug sm:hover:text-[#8C4A32] transition-colors line-clamp-2">
                                 <Link to={`/product/${product._id}`}>{product.name}</Link>
                               </h3>
 
                               {/* Remove Button */}
                               <button
                                 onClick={() => removeItem(item)}
-                                className="text-stone-400 hover:text-red-500 p-1 rounded-lg hover:bg-red-50 transition-colors shrink-0 cursor-pointer"
+                                className="text-stone-400 sm:hover:text-red-500 p-1 rounded-lg sm:hover:bg-red-50 transition-colors shrink-0 cursor-pointer"
                                 title="Xóa sản phẩm này"
                               >
                                 <i className="ph-bold ph-trash text-base"></i>
@@ -363,7 +363,7 @@ export default function Cart() {
                                 type="button"
                                 onClick={() => updateQuantity(item, item.quantity - 1)}
                                 disabled={item.quantity <= 1}
-                                className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-stone-600 hover:text-stone-900 hover:bg-white rounded-lg transition-colors disabled:opacity-30 cursor-pointer active:scale-90"
+                                className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-stone-600 sm:hover:text-stone-900 sm:hover:bg-white rounded-lg transition-colors disabled:opacity-30 cursor-pointer active:scale-90"
                                 title="Giảm 1"
                               >
                                 <i className="ph-bold ph-minus text-xs"></i>
@@ -374,7 +374,7 @@ export default function Cart() {
                               <button
                                 type="button"
                                 onClick={() => updateQuantity(item, item.quantity + 1)}
-                                className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-stone-600 hover:text-stone-900 hover:bg-white rounded-lg transition-colors cursor-pointer active:scale-90"
+                                className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-stone-600 sm:hover:text-stone-900 sm:hover:bg-white rounded-lg transition-colors cursor-pointer active:scale-90"
                                 title="Tăng 1"
                               >
                                 <i className="ph-bold ph-plus text-xs"></i>
@@ -477,7 +477,7 @@ export default function Cart() {
                 <button
                   onClick={handleCheckout}
                   disabled={selectedItems.length === 0}
-                  className="w-full bg-[#4A2C2A] hover:bg-[#341F1D] disabled:bg-stone-200 disabled:text-stone-400 disabled:cursor-not-allowed text-white text-xs font-bold uppercase tracking-widest rounded-xl py-4 px-6 flex items-center justify-center gap-2.5 transition-all shadow-md hover:shadow-lg active:scale-98 cursor-pointer"
+                  className="w-full bg-[#4A2C2A] sm:hover:bg-[#341F1D] disabled:bg-stone-200 disabled:text-stone-400 disabled:cursor-not-allowed text-white text-xs font-bold uppercase tracking-widest rounded-xl py-4 px-6 flex items-center justify-center gap-2.5 transition-all shadow-md sm:hover:shadow-lg active:scale-98 cursor-pointer"
                 >
                   <span>Tiến hành đặt hàng ({selectedCount})</span>
                   <i className="ph-bold ph-arrow-right text-base"></i>
@@ -528,7 +528,7 @@ export default function Cart() {
                 type="button"
                 onClick={handleDeleteSelected}
                 disabled={isDeletingMultiple}
-                className="text-[11px] text-stone-400 hover:text-red-600 underline cursor-pointer"
+                className="text-[11px] text-stone-400 sm:hover:text-red-600 underline cursor-pointer"
               >
                 Xóa
               </button>

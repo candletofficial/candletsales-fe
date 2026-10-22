@@ -109,7 +109,7 @@ export default function ShopStories() {
           
           {/* Breadcrumbs */}
           <div className="mb-6 hidden items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-stone-500 sm:flex">
-            <Link to="/" className="hover:text-[#4A2C2A] transition-colors">Trang Chủ</Link>
+            <Link to="/" className="sm:hover:text-[#4A2C2A] transition-colors">Trang Chủ</Link>
             <span className="text-stone-300">/</span>
             <span className="text-[#8C4A32]">Candlet Journal</span>
           </div>
@@ -138,7 +138,7 @@ export default function ShopStories() {
 
           {/* Search Box */}
           <form onSubmit={handleSearchSubmit} className="group relative mx-auto mt-6 max-w-md sm:mt-9">
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-amber-400/20 to-orange-400/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-amber-400/20 to-orange-400/20 blur-md opacity-0 sm:group-hover:opacity-100 transition-opacity"></div>
             <div className="relative flex items-center">
               <i className="ph ph-magnifying-glass absolute left-4.5 text-stone-400 text-base"></i>
               <input
@@ -157,7 +157,7 @@ export default function ShopStories() {
                     newParams.delete('q');
                     setSearchParams(newParams);
                   }}
-                  className="absolute right-11 cursor-pointer p-1 text-xs text-stone-400 hover:text-stone-600 sm:right-24"
+                  className="absolute right-11 cursor-pointer p-1 text-xs text-stone-400 sm:hover:text-stone-600 sm:right-24"
                   title="Xóa tìm kiếm"
                 >
                   <i className="ph-bold ph-x"></i>
@@ -165,7 +165,7 @@ export default function ShopStories() {
               )}
               <button
                 type="submit"
-                className="absolute right-1.5 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-[#4A2C2A] text-xs font-bold text-amber-100 shadow-xs transition-all hover:bg-[#2A1412] hover:text-white sm:h-auto sm:w-auto sm:gap-1.5 sm:px-5 sm:py-2.5"
+                className="absolute right-1.5 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-[#4A2C2A] text-xs font-bold text-amber-100 shadow-xs transition-all sm:hover:bg-[#2A1412] sm:hover:text-white sm:h-auto sm:w-auto sm:gap-1.5 sm:px-5 sm:py-2.5"
               >
                 <span className="hidden sm:inline">Tìm kiếm</span>
                 <i className="ph-bold ph-arrow-right sm:hidden"></i>
@@ -190,7 +190,7 @@ export default function ShopStories() {
                   className={`flex cursor-pointer items-center gap-2 whitespace-nowrap border-b-2 px-1 py-2.5 text-xs font-semibold transition-all duration-300 sm:rounded-full sm:border-b-0 sm:px-4.5 sm:py-2 ${
                     isSelected
                       ? 'border-[#381B18] text-[#381B18] sm:bg-[#381B18] sm:text-amber-100 sm:shadow-[0_4px_15px_rgba(56,27,24,0.2)]'
-                      : 'border-transparent text-stone-500 hover:text-[#381B18] sm:border sm:border-stone-200/70 sm:bg-white/80 sm:text-stone-600 sm:hover:bg-white'
+                      : 'border-transparent text-stone-500 sm:hover:text-[#381B18] sm:border sm:border-stone-200/70 sm:bg-white/80 sm:text-stone-600 sm:hover:bg-white'
                   }`}
                 >
                   <i className={`ph ${cat.icon} text-sm ${isSelected ? 'text-amber-400' : 'text-stone-400'}`}></i>
@@ -222,7 +222,7 @@ export default function ShopStories() {
             <button
               type="button"
               onClick={() => handleCategoryChange('Tất cả')}
-              className="inline-flex items-center gap-2 text-xs font-bold text-[#4A2C2A] uppercase tracking-wider hover:underline pt-2"
+              className="inline-flex items-center gap-2 text-xs font-bold text-[#4A2C2A] uppercase tracking-wider sm:hover:underline pt-2"
             >
               <span>Xem tất cả câu chuyện</span>
               <i className="ph-bold ph-arrow-right"></i>
@@ -240,7 +240,7 @@ export default function ShopStories() {
                   <img
                     src={featuredPost.thumbnail || 'https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=1200&q=80'}
                     alt={featuredPost.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
+                    className="w-full h-full object-cover sm:group-hover:scale-105 transition-transform duration-1000 ease-out"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent lg:hidden"></div>
                   
@@ -275,7 +275,7 @@ export default function ShopStories() {
                     </div>
 
                     <Link to={`/stories/${featuredPost.slug}`}>
-                      <h2 className="font-serif-display text-2xl sm:text-3xl lg:text-4xl font-bold text-[#2C1810] group-hover:text-[#8C4A32] transition-colors leading-[1.2]">
+                      <h2 className="font-serif-display text-2xl sm:text-3xl lg:text-4xl font-bold text-[#2C1810] sm:group-hover:text-[#8C4A32] transition-colors leading-[1.2]">
                         {featuredPost.title}
                       </h2>
                     </Link>
@@ -306,7 +306,7 @@ export default function ShopStories() {
 
                     <Link
                       to={`/stories/${featuredPost.slug}`}
-                      className="inline-flex items-center gap-2 text-xs font-bold text-white bg-[#381B18] px-5 py-2.5 rounded-full hover:bg-[#502621] transition-all shadow-xs group-hover:translate-x-1"
+                      className="inline-flex items-center gap-2 text-xs font-bold text-white bg-[#381B18] px-5 py-2.5 rounded-full sm:hover:bg-[#502621] transition-all shadow-xs sm:group-hover:translate-x-1"
                     >
                       <span>Khám phá</span>
                       <i className="ph-bold ph-arrow-right"></i>
@@ -340,9 +340,9 @@ export default function ShopStories() {
                         <img
                           src={post.thumbnail || 'https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=800&q=80'}
                           alt={post.title}
-                          className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 ease-out"
+                          className="w-full h-full object-cover sm:group-hover:scale-108 transition-transform duration-700 ease-out"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 sm:group-hover:opacity-100 transition-opacity"></div>
                         
                         {/* Category Tag */}
                         <span
@@ -372,7 +372,7 @@ export default function ShopStories() {
                           </div>
 
                           <Link to={`/stories/${post.slug}`} className="block">
-                            <h3 className="font-serif-display text-xl sm:text-2xl font-bold text-[#2C1810] group-hover:text-[#8C4A32] transition-colors leading-snug line-clamp-2">
+                            <h3 className="font-serif-display text-xl sm:text-2xl font-bold text-[#2C1810] sm:group-hover:text-[#8C4A32] transition-colors leading-snug line-clamp-2">
                               {post.title}
                             </h3>
                           </Link>
@@ -388,10 +388,10 @@ export default function ShopStories() {
                           </span>
                           <Link
                             to={`/stories/${post.slug}`}
-                            className="font-bold text-[#4A2C2A] group-hover:text-[#8C4A32] flex items-center gap-1 transition-colors"
+                            className="font-bold text-[#4A2C2A] sm:group-hover:text-[#8C4A32] flex items-center gap-1 transition-colors"
                           >
                             <span>Đọc tiếp</span>
-                            <i className="ph-bold ph-caret-right text-xs transition-transform group-hover:translate-x-1"></i>
+                            <i className="ph-bold ph-caret-right text-xs transition-transform sm:group-hover:translate-x-1"></i>
                           </Link>
                         </div>
                       </div>
@@ -420,7 +420,7 @@ export default function ShopStories() {
                       className={`w-10 h-10 rounded-full text-xs font-bold transition-all cursor-pointer ${
                         isCurrent
                           ? 'bg-[#381B18] text-amber-100 shadow-md scale-105'
-                          : 'bg-white border border-stone-200 text-stone-700 hover:border-[#381B18]'
+                          : 'bg-white border border-stone-200 text-stone-700 sm:hover:border-[#381B18]'
                       }`}
                     >
                       {p}
@@ -470,7 +470,7 @@ export default function ShopStories() {
                     />
                     <button
                       type="submit"
-                      className="px-7 py-3.5 bg-amber-400 text-[#381B18] font-bold text-xs rounded-full hover:bg-amber-300 transition-all uppercase tracking-wider cursor-pointer shrink-0"
+                      className="px-7 py-3.5 bg-amber-400 text-[#381B18] font-bold text-xs rounded-full sm:hover:bg-amber-300 transition-all uppercase tracking-wider cursor-pointer shrink-0"
                     >
                       Đăng Ký
                     </button>

@@ -45,7 +45,7 @@ export default function ShopWishlist() {
         
         {/* Breadcrumb navigation */}
         <nav className="mb-6 hidden items-center space-x-2 text-xs font-medium text-stone-500 sm:flex">
-          <Link to="/" className="hover:text-brand-burgundy transition-colors">Trang Chủ</Link>
+          <Link to="/" className="sm:hover:text-brand-burgundy transition-colors">Trang Chủ</Link>
           <span className="text-stone-300">/</span>
           <span className="text-stone-800 font-bold">Sản Phẩm Yêu Thích</span>
         </nav>
@@ -72,7 +72,7 @@ export default function ShopWishlist() {
               </span>
               <button
                 onClick={clearWishlist}
-                className="text-xs text-stone-400 hover:text-red-600 transition-colors font-medium hover:underline underline-offset-4"
+                className="text-xs text-stone-400 sm:hover:text-red-600 transition-colors font-medium sm:hover:underline underline-offset-4"
               >
                 Xóa tất cả
               </button>
@@ -94,7 +94,7 @@ export default function ShopWishlist() {
             </p>
             <Link
               to="/shop"
-              className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#4A2C2A] hover:bg-[#381B18] text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-sm hover:shadow-md hover:scale-[1.02] transition-all"
+              className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#4A2C2A] sm:hover:bg-[#381B18] text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-sm sm:hover:shadow-md sm:hover:scale-[1.02] transition-all"
             >
               <span>Khám Phá Cửa Hàng Ngay</span>
               <i className="ph-bold ph-arrow-right text-xs"></i>
@@ -111,7 +111,7 @@ export default function ShopWishlist() {
               return (
                 <div
                   key={product._id}
-                  className="group relative flex min-w-0 flex-col overflow-hidden rounded-[18px] border border-[#EADFD7] bg-white shadow-[0_3px_14px_rgba(74,44,42,0.06)] transition-all duration-300 hover:border-[#D8C8BD] hover:shadow-[0_10px_28px_rgba(74,44,42,0.11)] sm:justify-between sm:p-5"
+                  className="group relative flex min-w-0 flex-col overflow-hidden rounded-[18px] border border-[#EADFD7] bg-white shadow-[0_3px_14px_rgba(74,44,42,0.06)] transition-all duration-300 sm:hover:border-[#D8C8BD] sm:hover:shadow-[0_10px_28px_rgba(74,44,42,0.11)] sm:justify-between sm:p-5"
                 >
                   {/* Top image & Tag */}
                   <div className="flex flex-1 flex-col sm:block">
@@ -131,7 +131,7 @@ export default function ShopWishlist() {
                           e.preventDefault();
                           removeFromWishlist(product._id);
                         }}
-                        className="absolute right-2 top-2 z-10 flex size-8 items-center justify-center rounded-full border border-white/70 bg-white/90 text-rose-500 shadow-sm backdrop-blur-xs transition-all hover:scale-110 hover:text-stone-400 sm:right-2.5 sm:top-2.5"
+                        className="absolute right-2 top-2 z-10 flex size-8 items-center justify-center rounded-full border border-white/70 bg-white/90 text-rose-500 shadow-sm backdrop-blur-xs transition-all sm:hover:scale-110 sm:hover:text-stone-400 sm:right-2.5 sm:top-2.5"
                         title="Bỏ khỏi yêu thích"
                       >
                         <i className="ph-fill ph-heart text-base"></i>
@@ -143,7 +143,7 @@ export default function ShopWishlist() {
                           <img
                             src={getImageUrl(product.image)}
                             alt={product.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            className="w-full h-full object-cover sm:group-hover:scale-105 transition-transform duration-500"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-stone-400 text-xs font-mono">
@@ -166,7 +166,7 @@ export default function ShopWishlist() {
                     {/* Product Name */}
                     <Link
                       to={`/product/${product._id}`}
-                      className="mb-1.5 block min-h-9 line-clamp-2 px-3 font-serif-display text-sm font-bold leading-[1.3] text-stone-900 transition-colors group-hover:text-[#8C4A32] sm:mb-2 sm:min-h-0 sm:line-clamp-1 sm:px-0 sm:text-lg"
+                      className="mb-1.5 block min-h-9 line-clamp-2 px-3 font-serif-display text-sm font-bold leading-[1.3] text-stone-900 transition-colors sm:group-hover:text-[#8C4A32] sm:mb-2 sm:min-h-0 sm:line-clamp-1 sm:px-0 sm:text-lg"
                       title={product.name}
                     >
                       {product.name}
@@ -186,7 +186,7 @@ export default function ShopWishlist() {
                       className={`flex min-w-0 flex-1 items-center justify-center gap-1 rounded-xl px-1.5 py-2.5 text-[9px] font-bold uppercase tracking-wide shadow-sm transition-all active:scale-[0.98] sm:gap-1.5 sm:px-3 sm:text-xs ${
                         isAddedSuccess
                           ? 'bg-emerald-600 text-white'
-                          : 'bg-[#4A2C2A] hover:bg-[#381B18] text-white'
+                          : 'bg-[#4A2C2A] sm:hover:bg-[#381B18] text-white'
                       }`}
                     >
                       {isAdding ? (
@@ -211,7 +211,7 @@ export default function ShopWishlist() {
 
                     <Link
                       to={`/product/${product._id}`}
-                      className="rounded-xl border border-[#E8DED7] bg-white p-2.5 text-stone-500 transition-colors hover:bg-stone-100 hover:text-stone-900"
+                      className="rounded-xl border border-[#E8DED7] bg-white p-2.5 text-stone-500 transition-colors sm:hover:bg-stone-100 sm:hover:text-stone-900"
                       title="Xem chi tiết sản phẩm"
                     >
                       <i className="ph-bold ph-eye text-base"></i>
