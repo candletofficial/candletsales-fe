@@ -37,7 +37,7 @@ export default function handler(request, response) {
   const route = request.query.route === 't' ? 't' : 'd';
   const shareUrl = `${origin}/${route}/${safeToken}`;
   const appUrl = `/theo-doi-don/${encodeURIComponent(token)}`;
-  const previewImageUrl = `${origin}/og-order-tracking.jpg?v=6`;
+  const previewImageUrl = `${origin}/og-order-tracking-v7.jpg`;
 
   response.setHeader("Content-Type", "text/html; charset=utf-8");
   response.setHeader("Cache-Control", "public, s-maxage=3600, stale-while-revalidate=86400");
@@ -48,7 +48,6 @@ export default function handler(request, response) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Theo dõi đơn hàng Candlet</title>
     <meta name="description" content="Kiểm tra trạng thái và hành trình giao hàng của bạn." />
-    <meta name="robots" content="noindex" />
     <link rel="canonical" href="${shareUrl}" />
     <link rel="icon" href="/favicon.svg?v=1" />
 
