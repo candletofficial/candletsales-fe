@@ -47,7 +47,7 @@ export default function handler(request, response) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Theo dõi đơn hàng Candlet</title>
     <meta name="description" content="Kiểm tra trạng thái và hành trình giao hàng của bạn." />
-    <meta name="robots" content="noindex, nofollow" />
+    <meta name="robots" content="noindex" />
     <link rel="canonical" href="${shareUrl}" />
     <link rel="icon" href="/favicon.svg?v=1" />
 
@@ -58,6 +58,7 @@ export default function handler(request, response) {
     <meta property="og:description" content="Kiểm tra trạng thái và hành trình giao hàng của bạn." />
     <meta property="og:url" content="${shareUrl}" />
     <meta property="og:image" content="${previewImageUrl}" />
+    <meta property="og:image:url" content="${previewImageUrl}" />
     <meta property="og:image:secure_url" content="${previewImageUrl}" />
     <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content="1200" />
@@ -70,7 +71,6 @@ export default function handler(request, response) {
     <meta name="twitter:image" content="${previewImageUrl}" />
     <meta name="twitter:image:alt" content="Theo dõi đơn hàng cùng Candlet Shop" />
 
-    <meta http-equiv="refresh" content="0;url=${appUrl}" />
     <style>
       body { margin: 0; min-height: 100vh; display: grid; place-items: center; font-family: system-ui, sans-serif; color: #371814; background: #fffaf3; }
       a { color: inherit; font-weight: 700; }
