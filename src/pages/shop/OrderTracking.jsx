@@ -71,6 +71,13 @@ export default function OrderTracking() {
   const spxWaybill = getSpxWaybill(order);
   const isPaidTransfer = order?.payment_method === 'transfer' && order?.payment_status === 'paid';
   const amountDue = isPaidTransfer ? 0 : Number(order?.total_price || 0);
+  const deliveryHeroStyle = ['pending', 'confirmed', 'shipping'].includes(status)
+    ? {
+        backgroundImage: "linear-gradient(90deg, rgba(255,255,255,0.94) 0%, rgba(255,255,255,0.82) 58%, rgba(255,255,255,0.28) 100%), url('/tracking-status-bg.jpg')",
+        backgroundPosition: '78% center',
+        backgroundSize: 'cover',
+      }
+    : undefined;
 
   const copyOrderId = async () => {
     if (!order?.orderId || !navigator.clipboard) return;
@@ -110,7 +117,7 @@ export default function OrderTracking() {
           </section>
         ) : (
           <section>
-            <section aria-live="polite" className={`overflow-hidden border-b-8 border-stone-100 ${statusDetail.tone}`}>
+            <section aria-live="polite" style={deliveryHeroStyle} className={`overflow-hidden border-b-8 border-stone-100 ${statusDetail.tone}`}>
               <header className="flex items-start gap-3 p-4 sm:p-6">
                 <span aria-hidden="true" className={`material-symbols-outlined flex size-11 shrink-0 items-center justify-center rounded-xl text-2xl shadow-sm ${statusDetail.iconTone}`}>{statusDetail.icon}</span>
                 <hgroup className="min-w-0">

@@ -65,12 +65,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
     ? btoa(String.fromCharCode(...(order.tracking_token.slice(0, 16).match(/.{2}/g) || []).map(value => parseInt(value, 16))))
       .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '')
     : '';
-  const publicShopOrigin = (import.meta.env.VITE_PUBLIC_SITE_URL || (
-    ['localhost', '127.0.0.1'].includes(window.location.hostname)
-      ? 'https://candletshop.vercel.app'
-      : window.location.origin
-  )).replace(/\/$/, '');
-  const trackingUrl = trackingCode ? `${publicShopOrigin}/d/${trackingCode}` : '';
+  const trackingUrl = trackingCode ? `${window.location.origin}/d/${trackingCode}` : '';
   const handleCreateTracking = async () => {
     setLinkLoading(true);
     setError('');
