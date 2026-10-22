@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { orderService } from '../../services/orderService';
 import { getImageUrl } from '../../utils/imageUtils';
+import { getSpxTrackingUrl } from '../../utils/spxTracking';
 
 export default function ShopOrders() {
   const { user } = useAuth();
@@ -491,6 +492,7 @@ export default function ShopOrders() {
               const mobileStatus = getMobileStatus(dStatus);
               const firstItem = order.items?.[0];
               const remainingItems = Math.max((order.items?.length || 0) - 1, 0);
+              const spxTrackingUrl = getSpxTrackingUrl(order);
 
               return (
                 <React.Fragment key={order._id || order.orderId}>
@@ -574,6 +576,19 @@ export default function ShopOrders() {
                     </div>
 
                     <div className="flex items-center justify-end gap-2">
+                      {spxTrackingUrl && (
+                        <a
+                          href={spxTrackingUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex min-h-9 shrink-0 items-center justify-center gap-1 rounded-full border border-orange-200 bg-orange-50 px-3 text-[10px] font-bold text-orange-700"
+                          aria-label="Xem hành trình trên SPX"
+                          title="Xem hành trình trên SPX"
+                        >
+                          <i className="ph-bold ph-truck text-sm"></i>
+                          SPX
+                        </a>
+                      )}
                       {canCancel(order) && (
                         <button
                           type="button"
@@ -884,6 +899,18 @@ export default function ShopOrders() {
                           {formatPrice(order.total_price)}
                         </span>
                       </div>
+
+                      {spxTrackingUrl && (
+                        <a
+                          href={spxTrackingUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 rounded-2xl border border-orange-200 bg-orange-50 px-3.5 py-2 text-xs font-bold text-orange-700 transition-colors hover:bg-orange-100"
+                        >
+                          <i className="ph-bold ph-truck text-sm"></i>
+                          SPX
+                        </a>
+                      )}
 
                       {/* Nút Xem chi tiết */}
                       <button

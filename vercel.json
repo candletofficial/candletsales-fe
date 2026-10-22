@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/d/:token",
+      "destination": "/api/tracking-preview?token=:token"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

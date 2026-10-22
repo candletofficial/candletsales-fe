@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { orderService } from '../../services/orderService';
 import { formatPrice } from '../../utils/formatPrice';
 import { getImageUrl } from '../../utils/imageUtils';
+import { getSpxTrackingUrl, getSpxWaybill } from '../../utils/spxTracking';
 
 const steps = [
   { value: 'pending', label: 'Chờ xác nhận', description: 'Shop đang kiểm tra thông tin đơn hàng.', icon: 'receipt_long' },
@@ -66,6 +67,10 @@ export default function OrderTracking() {
   const stepIndex = steps.findIndex(step => step.value === status);
   const exceptionProgress = status === 'failed' || status === 'returned' ? 2 : -1;
   const statusDetail = statusDetails[status] || statusDetails.pending;
+  const spxTrackingUrl = getSpxTrackingUrl(order);
+  const spxWaybill = getSpxWaybill(order);
+  const isPaidTransfer = order?.payment_method === 'transfer' && order?.payment_status === 'paid';
+  const amountDue = isPaidTransfer ? 0 : Number(order?.total_price || 0);
 
   const copyOrderId = async () => {
     if (!order?.orderId || !navigator.clipboard) return;
@@ -132,6 +137,7 @@ export default function OrderTracking() {
                 <dt className="text-stone-500">Mã đơn</dt><dd className="min-w-0 break-all text-right font-mono font-bold text-stone-900">{order.orderId}</dd>
                 <dt className="text-stone-500">Ngày đặt</dt><dd className="text-right font-semibold text-stone-800">{dateText(order.ordered_at) || '—'}</dd>
                 <dt className="text-stone-500">Vận chuyển</dt><dd className="text-right font-semibold text-stone-800">{order.shippingMethod === 'express' ? 'Hỏa tốc 4h' : 'Tiêu chuẩn'}</dd>
+                <dt className="text-stone-500">Thanh toán</dt><dd className={`text-right font-semibold ${isPaidTransfer ? 'text-emerald-700' : 'text-stone-800'}`}>{isPaidTransfer ? 'Chuyển khoản · Đã thanh toán' : order.payment_method === 'transfer' ? 'Chuyển khoản · Chờ thanh toán' : 'Thanh toán khi nhận hàng'}</dd>
               </dl>
               <address className="flex gap-3 border-t border-stone-100 px-4 py-4 not-italic sm:px-5">
                 <span aria-hidden="true" className="material-symbols-outlined flex size-9 shrink-0 items-center justify-center rounded-full bg-orange-50 text-lg text-[#c45e37]">location_on</span>
@@ -144,12 +150,26 @@ export default function OrderTracking() {
             </section>
 
             <section className="border-b-8 border-stone-100 bg-white px-4 py-5 sm:px-6 sm:py-6">
-              <header className="mb-5 flex items-center gap-2.5">
-                <span aria-hidden="true" className="material-symbols-outlined flex size-9 items-center justify-center rounded-lg bg-orange-50 text-xl text-[#a45f32]">local_shipping</span>
-                <hgroup>
-                  <h2 className="text-[15px] font-extrabold text-stone-900">Hành trình đơn hàng</h2>
-                  <p className="text-[11px] text-stone-500">Trạng thái vận chuyển mới nhất</p>
-                </hgroup>
+              <header className="mb-5 flex items-center justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-2.5">
+                  <span aria-hidden="true" className="material-symbols-outlined flex size-9 shrink-0 items-center justify-center rounded-lg bg-orange-50 text-xl text-[#a45f32]">local_shipping</span>
+                  <hgroup className="min-w-0">
+                    <h2 className="text-[15px] font-extrabold text-stone-900">Hành trình đơn hàng</h2>
+                    <p className="truncate text-[11px] text-stone-500">Trạng thái vận chuyển mới nhất</p>
+                  </hgroup>
+                </div>
+                {spxTrackingUrl && (
+                  <a
+                    href={spxTrackingUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-9 shrink-0 items-center justify-center gap-1.5 rounded-lg bg-[#ee4d2d] px-3 text-[11px] font-extrabold text-white shadow-sm transition active:scale-[0.98]"
+                  >
+                    <span aria-hidden="true" className="material-symbols-outlined text-base">open_in_new</span>
+                    <span className="sm:hidden">Xem SPX</span>
+                    <span className="hidden sm:inline">Chi tiết trên SPX</span>
+                  </a>
+                )}
               </header>
               <ol className="pl-0.5">{steps.map((step, index) => {
                 const isCurrent = index === stepIndex;
@@ -164,6 +184,9 @@ export default function OrderTracking() {
                   </article>
                 </li>;
               })}</ol>
+              {spxWaybill && (
+                <p className="mt-4 border-t border-stone-100 pt-3 font-mono text-[10px] text-stone-400">Mã vận đơn SPX: {spxWaybill}</p>
+              )}
             </section>
 
             <section className="overflow-hidden border-b border-stone-200 bg-white">
@@ -179,7 +202,18 @@ export default function OrderTracking() {
                   <footer className="mt-2 flex items-center justify-between gap-2"><span className="text-xs text-stone-500">x{item.quantity}</span><strong className="text-[13px] text-stone-900">{formatPrice(item.unit_price * item.quantity)}</strong></footer>
                 </article>
               </li>)}</ul>
-              <footer className="flex items-center justify-between bg-stone-50 px-4 py-3.5 sm:px-5"><span className="text-[13px] text-stone-600">Thành tiền</span><strong className="text-lg text-[#ee4d2d]">{formatPrice(order.total_price)}</strong></footer>
+              <footer className="bg-stone-50 px-4 py-3.5 sm:px-5">
+                <p className="flex items-center justify-between gap-4">
+                  <span className="text-[13px] text-stone-600">Tổng khách phải thanh toán</span>
+                  <strong className="text-lg text-[#ee4d2d]">{formatPrice(order.total_price)}</strong>
+                </p>
+                {isPaidTransfer && (
+                  <p className="mt-2 flex items-center justify-between gap-4 border-t border-stone-200 pt-2 text-[12px] font-semibold text-emerald-700">
+                    <span className="inline-flex items-center gap-1"><span aria-hidden="true" className="material-symbols-outlined text-base">check_circle</span>Đã thanh toán chuyển khoản</span>
+                    <span>Còn phải trả: {formatPrice(amountDue)}</span>
+                  </p>
+                )}
+              </footer>
             </section>
 
             <footer className="px-2 py-2 text-center text-xs text-stone-500">
