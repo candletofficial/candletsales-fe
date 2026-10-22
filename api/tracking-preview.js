@@ -35,11 +35,7 @@ export default function handler(request, response) {
 
   const safeToken = escapeHtml(token);
   const origin = getPublicOrigin(request);
-  const rawPreviewKey = Array.isArray(request.query.p) ? request.query.p[0] : request.query.p;
-  const previewKey = /^[a-z0-9]{5}$/i.test(String(rawPreviewKey || ''))
-    ? String(rawPreviewKey).toLowerCase()
-    : '';
-  const shareUrl = `${origin}/s/${safeToken}?v=${PREVIEW_VERSION}${previewKey ? `&p=${previewKey}` : ''}`;
+  const shareUrl = `${origin}/s/${safeToken}?v=${PREVIEW_VERSION}`;
   const appUrl = `/theo-doi-don/${encodeURIComponent(token)}`;
   const previewImageUrl = `${origin}/og-order-tracking-v7.jpg?v=${PREVIEW_VERSION}`;
 

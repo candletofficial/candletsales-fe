@@ -24,8 +24,6 @@ const today = () => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
 
-const newPreviewKey = () => Math.random().toString(36).slice(2, 7).padEnd(5, '0');
-
 // ── Modal Tạo / Chỉnh sửa đơn hàng ───────────────────────────────
 function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, onMaterialsSaved, onTrackingCreated, onStatusSaved, isReplacementMode = false, isSeedingMode = false }) {
   const isEdit = !!order;
@@ -61,14 +59,13 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
   const [createTracking, setCreateTracking] = useState(false);
   const [linkLoading, setLinkLoading] = useState(false);
   const [linkMessage, setLinkMessage] = useState('');
-  const [previewKey, setPreviewKey] = useState(newPreviewKey);
   const managesDelivery = source === 'website' || order?.tracking_enabled;
   const canEditCustomer = source === 'website' || source === 'pos' || !order?.pancake_order_id;
   const trackingCode = order?.tracking_token
     ? btoa(String.fromCharCode(...(order.tracking_token.slice(0, 16).match(/.{2}/g) || []).map(value => parseInt(value, 16))))
       .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '')
     : '';
-  const trackingUrl = trackingCode ? `${window.location.origin}/s/${trackingCode}?v=8&p=${previewKey}` : '';
+  const trackingUrl = trackingCode ? `${window.location.origin}/s/${trackingCode}?v=8` : '';
   const handleCreateTracking = async () => {
     setLinkLoading(true);
     setError('');
@@ -81,13 +78,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
     finally { setLinkLoading(false); }
   };
   const handleCopyTracking = async () => {
-    const nextPreviewKey = newPreviewKey();
-    const nextTrackingUrl = `${window.location.origin}/s/${trackingCode}?v=8&p=${nextPreviewKey}`;
-    try {
-      await navigator.clipboard.writeText(nextTrackingUrl);
-      setPreviewKey(nextPreviewKey);
-      setLinkMessage('Đã sao chép link theo dõi mới.');
-    }
+    try { await navigator.clipboard.writeText(trackingUrl); setLinkMessage('Đã sao chép link theo dõi.'); }
     catch { setLinkMessage('Hãy chọn đường link bên dưới và sao chép thủ công.'); }
   };
   const [cancelReason, setCancelReason] = useState(order?.cancelled_reason || '');
