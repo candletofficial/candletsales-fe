@@ -40,14 +40,16 @@ export default function ShopLogin() {
     setFacebookLoading(true);
     const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/+$/, '');
     // Backend tạo state chống CSRF và giữ URL khách đang muốn quay lại.
-    window.location.assign(`${apiBase}/auth/facebook?returnTo=${encodeURIComponent(from)}`);
+    const params = new URLSearchParams({ returnTo: from, clientOrigin: window.location.origin });
+    window.location.assign(`${apiBase}/auth/facebook?${params.toString()}`);
   };
 
   const handleGoogleLogin = () => {
     setError('');
     setGoogleLoading(true);
     const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/+$/, '');
-    window.location.assign(`${apiBase}/auth/google?returnTo=${encodeURIComponent(from)}`);
+    const params = new URLSearchParams({ returnTo: from, clientOrigin: window.location.origin });
+    window.location.assign(`${apiBase}/auth/google?${params.toString()}`);
   };
 
   return (

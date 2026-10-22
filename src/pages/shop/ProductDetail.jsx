@@ -390,7 +390,7 @@ export default function ProductDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-white pb-16 md:pb-0 sm:bg-[#f9f9f9]">
+    <div className="min-h-screen bg-white pb-[calc(58px+env(safe-area-inset-bottom,0px))] md:pb-0 sm:bg-[#f9f9f9]">
       <div className="mx-auto max-w-7xl px-4 pt-3 sm:px-6 sm:pt-8 lg:px-8">
         
         {/* Top Navigation & Breadcrumbs */}
@@ -459,8 +459,12 @@ export default function ProductDetail() {
               <div
                 ref={carouselRef}
                 onScroll={handleCarouselScroll}
-                className="w-full h-full flex overflow-x-auto snap-x snap-mandatory scrollbar-none scroll-smooth touch-pan-x"
-                style={{ WebkitOverflowScrolling: 'touch' }}
+                className="w-full h-full flex overflow-x-auto snap-x snap-mandatory scrollbar-none scroll-smooth"
+                style={{
+                  WebkitOverflowScrolling: 'touch',
+                  touchAction: 'pan-x pan-y',
+                  overscrollBehaviorX: 'contain',
+                }}
               >
                 {allImages.length > 0 ? (
                   allImages.map((img, index) => (
@@ -913,8 +917,11 @@ export default function ProductDetail() {
 
       {/* SHOPEE-STYLE MOBILE STICKY BOTTOM ACTION BAR (Chuẩn trải nghiệm Shopee trên Mobile) */}
       <div 
-        className="fixed bottom-0 left-0 right-0 z-50 flex h-[58px] items-stretch border-t border-stone-200/90 bg-white shadow-[0_-4px_25px_rgba(0,0,0,0.12)] md:hidden"
-        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+        className="fixed bottom-0 left-0 right-0 z-50 isolate flex min-h-[58px] items-stretch border-t border-stone-200/90 bg-white shadow-[0_-4px_25px_rgba(0,0,0,0.12)] md:hidden"
+        style={{
+          height: 'calc(58px + env(safe-area-inset-bottom, 0px))',
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        }}
       >
         {/* 1. Nút Yêu thích (Wishlist) */}
         <button
