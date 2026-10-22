@@ -98,7 +98,7 @@ export default function ShopStories() {
   const gridPosts = featuredPost ? posts.slice(1) : posts;
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-white font-jakarta text-[#2C1810] selection:bg-[#4A2C2A] selection:text-white sm:bg-[#FAF7F2]">
+    <main className="relative min-h-screen overflow-hidden bg-white pb-12 font-jakarta text-[#2C1810] selection:bg-[#4A2C2A] selection:text-white sm:bg-[#FAF7F2] sm:pb-20 lg:pb-24">
       
       {/* Nền hiệu ứng hạt bụi sáng / sương mù ấm áp */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[400px] bg-gradient-to-b from-amber-200/20 via-orange-100/10 to-transparent blur-3xl pointer-events-none -z-10"></div>

@@ -33,7 +33,7 @@ export default function ShopGuide() {
   ];
 
   return (
-    <main className="min-h-screen bg-white font-jakarta text-[#2C1810] selection:bg-[#4A2C2A] selection:text-white sm:bg-[#FFFDF9]">
+    <main className="min-h-screen bg-white pb-12 font-jakarta text-[#2C1810] selection:bg-[#4A2C2A] selection:text-white sm:bg-[#FFFDF9] sm:pb-20 lg:pb-24">
       
       {/* 1. HERO HEADER */}
       <header className="relative border-b-8 border-stone-100 bg-white py-7 sm:border-b sm:border-stone-200/80 sm:bg-gradient-to-b sm:from-[#F7EFE8]/70 sm:via-[#FFFDF9] sm:to-[#FFFDF9] sm:py-20">
