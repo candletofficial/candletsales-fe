@@ -34,7 +34,8 @@ export default function handler(request, response) {
 
   const safeToken = escapeHtml(token);
   const origin = getPublicOrigin(request);
-  const shareUrl = `${origin}/d/${safeToken}`;
+  const route = request.query.route === 't' ? 't' : 'd';
+  const shareUrl = `${origin}/${route}/${safeToken}`;
   const appUrl = `/theo-doi-don/${encodeURIComponent(token)}`;
   const previewImageUrl = `${origin}/og-order-tracking.jpg?v=6`;
 
