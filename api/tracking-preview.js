@@ -1,4 +1,4 @@
-const PUBLIC_SITE_URL = "https://candletshop.vercel.app";
+const PUBLIC_SITE_URL = "https://candlet.shop";
 const PREVIEW_VERSION = "8";
 const TRACKING_CODE_PATTERN = /^[A-Za-z0-9_-]{11}$/;
 
