@@ -36,7 +36,7 @@ export default function handler(request, response) {
   const origin = getPublicOrigin(request);
   const shareUrl = `${origin}/d/${safeToken}`;
   const appUrl = `/theo-doi-don/${encodeURIComponent(token)}`;
-  const previewImageUrl = `${origin}/og-order-tracking.jpg?v=4`;
+  const previewImageUrl = `${origin}/og-order-tracking.jpg?v=6`;
 
   response.setHeader("Content-Type", "text/html; charset=utf-8");
   response.setHeader("Cache-Control", "public, s-maxage=3600, stale-while-revalidate=86400");
