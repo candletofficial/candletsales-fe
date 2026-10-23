@@ -134,7 +134,7 @@ export default function ShopLayout() {
 
           <div className="flex items-center space-x-3 sm:space-x-4 shrink-0">
             <span className="hidden sm:inline text-stone-300">Hotline: <strong className="text-white">032.862.4761</strong></span>
-            <Link to="/tra-cuu-don" className="text-amber-200 sm:hover:text-white font-medium transition-colors underline-offset-2 sm:hover:underline">
+            <Link to="/order-lookup" className="text-amber-200 sm:hover:text-white font-medium transition-colors underline-offset-2 sm:hover:underline">
               Tra cứu đơn
             </Link>
           </div>
@@ -581,7 +581,7 @@ export default function ShopLayout() {
               <i className="ph-bold ph-storefront text-sm text-amber-300"></i>
               <span>Cửa hàng</span>
             </Link>
-            <Link to="/tra-cuu-don" className="flex min-h-9 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.06] px-2.5 py-2 text-stone-100 transition-colors active:bg-white/15">
+            <Link to="/order-lookup" className="flex min-h-9 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.06] px-2.5 py-2 text-stone-100 transition-colors active:bg-white/15">
               <i className="ph-bold ph-package text-sm text-amber-300"></i>
               <span>Tra cứu đơn</span>
             </Link>
@@ -782,7 +782,7 @@ export default function ShopLayout() {
               </h4>
               <ul className="space-y-2.5 text-[12px]">
                 <li>
-                  <Link to="/tra-cuu-don" className="text-stone-300 sm:hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
+                  <Link to="/order-lookup" className="text-stone-300 sm:hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
                     <i className="ph ph-receipt text-xs text-amber-400/60"></i>
                     <span>Tra Cứu Đơn Hàng</span>
                   </Link>

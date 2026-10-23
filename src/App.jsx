@@ -82,7 +82,7 @@ export default function App() {
             <Route path="payment/:orderId" element={<OrderSuccess paymentFlow />} />
             <Route path="order-success/:orderId" element={<OrderSuccess />} />
             <Route path="orders" element={<ShopOrders />} />
-            <Route path="tra-cuu-don" element={<OrderLookup />} />
+            <Route path="order-lookup" element={<OrderLookup />} />
             <Route path="s/:token" element={<OrderTracking />} />
             <Route path="theo-doi-don/:token" element={<OrderTracking />} />
             <Route path="guide" element={<ShopGuide />} />

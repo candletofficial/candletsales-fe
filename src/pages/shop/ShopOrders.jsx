@@ -384,7 +384,7 @@ export default function ShopOrders() {
             <div className="pt-2">
               {!user ? (
                 <Link
-                  to="/tra-cuu-don"
+                  to="/order-lookup"
                   className="inline-flex items-center gap-2 rounded-full bg-[#4A2C2A] px-6 py-3 text-xs font-bold uppercase tracking-wider text-white shadow-sm transition-all sm:hover:bg-[#381B18]"
                 >
                   <i className="ph-bold ph-magnifying-glass"></i>
