@@ -25,9 +25,6 @@ export default function ShopOrders() {
   const [cancelError, setCancelError] = useState('');
 
   // Guest lookup (khách chưa đăng nhập)
-  const [guestPhone, setGuestPhone] = useState('');
-  const [guestOrderId, setGuestOrderId] = useState('');
-  const [searchingGuest, setSearchingGuest] = useState(false);
 
   // Danh sách các lý do huỷ đơn mẫu để khách chọn nhanh
   const quickReasons = [
@@ -62,30 +59,6 @@ export default function ShopOrders() {
   }, [fetchOrders]);
 
   // Tra cứu đơn khách vãng lai
-  const handleGuestSearch = async (e) => {
-    e.preventDefault();
-    if (!guestPhone.trim() && !guestOrderId.trim()) {
-      alert('Vui lòng nhập Số điện thoại hoặc Mã đơn hàng để tra cứu');
-      return;
-    }
-    try {
-      setSearchingGuest(true);
-      const params = {};
-      if (guestPhone.trim()) params.phone = guestPhone.trim();
-      if (guestOrderId.trim()) params.orderId = guestOrderId.trim();
-
-      const res = await orderService.getShopOrders(params);
-      if (res.data?.success) {
-        setOrders(res.data.data || []);
-      }
-    } catch (err) {
-      console.error('Lỗi tra cứu đơn:', err);
-      alert('Có lỗi xảy ra khi tra cứu đơn hàng');
-    } finally {
-      setSearchingGuest(false);
-    }
-  };
-
   // Huỷ đơn hàng
   const handleCancelOrder = async () => {
     if (!cancelModalOrder) return;
@@ -307,59 +280,6 @@ export default function ShopOrders() {
         {/* ======================================================== */}
         {/* FORM TRA CỨU NHANH CHO KHÁCH CHƯA ĐĂNG NHẬP              */}
         {/* ======================================================== */}
-        {!user && (
-          <div className="bg-white rounded-3xl p-6 border border-stone-200/90 shadow-sm">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-2xl bg-[#FAF5EE] text-[#8C4A32] flex items-center justify-center text-lg">
-                <i className="ph-bold ph-magnifying-glass"></i>
-              </div>
-              <div>
-                <h3 className="text-sm font-serif-display font-bold text-[#4A2C2A]">
-                  Tra cứu nhanh đơn hàng (Khách vãng lai)
-                </h3>
-                <p className="text-xs text-stone-500">
-                  Nhập số điện thoại đặt hàng hoặc mã đơn để theo dõi tiến độ vận chuyển
-                </p>
-              </div>
-            </div>
-
-            <form onSubmit={handleGuestSearch} className="grid grid-cols-1 sm:grid-cols-12 gap-3">
-              <div className="sm:col-span-5">
-                <input
-                  type="tel"
-                  placeholder="Số điện thoại nhận hàng..."
-                  value={guestPhone}
-                  onChange={e => setGuestPhone(e.target.value)}
-                  className="w-full px-4 py-3 text-xs rounded-2xl bg-stone-50/70 border border-stone-200 focus:outline-none focus:border-[#4A2C2A] font-mono"
-                />
-              </div>
-              <div className="sm:col-span-4">
-                <input
-                  type="text"
-                  placeholder="Mã đơn (VD: DH-1234567)..."
-                  value={guestOrderId}
-                  onChange={e => setGuestOrderId(e.target.value.toUpperCase())}
-                  className="w-full px-4 py-3 text-xs rounded-2xl bg-stone-50/70 border border-stone-200 focus:outline-none focus:border-[#4A2C2A] font-mono"
-                />
-              </div>
-              <div className="sm:col-span-3">
-                <button
-                  type="submit"
-                  disabled={searchingGuest}
-                  className="w-full bg-[#4A2C2A] sm:hover:bg-[#381B18] text-white text-xs font-bold uppercase tracking-wider rounded-2xl py-3 px-4 flex items-center justify-center gap-2 cursor-pointer transition-all shadow-xs"
-                >
-                  {searchingGuest ? (
-                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                  ) : (
-                    <i className="ph-bold ph-magnifying-glass"></i>
-                  )}
-                  <span>Tra cứu</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
-
         {/* ======================================================== */}
         {/* THANH TÌM KIẾM & BỘ LỌC ĐƠN HÀNG                         */}
         {/* ======================================================== */}
@@ -455,12 +375,22 @@ export default function ShopOrders() {
               Không tìm thấy đơn hàng nào
             </h3>
             <p className="text-xs sm:text-sm text-stone-500 max-w-md mx-auto leading-relaxed">
-              {searchKeyword || filterExpressOnly
+              {!user
+                ? 'Bạn chưa đăng nhập. Hãy dùng trang tra cứu đơn dành cho khách hoặc đăng nhập để xem toàn bộ lịch sử mua hàng.'
+                : searchKeyword || filterExpressOnly
                 ? 'Không có đơn hàng nào khớp với điều kiện tìm kiếm. Hãy thử xóa bớt bộ lọc.'
                 : 'Bạn chưa có đơn hàng nào ở mục này. Hãy khám phá các mẻ nến thơm thủ công tinh tế của Candlet nhé!'}
             </p>
             <div className="pt-2">
-              {searchKeyword || filterExpressOnly ? (
+              {!user ? (
+                <Link
+                  to="/tra-cuu-don"
+                  className="inline-flex items-center gap-2 rounded-full bg-[#4A2C2A] px-6 py-3 text-xs font-bold uppercase tracking-wider text-white shadow-sm transition-all sm:hover:bg-[#381B18]"
+                >
+                  <i className="ph-bold ph-magnifying-glass"></i>
+                  <span>Tra cứu đơn hàng</span>
+                </Link>
+              ) : searchKeyword || filterExpressOnly ? (
                 <button
                   onClick={() => {
                     setSearchKeyword('');
