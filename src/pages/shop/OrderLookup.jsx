@@ -113,7 +113,12 @@ export default function OrderLookup() {
                 {orders.map((order) => {
                   const meta = STATUS_META[order.delivery_status || 'pending'] || STATUS_META.pending;
                   return (
-                    <article key={order._id || order.orderId} className="rounded-3xl border border-stone-200/90 bg-white p-5 shadow-xs sm:p-6">
+                    <Link
+                      key={order._id || order.orderId}
+                      to={order.tracking_path || '/orders'}
+                      className="group block rounded-3xl border border-stone-200/90 bg-white p-5 shadow-xs transition-all hover:-translate-y-0.5 hover:border-[#B98A76] hover:shadow-md sm:p-6"
+                      aria-label={`Xem tiến độ đơn hàng ${order.orderId}`}
+                    >
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                         <div>
                           <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Mã đơn hàng</p>
@@ -129,7 +134,11 @@ export default function OrderLookup() {
                         <div><span className="text-[10px] uppercase tracking-wider text-stone-400">Sản phẩm</span><p className="mt-1 text-xs font-semibold text-stone-700">{(order.items || []).reduce((sum, item) => sum + (item.quantity || 0), 0)} sản phẩm</p></div>
                         <div className="sm:text-right"><span className="text-[10px] uppercase tracking-wider text-stone-400">Tổng tiền</span><p className="mt-1 text-sm font-bold text-[#4A2C2A]">{formatPrice(order.total_price)}</p></div>
                       </div>
-                    </article>
+                      <div className="mt-4 flex items-center justify-end gap-1.5 text-[11px] font-bold text-[#8C4A32]">
+                        <span>Xem tiến độ đơn hàng</span>
+                        <i className="ph-bold ph-arrow-right transition-transform group-hover:translate-x-1"></i>
+                      </div>
+                    </Link>
                   );
                 })}
               </div>
