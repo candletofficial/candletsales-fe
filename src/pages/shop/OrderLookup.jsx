@@ -115,7 +115,7 @@ export default function OrderLookup() {
                   return (
                     <Link
                       key={order._id || order.orderId}
-                      to="/orders"
+                      to={order.source === 'website' ? '/orders' : order.tracking_path || '/orders'}
                       className="group block rounded-3xl border border-stone-200/90 bg-white p-5 shadow-xs transition-all hover:-translate-y-0.5 hover:border-[#B98A76] hover:shadow-md sm:p-6"
                       aria-label={`Xem tiến độ đơn hàng ${order.orderId}`}
                     >
