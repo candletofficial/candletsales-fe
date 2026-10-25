@@ -70,7 +70,7 @@ export default function Header({ onMenuClick }) {
         <button onClick={onMenuClick} className="lg:hidden p-2 text-on-surface-variant hover:bg-surface-container rounded-full flex items-center justify-center -ml-2">
           <span className="material-symbols-outlined text-[24px]">menu</span>
         </button>
-        <h1 className="text-[18px] font-bold text-[#003366] hidden sm:block">Quản lý Kho & Bán hàng</h1>
+        <h1 className="text-[18px] font-bold text-[#381B18] hidden sm:block">Quản lý Kho & Bán hàng</h1>
       </div>
 
       {/* Middle - Search */}

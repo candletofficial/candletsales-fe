@@ -295,7 +295,7 @@ export default function FundManagement() {
     switch(type) {
       case 'admin_deposit': return { label: 'Góp vốn', color: 'bg-[#d1fae5] text-[#059669]' };
       case 'admin_withdrawal': return { label: 'Rút vốn', color: 'bg-[#fee2e2] text-[#dc2626]' };
-      case 'revenue_withdrawal': return { label: 'Rút doanh thu', color: 'bg-[#dbeafe] text-[#2563eb]' };
+      case 'revenue_withdrawal': return { label: 'Rút doanh thu', color: 'bg-[#f3e5df] text-[#4A2C2A]' };
       case 'ad_topup': return { label: 'Nạp quảng cáo', color: 'bg-purple-100 text-purple-700' };
       case 'import_payment': return { label: 'Thanh toán PN', color: 'bg-[#fee2e2] text-[#dc2626]' };
       case 'expense_payment': return { label: 'Chi tiêu', color: 'bg-orange-100 text-orange-700' };
@@ -327,7 +327,7 @@ export default function FundManagement() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           {/* Main Fund Card */}
-          <div className="lg:col-span-1 bg-gradient-to-br from-[#1e3a5f] to-[#2563eb] rounded-2xl p-6 shadow-sm flex flex-col justify-between relative overflow-hidden">
+          <div className="lg:col-span-1 bg-gradient-to-br from-[#381B18] to-[#8C4A32] rounded-2xl p-6 shadow-sm flex flex-col justify-between relative overflow-hidden">
             <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/5" />
             <div className="absolute -right-4 -bottom-10 w-56 h-56 rounded-full bg-white/5" />
             

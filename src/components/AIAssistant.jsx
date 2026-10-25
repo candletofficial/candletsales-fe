@@ -66,7 +66,7 @@ const MessageBubble = ({ msg }) => {
       <div className="flex gap-2 items-end justify-end">
         <div
           className="max-w-[80%] text-white rounded-2xl rounded-br-sm px-4 py-2.5 shadow-sm text-[14px] leading-relaxed"
-          style={{ background: 'linear-gradient(135deg, #1e40af, #1e3a8a)' }}
+          style={{ background: 'linear-gradient(135deg, #6B3530, #381B18)' }}
         >
           {msg.content}
         </div>
@@ -216,12 +216,12 @@ export default function AIAssistant({ periodLabel = 'Tháng này' }) {
         onClick={() => setIsOpen((v) => !v)}
         className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 bg-white overflow-hidden"
         style={{
-          boxShadow: '0 8px 32px rgba(30,64,175,0.35), 0 0 0 3px #1e40af',
+          boxShadow: '0 8px 32px rgba(91,48,40,0.30), 0 0 0 3px #4A2C2A',
         }}
         title="AI Business Analyst"
       >
         {isOpen ? (
-          <span className="material-symbols-outlined text-[#1e40af] text-[26px]">close</span>
+          <span className="material-symbols-outlined text-[#4A2C2A] text-[26px]">close</span>
         ) : (
           <>
             <img
@@ -256,7 +256,7 @@ export default function AIAssistant({ periodLabel = 'Tháng này' }) {
           {/* Header */}
           <div
             className="flex items-center gap-3 px-4 py-3.5 flex-shrink-0"
-            style={{ background: 'linear-gradient(135deg, #1e40af, #1e3a8a)' }}
+            style={{ background: 'linear-gradient(135deg, #6B3530, #381B18)' }}
           >
             {/* Logo Candlet Shop */}
             <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center flex-shrink-0 overflow-hidden p-0.5">
@@ -343,7 +343,7 @@ export default function AIAssistant({ periodLabel = 'Tháng này' }) {
                 disabled={loading || !input.trim()}
                 className="w-8 h-8 rounded-lg flex items-center justify-center transition-all flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
                 style={{
-                  background: input.trim() && !loading ? 'linear-gradient(135deg, #1e40af, #1e3a8a)' : '#e5e7eb',
+                  background: input.trim() && !loading ? 'linear-gradient(135deg, #6B3530, #381B18)' : '#e5e7eb',
                 }}
               >
                 {loading ? (

@@ -404,7 +404,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
         {/* Header */}
         <div className="px-6 py-4 border-b border-stone-200/80 flex items-center justify-between bg-white shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#003366] to-[#1e40af] text-white flex items-center justify-center shadow-xs shadow-primary/20">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#381B18] to-[#6B3530] text-white flex items-center justify-center shadow-xs shadow-primary/20">
               <span className="material-symbols-outlined text-[24px]">
                 {isReplacementMode ? 'local_shipping' : isSeedingMode ? 'campaign' : 'receipt_long'}
               </span>

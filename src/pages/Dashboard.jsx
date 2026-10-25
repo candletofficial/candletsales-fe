@@ -263,7 +263,7 @@ export default function Dashboard() {
           {/* LEFT: Tổng tài sản chung - large card */}
           <div 
             onClick={() => navigate('/admin/fund')}
-            className="lg:col-span-1 bg-gradient-to-br from-[#1e3a5f] to-[#2563eb] rounded-2xl p-6 shadow-sm flex flex-col justify-between relative overflow-hidden cursor-pointer hover:shadow-lg transition-all hover:scale-[1.01]"
+            className="lg:col-span-1 bg-gradient-to-br from-[#381B18] to-[#8C4A32] rounded-2xl p-6 shadow-sm flex flex-col justify-between relative overflow-hidden cursor-pointer hover:shadow-lg transition-all hover:scale-[1.01]"
           >
             <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/5" />
             <div className="absolute -right-4 -bottom-10 w-56 h-56 rounded-full bg-white/5" />
@@ -510,7 +510,7 @@ export default function Dashboard() {
                 data.recentActivities.map((act, idx) => {
                   let icon, color, bgColor;
                   if (act.type === 'order') {
-                    icon = 'shopping_cart'; color = '#1e40af'; bgColor = '#eff6ff'; // primary blue
+                    icon = 'shopping_cart'; color = '#4A2C2A'; bgColor = '#fbf5f2';
                   } else if (act.type === 'import') {
                     icon = 'inventory_2'; color = '#059669'; bgColor = '#ecfdf5'; // emerald
                   } else if (act.type === 'inventory_check') {
@@ -520,7 +520,7 @@ export default function Dashboard() {
                   } else if (act.type === 'deposit') {
                     icon = 'account_balance_wallet'; color = '#059669'; bgColor = '#ecfdf5'; // emerald
                   } else if (act.type === 'withdraw') {
-                    icon = 'payments'; color = '#2563eb'; bgColor = '#dbeafe'; // blue
+                    icon = 'payments'; color = '#8C4A32'; bgColor = '#f3e5df';
                   } else if (act.type === 'payment') {
                     icon = 'receipt_long'; color = '#dc2626'; bgColor = '#fef2f2'; // red
                   } else if (act.type === 'expense') {
@@ -540,7 +540,7 @@ export default function Dashboard() {
                         <span className="material-symbols-outlined text-[16px]">{icon}</span>
                       </div>
                       <div className="flex-1 pb-1">
-                        <p className="text-[14px] font-bold text-on-surface" dangerouslySetInnerHTML={{ __html: act.title.replace(/(#[A-Z0-9-]+)/g, '<span style="color:#1e40af">$1</span>') }}></p>
+                        <p className="text-[14px] font-bold text-on-surface" dangerouslySetInnerHTML={{ __html: act.title.replace(/(#[A-Z0-9-]+)/g, '<span style="color:#4A2C2A">$1</span>') }}></p>
                         <p className="text-[13px] text-on-surface-variant mt-0.5">{act.subtitle}</p>
                         {act.detail && <p className="text-[13px] font-bold mt-0.5">{act.detail}</p>}
                         <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mt-1.5">

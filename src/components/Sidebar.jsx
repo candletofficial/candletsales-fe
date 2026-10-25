@@ -1,5 +1,5 @@
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 
 const NAV_ITEMS = [
@@ -184,6 +184,16 @@ const NAV_ITEMS = [
   },
 ];
 
+const QUICK_ACCESS_KEY = 'candlet-admin-quick-access';
+const NAV_LINKS = NAV_ITEMS.flatMap((item) => item.isGroup ? item.children : item.to ? [item] : []);
+
+const readQuickAccess = () => {
+  try {
+    const saved = JSON.parse(localStorage.getItem(QUICK_ACCESS_KEY) || '[]');
+    return Array.isArray(saved) ? saved.filter((path) => NAV_LINKS.some((item) => item.to === path)).slice(0, 8) : [];
+  } catch { return []; }
+};
+
 export default function Sidebar({ isOpen, onClose }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -192,6 +202,27 @@ export default function Sidebar({ isOpen, onClose }) {
     // Auto-open if on a tool page
     return location.pathname.startsWith('/admin/tools') ? { 'Công cụ tính': true } : {};
   });
+  const [quickAccess, setQuickAccess] = useState(readQuickAccess);
+  const [contextMenu, setContextMenu] = useState(null);
+
+  useEffect(() => { localStorage.setItem(QUICK_ACCESS_KEY, JSON.stringify(quickAccess)); }, [quickAccess]);
+  useEffect(() => {
+    if (!contextMenu) return undefined;
+    const close = () => setContextMenu(null);
+    const onKeyDown = (event) => { if (event.key === 'Escape') close(); };
+    document.addEventListener('click', close);
+    document.addEventListener('contextmenu', close);
+    document.addEventListener('keydown', onKeyDown);
+    window.addEventListener('resize', close);
+    window.addEventListener('scroll', close, true);
+    return () => {
+      document.removeEventListener('click', close);
+      document.removeEventListener('contextmenu', close);
+      document.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('resize', close);
+      window.removeEventListener('scroll', close, true);
+    };
+  }, [contextMenu]);
 
   const toggleGroup = (label) => setOpenGroups(g => ({ ...g, [label]: !g[label] }));
 
@@ -200,18 +231,41 @@ export default function Sidebar({ isOpen, onClose }) {
     navigate('/admin/login');
   };
 
+  const displayName = user?.name || 'Quản trị viên';
+  const initials = displayName.split(/\s+/).filter(Boolean).slice(-2).map((part) => part[0]).join('').toUpperCase();
+  const linkClass = (isActive) => `group relative mx-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-semibold transition-all duration-200 ${isActive
+    ? 'bg-[#F5EFE6] text-[#4A2C2A] shadow-[0_5px_16px_rgba(91,48,40,.08)]'
+    : 'text-[#665a56] hover:translate-x-0.5 hover:bg-white hover:text-[#2C1810] hover:shadow-sm'}`;
+  const quickItems = quickAccess.map((path) => NAV_LINKS.find((item) => item.to === path)).filter(Boolean);
+  const openContextMenu = (event, item) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const menuWidth = 230; const menuHeight = 104;
+    setContextMenu({ item, x: Math.min(event.clientX, window.innerWidth - menuWidth - 10), y: Math.min(event.clientY, window.innerHeight - menuHeight - 10) });
+  };
+  const toggleQuickAccess = (item) => {
+    setQuickAccess((current) => current.includes(item.to) ? current.filter((path) => path !== item.to) : [...current, item.to].slice(-8));
+    setContextMenu(null);
+  };
+
   return (
-    <aside className={`sidebar z-40 ${isOpen ? 'open' : ''}`}>
-      <div className="sidebar-brand flex items-center justify-center">
-        <img src="/logo.png" alt="CandletShop" className="h-[48px] w-auto object-contain drop-shadow-sm" />
+    <aside aria-label="Điều hướng quản trị" className={`sidebar z-40 overflow-hidden border-r border-[#e8dfdb] bg-[#FAF7F2] shadow-[8px_0_30px_rgba(50,35,30,.035)] ${isOpen ? 'open' : ''}`}>
+      <div className="relative flex h-[88px] shrink-0 items-center border-b border-[#ebe2de] bg-white px-5">
+        <div className="absolute -left-8 -top-10 h-24 w-24 rounded-full bg-[#ead4ca]/35 blur-2xl" />
+        <div className="relative flex min-w-0 items-center gap-3">
+          <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#FFF9F2] to-[#f1dfd7] shadow-sm"><img src="/logo.png" alt="CandletShop" className="h-9 w-9 object-contain" /></div>
+          <div className="min-w-0"><p className="truncate text-[15px] font-black tracking-tight text-[#2C1810]">Candlet Admin</p><p className="mt-0.5 text-[9px] font-bold uppercase tracking-[.18em] text-[#a27666]">Management workspace</p></div>
+        </div>
+        <button type="button" onClick={onClose} className="ml-auto grid h-9 w-9 shrink-0 place-items-center rounded-xl text-[#806e68] transition hover:bg-[#f3e9e5] lg:hidden" aria-label="Đóng thanh điều hướng"><span className="material-symbols-outlined text-[20px]">close</span></button>
       </div>
 
-      <nav className="sidebar-nav overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-gray-300">
+      <nav className="sidebar-nav overflow-y-auto overflow-x-hidden py-3 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#dccbc4]">
+        {quickItems.length > 0 && <div className="mb-2 rounded-2xl border border-[#EAE1D2] bg-white/80 py-2 shadow-[0_4px_16px_rgba(70,45,38,.04)]"><div className="flex items-center justify-between px-4 pb-1.5"><p className="text-[9px] font-black uppercase tracking-[.18em] text-[#8C4A32]">Truy cập nhanh</p><span className="material-symbols-outlined text-[15px] text-[#b17864]">star</span></div><div className="space-y-0.5">{quickItems.map((item) => <NavLink key={`quick-${item.to}`} to={item.to} onClick={onClose} onContextMenu={(event) => openContextMenu(event, item)} className={({ isActive }) => `group mx-2 flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-[12px] font-bold transition ${isActive ? 'bg-[#4A2C2A] text-white shadow-sm' : 'text-[#62534e] hover:bg-[#F5EFE6] hover:text-[#381B18]'}`}><span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-[#F5EFE6] text-[#4A2C2A] [&_.material-symbols-outlined]:text-[17px] [&_svg]:h-[17px] [&_svg]:w-[17px]">{item.icon}</span><span className="truncate">{item.label}</span><span className="material-symbols-outlined ml-auto text-[14px] opacity-0 transition group-hover:opacity-60">more_horiz</span></NavLink>)}</div></div>}
         {NAV_ITEMS.map((item, idx) => {
           if (item.isSection) {
             return (
-              <div key={`sec-${idx}`} className="px-4 pt-5 pb-2 first:pt-2">
-                <p className="text-[11px] font-bold text-gray-400 tracking-wider uppercase">{item.label}</p>
+              <div key={`sec-${idx}`} className="flex items-center gap-2 px-4 pb-1.5 pt-4 first:pt-1">
+                <p className="shrink-0 text-[9px] font-black uppercase tracking-[.18em] text-[#a28f88]">{item.label}</p><span className="h-px flex-1 bg-gradient-to-r from-[#e5d9d4] to-transparent" />
               </div>
             );
           }
@@ -222,23 +276,26 @@ export default function Sidebar({ isOpen, onClose }) {
               <div key={item.label}>
                 <button
                   onClick={() => toggleGroup(item.label)}
-                  className={`nav-item w-full text-left ${isChildActive ? 'text-primary font-semibold' : ''}`}
+                  className={`${linkClass(isChildActive)} w-[calc(100%_-_1rem)] text-left`}
                 >
-                  {item.icon}
+                  {isChildActive && <span className="absolute -left-2 h-6 w-1 rounded-r-full bg-[#4A2C2A]" />}
+                  <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl transition ${isChildActive ? 'bg-[#4A2C2A] text-white shadow-sm' : 'bg-white text-[#806d66] shadow-[0_2px_8px_rgba(50,35,30,.06)] group-hover:text-[#4A2C2A]'}`}>{item.icon}</span>
                   <span className="flex-1">{item.label}</span>
-                  <span className={`material-symbols-outlined text-[16px] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>expand_more</span>
+                  <span className={`material-symbols-outlined text-[17px] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>expand_more</span>
                 </button>
-                {isOpen && (
-                  <div className="mt-0.5 mb-1 space-y-0.5">
+                <div className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
+                  <div className="min-h-0 overflow-hidden"><div className="mb-1 ml-7 mt-1 space-y-1 border-l border-[#E3D8C7] pl-2">
                     {item.children.map(child => (
                       <NavLink
                         key={child.to}
                         to={child.to}
+                        onClick={onClose}
+                        onContextMenu={(event) => openContextMenu(event, child)}
                         className={({ isActive }) =>
-                          `flex items-center gap-3 pl-10 pr-3 py-2 rounded-lg text-[13px] font-medium transition-all ${
+                          `flex items-center gap-2.5 rounded-xl px-3 py-2 text-[12px] font-semibold transition-all ${
                             isActive
-                              ? 'bg-primary-container text-primary font-semibold'
-                              : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
+                              ? 'bg-white text-[#4A2C2A] shadow-sm'
+                              : 'text-[#756660] hover:bg-white hover:text-[#2C1810]'
                           }`
                         }
                       >
@@ -249,8 +306,8 @@ export default function Sidebar({ isOpen, onClose }) {
                         )}
                       </NavLink>
                     ))}
-                  </div>
-                )}
+                  </div></div>
+                </div>
               </div>
             );
           }
@@ -258,31 +315,21 @@ export default function Sidebar({ isOpen, onClose }) {
             <NavLink
               key={item.to}
               to={item.to}
-              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+              onClick={onClose}
+              onContextMenu={(event) => openContextMenu(event, item)}
+              className={({ isActive }) => linkClass(isActive)}
             >
-              {item.icon}
-              <span>{item.label}</span>
+              {({ isActive }) => <><span className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl transition ${isActive ? 'bg-[#4A2C2A] text-white shadow-sm' : 'bg-white text-[#806d66] shadow-[0_2px_8px_rgba(50,35,30,.06)] group-hover:text-[#4A2C2A]'}`}>{item.icon}</span><span className="truncate">{item.label}</span>{isActive && <><span className="absolute -left-2 h-6 w-1 rounded-r-full bg-[#4A2C2A]" /><span className="ml-auto h-1.5 w-1.5 rounded-full bg-[#a96650]" /></>}</>}
             </NavLink>
           );
         })}
       </nav>
 
-      <div className="sidebar-footer">
-        <NavLink
-          to="/admin/settings"
-          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-        >
-          <span className="material-symbols-outlined text-[20px]">settings</span>
-          <span>Cài đặt</span>
-        </NavLink>
-        <button 
-          onClick={handleLogout}
-          className="nav-item w-full text-left cursor-pointer hover:!bg-[#fee2e2] hover:!text-[#dc2626]"
-        >
-          <span className="material-symbols-outlined text-[20px]">logout</span>
-          <span>Đăng xuất</span>
-        </button>
+      <div className="sidebar-footer shrink-0 border-t border-[#e8dfdb] bg-white p-3">
+        <div className="mb-2 flex items-center gap-3 rounded-2xl bg-[#f8f3f1] p-2.5"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-[#4A2C2A] to-[#8C4A32] text-xs font-black text-white shadow-sm">{initials || 'AD'}</span><span className="min-w-0 flex-1"><span className="block truncate text-xs font-extrabold text-[#3c2e2a]">{displayName}</span><span className="mt-0.5 block text-[9px] font-semibold text-[#927d75]">{user?.isDefaultAdmin ? 'Quản trị viên chính' : 'Quản trị viên'}</span></span><span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_3px_#d1fae5]" /></div>
+        <div className="grid grid-cols-2 gap-2"><NavLink to="/admin/settings" onClick={onClose} className={({ isActive }) => `flex items-center justify-center gap-2 rounded-xl px-2 py-2.5 text-[11px] font-bold transition ${isActive ? 'bg-[#F5EFE6] text-[#4A2C2A]' : 'bg-[#FAF7F2] text-[#6f605b] hover:bg-[#F5EFE6] hover:text-[#4A2C2A]'}`}><span className="material-symbols-outlined text-[17px]">settings</span>Cài đặt</NavLink><button onClick={handleLogout} className="flex items-center justify-center gap-2 rounded-xl bg-[#FAF7F2] px-2 py-2.5 text-[11px] font-bold text-[#6f605b] transition hover:bg-red-50 hover:text-red-700"><span className="material-symbols-outlined text-[17px]">logout</span>Đăng xuất</button></div>
       </div>
+      {contextMenu && <div role="menu" className="fixed z-[100] w-[230px] overflow-hidden rounded-2xl border border-[#E3D8C7] bg-white p-1.5 shadow-[0_18px_50px_rgba(45,28,24,.22)]" style={{ left: contextMenu.x, top: contextMenu.y }} onClick={(event) => event.stopPropagation()}><div className="border-b border-[#eee5e1] px-3 py-2"><p className="truncate text-[10px] font-black uppercase tracking-[.12em] text-[#a0857c]">{contextMenu.item.label}</p></div><button type="button" role="menuitem" onClick={() => toggleQuickAccess(contextMenu.item)} className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-xs font-extrabold text-[#4d3933] transition hover:bg-[#F5EFE6] hover:text-[#4A2C2A]"><span className="material-symbols-outlined text-[18px]">{quickAccess.includes(contextMenu.item.to) ? 'star' : 'star_outline'}</span>{quickAccess.includes(contextMenu.item.to) ? 'Gỡ khỏi truy cập nhanh' : 'Thêm vào truy cập nhanh'}</button></div>}
     </aside>
   );
 }
