@@ -20,6 +20,7 @@ import FundManagement from './pages/FundManagement';
 import ExpenseManagement from './pages/ExpenseManagement';
 import POS from './pages/POS';
 import PostManagement from './pages/PostManagement';
+import MessengerBotManagement from './pages/MessengerBotManagement';
 
 import ShopLayout from './pages/shop/ShopLayout';
 import ShopHome from './pages/shop/ShopHome';
@@ -70,6 +71,7 @@ export default function App() {
           <Route path="/admin/tools/shopee" element={<ProtectedRoute><ShopeeCalculator /></ProtectedRoute>} />
           <Route path="/admin/tools/tiktok" element={<ProtectedRoute><TiktokCalculator /></ProtectedRoute>} />
           <Route path="/admin/posts" element={<ProtectedRoute><PostManagement /></ProtectedRoute>} />
+          <Route path="/admin/messenger-bot" element={<ProtectedRoute><MessengerBotManagement /></ProtectedRoute>} />
           <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
           
           {/* Shop Public Routes */}

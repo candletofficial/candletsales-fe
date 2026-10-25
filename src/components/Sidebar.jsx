@@ -84,6 +84,13 @@ const NAV_ITEMS = [
     label: 'Đơn hàng',
   },
   {
+    to: '/admin/messenger-bot',
+    icon: (
+      <span className="material-symbols-outlined text-[20px]">smart_toy</span>
+    ),
+    label: 'Bot Messenger',
+  },
+  {
     isSection: true,
     label: 'Tài chính & Marketing',
   },
