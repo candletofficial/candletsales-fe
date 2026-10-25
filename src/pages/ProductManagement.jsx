@@ -1628,6 +1628,7 @@ export default function ProductManagement() {
                 <tr className="bg-surface-container-low/50 border-b border-outline-variant/30">
                   <th className="px-lg py-md text-[12px] font-bold text-on-surface-variant uppercase tracking-wider">Tên sản phẩm / SKU</th>
                   <th className="px-lg py-md text-[12px] font-bold text-on-surface-variant uppercase tracking-wider">Mã sản phẩm / SKU</th>
+                  <th className="px-lg py-md text-[12px] font-bold text-on-surface-variant uppercase tracking-wider text-right">Có thể sản xuất</th>
                   <th className="px-lg py-md text-[12px] font-bold text-on-surface-variant uppercase tracking-wider text-right">Giá vốn</th>
                   <th className="px-lg py-md text-[12px] font-bold text-on-surface-variant uppercase tracking-wider text-right text-primary pr-8">Giá bán</th>
                 </tr>
@@ -1638,6 +1639,7 @@ export default function ProductManagement() {
                     <tr key={i} className="animate-pulse">
                       <td className="px-lg py-md"><div className="h-4 bg-surface-container rounded w-3/4"></div></td>
                       <td className="px-lg py-md"><div className="h-4 bg-surface-container rounded w-16"></div></td>
+                      <td className="px-lg py-md"><div className="h-4 bg-surface-container rounded w-12 ml-auto"></div></td>
                       <td className="px-lg py-md"><div className="h-4 bg-surface-container rounded w-20 ml-auto"></div></td>
                       <td className="px-lg py-md"><div className="h-4 bg-surface-container rounded w-16 ml-auto"></div></td>
                     </tr>
@@ -1710,6 +1712,9 @@ export default function ProductManagement() {
                               {p.productId}
                             </span>
                           </td>
+                          <td className={`px-lg py-md text-right font-mono text-[14px] font-bold ${p.stock === 0 ? 'text-error' : 'text-on-surface'}`}>
+                            {Number.isFinite(p.stock) ? p.stock : '—'}
+                          </td>
                           <td className="px-lg py-md text-right font-mono text-[14px] text-on-surface-variant font-semibold">
                             {costDisplay}
                           </td>
@@ -1740,6 +1745,9 @@ export default function ProductManagement() {
                               </td>
                               <td className="px-lg py-sm">
                                 <span className="text-[12px] font-mono text-on-surface-variant bg-surface-container-high px-2 py-0.5 rounded">{p.productId}/{sku.id}</span>
+                              </td>
+                              <td className={`px-lg py-sm text-right font-mono text-[13px] font-bold ${sku.stock === 0 ? 'text-error' : 'text-on-surface-variant'}`}>
+                                {Number.isFinite(sku.stock) ? sku.stock : '—'}
                               </td>
                               <td className="px-lg py-sm text-right font-mono text-[13px] text-on-surface-variant">
                                 {formatPrice(sku.cost)}

@@ -94,7 +94,13 @@ export default function ShopHome() {
     e.preventDefault();
     e.stopPropagation();
 
-    const defaultSkuId = (product.skus && product.skus.length > 0) ? product.skus[0].id : undefined;
+    if (product.stock === 0) {
+      alert('Sản phẩm hiện đã hết hàng');
+      return;
+    }
+
+    const defaultSku = product.skus?.find((sku) => sku.stock === null || sku.stock === undefined || sku.stock > 0);
+    const defaultSkuId = defaultSku?.id;
 
     const buyItem = {
       product_id: product,
@@ -534,11 +540,10 @@ export default function ShopHome() {
                 <button
                   type="button"
                   onClick={() => setActiveMobileCoupon(0)}
-                  className={`flex-1 py-1.5 px-2.5 rounded-full text-[11px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1 shadow-2xs ${
-                    activeMobileCoupon === 0
-                      ? 'bg-brand-charcoal text-amber-300 font-bold border border-amber-400/40 scale-102 shadow-sm'
-                      : 'bg-white/80 text-stone-600 border border-stone-200/80 sm:hover:bg-white'
-                  }`}
+                  className={`flex-1 py-1.5 px-2.5 rounded-full text-[11px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1 shadow-2xs ${activeMobileCoupon === 0
+                    ? 'bg-brand-charcoal text-amber-300 font-bold border border-amber-400/40 scale-102 shadow-sm'
+                    : 'bg-white/80 text-stone-600 border border-stone-200/80 sm:hover:bg-white'
+                    }`}
                 >
                   <span>🎟️</span>
                   <span className="truncate">{primaryCoupon.name}</span>
@@ -549,11 +554,10 @@ export default function ShopHome() {
                 <button
                   type="button"
                   onClick={() => setActiveMobileCoupon(1)}
-                  className={`flex-1 py-1.5 px-2.5 rounded-full text-[11px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1 shadow-2xs ${
-                    activeMobileCoupon === 1
-                      ? 'bg-[#4A0E13] text-amber-200 font-bold border border-amber-400/40 scale-102 shadow-sm'
-                      : 'bg-white/80 text-stone-600 border border-stone-200/80 sm:hover:bg-white'
-                  }`}
+                  className={`flex-1 py-1.5 px-2.5 rounded-full text-[11px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1 shadow-2xs ${activeMobileCoupon === 1
+                    ? 'bg-[#4A0E13] text-amber-200 font-bold border border-amber-400/40 scale-102 shadow-sm'
+                    : 'bg-white/80 text-stone-600 border border-stone-200/80 sm:hover:bg-white'
+                    }`}
                 >
                   <span>✦</span>
                   <span className="truncate">{secondaryCoupon.name}</span>
@@ -572,17 +576,16 @@ export default function ShopHome() {
               {/* Thẻ 0: Ivory & Amber Gold Foil Stub (primaryCoupon) */}
               <div
                 onMouseEnter={() => setHoveredCardIdx(0)}
-                className={`absolute w-[320px] xs:w-[340px] sm:w-[410px] h-[180px] sm:h-[195px] flex cursor-pointer transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] text-stone-900 ${
-                  activeMobileCoupon === 1
-                    ? 'max-sm:opacity-0 max-sm:pointer-events-none max-sm:scale-95'
-                    : 'max-sm:z-20 max-sm:scale-100 max-sm:rotate-0 max-sm:translate-x-0 max-sm:translate-y-0 max-sm:drop-shadow-xl'
-                } ${displayCoupons.length === 1
-                  ? 'sm:z-20 sm:scale-100 sm:drop-shadow-2xl sm:hover:scale-[1.03]'
-                  : hoveredCardIdx === 0
-                    ? 'sm:z-30 sm:rotate-0 sm:-translate-y-7 sm:-translate-x-1 sm:scale-[1.05] sm:drop-shadow-[0_25px_30px_rgba(0,0,0,0.3)] sm:opacity-100'
-                    : hoveredCardIdx === 1
-                      ? 'sm:z-10 sm:-rotate-[13deg] sm:-translate-x-12 sm:translate-y-5 sm:scale-[0.95] sm:opacity-75 sm:drop-shadow-md'
-                      : 'sm:z-10 sm:-rotate-[7deg] sm:-translate-x-7 sm:translate-y-2 sm:scale-100 sm:drop-shadow-xl sm:opacity-95 sm:animate-float-gentle'
+                className={`absolute w-[320px] xs:w-[340px] sm:w-[410px] h-[180px] sm:h-[195px] flex cursor-pointer transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] text-stone-900 ${activeMobileCoupon === 1
+                  ? 'max-sm:opacity-0 max-sm:pointer-events-none max-sm:scale-95'
+                  : 'max-sm:z-20 max-sm:scale-100 max-sm:rotate-0 max-sm:translate-x-0 max-sm:translate-y-0 max-sm:drop-shadow-xl'
+                  } ${displayCoupons.length === 1
+                    ? 'sm:z-20 sm:scale-100 sm:drop-shadow-2xl sm:hover:scale-[1.03]'
+                    : hoveredCardIdx === 0
+                      ? 'sm:z-30 sm:rotate-0 sm:-translate-y-7 sm:-translate-x-1 sm:scale-[1.05] sm:drop-shadow-[0_25px_30px_rgba(0,0,0,0.3)] sm:opacity-100'
+                      : hoveredCardIdx === 1
+                        ? 'sm:z-10 sm:-rotate-[13deg] sm:-translate-x-12 sm:translate-y-5 sm:scale-[0.95] sm:opacity-75 sm:drop-shadow-md'
+                        : 'sm:z-10 sm:-rotate-[7deg] sm:-translate-x-7 sm:translate-y-2 sm:scale-100 sm:drop-shadow-xl sm:opacity-95 sm:animate-float-gentle'
                   }`}
               >
                 {/* SVG Die-Cut Background (Vết cắt trong suốt 100%, viền vàng uốn lượn tự nhiên, không rò rỉ góc) */}
@@ -716,15 +719,14 @@ export default function ShopHome() {
               {displayCoupons.length >= 2 && (
                 <div
                   onMouseEnter={() => setHoveredCardIdx(1)}
-                  className={`absolute w-[320px] xs:w-[340px] sm:w-[410px] h-[180px] sm:h-[195px] flex cursor-pointer transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] text-amber-50 ${
-                    activeMobileCoupon === 0
-                      ? 'max-sm:opacity-0 max-sm:pointer-events-none max-sm:scale-95'
-                      : 'max-sm:z-20 max-sm:scale-100 max-sm:rotate-0 max-sm:translate-x-0 max-sm:translate-y-0 max-sm:drop-shadow-xl'
-                  } ${hoveredCardIdx === 1
-                    ? 'sm:z-30 sm:rotate-0 sm:-translate-y-7 sm:translate-x-1 sm:scale-[1.05] sm:drop-shadow-[0_25px_30px_rgba(0,0,0,0.35)] sm:opacity-100'
-                    : hoveredCardIdx === 0
-                      ? 'sm:z-10 sm:rotate-[13deg] sm:translate-x-12 sm:translate-y-5 sm:scale-[0.95] sm:opacity-75 sm:drop-shadow-md'
-                      : 'sm:z-20 sm:rotate-[7deg] sm:translate-x-7 sm:translate-y-0 sm:scale-100 sm:drop-shadow-2xl sm:opacity-100 sm:animate-float-slow'
+                  className={`absolute w-[320px] xs:w-[340px] sm:w-[410px] h-[180px] sm:h-[195px] flex cursor-pointer transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] text-amber-50 ${activeMobileCoupon === 0
+                    ? 'max-sm:opacity-0 max-sm:pointer-events-none max-sm:scale-95'
+                    : 'max-sm:z-20 max-sm:scale-100 max-sm:rotate-0 max-sm:translate-x-0 max-sm:translate-y-0 max-sm:drop-shadow-xl'
+                    } ${hoveredCardIdx === 1
+                      ? 'sm:z-30 sm:rotate-0 sm:-translate-y-7 sm:translate-x-1 sm:scale-[1.05] sm:drop-shadow-[0_25px_30px_rgba(0,0,0,0.35)] sm:opacity-100'
+                      : hoveredCardIdx === 0
+                        ? 'sm:z-10 sm:rotate-[13deg] sm:translate-x-12 sm:translate-y-5 sm:scale-[0.95] sm:opacity-75 sm:drop-shadow-md'
+                        : 'sm:z-20 sm:rotate-[7deg] sm:translate-x-7 sm:translate-y-0 sm:scale-100 sm:drop-shadow-2xl sm:opacity-100 sm:animate-float-slow'
                     }`}
                 >
                   {/* SVG Die-Cut Background (Vết cắt trong suốt 100%, viền vàng uốn lượn tự nhiên, không rò rỉ góc) */}
@@ -931,11 +933,10 @@ export default function ShopHome() {
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategoryFilter(cat.id)}
-                className={`inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full text-xs font-semibold shrink-0 transition-all cursor-pointer ${
-                  selectedCategoryFilter === cat.id
-                    ? 'bg-brand-charcoal text-white shadow-sm'
-                    : 'bg-white/80 sm:hover:bg-white text-stone-600 border border-stone-200/80'
-                }`}
+                className={`inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full text-xs font-semibold shrink-0 transition-all cursor-pointer ${selectedCategoryFilter === cat.id
+                  ? 'bg-brand-charcoal text-white shadow-sm'
+                  : 'bg-white/80 sm:hover:bg-white text-stone-600 border border-stone-200/80'
+                  }`}
               >
                 <i className={`ph-bold ${cat.icon} text-xs ${selectedCategoryFilter === cat.id ? 'text-amber-300' : 'text-stone-400'}`}></i>
                 <span>{cat.label}</span>
@@ -981,118 +982,119 @@ export default function ShopHome() {
                 })
                 .slice(0, 4)
                 .map((product, index) => {
-                return (
-                  <div
-                    key={product._id}
-                    className={`card-hover-lift group relative flex h-full flex-col justify-between overflow-hidden rounded-[18px] border border-[#E8DED5] bg-[#FFFCF8] p-2.5 shadow-[0_5px_18px_rgba(74,44,42,0.06)] transition-all duration-500 sm:hover:border-[#CFAF99] sm:hover:shadow-[0_16px_30px_-10px_rgba(74,44,42,0.2)] sm:rounded-3xl sm:bg-white/90 sm:p-5 sm:backdrop-blur-xs reveal-on-scroll reveal-delay-${((index % 4) + 1) * 100}`}
-                  >
-                    <div>
-                      {/* Image Frame with Badges */}
-                      <div className="relative -mx-2.5 -mt-2.5 mb-3 aspect-[1/1.02] w-[calc(100%+1.25rem)] overflow-hidden bg-[#F4EEE7] sm:mx-0 sm:mt-0 sm:mb-4 sm:aspect-[4/4.2] sm:w-full sm:rounded-2xl">
-                        <Link to={`/product/${product._id}`} className="block w-full h-full">
-                          {product.image ? (
-                            <img
-                              alt={product.name}
-                              className="h-full w-full object-cover transition-transform duration-700 ease-out sm:group-hover:scale-105"
-                              src={getImageUrl(product.image)}
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-stone-100 flex items-center justify-center text-stone-400 text-xs">
-                              Chưa có ảnh
+                  return (
+                    <div
+                      key={product._id}
+                      className={`card-hover-lift group relative flex h-full flex-col justify-between overflow-hidden rounded-[18px] border border-[#E8DED5] bg-[#FFFCF8] p-2.5 shadow-[0_5px_18px_rgba(74,44,42,0.06)] transition-all duration-500 sm:hover:border-[#CFAF99] sm:hover:shadow-[0_16px_30px_-10px_rgba(74,44,42,0.2)] sm:rounded-3xl sm:bg-white/90 sm:p-5 sm:backdrop-blur-xs reveal-on-scroll reveal-delay-${((index % 4) + 1) * 100}`}
+                    >
+                      <div>
+                        {/* Image Frame with Badges */}
+                        <div className="relative -mx-2.5 -mt-2.5 mb-3 aspect-[1/1.02] w-[calc(100%+1.25rem)] overflow-hidden bg-[#F4EEE7] sm:mx-0 sm:mt-0 sm:mb-4 sm:aspect-[4/4.2] sm:w-full sm:rounded-2xl">
+                          <Link to={`/product/${product._id}`} className="block w-full h-full">
+                            {product.image ? (
+                              <img
+                                alt={product.name}
+                                className="h-full w-full object-cover transition-transform duration-700 ease-out sm:group-hover:scale-105"
+                                src={getImageUrl(product.image)}
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-stone-100 flex items-center justify-center text-stone-400 text-xs">
+                                Chưa có ảnh
+                              </div>
+                            )}
+                          </Link>
+
+                          {/* Top Left Tag */}
+                          {product.tag && (
+                            <div
+                              className="absolute left-1.5 top-1.5 z-10 rounded-md px-2 py-1 font-mono text-[7px] font-bold uppercase tracking-wider text-white shadow-sm backdrop-blur-xs sm:left-3 sm:top-3 sm:rounded-full sm:px-2.5 sm:text-[9px] sm:tracking-widest"
+                              style={{ backgroundColor: resolveTagColor(product.tag, product.tag_color) }}
+                            >
+                              {product.tag}
                             </div>
                           )}
+
+                          {/* Top Right Floating Wishlist Button */}
+                          <button
+                            aria-label="Thêm vào yêu thích"
+                            className="absolute right-1.5 top-1.5 z-10 flex size-8 cursor-pointer items-center justify-center rounded-full border border-white/80 bg-white/90 text-stone-500 shadow-sm backdrop-blur-md transition-all duration-300 sm:hover:scale-110 sm:hover:bg-white sm:hover:text-rose-500 active:scale-90 sm:right-3 sm:top-3"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              toggleWishlist(product, navigate);
+                            }}
+                            title={isInWishlist(product._id) ? "Bỏ yêu thích" : "Thêm vào yêu thích"}
+                          >
+                            <i className={`text-sm sm:text-base transition-transform duration-300 ${isInWishlist(product._id)
+                              ? 'ph-fill ph-heart text-rose-500 scale-110'
+                              : 'ph-bold ph-heart text-stone-600 sm:hover:text-rose-500'
+                              }`}></i>
+                          </button>
+                        </div>
+
+                        {/* Header Info: Category & Rating */}
+                        <div className="mb-1.5 flex items-center justify-between gap-1 sm:mb-2">
+                          <span className="truncate font-mono text-[8px] uppercase tracking-[0.12em] text-stone-500 sm:text-[10px] sm:tracking-wider">
+                            {product.category?.name || 'CANDLET'}
+                          </span>
+                          <div className="flex shrink-0 items-center gap-0.5 rounded-full bg-amber-50 px-1.5 py-0.5 sm:bg-transparent sm:px-0 sm:py-0">
+                            <i className="ph-fill ph-star text-[9px] text-amber-500 sm:text-[11px]"></i>
+                            <span className="font-mono text-[9px] font-bold text-stone-700 sm:text-xs sm:font-semibold">
+                              {product.avgRating || '5.0'}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Product Name */}
+                        <Link to={`/product/${product._id}`} className="block sm:group-hover:text-amber-950 transition-colors">
+                          <h3
+                            className="mb-1.5 line-clamp-2 min-h-[38px] overflow-hidden font-serif-display text-[13px] font-bold leading-[1.45] text-brand-charcoal sm:mb-2 sm:h-[48px] sm:min-h-0 sm:text-lg sm:leading-snug"
+                            title={product.name}
+                          >
+                            {product.name}
+                          </h3>
                         </Link>
 
-                        {/* Top Left Tag */}
-                        {product.tag && (
-                          <div
-                            className="absolute left-1.5 top-1.5 z-10 rounded-md px-2 py-1 font-mono text-[7px] font-bold uppercase tracking-wider text-white shadow-sm backdrop-blur-xs sm:left-3 sm:top-3 sm:rounded-full sm:px-2.5 sm:text-[9px] sm:tracking-widest"
-                            style={{ backgroundColor: resolveTagColor(product.tag, product.tag_color) }}
-                          >
-                            {product.tag}
-                          </div>
-                        )}
-
-                        {/* Top Right Floating Wishlist Button */}
-                        <button
-                          aria-label="Thêm vào yêu thích"
-                          className="absolute right-1.5 top-1.5 z-10 flex size-8 cursor-pointer items-center justify-center rounded-full border border-white/80 bg-white/90 text-stone-500 shadow-sm backdrop-blur-md transition-all duration-300 sm:hover:scale-110 sm:hover:bg-white sm:hover:text-rose-500 active:scale-90 sm:right-3 sm:top-3"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            toggleWishlist(product, navigate);
-                          }}
-                          title={isInWishlist(product._id) ? "Bỏ yêu thích" : "Thêm vào yêu thích"}
+                        {/* Product Description (Giới hạn đúng 2 dòng, chiều cao cố định để các thẻ đều nhau tuyệt đối) */}
+                        <p
+                          className="mb-3 line-clamp-2 min-h-[32px] overflow-hidden text-[10px] font-normal leading-4 text-stone-500 sm:mb-4 sm:h-[36px] sm:text-xs sm:leading-relaxed"
+                          title={product.description}
                         >
-                          <i className={`text-sm sm:text-base transition-transform duration-300 ${isInWishlist(product._id)
-                            ? 'ph-fill ph-heart text-rose-500 scale-110'
-                            : 'ph-bold ph-heart text-stone-600 sm:hover:text-rose-500'
-                            }`}></i>
-                        </button>
+                          {product.description || 'Hương thơm êm dịu, thanh lọc không gian và mang lại cảm giác thư thái sâu lắng.'}
+                        </p>
                       </div>
 
-                      {/* Header Info: Category & Rating */}
-                      <div className="mb-1.5 flex items-center justify-between gap-1 sm:mb-2">
-                        <span className="truncate font-mono text-[8px] uppercase tracking-[0.12em] text-stone-500 sm:text-[10px] sm:tracking-wider">
-                          {product.category?.name || 'CANDLET'}
-                        </span>
-                        <div className="flex shrink-0 items-center gap-0.5 rounded-full bg-amber-50 px-1.5 py-0.5 sm:bg-transparent sm:px-0 sm:py-0">
-                          <i className="ph-fill ph-star text-[9px] text-amber-500 sm:text-[11px]"></i>
-                          <span className="font-mono text-[9px] font-bold text-stone-700 sm:text-xs sm:font-semibold">
-                            {product.avgRating || '5.0'}
+                      {/* Footer: Price & Buy Action */}
+                      <div className="flex flex-col gap-2 border-t border-[#E9DED5] pt-2.5 sm:pt-3.5">
+                        <div className="flex items-end justify-between gap-1">
+                          <span className="pb-0.5 font-mono text-[8px] font-semibold uppercase tracking-wider text-stone-400 sm:text-[11px]">
+                            Từ
+                          </span>
+                          <span className="font-serif-display text-[17px] font-bold leading-none text-[#8C4A32] transition-colors sm:group-hover:text-brand-burgundy sm:text-xl">
+                            {product.base_price?.toLocaleString('vi-VN')}đ
                           </span>
                         </div>
-                      </div>
 
-                      {/* Product Name */}
-                      <Link to={`/product/${product._id}`} className="block sm:group-hover:text-amber-950 transition-colors">
-                        <h3
-                          className="mb-1.5 line-clamp-2 min-h-[38px] overflow-hidden font-serif-display text-[13px] font-bold leading-[1.45] text-brand-charcoal sm:mb-2 sm:h-[48px] sm:min-h-0 sm:text-lg sm:leading-snug"
-                          title={product.name}
+                        <button
+                          onClick={(e) => handleBuyNow(e, product)}
+                          className="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#6B3530] to-[#4A2C2A] px-2 py-2.5 text-[9px] font-bold uppercase tracking-[0.12em] text-white shadow-sm transition-all duration-300 sm:hover:from-[#7C4038] sm:hover:to-brand-burgundy sm:hover:shadow-md active:scale-[0.98] sm:rounded-full sm:px-3 sm:text-[11px] sm:tracking-wider"
                         >
-                          {product.name}
-                        </h3>
-                      </Link>
+                          <i className="ph-bold ph-shopping-bag-open text-xs"></i>
+                          <span>Mua Ngay</span>
+                        </button>
 
-                      {/* Product Description (Giới hạn đúng 2 dòng, chiều cao cố định để các thẻ đều nhau tuyệt đối) */}
-                      <p
-                        className="mb-3 line-clamp-2 min-h-[32px] overflow-hidden text-[10px] font-normal leading-4 text-stone-500 sm:mb-4 sm:h-[36px] sm:text-xs sm:leading-relaxed"
-                        title={product.description}
-                      >
-                        {product.description || 'Hương thơm êm dịu, thanh lọc không gian và mang lại cảm giác thư thái sâu lắng.'}
-                      </p>
-                    </div>
-
-                    {/* Footer: Price & Buy Action */}
-                    <div className="flex flex-col gap-2 border-t border-[#E9DED5] pt-2.5 sm:pt-3.5">
-                      <div className="flex items-end justify-between gap-1">
-                        <span className="pb-0.5 font-mono text-[8px] font-semibold uppercase tracking-wider text-stone-400 sm:text-[11px]">
-                          Từ
-                        </span>
-                        <span className="font-serif-display text-[17px] font-bold leading-none text-[#8C4A32] transition-colors sm:group-hover:text-brand-burgundy sm:text-xl">
-                          {product.base_price?.toLocaleString('vi-VN')}đ
-                        </span>
+                        {/* Low Stock Indicator */}
+                        {product.stock <= 5 && product.stock > 0 && (
+                          <div className="py-0.5 px-2 rounded-lg bg-amber-50 border border-amber-200/70 text-[9px] sm:text-[10px] font-mono text-amber-900 flex items-center justify-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse"></span>
+                            <span>Còn {product.stock} hũ cuối</span>
+                          </div>
+                        )}
+                        {product.stock === 0 && <div className="rounded-lg border border-red-200 bg-red-50 px-2 py-1 text-center text-[9px] font-bold uppercase tracking-wider text-red-700 sm:text-[10px]">Tạm hết hàng</div>}
                       </div>
-
-                      <button
-                        onClick={(e) => handleBuyNow(e, product)}
-                        className="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#6B3530] to-[#4A2C2A] px-2 py-2.5 text-[9px] font-bold uppercase tracking-[0.12em] text-white shadow-sm transition-all duration-300 sm:hover:from-[#7C4038] sm:hover:to-brand-burgundy sm:hover:shadow-md active:scale-[0.98] sm:rounded-full sm:px-3 sm:text-[11px] sm:tracking-wider"
-                      >
-                        <i className="ph-bold ph-shopping-bag-open text-xs"></i>
-                        <span>Mua Ngay</span>
-                      </button>
-
-                      {/* Low Stock Indicator */}
-                      {product.stock <= 5 && product.stock > 0 && (
-                        <div className="py-0.5 px-2 rounded-lg bg-amber-50 border border-amber-200/70 text-[9px] sm:text-[10px] font-mono text-amber-900 flex items-center justify-center gap-1.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse"></span>
-                          <span>Còn {product.stock} hũ cuối</span>
-                        </div>
-                      )}
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
             </div>
           )}
 
@@ -1220,7 +1222,7 @@ export default function ShopHome() {
                   <img
                     alt="Nghệ nhân rót nến thủ công Candlet"
                     className="w-full h-full object-cover sm:group-hover:scale-108 transition-transform duration-700 ease-out"
-                    src="/story-craft.png"
+                    src="/story-craft.jpg"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 opacity-80 sm:group-hover:opacity-60 transition-opacity"></div>
 

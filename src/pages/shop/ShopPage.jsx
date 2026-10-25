@@ -138,7 +138,13 @@ export default function ShopPage() {
     e.preventDefault();
     e.stopPropagation();
 
-    const defaultSkuId = (product.skus && product.skus.length > 0) ? product.skus[0].id : undefined;
+    if (product.stock === 0) {
+      alert('Sản phẩm hiện đã hết hàng');
+      return;
+    }
+
+    const defaultSku = product.skus?.find((sku) => sku.stock === null || sku.stock === undefined || sku.stock > 0);
+    const defaultSkuId = defaultSku?.id;
 
     const buyItem = {
       product_id: product,

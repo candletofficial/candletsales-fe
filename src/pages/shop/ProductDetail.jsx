@@ -212,6 +212,11 @@ export default function ProductDetail() {
       alert('Vui lòng chọn loại sản phẩm');
       return;
     }
+    const available = selectedSku?.stock ?? product.stock;
+    if (Number.isFinite(available) && (available <= 0 || quantity > available)) {
+      alert(available <= 0 ? 'Phân loại này hiện đã hết hàng' : `Phân loại này chỉ còn ${available} sản phẩm`);
+      return;
+    }
 
     try {
       setIsAdding(true);
@@ -241,6 +246,11 @@ export default function ProductDetail() {
       alert('Vui lòng chọn loại sản phẩm');
       return;
     }
+    const available = selectedSku?.stock ?? product.stock;
+    if (Number.isFinite(available) && (available <= 0 || quantity > available)) {
+      alert(available <= 0 ? 'Phân loại này hiện đã hết hàng' : `Phân loại này chỉ còn ${available} sản phẩm`);
+      return;
+    }
 
     const buyItem = {
       product_id: product,
@@ -253,6 +263,7 @@ export default function ProductDetail() {
   };
 
   const activeSku = currentSku();
+  const availableStock = activeSku?.stock ?? product?.stock;
   const basePrice = activeSku && activeSku.price > 0 ? activeSku.price : (product?.base_price || 0);
 
   // Tính toán voucher tốt nhất (Phải gọi trước các lệnh return)
@@ -1019,7 +1030,7 @@ export default function ProductDetail() {
                 </div>
                 
                 <p className="text-[11px] text-stone-500 mt-1">
-                  Kho: <span className="font-semibold text-stone-700">{activeSku?.stock || 99}</span> sản phẩm
+                  Kho: <span className={`font-semibold ${availableStock === 0 ? 'text-red-600' : 'text-stone-700'}`}>{Number.isFinite(availableStock) ? availableStock : 'Đang cập nhật'}</span>{Number.isFinite(availableStock) ? ' sản phẩm' : ''}
                 </p>
                 
                 <p className="text-[11px] text-stone-600 font-medium truncate mt-0.5">
@@ -1084,8 +1095,8 @@ export default function ProductDetail() {
                   <span className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
                     Số lượng
                   </span>
-                  {activeSku?.stock && (
-                    <span className="text-[10px] text-stone-400">Còn {activeSku.stock} sản phẩm</span>
+                  {Number.isFinite(availableStock) && (
+                    <span className={`text-[10px] ${availableStock === 0 ? 'font-semibold text-red-600' : 'text-stone-400'}`}>{availableStock === 0 ? 'Đã hết hàng' : `Còn ${availableStock} sản phẩm`}</span>
                   )}
                 </div>
 
@@ -1100,8 +1111,9 @@ export default function ProductDetail() {
                   <span className="w-10 text-center text-xs font-bold text-stone-800">{quantity}</span>
                   <button
                     type="button"
-                    onClick={() => setQuantity(q => q + 1)}
-                    className="w-8 h-8 flex items-center justify-center text-stone-500 sm:hover:text-stone-800 rounded-lg active:bg-stone-200 transition-colors cursor-pointer"
+                    onClick={() => setQuantity(q => Number.isFinite(availableStock) ? Math.min(Math.max(1, availableStock), q + 1) : q + 1)}
+                    disabled={availableStock === 0 || (Number.isFinite(availableStock) && quantity >= availableStock)}
+                    className="w-8 h-8 flex items-center justify-center text-stone-500 sm:hover:text-stone-800 rounded-lg active:bg-stone-200 transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-35"
                   >
                     <i className="ph-bold ph-plus text-xs"></i>
                   </button>
