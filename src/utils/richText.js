@@ -54,7 +54,22 @@ export const sanitizeRichHtml = (value = '') => {
 };
 
 export const descriptionToHtml = (value = '') => {
-  const text = String(value || '');
+  let text = String(value || '');
+
+  // Older descriptions may contain one or two encoded HTML layers
+  // (for example &lt;p&gt; or &amp;lt;p&amp;gt;). Decode only when the
+  // encoded value clearly starts with a supported rich-text tag.
+  if (typeof document !== 'undefined') {
+    const encodedTagPattern = /&(?:amp;)?lt;\/?(?:p|div|br|strong|b|em|i|u|s|ul|ol|li|blockquote|h2|h3|span|font)\b/i;
+    for (let layer = 0; layer < 2 && encodedTagPattern.test(text); layer += 1) {
+      const decoder = document.createElement('textarea');
+      decoder.innerHTML = text;
+      const decoded = decoder.value;
+      if (decoded === text) break;
+      text = decoded;
+    }
+  }
+
   if (/<[a-z][\s\S]*>/i.test(text)) return sanitizeRichHtml(text);
   const container = document.createElement('div');
   container.textContent = text;
