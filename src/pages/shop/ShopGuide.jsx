@@ -33,7 +33,7 @@ export default function ShopGuide() {
   ];
 
   return (
-    <main className="min-h-screen bg-white pb-12 font-jakarta text-[#2C1810] selection:bg-[#4A2C2A] selection:text-white sm:bg-[#FFFDF9] sm:pb-20 lg:pb-24">
+    <main className="min-h-screen bg-white pb-12 font-jakarta text-brand-charcoal selection:bg-brand-burgundy selection:text-white sm:bg-[#FFFDF9] sm:pb-20 lg:pb-24">
       
       {/* 1. HERO HEADER */}
       <header className="relative border-b-8 border-stone-100 bg-white py-7 sm:border-b sm:border-stone-200/80 sm:bg-gradient-to-b sm:from-[#F7EFE8]/70 sm:via-[#FFFDF9] sm:to-[#FFFDF9] sm:py-20">
@@ -41,9 +41,9 @@ export default function ShopGuide() {
           
           {/* Breadcrumbs */}
           <div className="mb-6 hidden items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest text-stone-500 sm:flex">
-            <Link to="/" className="sm:hover:text-[#4A2C2A] transition-colors">Trang Chủ</Link>
+            <Link to="/" className="sm:hover:text-brand-burgundy transition-colors">Trang Chủ</Link>
             <span>/</span>
-            <span className="text-[#8C4A32]">Cẩm Nang Nến Thơm Nghệ Thuật</span>
+            <span className="text-brand-terracotta">Cẩm Nang Nến Thơm Nghệ Thuật</span>
           </div>
 
           <div className="mb-5 hidden items-center gap-2 rounded-full border border-amber-200/80 bg-amber-50 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-amber-900 sm:inline-flex">
@@ -51,7 +51,7 @@ export default function ShopGuide() {
             The Art of Mindful Candle Rituals
           </div>
 
-          <h1 className="mb-3 font-serif-display text-3xl font-bold leading-tight text-[#4A2C2A] sm:mb-6 sm:text-5xl lg:text-6xl">
+          <h1 className="mb-3 font-serif-display text-3xl font-bold leading-tight text-brand-burgundy sm:mb-6 sm:text-5xl lg:text-6xl">
             Cẩm Nang Thắp Nến & Nghệ Thuật Mùi Hương
           </h1>
 
@@ -63,28 +63,28 @@ export default function ShopGuide() {
           <nav className="no-scrollbar -mx-4 mt-6 flex items-center gap-5 overflow-x-auto border-t border-stone-100 px-4 pt-3 sm:mx-0 sm:mt-10 sm:flex-wrap sm:justify-center sm:gap-2.5 sm:overflow-visible sm:border-t-0 sm:px-0 sm:pt-0">
             <a
               href="#golden-rules"
-              className="flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 border-transparent py-2 text-left text-[11px] font-bold text-stone-700 transition-all sm:hover:border-[#4A2C2A] sm:hover:text-[#4A2C2A] sm:rounded-full sm:border sm:bg-white sm:px-5 sm:py-2.5 sm:text-xs sm:shadow-2xs"
+              className="flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 border-transparent py-2 text-left text-[11px] font-bold text-stone-700 transition-all sm:hover:border-brand-burgundy sm:hover:text-brand-burgundy sm:rounded-full sm:border sm:bg-white sm:px-5 sm:py-2.5 sm:text-xs sm:shadow-2xs"
             >
               <i className="ph-bold ph-shield-check text-[#B45309]"></i>
               <span>4 Quy Tắc Vàng</span>
             </a>
             <a
               href="#scent-families"
-              className="flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 border-transparent py-2 text-left text-[11px] font-bold text-stone-700 transition-all sm:hover:border-[#4A2C2A] sm:hover:text-[#4A2C2A] sm:rounded-full sm:border sm:bg-white sm:px-5 sm:py-2.5 sm:text-xs sm:shadow-2xs"
+              className="flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 border-transparent py-2 text-left text-[11px] font-bold text-stone-700 transition-all sm:hover:border-brand-burgundy sm:hover:text-brand-burgundy sm:rounded-full sm:border sm:bg-white sm:px-5 sm:py-2.5 sm:text-xs sm:shadow-2xs"
             >
               <i className="ph-bold ph-flower-lotus text-[#B45309]"></i>
               <span>Chọn Mùi Theo Không Gian</span>
             </a>
             <a
               href="#upcycle-candle"
-              className="flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 border-transparent py-2 text-left text-[11px] font-bold text-stone-700 transition-all sm:hover:border-[#4A2C2A] sm:hover:text-[#4A2C2A] sm:rounded-full sm:border sm:bg-white sm:px-5 sm:py-2.5 sm:text-xs sm:shadow-2xs"
+              className="flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 border-transparent py-2 text-left text-[11px] font-bold text-stone-700 transition-all sm:hover:border-brand-burgundy sm:hover:text-brand-burgundy sm:rounded-full sm:border sm:bg-white sm:px-5 sm:py-2.5 sm:text-xs sm:shadow-2xs"
             >
               <i className="ph-bold ph-recycle text-[#B45309]"></i>
               <span>Tái Sinh Hũ Nến</span>
             </a>
             <a
               href="#faq-section"
-              className="flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 border-transparent py-2 text-left text-[11px] font-bold text-stone-700 transition-all sm:hover:border-[#4A2C2A] sm:hover:text-[#4A2C2A] sm:rounded-full sm:border sm:bg-white sm:px-5 sm:py-2.5 sm:text-xs sm:shadow-2xs"
+              className="flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 border-transparent py-2 text-left text-[11px] font-bold text-stone-700 transition-all sm:hover:border-brand-burgundy sm:hover:text-brand-burgundy sm:rounded-full sm:border sm:bg-white sm:px-5 sm:py-2.5 sm:text-xs sm:shadow-2xs"
             >
               <i className="ph-bold ph-question text-[#B45309]"></i>
               <span>Hỏi & Đáp (FAQ)</span>
@@ -100,7 +100,7 @@ export default function ShopGuide() {
           <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#B45309] block mb-2">
             Nền Tảng Căn Bản
           </span>
-          <h2 className="font-serif-display text-3xl sm:text-4xl font-bold text-[#4A2C2A] mb-3">
+          <h2 className="font-serif-display text-3xl sm:text-4xl font-bold text-brand-burgundy mb-3">
             4 Quy Tắc Vàng Khi Đốt Nến Thơm
           </h2>
           <p className="text-sm text-stone-600 leading-relaxed">
@@ -114,10 +114,10 @@ export default function ShopGuide() {
           <article className="group relative overflow-hidden py-7 transition-all md:rounded-2xl md:border md:border-stone-200 md:bg-white md:p-8 md:shadow-xs md:hover:shadow-md">
             <div className="absolute right-0 top-0 -z-0 hidden size-24 rounded-bl-full bg-[#FFF9F2] transition-transform sm:group-hover:scale-110 md:block"></div>
             <div className="relative z-10">
-              <div className="w-12 h-12 rounded-xl bg-[#4A2C2A] text-white font-serif-display font-bold text-xl flex items-center justify-center mb-6 shadow-sm">
+              <div className="w-12 h-12 rounded-xl bg-brand-burgundy text-white font-serif-display font-bold text-xl flex items-center justify-center mb-6 shadow-sm">
                 01
               </div>
-              <h3 className="font-serif-display text-xl font-bold text-[#4A2C2A] mb-3">
+              <h3 className="font-serif-display text-xl font-bold text-brand-burgundy mb-3">
                 Lần Đốt Đầu Tiên: Ký Ức Của Sáp
               </h3>
               <p className="text-sm text-stone-600 leading-relaxed mb-4">
@@ -134,10 +134,10 @@ export default function ShopGuide() {
           <article className="group relative overflow-hidden py-7 transition-all md:rounded-2xl md:border md:border-stone-200 md:bg-white md:p-8 md:shadow-xs md:hover:shadow-md">
             <div className="absolute right-0 top-0 -z-0 hidden size-24 rounded-bl-full bg-[#FFF9F2] transition-transform sm:group-hover:scale-110 md:block"></div>
             <div className="relative z-10">
-              <div className="w-12 h-12 rounded-xl bg-[#4A2C2A] text-white font-serif-display font-bold text-xl flex items-center justify-center mb-6 shadow-sm">
+              <div className="w-12 h-12 rounded-xl bg-brand-burgundy text-white font-serif-display font-bold text-xl flex items-center justify-center mb-6 shadow-sm">
                 02
               </div>
-              <h3 className="font-serif-display text-xl font-bold text-[#4A2C2A] mb-3">
+              <h3 className="font-serif-display text-xl font-bold text-brand-burgundy mb-3">
                 Cắt Tỉa Bấc Nến Từ 3 - 5mm
               </h3>
               <p className="text-sm text-stone-600 leading-relaxed mb-4">
@@ -154,10 +154,10 @@ export default function ShopGuide() {
           <article className="group relative overflow-hidden py-7 transition-all md:rounded-2xl md:border md:border-stone-200 md:bg-white md:p-8 md:shadow-xs md:hover:shadow-md">
             <div className="absolute right-0 top-0 -z-0 hidden size-24 rounded-bl-full bg-[#FFF9F2] transition-transform sm:group-hover:scale-110 md:block"></div>
             <div className="relative z-10">
-              <div className="w-12 h-12 rounded-xl bg-[#4A2C2A] text-white font-serif-display font-bold text-xl flex items-center justify-center mb-6 shadow-sm">
+              <div className="w-12 h-12 rounded-xl bg-brand-burgundy text-white font-serif-display font-bold text-xl flex items-center justify-center mb-6 shadow-sm">
                 03
               </div>
-              <h3 className="font-serif-display text-xl font-bold text-[#4A2C2A] mb-3">
+              <h3 className="font-serif-display text-xl font-bold text-brand-burgundy mb-3">
                 Tắt Nến Đúng Điệu: Đừng Thổi
               </h3>
               <p className="text-sm text-stone-600 leading-relaxed mb-4">
@@ -174,10 +174,10 @@ export default function ShopGuide() {
           <article className="group relative overflow-hidden py-7 transition-all md:rounded-2xl md:border md:border-stone-200 md:bg-white md:p-8 md:shadow-xs md:hover:shadow-md">
             <div className="absolute right-0 top-0 -z-0 hidden size-24 rounded-bl-full bg-[#FFF9F2] transition-transform sm:group-hover:scale-110 md:block"></div>
             <div className="relative z-10">
-              <div className="w-12 h-12 rounded-xl bg-[#4A2C2A] text-white font-serif-display font-bold text-xl flex items-center justify-center mb-6 shadow-sm">
+              <div className="w-12 h-12 rounded-xl bg-brand-burgundy text-white font-serif-display font-bold text-xl flex items-center justify-center mb-6 shadow-sm">
                 04
               </div>
-              <h3 className="font-serif-display text-xl font-bold text-[#4A2C2A] mb-3">
+              <h3 className="font-serif-display text-xl font-bold text-brand-burgundy mb-3">
                 Giới Hạn Tối Đa 4 Giờ & An Toàn
               </h3>
               <p className="text-sm text-stone-600 leading-relaxed mb-4">
@@ -199,7 +199,7 @@ export default function ShopGuide() {
           <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#B45309] block mb-2">
             Khứu Giác & Không Gian
           </span>
-          <h2 className="font-serif-display text-3xl sm:text-4xl font-bold text-[#4A2C2A] mb-3">
+          <h2 className="font-serif-display text-3xl sm:text-4xl font-bold text-brand-burgundy mb-3">
             Chọn Mùi Hương Phù Hợp Từng Khoảnh Khắc
           </h2>
           <p className="text-sm text-stone-600 leading-relaxed">
@@ -212,13 +212,13 @@ export default function ShopGuide() {
           {/* Nhóm Gỗ & Hổ Phách */}
           <article className="flex flex-col justify-between py-7 md:rounded-2xl md:border md:border-amber-200/50 md:bg-[#FAF5EE] md:p-8">
             <div>
-              <div className="w-12 h-12 rounded-full bg-[#EFE3D3] text-[#8C4A32] flex items-center justify-center text-2xl mb-6">
+              <div className="w-12 h-12 rounded-full bg-[#EFE3D3] text-brand-terracotta flex items-center justify-center text-2xl mb-6">
                 <i className="ph-fill ph-tree"></i>
               </div>
               <span className="text-[10px] font-bold uppercase tracking-widest text-[#B45309] block mb-1">
                 Woody & Amber
               </span>
-              <h3 className="font-serif-display text-xl font-bold text-[#4A2C2A] mb-3">
+              <h3 className="font-serif-display text-xl font-bold text-brand-burgundy mb-3">
                 Gỗ Đàn Hương, Tuyết Tùng & Vani
               </h3>
               <p className="text-xs text-stone-600 leading-relaxed mb-6">
@@ -238,7 +238,7 @@ export default function ShopGuide() {
             </div>
 
             <div className="mt-8 pt-4 border-t border-amber-200/60">
-              <Link to="/shop?category=Nến Hũ Đơn" className="text-xs font-bold text-[#4A2C2A] sm:hover:text-[#8C4A32] inline-flex items-center gap-1.5 group">
+              <Link to="/shop?category=Nến Hũ Đơn" className="text-xs font-bold text-brand-burgundy sm:hover:text-brand-terracotta inline-flex items-center gap-1.5 group">
                 <span>Khám phá nốt hương Gỗ</span>
                 <i className="ph-bold ph-arrow-right sm:group-hover:translate-x-1 transition-transform"></i>
               </Link>
@@ -248,13 +248,13 @@ export default function ShopGuide() {
           {/* Nhóm Hoa Cỏ & Trái Cây */}
           <article className="flex flex-col justify-between py-7 md:rounded-2xl md:border md:border-amber-200/50 md:bg-[#FAF5EE] md:p-8">
             <div>
-              <div className="w-12 h-12 rounded-full bg-[#EFE3D3] text-[#8C4A32] flex items-center justify-center text-2xl mb-6">
+              <div className="w-12 h-12 rounded-full bg-[#EFE3D3] text-brand-terracotta flex items-center justify-center text-2xl mb-6">
                 <i className="ph-fill ph-flower-lotus"></i>
               </div>
               <span className="text-[10px] font-bold uppercase tracking-widest text-[#B45309] block mb-1">
                 Floral & Botanical
               </span>
-              <h3 className="font-serif-display text-xl font-bold text-[#4A2C2A] mb-3">
+              <h3 className="font-serif-display text-xl font-bold text-brand-burgundy mb-3">
                 Oải Hương, Hoa Nhài & Cam Bergamot
               </h3>
               <p className="text-xs text-stone-600 leading-relaxed mb-6">
@@ -274,7 +274,7 @@ export default function ShopGuide() {
             </div>
 
             <div className="mt-8 pt-4 border-t border-amber-200/60">
-              <Link to="/shop?category=Nến Hũ Đơn" className="text-xs font-bold text-[#4A2C2A] sm:hover:text-[#8C4A32] inline-flex items-center gap-1.5 group">
+              <Link to="/shop?category=Nến Hũ Đơn" className="text-xs font-bold text-brand-burgundy sm:hover:text-brand-terracotta inline-flex items-center gap-1.5 group">
                 <span>Khám phá nốt hương Hoa</span>
                 <i className="ph-bold ph-arrow-right sm:group-hover:translate-x-1 transition-transform"></i>
               </Link>
@@ -284,13 +284,13 @@ export default function ShopGuide() {
           {/* Nhóm Thảo Mộc & Trà Trắng */}
           <article className="flex flex-col justify-between py-7 md:rounded-2xl md:border md:border-amber-200/50 md:bg-[#FAF5EE] md:p-8">
             <div>
-              <div className="w-12 h-12 rounded-full bg-[#EFE3D3] text-[#8C4A32] flex items-center justify-center text-2xl mb-6">
+              <div className="w-12 h-12 rounded-full bg-[#EFE3D3] text-brand-terracotta flex items-center justify-center text-2xl mb-6">
                 <i className="ph-fill ph-leaf"></i>
               </div>
               <span className="text-[10px] font-bold uppercase tracking-widest text-[#B45309] block mb-1">
                 Herbal & Tea
               </span>
-              <h3 className="font-serif-display text-xl font-bold text-[#4A2C2A] mb-3">
+              <h3 className="font-serif-display text-xl font-bold text-brand-burgundy mb-3">
                 Trà Trắng, Xô Thơm & Bạc Hà
               </h3>
               <p className="text-xs text-stone-600 leading-relaxed mb-6">
@@ -310,7 +310,7 @@ export default function ShopGuide() {
             </div>
 
             <div className="mt-8 pt-4 border-t border-amber-200/60">
-              <Link to="/shop?category=Nến Hũ Đơn" className="text-xs font-bold text-[#4A2C2A] sm:hover:text-[#8C4A32] inline-flex items-center gap-1.5 group">
+              <Link to="/shop?category=Nến Hũ Đơn" className="text-xs font-bold text-brand-burgundy sm:hover:text-brand-terracotta inline-flex items-center gap-1.5 group">
                 <span>Khám phá nốt hương Trà</span>
                 <i className="ph-bold ph-arrow-right sm:group-hover:translate-x-1 transition-transform"></i>
               </Link>
@@ -328,7 +328,7 @@ export default function ShopGuide() {
             <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#B45309] block">
               Sống Xanh & Bền Vững
             </span>
-            <h2 className="font-serif-display text-3xl sm:text-4xl font-bold text-[#4A2C2A] leading-tight">
+            <h2 className="font-serif-display text-3xl sm:text-4xl font-bold text-brand-burgundy leading-tight">
               Vòng Đời Mới Cho Chiếc Hũ Sau Khi Nến Tàn
             </h2>
             <p className="text-sm text-stone-600 leading-relaxed">
@@ -375,14 +375,14 @@ export default function ShopGuide() {
           </div>
 
           <div className="lg:col-span-6">
-            <aside className="flex flex-col items-center justify-center space-y-6 border-y border-stone-200 py-8 text-center sm:rounded-3xl sm:border sm:bg-gradient-to-tr sm:from-[#EBE3D5] sm:to-[#F5EFE6] sm:p-10 sm:shadow-sm">
-              <div className="w-20 h-20 rounded-full bg-white shadow-sm flex items-center justify-center text-4xl text-[#4A2C2A]">
+            <aside className="flex flex-col items-center justify-center space-y-6 border-y border-stone-200 py-8 text-center sm:rounded-3xl sm:border sm:bg-gradient-to-tr sm:from-[#EBE3D5] sm:to-brand-warmIvory sm:p-10 sm:shadow-sm">
+              <div className="w-20 h-20 rounded-full bg-white shadow-sm flex items-center justify-center text-4xl text-brand-burgundy">
                 <i className="ph-fill ph-plant"></i>
               </div>
-              <blockquote className="font-serif-display text-xl sm:text-2xl text-[#4A2C2A] italic leading-relaxed">
+              <blockquote className="font-serif-display text-xl sm:text-2xl text-brand-burgundy italic leading-relaxed">
                 "Một ngọn nến cháy hết không phải là kết thúc, mà là sự mở đầu cho một mầm xanh bình yên."
               </blockquote>
-              <span className="text-xs font-bold text-[#8C4A32] uppercase tracking-widest">
+              <span className="text-xs font-bold text-brand-terracotta uppercase tracking-widest">
                 — Triết lý thủ công xanh tại Candlet
               </span>
             </aside>
@@ -397,7 +397,7 @@ export default function ShopGuide() {
           <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#B45309] block mb-2">
             Giải Đáp Thắc Mắc
           </span>
-          <h2 className="font-serif-display text-3xl sm:text-4xl font-bold text-[#4A2C2A] mb-3">
+          <h2 className="font-serif-display text-3xl sm:text-4xl font-bold text-brand-burgundy mb-3">
             Những Câu Hỏi Thường Gặp (FAQ)
           </h2>
           <p className="text-sm text-stone-600 leading-relaxed">
@@ -418,10 +418,10 @@ export default function ShopGuide() {
                   onClick={() => toggleFaq(index)}
                   className="flex w-full items-center justify-between gap-4 py-5 text-left transition-colors sm:hover:bg-stone-50/80 focus:outline-none sm:px-6"
                 >
-                  <span className="font-serif-display text-base sm:text-lg font-bold text-[#4A2C2A]">
+                  <span className="font-serif-display text-base sm:text-lg font-bold text-brand-burgundy">
                     {faq.q}
                   </span>
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-transform duration-200 ${isOpen ? 'bg-[#4A2C2A] text-white rotate-180' : 'bg-stone-100 text-stone-600'}`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-transform duration-200 ${isOpen ? 'bg-brand-burgundy text-white rotate-180' : 'bg-stone-100 text-stone-600'}`}>
                     <i className="ph-bold ph-caret-down text-sm"></i>
                   </div>
                 </button>
@@ -439,12 +439,12 @@ export default function ShopGuide() {
         {/* Support Hotline Box */}
         <aside className="mt-10 flex flex-col items-center justify-between gap-4 border-y border-amber-200/60 py-6 text-center sm:mt-12 sm:flex-row sm:rounded-2xl sm:border sm:bg-[#FAF5EE] sm:p-6">
           <div className="text-left">
-            <h4 className="font-serif-display text-lg font-bold text-[#4A2C2A]">Bạn vẫn còn câu hỏi cần tư vấn?</h4>
+            <h4 className="font-serif-display text-lg font-bold text-brand-burgundy">Bạn vẫn còn câu hỏi cần tư vấn?</h4>
             <p className="text-xs text-stone-600 mt-1">Đội ngũ nghệ nhân của Candlet luôn sẵn sàng hỗ trợ bạn bất cứ lúc nào.</p>
           </div>
           <a
             href="tel:0328624761"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#4A2C2A] text-white text-xs font-bold uppercase tracking-wider sm:hover:bg-[#381B18] transition-colors shadow-xs shrink-0"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-brand-burgundy text-white text-xs font-bold uppercase tracking-wider sm:hover:bg-brand-deepWine transition-colors shadow-xs shrink-0"
           >
             <i className="ph-bold ph-phone-call"></i>
             <span>Hotline: 032.862.4761</span>
@@ -458,7 +458,7 @@ export default function ShopGuide() {
           <span className="text-xs font-bold uppercase tracking-widest text-[#B45309]">
             Khởi Đầu Hành Trình Thư Thái
           </span>
-          <h2 className="font-serif-display text-3xl sm:text-4xl text-[#4A2C2A] font-bold">
+          <h2 className="font-serif-display text-3xl sm:text-4xl text-brand-burgundy font-bold">
             Sẵn Sàng Tìm Kiếm Mùi Hương Thuộc Về Bạn?
           </h2>
           <p className="text-sm text-stone-600 max-w-xl mx-auto leading-relaxed">
@@ -467,7 +467,7 @@ export default function ShopGuide() {
           <div className="pt-2">
             <Link
               to="/shop"
-              className="inline-flex items-center gap-2 bg-[#4A2C2A] sm:hover:bg-[#381B18] text-white font-bold text-xs uppercase tracking-widest px-8 py-4 rounded-full transition-all shadow-md sm:hover:scale-105 active:scale-95"
+              className="inline-flex items-center gap-2 bg-brand-burgundy sm:hover:bg-brand-deepWine text-white font-bold text-xs uppercase tracking-widest px-8 py-4 rounded-full transition-all shadow-md sm:hover:scale-105 active:scale-95"
             >
               <i className="ph-bold ph-tote text-base"></i>
               <span>Ghé Thăm Cửa Hàng Nến</span>

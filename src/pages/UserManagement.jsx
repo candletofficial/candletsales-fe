@@ -220,7 +220,7 @@ export default function UserManagement() {
             onClick={() => updateQueryParams({ role: 'admin' })}
             className={`p-4 rounded-xl border transition-all cursor-pointer shadow-xs ${
               roleFilter === 'admin'
-                ? 'bg-[#4A2C2A] text-white border-[#4A2C2A] ring-2 ring-[#4A2C2A]/20'
+                ? 'bg-primary text-white border-primary ring-2 ring-primary/20'
                 : 'bg-white text-stone-800 border-stone-200 hover:border-amber-400'
             }`}
           >
@@ -416,7 +416,7 @@ export default function UserManagement() {
                             <div
                               className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs shrink-0 shadow-xs ${
                                 isAdmin
-                                  ? 'bg-[#4A2C2A] text-amber-200 border border-amber-300/30'
+                                  ? 'bg-primary text-amber-200 border border-amber-300/30'
                                   : 'bg-blue-100 text-blue-800 border border-blue-200'
                               }`}
                             >

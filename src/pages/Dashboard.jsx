@@ -263,7 +263,7 @@ export default function Dashboard() {
           {/* LEFT: Tổng tài sản chung - large card */}
           <div 
             onClick={() => navigate('/admin/fund')}
-            className="lg:col-span-1 bg-gradient-to-br from-[#381B18] to-[#8C4A32] rounded-2xl p-6 shadow-sm flex flex-col justify-between relative overflow-hidden cursor-pointer hover:shadow-lg transition-all hover:scale-[1.01]"
+            className="lg:col-span-1 bg-gradient-to-br from-on-primary-container to-secondary rounded-2xl p-6 shadow-sm flex flex-col justify-between relative overflow-hidden cursor-pointer hover:shadow-lg transition-all hover:scale-[1.01]"
           >
             <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/5" />
             <div className="absolute -right-4 -bottom-10 w-56 h-56 rounded-full bg-white/5" />

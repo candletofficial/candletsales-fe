@@ -120,7 +120,7 @@ export default function ProductReviews({ productId }) {
   if (loading) {
     return (
       <div className="mt-0 flex justify-center border-t-8 border-stone-100 bg-white py-10 sm:mt-16 sm:border-t sm:border-stone-200 sm:bg-[#FFFDF9] sm:pb-8 sm:pt-16">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4A2C2A]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-burgundy"></div>
       </div>
     );
   }
@@ -135,13 +135,13 @@ export default function ProductReviews({ productId }) {
             <span className="text-[10px] font-bold tracking-widest text-[#B45309] uppercase mb-2 block">
               Trải Nghiệm Khách Hàng
             </span>
-            <h2 className="text-3xl md:text-4xl font-serif-display text-[#4A2C2A]">
+            <h2 className="text-3xl md:text-4xl font-serif-display text-brand-burgundy">
               Đánh Giá & Cảm Nhận Khứu Giác
             </h2>
           </div>
           <button 
             onClick={handleWriteReviewClick}
-            className="bg-[#4A2C2A] sm:hover:bg-[#3A2221] text-white text-xs font-bold uppercase tracking-widest px-6 py-3 rounded flex items-center gap-2 transition-colors shrink-0 shadow-sm"
+            className="bg-brand-burgundy sm:hover:bg-[#3A2221] text-white text-xs font-bold uppercase tracking-widest px-6 py-3 rounded flex items-center gap-2 transition-colors shrink-0 shadow-sm"
           >
             <i className="ph-bold ph-pencil-simple text-base"></i>
             Viết đánh giá của bạn
@@ -153,7 +153,7 @@ export default function ProductReviews({ productId }) {
           
           {/* Left: Overall Rating */}
           <div className="flex flex-col items-center justify-center text-center w-full md:w-1/3 md:border-r border-stone-100 md:pr-12">
-            <div className="text-6xl font-serif-display text-[#4A2C2A] mb-2">{avgRating}</div>
+            <div className="text-6xl font-serif-display text-brand-burgundy mb-2">{avgRating}</div>
             <div className="flex gap-1 text-[#B45309] text-xl mb-3">
               {[1, 2, 3, 4, 5].map((star) => (
                 <i key={star} className={`${star <= Math.round(avgRating) ? 'ph-fill' : 'ph'} ph-star`}></i>
@@ -203,7 +203,7 @@ export default function ProductReviews({ productId }) {
               }}
               className={`px-4 py-2 rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer ${
                 selectedRating === 0
-                  ? 'bg-[#4A2C2A] text-white shadow-xs'
+                  ? 'bg-brand-burgundy text-white shadow-xs'
                   : 'bg-white text-stone-700 border border-stone-200 sm:hover:border-stone-400'
               }`}
             >
@@ -222,7 +222,7 @@ export default function ProductReviews({ productId }) {
                   }}
                   className={`px-4 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
                     selectedRating === star
-                      ? 'bg-[#4A2C2A] text-white shadow-xs'
+                      ? 'bg-brand-burgundy text-white shadow-xs'
                       : 'bg-white text-stone-700 border border-stone-200 sm:hover:border-stone-400'
                   }`}
                 >
@@ -257,7 +257,7 @@ export default function ProductReviews({ productId }) {
                     setSelectedRating(0);
                     setVisibleCount(INITIAL_COUNT);
                   }}
-                  className="mt-3 text-xs font-bold text-[#4A2C2A] sm:hover:underline cursor-pointer"
+                  className="mt-3 text-xs font-bold text-brand-burgundy sm:hover:underline cursor-pointer"
                 >
                   Xem tất cả đánh giá
                 </button>
@@ -280,7 +280,7 @@ export default function ProductReviews({ productId }) {
                       <span className="text-xs text-stone-400">{formatDate(review.createdAt)}</span>
                     </div>
 
-                    <h4 className="text-lg font-serif-display text-[#4A2C2A] font-medium leading-snug mb-3">
+                    <h4 className="text-lg font-serif-display text-brand-burgundy font-medium leading-snug mb-3">
                       {review.title}
                     </h4>
                     
@@ -314,12 +314,12 @@ export default function ProductReviews({ productId }) {
                   {/* Thanh tiến độ trực quan */}
                   <div className="text-center space-y-2">
                     <p className="text-xs font-medium text-stone-500">
-                      Đang hiển thị <span className="font-bold text-[#4A2C2A]">{visibleReviews.length}</span> trên{' '}
-                      <span className="font-bold text-[#4A2C2A]">{currentFilteredCount}</span> đánh giá
+                      Đang hiển thị <span className="font-bold text-brand-burgundy">{visibleReviews.length}</span> trên{' '}
+                      <span className="font-bold text-brand-burgundy">{currentFilteredCount}</span> đánh giá
                     </p>
                     <div className="w-56 sm:w-72 h-1.5 bg-stone-200/80 rounded-full overflow-hidden mx-auto">
                       <div
-                        className="h-full bg-gradient-to-r from-[#B45309] to-[#4A2C2A] rounded-full transition-all duration-500 ease-out"
+                        className="h-full bg-gradient-to-r from-[#B45309] to-brand-burgundy rounded-full transition-all duration-500 ease-out"
                         style={{ width: `${progressPercent}%` }}
                       ></div>
                     </div>
@@ -331,7 +331,7 @@ export default function ProductReviews({ productId }) {
                       <button
                         type="button"
                         onClick={() => setVisibleCount(prev => Math.min(currentFilteredCount, prev + STEP_COUNT))}
-                        className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full bg-white border-2 border-[#4A2C2A] text-[#4A2C2A] sm:hover:bg-[#4A2C2A] sm:hover:text-white font-semibold text-sm tracking-wide transition-all duration-300 shadow-sm sm:hover:shadow-md active:scale-95 group cursor-pointer"
+                        className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full bg-white border-2 border-brand-burgundy text-brand-burgundy sm:hover:bg-brand-burgundy sm:hover:text-white font-semibold text-sm tracking-wide transition-all duration-300 shadow-sm sm:hover:shadow-md active:scale-95 group cursor-pointer"
                       >
                         <span>Xem thêm ({Math.min(STEP_COUNT, remainingCount)} đánh giá tiếp)</span>
                         <i className="ph-bold ph-arrow-down text-base sm:group-hover:translate-y-0.5 transition-transform"></i>
@@ -345,7 +345,7 @@ export default function ProductReviews({ productId }) {
                         <button
                           type="button"
                           onClick={() => setVisibleCount(INITIAL_COUNT)}
-                          className="inline-flex items-center gap-1.5 text-xs font-bold text-[#4A2C2A] sm:hover:underline px-3 py-1.5 cursor-pointer"
+                          className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-burgundy sm:hover:underline px-3 py-1.5 cursor-pointer"
                         >
                           <i className="ph-bold ph-arrow-up text-xs"></i>
                           Thu gọn về {INITIAL_COUNT} đánh giá đầu
@@ -374,7 +374,7 @@ export default function ProductReviews({ productId }) {
             >
               <i className="ph ph-x text-lg"></i>
             </button>
-            <h3 className="text-xl sm:text-2xl font-serif-display text-[#4A2C2A] mb-5">Viết Đánh Giá Của Bạn</h3>
+            <h3 className="text-xl sm:text-2xl font-serif-display text-brand-burgundy mb-5">Viết Đánh Giá Của Bạn</h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Đánh giá số sao</label>
@@ -397,7 +397,7 @@ export default function ProductReviews({ productId }) {
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#4A2C2A] bg-stone-50/50"
+                  className="w-full border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-burgundy bg-stone-50/50"
                   placeholder="Ví dụ: Hương thơm gỗ thông ấm cúng..."
                   required
                 />
@@ -407,7 +407,7 @@ export default function ProductReviews({ productId }) {
                 <textarea 
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  className="w-full border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#4A2C2A] min-h-[110px] bg-stone-50/50"
+                  className="w-full border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-burgundy min-h-[110px] bg-stone-50/50"
                   placeholder="Chia sẻ cảm nhận về độ tỏa hương, thời gian cháy, thẩm mỹ hũ nến..."
                   required
                 ></textarea>
@@ -416,7 +416,7 @@ export default function ProductReviews({ productId }) {
                 <button 
                   type="submit"
                   disabled={submitting}
-                  className="w-full bg-[#4A2C2A] sm:hover:bg-[#3A2221] active:bg-[#2A1817] text-white font-bold py-3.5 rounded-xl uppercase tracking-wider text-xs transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer shadow-md"
+                  className="w-full bg-brand-burgundy sm:hover:bg-[#3A2221] active:bg-[#2A1817] text-white font-bold py-3.5 rounded-xl uppercase tracking-wider text-xs transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer shadow-md"
                 >
                   {submitting ? 'Đang gửi đánh giá...' : 'Gửi Đánh Giá'}
                 </button>

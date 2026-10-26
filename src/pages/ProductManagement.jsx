@@ -8,6 +8,8 @@ import { formatPrice } from '../utils/formatPrice';
 import { TAG_PRESETS, TAG_COLORS, resolveTagColor } from '../utils/productTagUtils';
 import { uploadService } from '../services/uploadService';
 import { getImageUrl, isManagedUploadedImage } from '../utils/imageUtils';
+import RichTextEditor from '../components/RichTextEditor';
+import { sanitizeRichHtml } from '../utils/richText';
 
 const getEmptyForm = () => ({
   productId: `SP-${Math.floor(1000000 + Math.random() * 9000000)}`,
@@ -27,6 +29,16 @@ const getEmptyForm = () => ({
   variant_groups: [],
   skus: []
 });
+
+const getVariantCombinations = (groups = []) => {
+  if (!groups.length || groups.some(group => !group.options?.length)) return [];
+  return groups.reduce(
+    (combinations, group) => combinations.flatMap(combination => (
+      group.options.map(option => [...combination, option.id])
+    )),
+    [[]],
+  );
+};
 
 function ProductModal({ product, products = [], materials, onClose, onSave, onDelete, onDuplicate }) {
   const VOLUME_OPTIONS = useMemo(() => [...new Set(products.map(p => p.volume).filter(Boolean))], [products]);
@@ -157,11 +169,27 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
       }));
     }
 
+    // Repair combinations saved by older versions that did not propagate a
+    // changed option code into the generated SKUs.
+    const expectedCombinations = getVariantCombinations(p.variant_groups || []);
+    const validOptionIds = new Set((p.variant_groups || []).flatMap(group => (
+      (group.options || []).map(option => option.id)
+    )));
+    if (expectedCombinations.length === p.skus?.length) {
+      p.skus = p.skus.map((sku, index) => {
+        const combination = sku.combination || [];
+        const isStale = combination.length !== (p.variant_groups || []).length
+          || combination.some(optionId => !validOptionIds.has(optionId));
+        return isStale ? { ...sku, combination: expectedCombinations[index] } : sku;
+      });
+    }
+
     return p;
   });
 
   const [activeTab, setActiveTab] = useState('basic'); // basic, base_ingredients, variants, skus
   const [loading, setLoading] = useState(false);
+  const [saveError, setSaveError] = useState('');
   const [newGalleryUrl, setNewGalleryUrl] = useState('');
   const [showBatchUrlInput, setShowBatchUrlInput] = useState(false);
 
@@ -187,17 +215,49 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
     return currentBaseCost + extraCost;
   };
 
+  const financialSummary = useMemo(() => {
+    const skus = Array.isArray(form.skus) && form.skus.length > 0
+      ? form.skus
+      : [{ price: form.base_price, extra_ingredients: [] }];
+
+    const rows = skus.map((sku) => {
+      const extraCost = (sku.extra_ingredients || []).reduce((total, item) => {
+        const material = materials.find(entry => entry._id === item.ingredient_id);
+        return total + (material ? material.price * (Number(item.quantity) || 0) : 0);
+      }, 0);
+      const cost = currentBaseCost + extraCost;
+      const price = Number(sku.price ?? form.base_price) || 0;
+      const profit = price - cost;
+      const margin = price > 0 ? Math.round((profit / price) * 100) : 0;
+      return { cost, price, profit, margin };
+    });
+
+    const range = (key) => ({
+      min: Math.min(...rows.map(row => row[key])),
+      max: Math.max(...rows.map(row => row[key])),
+    });
+
+    return {
+      cost: range('cost'),
+      price: range('price'),
+      profit: range('profit'),
+      margin: range('margin'),
+      usesSkuCosts: Array.isArray(form.skus) && form.skus.length > 0,
+    };
+  }, [form.skus, form.base_price, currentBaseCost, materials]);
+
+  const formatMoneyRange = ({ min, max }) => (
+    min === max ? formatPrice(min) : `${formatPrice(min)} – ${formatPrice(max)}`
+  );
+  const formatPercentRange = ({ min, max }) => (
+    min === max ? `${min}%` : `${min}% – ${max}%`
+  );
+
   // Helper to generate SKUs from variants
   const handleGenerateSKUs = () => {
     if (!form.variant_groups || form.variant_groups.length === 0) return;
 
-    const cartesian = (...a) => a.reduce((a, b) => a.flatMap(d => b.map(e => [d, e].flat())));
-    const optionArrays = form.variant_groups.map(g => g.options.map(o => o.id));
-
-    let combinations = [];
-    if (optionArrays.length > 0) {
-      combinations = optionArrays.length === 1 ? optionArrays[0].map(id => [id]) : cartesian(...optionArrays);
-    }
+    const combinations = getVariantCombinations(form.variant_groups);
 
     const newSkus = combinations.map(combo => {
       let existingSku = form.skus.find(s => {
@@ -223,16 +283,20 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
+    setSaveError('');
     setLoading(true);
-    await onSave(form);
-    setLoading(false);
+    try {
+      const description = sanitizeRichHtml(form.description);
+      await onSave({ ...form, description });
+    } catch (error) {
+      setSaveError(error.response?.data?.message || error.message || 'Không thể lưu sản phẩm. Vui lòng thử lại.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Calculations for financial preview
-  const estimatedProfit = (form.base_price || 0) - currentBaseCost;
-  const marginPercent = (form.base_price || 0) > 0 
-    ? Math.round((estimatedProfit / form.base_price) * 100) 
-    : 0;
   const discountPercent = (form.original_price > form.base_price && form.original_price > 0)
     ? Math.round(((form.original_price - form.base_price) / form.original_price) * 100)
     : 0;
@@ -378,16 +442,21 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
           <div className="flex items-center gap-3 self-end sm:self-auto">
             <div className="hidden sm:flex items-center gap-2 bg-white border border-stone-200/90 rounded-xl px-3.5 py-1.5 shadow-xs">
               <div className="text-left border-r border-stone-100 pr-3">
-                <span className="block text-[10px] uppercase font-bold text-stone-400">Giá vốn (BOM)</span>
-                <span className="text-xs font-bold text-stone-800">{formatPrice(currentBaseCost)}</span>
+                <span className="block text-[10px] uppercase font-bold text-stone-400">
+                  {financialSummary.usesSkuCosts ? 'Giá vốn theo SKU' : 'Giá vốn (BOM)'}
+                </span>
+                <span className="text-xs font-bold text-stone-800">{formatMoneyRange(financialSummary.cost)}</span>
               </div>
               <div className="text-left pl-1">
                 <span className="block text-[10px] uppercase font-bold text-stone-400">Giá bán cơ bản</span>
                 <span className="text-xs font-bold text-primary">{formatPrice(form.base_price || 0)}</span>
               </div>
-              {marginPercent > 0 && (
-                <span className="ml-1 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold px-1.5 py-0.5 rounded">
-                  Lãi {marginPercent}%
+              {financialSummary.price.max > 0 && (
+                <span className={`ml-1 border text-[10px] font-bold px-1.5 py-0.5 rounded ${financialSummary.margin.min >= 0
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                  : 'bg-red-50 text-red-700 border-red-200'
+                }`}>
+                  Biên {formatPercentRange(financialSummary.margin)}
                 </span>
               )}
             </div>
@@ -555,11 +624,11 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
                   <div className="bg-amber-50/40 p-3.5 rounded-xl border border-amber-200/60 flex flex-col justify-between">
                     <div>
                       <span className="text-[11px] font-bold text-amber-800 uppercase tracking-wider block">Ước tính lợi nhuận</span>
-                      <p className="text-lg font-bold text-stone-900 mt-1">{formatPrice(estimatedProfit)}</p>
+                      <p className="text-lg font-bold text-stone-900 mt-1">{formatMoneyRange(financialSummary.profit)}</p>
                     </div>
                     <div className="flex items-center justify-between text-xs text-stone-500 pt-2 border-t border-amber-200/50">
                       <span>Tỷ suất lợi nhuận:</span>
-                      <span className="font-bold text-stone-800">{marginPercent}%</span>
+                      <span className="font-bold text-stone-800">{formatPercentRange(financialSummary.margin)}</span>
                     </div>
                   </div>
                 </div>
@@ -1027,13 +1096,12 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
 
                 <div className="pt-2">
                   <label className="block text-[13px] font-bold text-stone-700 mb-1.5">Mô tả sản phẩm</label>
-                  <textarea 
-                    value={form.description} 
-                    onChange={e => setForm({ ...form, description: e.target.value })} 
-                    rows="3"
-                    className="w-full border border-stone-200 rounded-lg px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-xs"
-                    placeholder="Mô tả cảm hứng nốt hương, độ tỏa hương, thông điệp ẩn bên trong hũ nến..." 
+                  <RichTextEditor
+                    value={form.description}
+                    onChange={description => setForm(current => ({ ...current, description }))}
+                    placeholder="Mô tả cảm hứng nốt hương, độ tỏa hương, thông điệp ẩn bên trong hũ nến..."
                   />
+                  <p className="mt-1.5 text-[10.5px] text-stone-400">Có thể dán nội dung đã định dạng. Hỗ trợ in đậm, in nghiêng, gạch chân, màu chữ và danh sách.</p>
                 </div>
               </div>
 
@@ -1181,9 +1249,27 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
                           <input 
                             value={opt.id} 
                             onChange={e => {
-                              const newGroups = [...form.variant_groups];
-                              newGroups[gIdx].options[oIdx].id = e.target.value;
-                              setForm({ ...form, variant_groups: newGroups });
+                              const nextId = e.target.value;
+                              setForm(current => {
+                                const previousId = current.variant_groups[gIdx].options[oIdx].id;
+                                const newGroups = current.variant_groups.map((currentGroup, currentGroupIndex) => (
+                                  currentGroupIndex !== gIdx
+                                    ? currentGroup
+                                    : {
+                                      ...currentGroup,
+                                      options: currentGroup.options.map((currentOption, currentOptionIndex) => (
+                                        currentOptionIndex === oIdx ? { ...currentOption, id: nextId } : currentOption
+                                      )),
+                                    }
+                                ));
+                                const newSkus = (current.skus || []).map(sku => ({
+                                  ...sku,
+                                  combination: (sku.combination || []).map(optionId => (
+                                    optionId === previousId ? nextId : optionId
+                                  )),
+                                }));
+                                return { ...current, variant_groups: newGroups, skus: newSkus };
+                              });
                             }}
                             placeholder="Mã (VD: RBY)" 
                             className="w-[100px] text-xs font-mono font-bold uppercase border border-stone-200 rounded-lg px-2.5 py-1.5 bg-stone-50" 
@@ -1259,8 +1345,8 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
                   const skuMargin = (sku.price || 0) > 0 ? Math.round((skuProfit / sku.price) * 100) : 0;
 
                   return (
-                    <div key={sIdx} className="bg-white border border-stone-200 rounded-xl shadow-xs overflow-hidden">
-                      <div className="bg-stone-50/80 px-4 py-2.5 border-b border-stone-200 flex flex-wrap justify-between items-center gap-3">
+                    <div key={sIdx} className="relative rounded-xl border border-stone-200 bg-white shadow-xs focus-within:z-20">
+                      <div className="flex flex-wrap items-center justify-between gap-3 rounded-t-xl border-b border-stone-200 bg-stone-50/80 px-4 py-2.5">
                         <div className="flex items-center gap-2.5">
                           <input 
                             value={sku.id} 
@@ -1313,6 +1399,7 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
                           )}
 
                           <button 
+                            type="button"
                             onClick={() => {
                               const newSkus = [...form.skus];
                               newSkus.splice(sIdx, 1);
@@ -1326,12 +1413,13 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
                       </div>
 
                       {/* Extra Ingredients for SKU */}
-                      <div className="p-3.5 bg-white">
+                      <div className="rounded-b-xl bg-white p-3.5">
                         <div className="flex items-center justify-between mb-2">
                           <p className="text-[11px] font-bold text-stone-500 uppercase tracking-wide">
                             Nguyên liệu bổ sung riêng cho SKU này (nếu có):
                           </p>
                           <button 
+                            type="button"
                             onClick={() => {
                               const newSkus = [...form.skus];
                               newSkus[sIdx].extra_ingredients.push({ ingredient_id: '', quantity: 1 });
@@ -1346,7 +1434,7 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
                         {sku.extra_ingredients && sku.extra_ingredients.length > 0 ? (
                           <div className="space-y-2">
                             {sku.extra_ingredients.map((item, idx) => (
-                              <div key={idx} className="flex gap-2 items-center">
+                              <div key={idx} className="relative flex items-center gap-2">
                                 <div className="flex-1 min-w-[220px]">
                                   <SearchableSelect
                                     options={materialOptions.filter(m => m.value === item.ingredient_id || (!form.base_ingredients.some(b => b.ingredient_id === m.value) && !sku.extra_ingredients.some(e => e.ingredient_id === m.value)))}
@@ -1374,6 +1462,7 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
                                   placeholder="SL" 
                                 />
                                 <button 
+                                  type="button"
                                   onClick={() => {
                                     const newSkus = [...form.skus];
                                     newSkus[sIdx].extra_ingredients.splice(idx, 1);
@@ -1408,6 +1497,12 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
 
         {/* Modal Footer */}
         <div className="px-6 py-4 border-t border-stone-200 bg-white flex flex-wrap justify-between items-center gap-3">
+          {saveError && (
+            <div role="alert" className="flex w-full items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-xs font-semibold text-red-700">
+              <span className="material-symbols-outlined text-[18px]">error</span>
+              <span className="min-w-0 flex-1 break-words">{saveError}</span>
+            </div>
+          )}
           <div className="flex gap-2">
             {product && product._id && (
               <button 
@@ -1518,6 +1613,7 @@ export default function ProductManagement() {
       fetchData(); // reload to get calculated costs
     } catch (err) {
       showToast(err.response?.data?.message || 'Có lỗi xảy ra', 'error');
+      throw err;
     }
   };
 
@@ -1665,6 +1761,10 @@ export default function ProductManagement() {
                     const minPrice = prices.length > 0 ? Math.min(...prices) : p.base_price;
                     const maxPrice = prices.length > 0 ? Math.max(...prices) : p.base_price;
                     const priceDisplay = minPrice === maxPrice ? formatPrice(minPrice) : `${formatPrice(minPrice)} - ${formatPrice(maxPrice)}`;
+                    const expectedProductCombinations = getVariantCombinations(p.variant_groups || []);
+                    const validProductOptionIds = new Set((p.variant_groups || []).flatMap(group => (
+                      (group.options || []).map(option => option.id)
+                    )));
 
                     return (
                       <React.Fragment key={p._id}>
@@ -1726,8 +1826,14 @@ export default function ProductManagement() {
                         {/* SKUs toggle row removed - moved inline */}
 
                         {/* SKUs nested rows */}
-                        {expandedProducts[p._id] && p.skus?.map(sku => {
-                          const comboLabel = sku.combination?.map(optId => {
+                        {expandedProducts[p._id] && p.skus?.map((sku, skuIndex) => {
+                          const savedCombination = sku.combination || [];
+                          const hasStaleOption = savedCombination.length !== (p.variant_groups || []).length
+                            || savedCombination.some(optionId => !validProductOptionIds.has(optionId));
+                          const displayCombination = hasStaleOption
+                            ? (expectedProductCombinations[skuIndex] || savedCombination)
+                            : savedCombination;
+                          const comboLabel = displayCombination.map(optId => {
                             for (const g of p.variant_groups || []) {
                               const opt = g.options.find(o => o.id === optId);
                               if (opt) return opt.label;

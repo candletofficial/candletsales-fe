@@ -116,7 +116,7 @@ export default function OrderSuccess({ paymentFlow = false }) {
   if (loading) {
     return (
       <div className="flex flex-col justify-center items-center h-[65vh] bg-[#fbf9f6]">
-        <div className="w-12 h-12 border-3 border-[#4A2C2A]/20 border-t-[#4A2C2A] rounded-full animate-spin mb-4"></div>
+        <div className="w-12 h-12 border-3 border-brand-burgundy/20 border-t-brand-burgundy rounded-full animate-spin mb-4"></div>
         <p className="text-sm font-serif-display text-stone-600 tracking-wider">Đang tải thông tin đơn hàng...</p>
       </div>
     );
@@ -128,11 +128,11 @@ export default function OrderSuccess({ paymentFlow = false }) {
         <div className="w-16 h-16 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mb-4">
           <i className="ph-bold ph-receipt-x text-3xl"></i>
         </div>
-        <h2 className="text-xl font-bold text-[#4A2C2A] mb-2 font-serif-display">Không tìm thấy đơn hàng</h2>
+        <h2 className="text-xl font-bold text-brand-burgundy mb-2 font-serif-display">Không tìm thấy đơn hàng</h2>
         <p className="text-sm text-stone-500 max-w-sm mb-6">Mã đơn hàng không hợp lệ hoặc bạn không có quyền xem thông tin đơn hàng này.</p>
         <Link 
           to="/shop" 
-          className="bg-[#4A2C2A] text-white text-xs font-bold uppercase tracking-wider px-6 py-3 rounded-full sm:hover:bg-[#381B18] transition-all shadow-sm"
+          className="bg-brand-burgundy text-white text-xs font-bold uppercase tracking-wider px-6 py-3 rounded-full sm:hover:bg-brand-deepWine transition-all shadow-sm"
         >
           Quay lại cửa hàng
         </Link>
@@ -177,9 +177,9 @@ export default function OrderSuccess({ paymentFlow = false }) {
         <main className="mx-auto max-w-md rounded-[2rem] border border-stone-200 bg-white p-8 text-center shadow-xl shadow-stone-900/5 sm:p-10">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-rose-50 text-rose-600"><i className="ph-bold ph-timer text-3xl"></i></div>
           <p className="mt-5 text-xs font-bold uppercase tracking-widest text-rose-600">Phiên thanh toán đã hết hạn</p>
-          <h1 className="mt-3 font-serif-display text-3xl font-bold text-[#4A2C2A]">Mã QR không còn hiệu lực</h1>
+          <h1 className="mt-3 font-serif-display text-3xl font-bold text-brand-burgundy">Mã QR không còn hiệu lực</h1>
           <p className="mt-3 text-sm leading-relaxed text-stone-600">Đơn hàng chưa được tạo và không có khoản tiền nào bị ghi nhận. Bạn có thể quay lại giỏ hàng để tạo mã QR mới.</p>
-          <button onClick={() => navigate('/cart')} className="mt-7 inline-flex items-center gap-2 rounded-xl bg-[#4A2C2A] px-6 py-3 text-xs font-bold uppercase tracking-wider text-white transition sm:hover:bg-[#381b18]"><i className="ph-bold ph-arrow-left"></i> Quay lại giỏ hàng</button>
+          <button onClick={() => navigate('/cart')} className="mt-7 inline-flex items-center gap-2 rounded-xl bg-brand-burgundy px-6 py-3 text-xs font-bold uppercase tracking-wider text-white transition sm:hover:bg-[#381b18]"><i className="ph-bold ph-arrow-left"></i> Quay lại giỏ hàng</button>
         </main>
       </div>
     );
@@ -191,14 +191,14 @@ export default function OrderSuccess({ paymentFlow = false }) {
         <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(ellipse_at_top,_#f6dccb_0%,_transparent_68%)]"></div>
         <main className="relative mx-auto max-w-xl overflow-hidden rounded-[2rem] border border-white/80 bg-white/95 shadow-[0_24px_80px_rgba(74,44,42,0.14)] backdrop-blur sm:rounded-[2.5rem]">
           <header className="border-b border-stone-100 px-6 py-6 text-center sm:px-10 sm:py-8">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#4A2C2A] text-white shadow-lg shadow-[#4A2C2A]/20">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-burgundy text-white shadow-lg shadow-brand-burgundy/20">
               <i className="ph-fill ph-qr-code text-3xl"></i>
             </div>
             <p className="inline-flex items-center gap-2 rounded-full bg-amber-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-amber-700">
               <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span>
               Chờ thanh toán
             </p>
-            <h1 className="mt-3 font-serif-display text-3xl font-bold text-[#4A2C2A] sm:text-4xl">Quét mã để thanh toán</h1>
+            <h1 className="mt-3 font-serif-display text-3xl font-bold text-brand-burgundy sm:text-4xl">Quét mã để thanh toán</h1>
             <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-stone-600">Thanh toán xong, Candlet sẽ tự động xác nhận và chuyển bạn đến trang thành công.</p>
           </header>
 
@@ -213,20 +213,20 @@ export default function OrderSuccess({ paymentFlow = false }) {
               <span className="absolute -right-2 -top-2 flex h-9 w-9 items-center justify-center rounded-full border-4 border-white bg-emerald-500 text-white shadow-sm"><i className="ph-bold ph-lock-key text-sm"></i></span>
             </div>
 
-            <button onClick={downloadQr} disabled={downloadingQr} className="mx-auto mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#4A2C2A]/15 bg-[#4A2C2A] px-5 py-3 text-xs font-bold uppercase tracking-wider text-white shadow-sm transition sm:hover:bg-[#381b18] disabled:cursor-wait disabled:opacity-70">
+            <button onClick={downloadQr} disabled={downloadingQr} className="mx-auto mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-brand-burgundy/15 bg-brand-burgundy px-5 py-3 text-xs font-bold uppercase tracking-wider text-white shadow-sm transition sm:hover:bg-[#381b18] disabled:cursor-wait disabled:opacity-70">
               <i className={`ph-bold ${downloadingQr ? 'ph-spinner animate-spin' : 'ph-download-simple'} text-base`}></i>
               {downloadingQr ? 'Đang chuẩn bị ảnh QR...' : 'Tải mã QR về máy'}
             </button>
 
             <dl className="mt-6 divide-y divide-stone-100 overflow-hidden rounded-2xl border border-stone-100 bg-stone-50/70 text-sm">
-              <div className="flex items-center justify-between gap-4 px-4 py-3.5"><dt className="flex items-center gap-2 text-stone-500"><i className="ph-bold ph-money text-base"></i>Số tiền</dt><dd className="font-bold text-[#8C4A32]">{formatPrice(order.total_price)}</dd></div>
+              <div className="flex items-center justify-between gap-4 px-4 py-3.5"><dt className="flex items-center gap-2 text-stone-500"><i className="ph-bold ph-money text-base"></i>Số tiền</dt><dd className="font-bold text-brand-terracotta">{formatPrice(order.total_price)}</dd></div>
               <div className="flex items-center justify-between gap-4 px-4 py-3.5"><dt className="flex items-center gap-2 text-stone-500"><i className="ph-bold ph-bank text-base"></i>Ngân hàng</dt><dd className="font-bold text-stone-900">{transferInfo.bankName}</dd></div>
               <div className="flex items-center justify-between gap-4 px-4 py-3.5"><dt className="flex items-center gap-2 text-stone-500"><i className="ph-bold ph-credit-card text-base"></i>Số tài khoản</dt><dd className="font-mono font-bold text-stone-900">{transferInfo.accountNo}</dd></div>
               <div className="flex items-center justify-between gap-4 px-4 py-3.5"><dt className="flex items-center gap-2 text-stone-500"><i className="ph-bold ph-user text-base"></i>Chủ tài khoản</dt><dd className="font-bold text-stone-900">{transferInfo.accountName}</dd></div>
-              <div className="flex items-center justify-between gap-4 px-4 py-3.5"><dt className="flex items-center gap-2 text-stone-500"><i className="ph-bold ph-note text-base"></i>Nội dung</dt><dd className="font-mono font-bold text-[#8C4A32]">{transferNote}</dd></div>
+              <div className="flex items-center justify-between gap-4 px-4 py-3.5"><dt className="flex items-center gap-2 text-stone-500"><i className="ph-bold ph-note text-base"></i>Nội dung</dt><dd className="font-mono font-bold text-brand-terracotta">{transferNote}</dd></div>
             </dl>
 
-            <div className="mt-5 flex items-center justify-center gap-2 text-xs font-medium text-stone-500"><i className="ph-bold ph-arrows-clockwise animate-spin text-[#8C4A32]"></i> Đang tự động kiểm tra thanh toán</div>
+            <div className="mt-5 flex items-center justify-center gap-2 text-xs font-medium text-stone-500"><i className="ph-bold ph-arrows-clockwise animate-spin text-brand-terracotta"></i> Đang tự động kiểm tra thanh toán</div>
             <p className="mt-3 text-center text-[11px] text-stone-400">Mã đơn <span className="font-mono font-bold text-stone-600">{order.orderId}</span></p>
           </section>
         </main>
@@ -252,7 +252,7 @@ export default function OrderSuccess({ paymentFlow = false }) {
             Đặt Hàng Thành Công
           </span>
 
-          <h1 className="mb-2 mt-3 font-serif-display text-2xl font-bold text-[#4A2C2A] sm:mb-3 sm:mt-4 sm:text-4xl">
+          <h1 className="mb-2 mt-3 font-serif-display text-2xl font-bold text-brand-burgundy sm:mb-3 sm:mt-4 sm:text-4xl">
             Cảm Ơn Bạn Đã Tin Chọn Candlet
           </h1>
           <p className="text-xs sm:text-sm text-stone-600 max-w-lg mx-auto leading-relaxed">
@@ -263,7 +263,7 @@ export default function OrderSuccess({ paymentFlow = false }) {
           <div className="mt-5 inline-flex items-center gap-3 rounded-xl border border-amber-200/80 bg-[#FAF5EE] px-4 py-2 sm:mt-6 sm:rounded-2xl sm:px-5 sm:py-2.5">
             <div className="text-left">
               <p className="text-[10px] uppercase font-bold tracking-wider text-amber-800">Mã đơn hàng</p>
-              <p className="font-mono font-bold text-sm sm:text-base text-[#4A2C2A]">{order.orderId}</p>
+              <p className="font-mono font-bold text-sm sm:text-base text-brand-burgundy">{order.orderId}</p>
             </div>
             <button
               onClick={handleCopyCode}
@@ -306,7 +306,7 @@ export default function OrderSuccess({ paymentFlow = false }) {
         {/* 2. Delivery Stepper / Timeline Progress */}
         <section className="-mx-4 border-y border-stone-200/90 bg-white p-4 sm:mx-0 sm:rounded-3xl sm:border sm:p-8 sm:shadow-sm">
           <h2 className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-stone-700 sm:mb-6 sm:text-sm">
-            <i className="ph-bold ph-path text-base text-[#8C4A32]"></i>
+            <i className="ph-bold ph-path text-base text-brand-terracotta"></i>
             Tiến trình đơn hàng
           </h2>
 
@@ -361,7 +361,7 @@ export default function OrderSuccess({ paymentFlow = false }) {
           {/* Shipping Address */}
           <section className="-mx-4 space-y-3 border-y border-stone-200/90 bg-white p-4 sm:mx-0 sm:rounded-3xl sm:border sm:p-6 sm:shadow-sm">
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-stone-700">
-              <i className="ph-bold ph-map-pin text-base text-[#8C4A32]"></i>
+              <i className="ph-bold ph-map-pin text-base text-brand-terracotta"></i>
               <span>Địa chỉ nhận hàng</span>
             </div>
             <div className="pt-1">
@@ -381,7 +381,7 @@ export default function OrderSuccess({ paymentFlow = false }) {
           {/* Payment & Shipping Method */}
           <section className="-mx-4 space-y-4 border-y border-stone-200/90 bg-white p-4 sm:mx-0 sm:rounded-3xl sm:border sm:p-6 sm:shadow-sm">
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-stone-700">
-              <i className="ph-bold ph-credit-card text-base text-[#8C4A32]"></i>
+              <i className="ph-bold ph-credit-card text-base text-brand-terracotta"></i>
               <span>Thanh toán & Vận chuyển</span>
             </div>
 
@@ -395,7 +395,7 @@ export default function OrderSuccess({ paymentFlow = false }) {
                 <div>
                   <p className="text-xs font-bold text-stone-900">Thanh toán khi nhận hàng (COD)</p>
                   <p className="text-[11px] text-stone-500 mt-0.5">
-                    Vui lòng chuẩn bị <strong className="text-[#8C4A32]">{formatPrice(order.total_price)}</strong> tiền mặt khi bưu tá giao nến.
+                    Vui lòng chuẩn bị <strong className="text-brand-terracotta">{formatPrice(order.total_price)}</strong> tiền mặt khi bưu tá giao nến.
                   </p>
                 </div>
               </div>
@@ -443,8 +443,8 @@ export default function OrderSuccess({ paymentFlow = false }) {
             <div className="flex flex-col sm:flex-row gap-6 items-center">
               <img src={vietQrUrl} alt="Mã VietQR thanh toán đơn hàng" className="w-52 h-52 rounded-2xl bg-white border border-stone-200 p-2 shadow-sm" />
               <div className="flex-1 text-center sm:text-left space-y-2">
-                <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#8C4A32]"><i className="ph-bold ph-qr-code text-base"></i> Thanh toán chuyển khoản</p>
-                <h2 className="text-xl font-serif-display font-bold text-[#4A2C2A]">Quét mã VietQR để thanh toán</h2>
+                <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand-terracotta"><i className="ph-bold ph-qr-code text-base"></i> Thanh toán chuyển khoản</p>
+                <h2 className="text-xl font-serif-display font-bold text-brand-burgundy">Quét mã VietQR để thanh toán</h2>
                 <p className="text-sm text-stone-600">
                   {order.payment_status === 'paid'
                     ? 'Thanh toán đã được SePay xác nhận. Shop sẽ sớm xử lý đơn hàng của bạn.'
@@ -454,7 +454,7 @@ export default function OrderSuccess({ paymentFlow = false }) {
                   <dt className="text-stone-500">Ngân hàng</dt><dd className="font-bold text-stone-900">{transferInfo.bankName}</dd>
                   <dt className="text-stone-500">Số tài khoản</dt><dd className="font-mono font-bold text-stone-900">{transferInfo.accountNo}</dd>
                   <dt className="text-stone-500">Chủ tài khoản</dt><dd className="font-bold text-stone-900">{transferInfo.accountName}</dd>
-                  <dt className="text-stone-500">Nội dung</dt><dd className="font-mono font-bold text-[#8C4A32]">{transferNote}</dd>
+                  <dt className="text-stone-500">Nội dung</dt><dd className="font-mono font-bold text-brand-terracotta">{transferNote}</dd>
                 </dl>
                 {order.payment_status === 'paid' ? (
                   <span className="inline-flex items-center gap-1.5 mt-2 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg"><i className="ph-bold ph-check-circle"></i> Đã thanh toán</span>
@@ -472,7 +472,7 @@ export default function OrderSuccess({ paymentFlow = false }) {
         <section className="-mx-4 space-y-5 border-y border-stone-200/90 bg-white p-4 sm:mx-0 sm:space-y-6 sm:rounded-3xl sm:border sm:p-8 sm:shadow-sm">
           <h2 className="text-sm font-bold uppercase tracking-wider text-stone-700 flex items-center justify-between">
             <span className="flex items-center gap-2">
-              <i className="ph-bold ph-bag-simple text-base text-[#8C4A32]"></i>
+              <i className="ph-bold ph-bag-simple text-base text-brand-terracotta"></i>
               Sản phẩm đã đặt ({order.items?.length || 0})
             </span>
           </h2>
@@ -494,9 +494,9 @@ export default function OrderSuccess({ paymentFlow = false }) {
                     </div>
                   )}
                   <div className="min-w-0">
-                    <p className="text-sm font-bold text-[#4A2C2A] truncate">{item.product_name}</p>
+                    <p className="text-sm font-bold text-brand-burgundy truncate">{item.product_name}</p>
                     {item.sku_label && (
-                      <p className="text-xs text-[#8C4A32] font-medium mt-0.5">{item.sku_label}</p>
+                      <p className="text-xs text-brand-terracotta font-medium mt-0.5">{item.sku_label}</p>
                     )}
                     <p className="text-xs text-stone-400 mt-0.5">Số lượng: ×{item.quantity}</p>
                   </div>
@@ -535,9 +535,9 @@ export default function OrderSuccess({ paymentFlow = false }) {
                 <span className="font-mono font-bold">-{formatPrice(order.discount_amount)}</span>
               </div>
             )}
-            <div className="flex justify-between items-baseline pt-3 border-t border-stone-100 text-base font-bold text-[#4A2C2A]">
+            <div className="flex justify-between items-baseline pt-3 border-t border-stone-100 text-base font-bold text-brand-burgundy">
               <span>{isTransfer ? 'Tổng cần chuyển khoản:' : 'Tổng thanh toán (Thu COD):'}</span>
-              <span className="text-xl sm:text-2xl font-mono text-[#8C4A32]">
+              <span className="text-xl sm:text-2xl font-mono text-brand-terracotta">
                 {formatPrice(order.total_price)}
               </span>
             </div>
@@ -548,7 +548,7 @@ export default function OrderSuccess({ paymentFlow = false }) {
         <div className="flex flex-col items-center justify-center gap-2 pb-3 pt-2 sm:flex-row sm:gap-4 sm:pb-8">
           <button
             onClick={() => navigate('/orders')}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#4A2C2A] sm:hover:bg-[#381B18] text-white text-xs font-bold uppercase tracking-wider py-3.5 px-8 rounded-full shadow-sm sm:hover:shadow-md sm:hover:scale-[1.02] active:scale-98 transition-all cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-brand-burgundy sm:hover:bg-brand-deepWine text-white text-xs font-bold uppercase tracking-wider py-3.5 px-8 rounded-full shadow-sm sm:hover:shadow-md sm:hover:scale-[1.02] active:scale-98 transition-all cursor-pointer"
           >
             <i className="ph-bold ph-receipt text-base"></i>
             <span>Xem lịch sử đơn hàng</span>

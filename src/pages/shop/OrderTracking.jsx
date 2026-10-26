@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { orderService } from '../../services/orderService';
 import { formatPrice } from '../../utils/formatPrice';
 import { getImageUrl } from '../../utils/imageUtils';
-import { getSpxTrackingUrl, getSpxWaybill } from '../../utils/spxTracking';
+import { getCarrierTracking } from '../../utils/shippingCarriers';
 
 const steps = [
   { value: 'pending', label: 'Chờ xác nhận', description: 'Shop đang kiểm tra thông tin đơn hàng.', icon: 'receipt_long' },
@@ -67,11 +67,10 @@ export default function OrderTracking() {
   const stepIndex = steps.findIndex(step => step.value === status);
   const exceptionProgress = status === 'failed' || status === 'returned' ? 2 : -1;
   const statusDetail = statusDetails[status] || statusDetails.pending;
-  const spxTrackingUrl = getSpxTrackingUrl(order);
-  const spxWaybill = getSpxWaybill(order);
+  const { carrierId, carrier, trackingNumber, trackingUrl } = getCarrierTracking(order);
   const isPaidTransfer = order?.payment_method === 'transfer' && order?.payment_status === 'paid';
   const amountDue = isPaidTransfer ? 0 : Number(order?.total_price || 0);
-  const deliveryHeroStyle = ['pending', 'confirmed', 'shipping'].includes(status)
+  const deliveryHeroStyle = ['pending', 'confirmed', 'shipping', 'delivered'].includes(status)
     ? {
         backgroundImage: "linear-gradient(90deg, rgba(255,255,255,0.94) 0%, rgba(255,255,255,0.82) 58%, rgba(255,255,255,0.28) 100%), url('/tracking-status-bg.jpg')",
         backgroundPosition: '78% center',
@@ -143,7 +142,15 @@ export default function OrderTracking() {
               <dl className="grid grid-cols-[auto_1fr] gap-x-5 gap-y-3 px-4 py-4 text-[13px] sm:px-5">
                 <dt className="text-stone-500">Mã đơn</dt><dd className="min-w-0 break-all text-right font-mono font-bold text-stone-900">{order.orderId}</dd>
                 <dt className="text-stone-500">Ngày đặt</dt><dd className="text-right font-semibold text-stone-800">{dateText(order.ordered_at) || '—'}</dd>
-                <dt className="text-stone-500">Vận chuyển</dt><dd className="text-right font-semibold text-stone-800">{order.shippingMethod === 'express' ? 'Hỏa tốc 4h' : 'Tiêu chuẩn'}</dd>
+                <dt className="text-stone-500">Vận chuyển</dt>
+                <dd className="flex items-center justify-end gap-2 text-right font-semibold text-stone-800">
+                  {carrierId && (
+                    carrier.logo
+                      ? <img src={carrier.logo} alt="" className="size-6 rounded-md border border-stone-100 object-contain" />
+                      : <span className="material-symbols-outlined text-lg" style={{ color: carrier.color }}>local_shipping</span>
+                  )}
+                  <span>{carrierId ? `${carrier.name} · ` : ''}{order.shippingMethod === 'express' ? 'Hỏa tốc' : 'Tiêu chuẩn'}</span>
+                </dd>
                 <dt className="text-stone-500">Thanh toán</dt><dd className={`text-right font-semibold ${isPaidTransfer ? 'text-emerald-700' : 'text-stone-800'}`}>{isPaidTransfer ? 'Chuyển khoản · Đã thanh toán' : order.payment_method === 'transfer' ? 'Chuyển khoản · Chờ thanh toán' : 'Thanh toán khi nhận hàng'}</dd>
               </dl>
               <address className="flex gap-3 border-t border-stone-100 px-4 py-4 not-italic sm:px-5">
@@ -162,19 +169,20 @@ export default function OrderTracking() {
                   <span aria-hidden="true" className="material-symbols-outlined flex size-9 shrink-0 items-center justify-center rounded-lg bg-orange-50 text-xl text-[#a45f32]">local_shipping</span>
                   <hgroup className="min-w-0">
                     <h2 className="text-[15px] font-extrabold text-stone-900">Hành trình đơn hàng</h2>
-                    <p className="truncate text-[11px] text-stone-500">Trạng thái vận chuyển mới nhất</p>
+                    <p className="truncate text-[11px] text-stone-500">{carrierId ? `Đang giao qua ${carrier.name}` : 'Trạng thái vận chuyển mới nhất'}</p>
                   </hgroup>
                 </div>
-                {spxTrackingUrl && (
+                {trackingUrl && (
                   <a
-                    href={spxTrackingUrl}
+                    href={trackingUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex min-h-9 shrink-0 items-center justify-center gap-1.5 rounded-lg bg-[#ee4d2d] px-3 text-[11px] font-extrabold text-white shadow-sm transition active:scale-[0.98]"
+                    className="inline-flex min-h-9 shrink-0 items-center justify-center gap-1.5 rounded-lg px-3 text-[11px] font-extrabold text-white shadow-sm transition active:scale-[0.98]"
+                    style={{ backgroundColor: carrier.color }}
                   >
                     <span aria-hidden="true" className="material-symbols-outlined text-base">open_in_new</span>
-                    <span className="sm:hidden">Xem SPX</span>
-                    <span className="hidden sm:inline">Chi tiết trên SPX</span>
+                    <span className="sm:hidden">Xem {carrier.shortName}</span>
+                    <span className="hidden sm:inline">Chi tiết trên {carrier.shortName}</span>
                   </a>
                 )}
               </header>
@@ -191,8 +199,8 @@ export default function OrderTracking() {
                   </article>
                 </li>;
               })}</ol>
-              {spxWaybill && (
-                <p className="mt-4 border-t border-stone-100 pt-3 font-mono text-[10px] text-stone-400">Mã vận đơn SPX: {spxWaybill}</p>
+              {trackingNumber && (
+                <p className="mt-4 border-t border-stone-100 pt-3 font-mono text-[10px] text-stone-400">Mã vận đơn {carrier.shortName}: {trackingNumber}</p>
               )}
             </section>
 

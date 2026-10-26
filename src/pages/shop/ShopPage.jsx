@@ -461,7 +461,7 @@ export default function ShopPage() {
             <div className="px-2 mb-6">
               <div className="h-1.5 w-full bg-stone-200 rounded-full relative">
                 <div 
-                  className="absolute h-full bg-[#4A2C2A] rounded-full"
+                  className="absolute h-full bg-brand-burgundy rounded-full"
                   style={{ left: `${(priceRange[0] / 1500000) * 100}%`, right: `${100 - (priceRange[1] / 1500000) * 100}%` }}
                 ></div>
                 <input 
@@ -476,8 +476,8 @@ export default function ShopPage() {
                   onChange={e => setPriceRange([priceRange[0], Math.max(Number(e.target.value), priceRange[0])])}
                   className="absolute w-full h-full opacity-0 cursor-pointer pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:appearance-none z-20" 
                 />
-                <div className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white border-2 border-[#4A2C2A] rounded-full shadow pointer-events-none z-0" style={{ left: `calc(${(priceRange[0] / 1500000) * 100}% - 7px)` }}></div>
-                <div className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white border-2 border-[#4A2C2A] rounded-full shadow pointer-events-none z-0" style={{ left: `calc(${(priceRange[1] / 1500000) * 100}% - 7px)` }}></div>
+                <div className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white border-2 border-brand-burgundy rounded-full shadow pointer-events-none z-0" style={{ left: `calc(${(priceRange[0] / 1500000) * 100}% - 7px)` }}></div>
+                <div className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white border-2 border-brand-burgundy rounded-full shadow pointer-events-none z-0" style={{ left: `calc(${(priceRange[1] / 1500000) * 100}% - 7px)` }}></div>
               </div>
               <div className="flex justify-between text-[10px] text-stone-500 mt-3 font-mono">
                 <span className="text-stone-800 font-bold">{priceRange[0].toLocaleString('vi-VN')}đ</span>
@@ -622,7 +622,7 @@ export default function ShopPage() {
                     className="group flex flex-col justify-between overflow-hidden rounded-[18px] border border-[#E8DED5] bg-white shadow-[0_3px_14px_rgba(74,44,42,0.06)] transition-all sm:hover:-translate-y-0.5 sm:hover:shadow-md sm:p-4"
                   >
                     {/* Image Area with badges & wishlist button */}
-                    <div className="relative mb-2.5 aspect-square overflow-hidden bg-[#F5EFE6] sm:mb-3.5 sm:rounded-xl">
+                    <div className="relative mb-2.5 aspect-square overflow-hidden bg-brand-warmIvory sm:mb-3.5 sm:rounded-xl">
                       {/* Product Tag */}
                       {product.tag && (
                         <div 
@@ -733,7 +733,7 @@ export default function ShopPage() {
                     className="group flex items-stretch gap-3 overflow-hidden rounded-[18px] border border-[#E8DED5] bg-white p-2.5 shadow-[0_3px_14px_rgba(74,44,42,0.06)] transition-all sm:hover:shadow-md sm:gap-5 sm:p-4"
                   >
                     {/* Image Area (Compact Square on Mobile) */}
-                    <div className="relative w-24 sm:w-44 md:w-52 aspect-square rounded-xl bg-[#F5EFE6] overflow-hidden shrink-0">
+                    <div className="relative w-24 sm:w-44 md:w-52 aspect-square rounded-xl bg-brand-warmIvory overflow-hidden shrink-0">
                       {product.tag && (
                         <div 
                           className="absolute top-1.5 left-1.5 text-white text-[8px] sm:text-[9px] font-bold tracking-widest px-1.5 py-0.5 uppercase z-20 rounded shadow-xs"

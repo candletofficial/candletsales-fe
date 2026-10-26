@@ -7,6 +7,7 @@ import NewsletterCanvas from '../../components/NewsletterCanvas';
 import { resolveTagColor } from '../../utils/productTagUtils';
 import { getImageUrl } from '../../utils/imageUtils';
 import { shippingDiscountLabel, shippingDiscountConditions } from '../../utils/couponUtils';
+import { richTextToPlainText } from '../../utils/richText';
 
 export default function ShopHome() {
   const navigate = useNavigate();
@@ -348,7 +349,7 @@ export default function ShopHome() {
       </section>
 
       {/* BEGIN: MindfulnessFeaturesSection */}
-      <section className="dashed-grid-border relative overflow-hidden border-b-8 border-stone-100 bg-white py-10 sm:border-b sm:border-dashed sm:bg-[#FAF7F2] sm:py-24" data-purpose="mindfulness-philosophy">
+      <section className="dashed-grid-border relative overflow-hidden border-b-8 border-stone-100 bg-white py-10 sm:border-b sm:border-dashed sm:bg-brand-cream sm:py-24" data-purpose="mindfulness-philosophy">
         {/* Subtle background ambient blur for organic artisan warmth */}
         <div className="absolute top-1/4 -left-20 w-80 h-80 rounded-full bg-amber-200/20 blur-3xl pointer-events-none"></div>
         <div className="absolute bottom-10 -right-20 w-96 h-96 rounded-full bg-rose-200/15 blur-3xl pointer-events-none"></div>
@@ -506,7 +507,7 @@ export default function ShopHome() {
                 </p>
 
                 {/* Secret Message Preview Tag */}
-                <div className="p-3 rounded-xl bg-[#FAF7F2] border border-dashed border-rose-300/70 flex items-center gap-3">
+                <div className="p-3 rounded-xl bg-brand-cream border border-dashed border-rose-300/70 flex items-center gap-3">
                   <i className="ph-fill ph-chat-centered-text text-brand-burgundy text-base shrink-0"></i>
                   <p className="text-[12px] italic font-serif-display text-stone-700 leading-snug">
                     “Dưới đáy nến là một lời thì thầm dịu dàng đang chờ bạn mở ra...”
@@ -519,7 +520,7 @@ export default function ShopHome() {
       </section>
 
       {/* BEGIN: TicketSpecialOfferSection */}
-      <section className="dashed-grid-border relative overflow-hidden border-b-8 border-stone-100 bg-[#F5EFE6] py-10 sm:border-b sm:border-dashed sm:py-24" data-purpose="special-offer-ticket" id="special-offers">
+      <section className="dashed-grid-border relative overflow-hidden border-b-8 border-stone-100 bg-brand-warmIvory py-10 sm:border-b sm:border-dashed sm:py-24" data-purpose="special-offer-ticket" id="special-offers">
         <div className="max-w-6xl mx-auto px-4 sm:px-8 grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 items-center">
           {/* Cột trái: Tối đa 2 Thẻ Vé Xòe Bài Chân Thực Ngoài Đời */}
           <div className="lg:col-span-7 flex flex-col items-center">
@@ -889,7 +890,7 @@ export default function ShopHome() {
       </section>
 
       {/* BEGIN: ProductCollectionSection */}
-      <section className="dashed-grid-border relative overflow-hidden border-b-8 border-stone-100 bg-[#FAF7F2] py-10 sm:border-b sm:border-dashed sm:py-24" data-purpose="product-collection" id="collection">
+      <section className="dashed-grid-border relative overflow-hidden border-b-8 border-stone-100 bg-brand-cream py-10 sm:border-b sm:border-dashed sm:py-24" data-purpose="product-collection" id="collection">
         {/* Ambient Subtle Warmth */}
         <div className="absolute -top-24 right-1/4 w-96 h-96 rounded-full bg-amber-100/40 blur-3xl pointer-events-none"></div>
         <div className="absolute bottom-0 -left-20 w-80 h-80 rounded-full bg-rose-100/30 blur-3xl pointer-events-none"></div>
@@ -1058,9 +1059,9 @@ export default function ShopHome() {
                         {/* Product Description (Giới hạn đúng 2 dòng, chiều cao cố định để các thẻ đều nhau tuyệt đối) */}
                         <p
                           className="mb-3 line-clamp-2 min-h-[32px] overflow-hidden text-[10px] font-normal leading-4 text-stone-500 sm:mb-4 sm:h-[36px] sm:text-xs sm:leading-relaxed"
-                          title={product.description}
+                          title={richTextToPlainText(product.description)}
                         >
-                          {product.description || 'Hương thơm êm dịu, thanh lọc không gian và mang lại cảm giác thư thái sâu lắng.'}
+                          {richTextToPlainText(product.description) || 'Hương thơm êm dịu, thanh lọc không gian và mang lại cảm giác thư thái sâu lắng.'}
                         </p>
                       </div>
 
@@ -1070,26 +1071,19 @@ export default function ShopHome() {
                           <span className="pb-0.5 font-mono text-[8px] font-semibold uppercase tracking-wider text-stone-400 sm:text-[11px]">
                             Từ
                           </span>
-                          <span className="font-serif-display text-[17px] font-bold leading-none text-[#8C4A32] transition-colors sm:group-hover:text-brand-burgundy sm:text-xl">
+                          <span className="font-serif-display text-[17px] font-bold leading-none text-brand-terracotta transition-colors sm:group-hover:text-brand-burgundy sm:text-xl">
                             {product.base_price?.toLocaleString('vi-VN')}đ
                           </span>
                         </div>
 
                         <button
                           onClick={(e) => handleBuyNow(e, product)}
-                          className="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#6B3530] to-[#4A2C2A] px-2 py-2.5 text-[9px] font-bold uppercase tracking-[0.12em] text-white shadow-sm transition-all duration-300 sm:hover:from-[#7C4038] sm:hover:to-brand-burgundy sm:hover:shadow-md active:scale-[0.98] sm:rounded-full sm:px-3 sm:text-[11px] sm:tracking-wider"
+                          className="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#6B3530] to-brand-burgundy px-2 py-2.5 text-[9px] font-bold uppercase tracking-[0.12em] text-white shadow-sm transition-all duration-300 sm:hover:from-[#7C4038] sm:hover:to-brand-burgundy sm:hover:shadow-md active:scale-[0.98] sm:rounded-full sm:px-3 sm:text-[11px] sm:tracking-wider"
                         >
                           <i className="ph-bold ph-shopping-bag-open text-xs"></i>
                           <span>Mua Ngay</span>
                         </button>
 
-                        {/* Low Stock Indicator */}
-                        {product.stock <= 5 && product.stock > 0 && (
-                          <div className="py-0.5 px-2 rounded-lg bg-amber-50 border border-amber-200/70 text-[9px] sm:text-[10px] font-mono text-amber-900 flex items-center justify-center gap-1.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse"></span>
-                            <span>Còn {product.stock} hũ cuối</span>
-                          </div>
-                        )}
                         {product.stock === 0 && <div className="rounded-lg border border-red-200 bg-red-50 px-2 py-1 text-center text-[9px] font-bold uppercase tracking-wider text-red-700 sm:text-[10px]">Tạm hết hàng</div>}
                       </div>
                     </div>
@@ -1167,7 +1161,7 @@ export default function ShopHome() {
               <div className="pt-2 sm:pt-3 flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
                 <a
                   href="#collection"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#FDE68A] to-[#F59E0B] sm:hover:from-white sm:hover:to-amber-100 text-[#381B18] px-7 py-3.5 text-xs font-bold tracking-widest uppercase rounded-full shadow-lg shadow-black/25 sm:hover:shadow-amber-500/25 sm:hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 btn-shimmer"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#FDE68A] to-[#F59E0B] sm:hover:from-white sm:hover:to-amber-100 text-brand-deepWine px-7 py-3.5 text-xs font-bold tracking-widest uppercase rounded-full shadow-lg shadow-black/25 sm:hover:shadow-amber-500/25 sm:hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 btn-shimmer"
                 >
                   <span>Khám Phá Bộ Sưu Tập</span>
                   <i className="ph-bold ph-arrow-right text-xs"></i>

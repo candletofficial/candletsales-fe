@@ -1,5 +1,5 @@
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 
 const NAV_ITEMS = [
@@ -185,6 +185,7 @@ const NAV_ITEMS = [
 ];
 
 const QUICK_ACCESS_KEY = 'candlet-admin-quick-access';
+const NAV_SCROLL_KEY = 'candlet-admin-nav-scroll';
 const NAV_LINKS = NAV_ITEMS.flatMap((item) => item.isGroup ? item.children : item.to ? [item] : []);
 
 const readQuickAccess = () => {
@@ -204,8 +205,17 @@ export default function Sidebar({ isOpen, onClose }) {
   });
   const [quickAccess, setQuickAccess] = useState(readQuickAccess);
   const [contextMenu, setContextMenu] = useState(null);
+  const [navSearch, setNavSearch] = useState('');
+  const navRef = useRef(null);
 
   useEffect(() => { localStorage.setItem(QUICK_ACCESS_KEY, JSON.stringify(quickAccess)); }, [quickAccess]);
+  useLayoutEffect(() => {
+    const savedPosition = Number(sessionStorage.getItem(NAV_SCROLL_KEY) || 0);
+    const frame = window.requestAnimationFrame(() => {
+      if (navRef.current) navRef.current.scrollTop = savedPosition;
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
   useEffect(() => {
     if (!contextMenu) return undefined;
     const close = () => setContextMenu(null);
@@ -234,9 +244,21 @@ export default function Sidebar({ isOpen, onClose }) {
   const displayName = user?.name || 'Quản trị viên';
   const initials = displayName.split(/\s+/).filter(Boolean).slice(-2).map((part) => part[0]).join('').toUpperCase();
   const linkClass = (isActive) => `group relative mx-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-semibold transition-all duration-200 ${isActive
-    ? 'bg-[#F5EFE6] text-[#4A2C2A] shadow-[0_5px_16px_rgba(91,48,40,.08)]'
-    : 'text-[#665a56] hover:translate-x-0.5 hover:bg-white hover:text-[#2C1810] hover:shadow-sm'}`;
+    ? 'bg-primary text-white shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_22%,transparent)]'
+    : 'text-on-surface-variant hover:translate-x-0.5 hover:bg-white hover:text-on-surface hover:shadow-sm'}`;
   const quickItems = quickAccess.map((path) => NAV_LINKS.find((item) => item.to === path)).filter(Boolean);
+  const normalizedSearch = navSearch.trim().toLocaleLowerCase('vi');
+  const visibleNavItems = normalizedSearch
+    ? NAV_ITEMS.flatMap((item) => {
+        if (item.isSection) return [];
+        if (item.isGroup) {
+          const children = item.children.filter((child) => child.label.toLocaleLowerCase('vi').includes(normalizedSearch));
+          if (item.label.toLocaleLowerCase('vi').includes(normalizedSearch)) return [item];
+          return children.length ? [{ ...item, children }] : [];
+        }
+        return item.label.toLocaleLowerCase('vi').includes(normalizedSearch) ? [item] : [];
+      })
+    : NAV_ITEMS;
   const openContextMenu = (event, item) => {
     event.preventDefault();
     event.stopPropagation();
@@ -249,28 +271,47 @@ export default function Sidebar({ isOpen, onClose }) {
   };
 
   return (
-    <aside aria-label="Điều hướng quản trị" className={`sidebar z-40 overflow-hidden border-r border-[#e8dfdb] bg-[#FAF7F2] shadow-[8px_0_30px_rgba(50,35,30,.035)] ${isOpen ? 'open' : ''}`}>
-      <div className="relative flex h-[88px] shrink-0 items-center border-b border-[#ebe2de] bg-white px-5">
-        <div className="absolute -left-8 -top-10 h-24 w-24 rounded-full bg-[#ead4ca]/35 blur-2xl" />
+    <aside aria-label="Điều hướng quản trị" className={`sidebar z-40 overflow-hidden border-r border-outline-variant bg-surface-container-low shadow-[10px_0_35px_rgba(40,30,25,.05)] ${isOpen ? 'open' : ''}`}>
+      <div className="relative flex h-[78px] shrink-0 items-center border-b border-outline-variant bg-gradient-to-r from-white via-white to-primary-container/45 px-4.5">
+        <div className="absolute -left-8 -top-10 h-24 w-24 rounded-full bg-primary/10 blur-2xl" />
         <div className="relative flex min-w-0 items-center gap-3">
-          <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#FFF9F2] to-[#f1dfd7] shadow-sm"><img src="/logo.png" alt="CandletShop" className="h-9 w-9 object-contain" /></div>
-          <div className="min-w-0"><p className="truncate text-[15px] font-black tracking-tight text-[#2C1810]">Candlet Admin</p><p className="mt-0.5 text-[9px] font-bold uppercase tracking-[.18em] text-[#a27666]">Management workspace</p></div>
+          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-primary/10 bg-white shadow-sm"><img src="/logo.png" alt="CandletShop" className="h-8 w-8 object-contain" /></div>
+          <div className="min-w-0"><p className="truncate text-[15px] font-black tracking-tight text-on-surface">Candlet Admin</p><p className="mt-0.5 text-[9px] font-bold uppercase tracking-[.15em] text-secondary">Vận hành cửa hàng</p></div>
         </div>
-        <button type="button" onClick={onClose} className="ml-auto grid h-9 w-9 shrink-0 place-items-center rounded-xl text-[#806e68] transition hover:bg-[#f3e9e5] lg:hidden" aria-label="Đóng thanh điều hướng"><span className="material-symbols-outlined text-[20px]">close</span></button>
+        <button type="button" onClick={onClose} className="ml-auto grid h-9 w-9 shrink-0 place-items-center rounded-xl text-on-surface-variant transition hover:bg-primary-container hover:text-primary lg:hidden" aria-label="Đóng thanh điều hướng"><span className="material-symbols-outlined text-[20px]">close</span></button>
       </div>
 
-      <nav className="sidebar-nav overflow-y-auto overflow-x-hidden py-3 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#dccbc4]">
-        {quickItems.length > 0 && <div className="mb-2 rounded-2xl border border-[#EAE1D2] bg-white/80 py-2 shadow-[0_4px_16px_rgba(70,45,38,.04)]"><div className="flex items-center justify-between px-4 pb-1.5"><p className="text-[9px] font-black uppercase tracking-[.18em] text-[#8C4A32]">Truy cập nhanh</p><span className="material-symbols-outlined text-[15px] text-[#b17864]">star</span></div><div className="space-y-0.5">{quickItems.map((item) => <NavLink key={`quick-${item.to}`} to={item.to} onClick={onClose} onContextMenu={(event) => openContextMenu(event, item)} className={({ isActive }) => `group mx-2 flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-[12px] font-bold transition ${isActive ? 'bg-[#4A2C2A] text-white shadow-sm' : 'text-[#62534e] hover:bg-[#F5EFE6] hover:text-[#381B18]'}`}><span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-[#F5EFE6] text-[#4A2C2A] [&_.material-symbols-outlined]:text-[17px] [&_svg]:h-[17px] [&_svg]:w-[17px]">{item.icon}</span><span className="truncate">{item.label}</span><span className="material-symbols-outlined ml-auto text-[14px] opacity-0 transition group-hover:opacity-60">more_horiz</span></NavLink>)}</div></div>}
-        {NAV_ITEMS.map((item, idx) => {
+      <div className="shrink-0 px-3 pb-1 pt-3">
+        <label className="group relative block">
+          <span className="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant transition group-focus-within:text-primary">search</span>
+          <input
+            type="search"
+            value={navSearch}
+            onChange={(event) => setNavSearch(event.target.value)}
+            placeholder="Tìm chức năng..."
+            className="h-10 w-full rounded-xl border border-outline-variant bg-white/80 pl-10 pr-9 text-xs font-semibold text-on-surface outline-none transition placeholder:text-on-surface-variant/65 focus:border-primary/40 focus:bg-white focus:ring-4 focus:ring-primary/5"
+          />
+          {navSearch && <button type="button" onClick={() => setNavSearch('')} className="absolute right-2 top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded-lg text-on-surface-variant hover:bg-primary-container hover:text-primary" aria-label="Xóa tìm kiếm"><span className="material-symbols-outlined text-[15px]">close</span></button>}
+        </label>
+      </div>
+
+      <nav
+        ref={navRef}
+        onScroll={(event) => sessionStorage.setItem(NAV_SCROLL_KEY, String(event.currentTarget.scrollTop))}
+        className="sidebar-nav overflow-y-auto overflow-x-hidden py-2 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-primary/20"
+      >
+        {!normalizedSearch && quickItems.length > 0 && <div className="mx-1 mb-2 rounded-2xl border border-outline-variant bg-white/80 py-2 shadow-[0_4px_16px_rgba(70,45,38,.04)]"><div className="flex items-center justify-between px-3 pb-1.5"><p className="text-[9px] font-black uppercase tracking-[.18em] text-secondary">Truy cập nhanh</p><span className="material-symbols-outlined text-[15px] text-tertiary">star</span></div><div className="space-y-0.5">{quickItems.map((item) => <NavLink key={`quick-${item.to}`} to={item.to} onClick={onClose} onContextMenu={(event) => openContextMenu(event, item)} className={({ isActive }) => `group mx-2 flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-[12px] font-bold transition ${isActive ? 'bg-primary text-white shadow-sm' : 'text-on-surface-variant hover:bg-primary-container hover:text-primary'}`}><span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-primary-container text-primary [&_.material-symbols-outlined]:text-[17px] [&_svg]:h-[17px] [&_svg]:w-[17px]">{item.icon}</span><span className="truncate">{item.label}</span><span className="material-symbols-outlined ml-auto text-[14px] opacity-0 transition group-hover:opacity-60">more_horiz</span></NavLink>)}</div></div>}
+        {normalizedSearch && visibleNavItems.length === 0 && <div className="mx-2 mt-4 rounded-2xl border border-dashed border-outline-variant bg-white/60 px-4 py-7 text-center"><span className="material-symbols-outlined text-2xl text-on-surface-variant/50">search_off</span><p className="mt-2 text-xs font-bold text-on-surface">Không tìm thấy chức năng</p><p className="mt-1 text-[10px] text-on-surface-variant">Thử tìm bằng từ khóa khác</p></div>}
+        {visibleNavItems.map((item, idx) => {
           if (item.isSection) {
             return (
               <div key={`sec-${idx}`} className="flex items-center gap-2 px-4 pb-1.5 pt-4 first:pt-1">
-                <p className="shrink-0 text-[9px] font-black uppercase tracking-[.18em] text-[#a28f88]">{item.label}</p><span className="h-px flex-1 bg-gradient-to-r from-[#e5d9d4] to-transparent" />
+                <p className="shrink-0 text-[9px] font-black uppercase tracking-[.18em] text-on-surface-variant/75">{item.label}</p><span className="h-px flex-1 bg-gradient-to-r from-outline-variant to-transparent" />
               </div>
             );
           }
           if (item.isGroup) {
-            const isOpen = !!openGroups[item.label];
+            const isOpen = normalizedSearch ? true : !!openGroups[item.label];
             const isChildActive = item.children.some(c => location.pathname === c.to);
             return (
               <div key={item.label}>
@@ -278,13 +319,13 @@ export default function Sidebar({ isOpen, onClose }) {
                   onClick={() => toggleGroup(item.label)}
                   className={`${linkClass(isChildActive)} w-[calc(100%_-_1rem)] text-left`}
                 >
-                  {isChildActive && <span className="absolute -left-2 h-6 w-1 rounded-r-full bg-[#4A2C2A]" />}
-                  <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl transition ${isChildActive ? 'bg-[#4A2C2A] text-white shadow-sm' : 'bg-white text-[#806d66] shadow-[0_2px_8px_rgba(50,35,30,.06)] group-hover:text-[#4A2C2A]'}`}>{item.icon}</span>
+                  {isChildActive && <span className="absolute -left-2 h-6 w-1 rounded-r-full bg-white/80" />}
+                  <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl transition ${isChildActive ? 'bg-white/15 text-white' : 'bg-white text-on-surface-variant shadow-[0_2px_8px_rgba(50,35,30,.06)] group-hover:text-primary'}`}>{item.icon}</span>
                   <span className="flex-1">{item.label}</span>
                   <span className={`material-symbols-outlined text-[17px] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>expand_more</span>
                 </button>
                 <div className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
-                  <div className="min-h-0 overflow-hidden"><div className="mb-1 ml-7 mt-1 space-y-1 border-l border-[#E3D8C7] pl-2">
+                  <div className="min-h-0 overflow-hidden"><div className="mb-1 ml-7 mt-1 space-y-1 border-l border-outline-variant pl-2">
                     {item.children.map(child => (
                       <NavLink
                         key={child.to}
@@ -294,8 +335,8 @@ export default function Sidebar({ isOpen, onClose }) {
                         className={({ isActive }) =>
                           `flex items-center gap-2.5 rounded-xl px-3 py-2 text-[12px] font-semibold transition-all ${
                             isActive
-                              ? 'bg-white text-[#4A2C2A] shadow-sm'
-                              : 'text-[#756660] hover:bg-white hover:text-[#2C1810]'
+                              ? 'bg-white text-primary shadow-sm'
+                              : 'text-[#756660] hover:bg-white hover:text-on-surface'
                           }`
                         }
                       >
@@ -319,17 +360,17 @@ export default function Sidebar({ isOpen, onClose }) {
               onContextMenu={(event) => openContextMenu(event, item)}
               className={({ isActive }) => linkClass(isActive)}
             >
-              {({ isActive }) => <><span className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl transition ${isActive ? 'bg-[#4A2C2A] text-white shadow-sm' : 'bg-white text-[#806d66] shadow-[0_2px_8px_rgba(50,35,30,.06)] group-hover:text-[#4A2C2A]'}`}>{item.icon}</span><span className="truncate">{item.label}</span>{isActive && <><span className="absolute -left-2 h-6 w-1 rounded-r-full bg-[#4A2C2A]" /><span className="ml-auto h-1.5 w-1.5 rounded-full bg-[#a96650]" /></>}</>}
+              {({ isActive }) => <><span className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl transition ${isActive ? 'bg-white/15 text-white' : 'bg-white text-on-surface-variant shadow-[0_2px_8px_rgba(50,35,30,.06)] group-hover:text-primary'}`}>{item.icon}</span><span className="truncate">{item.label}</span>{isActive && <span className="ml-auto material-symbols-outlined text-[17px] text-white/80">arrow_forward</span>}</>}
             </NavLink>
           );
         })}
       </nav>
 
-      <div className="sidebar-footer shrink-0 border-t border-[#e8dfdb] bg-white p-3">
-        <div className="mb-2 flex items-center gap-3 rounded-2xl bg-[#f8f3f1] p-2.5"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-[#4A2C2A] to-[#8C4A32] text-xs font-black text-white shadow-sm">{initials || 'AD'}</span><span className="min-w-0 flex-1"><span className="block truncate text-xs font-extrabold text-[#3c2e2a]">{displayName}</span><span className="mt-0.5 block text-[9px] font-semibold text-[#927d75]">{user?.isDefaultAdmin ? 'Quản trị viên chính' : 'Quản trị viên'}</span></span><span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_3px_#d1fae5]" /></div>
-        <div className="grid grid-cols-2 gap-2"><NavLink to="/admin/settings" onClick={onClose} className={({ isActive }) => `flex items-center justify-center gap-2 rounded-xl px-2 py-2.5 text-[11px] font-bold transition ${isActive ? 'bg-[#F5EFE6] text-[#4A2C2A]' : 'bg-[#FAF7F2] text-[#6f605b] hover:bg-[#F5EFE6] hover:text-[#4A2C2A]'}`}><span className="material-symbols-outlined text-[17px]">settings</span>Cài đặt</NavLink><button onClick={handleLogout} className="flex items-center justify-center gap-2 rounded-xl bg-[#FAF7F2] px-2 py-2.5 text-[11px] font-bold text-[#6f605b] transition hover:bg-red-50 hover:text-red-700"><span className="material-symbols-outlined text-[17px]">logout</span>Đăng xuất</button></div>
+      <div className="sidebar-footer shrink-0 border-t border-outline-variant bg-white/95 p-3 backdrop-blur">
+        <div className="mb-2 flex items-center gap-3 rounded-2xl border border-outline-variant bg-surface-container-low p-2.5"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-primary to-secondary text-xs font-black text-white shadow-sm">{initials || 'AD'}</span><span className="min-w-0 flex-1"><span className="block truncate text-xs font-extrabold text-on-surface">{displayName}</span><span className="mt-0.5 block text-[9px] font-semibold text-on-surface-variant">{user?.isDefaultAdmin ? 'Quản trị viên chính' : 'Quản trị viên'}</span></span><span className="relative h-2.5 w-2.5 rounded-full bg-emerald-500"><span className="absolute inset-0 animate-ping rounded-full bg-emerald-400 opacity-40" /></span></div>
+        <div className="grid grid-cols-2 gap-2"><NavLink to="/admin/settings" onClick={onClose} className={({ isActive }) => `flex items-center justify-center gap-2 rounded-xl border px-2 py-2.5 text-[11px] font-bold transition ${isActive ? 'border-primary/15 bg-primary-container text-primary' : 'border-outline-variant bg-white text-on-surface-variant hover:border-primary/20 hover:bg-primary-container hover:text-primary'}`}><span className="material-symbols-outlined text-[17px]">settings</span>Cài đặt</NavLink><button onClick={handleLogout} className="flex items-center justify-center gap-2 rounded-xl border border-outline-variant bg-white px-2 py-2.5 text-[11px] font-bold text-on-surface-variant transition hover:border-red-100 hover:bg-red-50 hover:text-red-700"><span className="material-symbols-outlined text-[17px]">logout</span>Đăng xuất</button></div>
       </div>
-      {contextMenu && <div role="menu" className="fixed z-[100] w-[230px] overflow-hidden rounded-2xl border border-[#E3D8C7] bg-white p-1.5 shadow-[0_18px_50px_rgba(45,28,24,.22)]" style={{ left: contextMenu.x, top: contextMenu.y }} onClick={(event) => event.stopPropagation()}><div className="border-b border-[#eee5e1] px-3 py-2"><p className="truncate text-[10px] font-black uppercase tracking-[.12em] text-[#a0857c]">{contextMenu.item.label}</p></div><button type="button" role="menuitem" onClick={() => toggleQuickAccess(contextMenu.item)} className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-xs font-extrabold text-[#4d3933] transition hover:bg-[#F5EFE6] hover:text-[#4A2C2A]"><span className="material-symbols-outlined text-[18px]">{quickAccess.includes(contextMenu.item.to) ? 'star' : 'star_outline'}</span>{quickAccess.includes(contextMenu.item.to) ? 'Gỡ khỏi truy cập nhanh' : 'Thêm vào truy cập nhanh'}</button></div>}
+      {contextMenu && <div role="menu" className="fixed z-[100] w-[230px] overflow-hidden rounded-2xl border border-outline-variant bg-white p-1.5 shadow-[0_18px_50px_rgba(45,28,24,.22)]" style={{ left: contextMenu.x, top: contextMenu.y }} onClick={(event) => event.stopPropagation()}><div className="border-b border-outline-variant px-3 py-2"><p className="truncate text-[10px] font-black uppercase tracking-[.12em] text-on-surface-variant">{contextMenu.item.label}</p></div><button type="button" role="menuitem" onClick={() => toggleQuickAccess(contextMenu.item)} className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-xs font-extrabold text-on-surface transition hover:bg-primary-container hover:text-primary"><span className="material-symbols-outlined text-[18px]">{quickAccess.includes(contextMenu.item.to) ? 'star' : 'star_outline'}</span>{quickAccess.includes(contextMenu.item.to) ? 'Gỡ khỏi truy cập nhanh' : 'Thêm vào truy cập nhanh'}</button></div>}
     </aside>
   );
 }

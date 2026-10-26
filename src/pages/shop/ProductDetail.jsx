@@ -6,6 +6,7 @@ import { useWishlist } from '../../hooks/useWishlist';
 import ProductReviews from '../../components/shop/ProductReviews';
 import { resolveTagColor } from '../../utils/productTagUtils';
 import { getImageUrl } from '../../utils/imageUtils';
+import { descriptionToHtml } from '../../utils/richText';
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -214,7 +215,7 @@ export default function ProductDetail() {
     }
     const available = selectedSku?.stock ?? product.stock;
     if (Number.isFinite(available) && (available <= 0 || quantity > available)) {
-      alert(available <= 0 ? 'Phân loại này hiện đã hết hàng' : `Phân loại này chỉ còn ${available} sản phẩm`);
+      alert(available <= 0 ? 'Phân loại này hiện đã hết hàng' : 'Số lượng bạn chọn hiện không khả dụng');
       return;
     }
 
@@ -248,7 +249,7 @@ export default function ProductDetail() {
     }
     const available = selectedSku?.stock ?? product.stock;
     if (Number.isFinite(available) && (available <= 0 || quantity > available)) {
-      alert(available <= 0 ? 'Phân loại này hiện đã hết hàng' : `Phân loại này chỉ còn ${available} sản phẩm`);
+      alert(available <= 0 ? 'Phân loại này hiện đã hết hàng' : 'Số lượng bạn chọn hiện không khả dụng');
       return;
     }
 
@@ -391,7 +392,7 @@ export default function ProductDetail() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-[60vh] bg-[#f9f9f9]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#4A2C2A]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-burgundy"></div>
       </div>
     );
   }
@@ -409,7 +410,7 @@ export default function ProductDetail() {
           {/* Mobile Back Button */}
           <button 
             onClick={() => navigate(-1)} 
-            className="inline-flex cursor-pointer items-center gap-1.5 py-2 text-xs font-bold text-stone-600 transition-colors active:text-[#4A2C2A] md:hidden"
+            className="inline-flex cursor-pointer items-center gap-1.5 py-2 text-xs font-bold text-stone-600 transition-colors active:text-brand-burgundy md:hidden"
           >
             <i className="ph-bold ph-arrow-left text-sm"></i>
             <span>Quay lại</span>
@@ -504,7 +505,7 @@ export default function ProductDetail() {
                   <button
                     type="button"
                     onClick={handlePrevImage}
-                    className="absolute left-2.5 top-1/2 z-20 hidden size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-stone-200/80 bg-white/85 text-stone-700 shadow-md backdrop-blur-md transition-all sm:hover:bg-white sm:hover:text-[#4A2C2A] active:scale-90 sm:flex"
+                    className="absolute left-2.5 top-1/2 z-20 hidden size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-stone-200/80 bg-white/85 text-stone-700 shadow-md backdrop-blur-md transition-all sm:hover:bg-white sm:hover:text-brand-burgundy active:scale-90 sm:flex"
                     aria-label="Xem ảnh trước"
                   >
                     <i className="ph-bold ph-caret-left text-base sm:text-lg"></i>
@@ -512,7 +513,7 @@ export default function ProductDetail() {
                   <button
                     type="button"
                     onClick={handleNextImage}
-                    className="absolute right-2.5 top-1/2 z-20 hidden size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-stone-200/80 bg-white/85 text-stone-700 shadow-md backdrop-blur-md transition-all sm:hover:bg-white sm:hover:text-[#4A2C2A] active:scale-90 sm:flex"
+                    className="absolute right-2.5 top-1/2 z-20 hidden size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-stone-200/80 bg-white/85 text-stone-700 shadow-md backdrop-blur-md transition-all sm:hover:bg-white sm:hover:text-brand-burgundy active:scale-90 sm:flex"
                     aria-label="Xem ảnh kế tiếp"
                   >
                     <i className="ph-bold ph-caret-right text-base sm:text-lg"></i>
@@ -563,7 +564,7 @@ export default function ProductDetail() {
                         onClick={() => scrollToImage(img, index)}
                         className={`shrink-0 w-16 h-16 rounded-xl bg-white border-2 overflow-hidden transition-all cursor-pointer ${
                           isSelected
-                            ? 'border-[#4A2C2A] shadow-xs scale-102 ring-2 ring-[#4A2C2A]/15'
+                            ? 'border-brand-burgundy shadow-xs scale-102 ring-2 ring-brand-burgundy/15'
                             : 'border-stone-200/80 opacity-70 sm:hover:opacity-100'
                         }`}
                       >
@@ -584,7 +585,7 @@ export default function ProductDetail() {
                           onClick={() => scrollToImage(img, index)}
                           className={`shrink-0 w-full aspect-square rounded-xl bg-white border-2 overflow-hidden transition-all cursor-pointer ${
                             isSelected
-                              ? 'border-[#4A2C2A] shadow-md scale-102 ring-2 ring-[#4A2C2A]/15'
+                              ? 'border-brand-burgundy shadow-md scale-102 ring-2 ring-brand-burgundy/15'
                               : 'border-stone-200 opacity-60 sm:hover:opacity-100'
                           }`}
                         >
@@ -691,7 +692,7 @@ export default function ProductDetail() {
                         {group.name}
                       </label>
                       <span className="text-xs text-stone-500 font-medium">
-                        Đang chọn: <span className="text-[#4A2C2A] font-bold">{group.options.find(o => o.id === selectedOptions[group.id])?.label || 'Chưa chọn'}</span>
+                        Đang chọn: <span className="text-brand-burgundy font-bold">{group.options.find(o => o.id === selectedOptions[group.id])?.label || 'Chưa chọn'}</span>
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -704,7 +705,7 @@ export default function ProductDetail() {
                             onClick={() => handleOptionSelect(group.id, opt.id)}
                             className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 cursor-pointer active:scale-95 ${
                               isSelected
-                                ? 'bg-[#4A2C2A] text-white border-2 border-[#4A2C2A] shadow-xs'
+                                ? 'bg-brand-burgundy text-white border-2 border-brand-burgundy shadow-xs'
                                 : 'bg-white text-stone-700 border border-stone-200 sm:hover:border-stone-400'
                             }`}
                           >
@@ -727,7 +728,7 @@ export default function ProductDetail() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h4 className="text-xs sm:text-sm font-bold text-[#D97706] uppercase tracking-wide">
+                    <h4 className="text-xs sm:text-sm font-bold text-brand-gold uppercase tracking-wide">
                       {bestCoupon.name}
                     </h4>
                     <span className="bg-amber-100 text-amber-900 font-mono text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-300">
@@ -768,7 +769,7 @@ export default function ProductDetail() {
                 <button
                   onClick={handleAddToCart}
                   disabled={isAdding}
-                  className="flex-1 border-2 border-[#4A2C2A] text-[#4A2C2A] bg-white sm:hover:bg-[#4A2C2A]/5 active:bg-[#4A2C2A]/10 text-xs sm:text-sm font-bold uppercase tracking-wider rounded-xl py-3.5 px-4 flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed shadow-xs cursor-pointer"
+                  className="flex-1 border-2 border-brand-burgundy text-brand-burgundy bg-white sm:hover:bg-brand-burgundy/5 active:bg-brand-burgundy/10 text-xs sm:text-sm font-bold uppercase tracking-wider rounded-xl py-3.5 px-4 flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed shadow-xs cursor-pointer"
                 >
                   {isAdding ? (
                     <i className="ph-bold ph-spinner animate-spin text-lg"></i>
@@ -782,7 +783,7 @@ export default function ProductDetail() {
                 <button
                   onClick={handleBuyNow}
                   disabled={isAdding}
-                  className="flex-1 bg-[#4A2C2A] sm:hover:bg-[#3A2221] active:bg-[#2A1817] text-white text-xs sm:text-sm font-bold uppercase tracking-wider rounded-xl py-3.5 px-4 flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed shadow-md cursor-pointer"
+                  className="flex-1 bg-brand-burgundy sm:hover:bg-[#3A2221] active:bg-[#2A1817] text-white text-xs sm:text-sm font-bold uppercase tracking-wider rounded-xl py-3.5 px-4 flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed shadow-md cursor-pointer"
                 >
                   <i className="ph-bold ph-tote text-base"></i>
                   <span>Mua Ngay</span>
@@ -817,7 +818,7 @@ export default function ProductDetail() {
                 <button
                   onClick={() => setActiveTab('description')}
                   className={`shrink-0 cursor-pointer border-b-2 px-0 py-3 text-[11px] font-bold uppercase tracking-wider transition-all sm:rounded-t-xl sm:border-b-0 sm:px-6 sm:text-xs ${activeTab === 'description'
-                      ? 'border-[#4A2C2A] text-[#4A2C2A] sm:bg-[#4A2C2A] sm:text-white sm:shadow-xs'
+                      ? 'border-brand-burgundy text-brand-burgundy sm:bg-brand-burgundy sm:text-white sm:shadow-xs'
                       : 'border-transparent text-stone-500 sm:hover:text-stone-800 sm:hover:bg-stone-100'
                     }`}
                 >
@@ -826,7 +827,7 @@ export default function ProductDetail() {
                 <button
                   onClick={() => setActiveTab('ingredients')}
                   className={`shrink-0 cursor-pointer border-b-2 px-0 py-3 text-[11px] font-bold uppercase tracking-wider transition-all sm:rounded-t-xl sm:border-b-0 sm:px-6 sm:text-xs ${activeTab === 'ingredients'
-                      ? 'border-[#4A2C2A] text-[#4A2C2A] sm:bg-[#4A2C2A] sm:text-white sm:shadow-xs'
+                      ? 'border-brand-burgundy text-brand-burgundy sm:bg-brand-burgundy sm:text-white sm:shadow-xs'
                       : 'border-transparent text-stone-500 sm:hover:text-stone-800 sm:hover:bg-stone-100'
                     }`}
                 >
@@ -835,7 +836,7 @@ export default function ProductDetail() {
                 <button
                   onClick={() => setActiveTab('care')}
                   className={`shrink-0 cursor-pointer border-b-2 px-0 py-3 text-[11px] font-bold uppercase tracking-wider transition-all sm:rounded-t-xl sm:border-b-0 sm:px-6 sm:text-xs ${activeTab === 'care'
-                      ? 'border-[#4A2C2A] text-[#4A2C2A] sm:bg-[#4A2C2A] sm:text-white sm:shadow-xs'
+                      ? 'border-brand-burgundy text-brand-burgundy sm:bg-brand-burgundy sm:text-white sm:shadow-xs'
                       : 'border-transparent text-stone-500 sm:hover:text-stone-800 sm:hover:bg-stone-100'
                     }`}
                 >
@@ -847,12 +848,12 @@ export default function ProductDetail() {
               <div className="bg-white px-0 py-6 sm:rounded-b-2xl sm:border-x sm:border-b sm:border-stone-200/80 sm:p-8 sm:shadow-2xs">
                 {activeTab === 'description' ? (
                   <div className="animate-in fade-in duration-300">
-                    <h2 className="font-serif-display text-2xl sm:text-3xl text-[#4A2C2A] mb-4 leading-tight">
+                    <h2 className="font-serif-display text-2xl sm:text-3xl text-brand-burgundy mb-4 leading-tight">
                       Câu Chuyện Mùi Hương
                     </h2>
                     <div className="prose prose-stone text-stone-600 max-w-none leading-relaxed text-sm sm:text-[15px]">
                       {product.description ? (
-                        <p className="whitespace-pre-line">{product.description}</p>
+                        <div className="product-rich-description" dangerouslySetInnerHTML={{ __html: descriptionToHtml(product.description) }} />
                       ) : (
                         <p className="italic text-stone-400">Một sản phẩm hương thơm thủ công tuyệt hảo, đem lại cảm giác thư giãn tuyệt đối cho không gian của bạn.</p>
                       )}
@@ -860,7 +861,7 @@ export default function ProductDetail() {
                   </div>
                 ) : activeTab === 'ingredients' ? (
                   <div className="animate-in fade-in duration-300">
-                    <h2 className="font-serif-display text-2xl sm:text-3xl text-[#4A2C2A] mb-4 leading-tight">
+                    <h2 className="font-serif-display text-2xl sm:text-3xl text-brand-burgundy mb-4 leading-tight">
                       Thuần Khiết Từ Tự Nhiên, An Toàn Cho Không Gian Sống
                     </h2>
                     <p className="text-stone-600 leading-relaxed mb-6 text-sm">
@@ -880,7 +881,7 @@ export default function ProductDetail() {
                   </div>
                 ) : (
                   <div className="animate-in fade-in duration-300">
-                    <h2 className="font-serif-display text-2xl sm:text-3xl text-[#4A2C2A] mb-4 leading-tight">
+                    <h2 className="font-serif-display text-2xl sm:text-3xl text-brand-burgundy mb-4 leading-tight">
                       Bí Quyết Giữ Trọn Hương Thơm
                     </h2>
                     <div className="divide-y divide-stone-200 md:space-y-4 md:divide-y-0">
@@ -947,7 +948,7 @@ export default function ProductDetail() {
         {/* 2. Nút Giỏ hàng (Có badge số lượng & Link trực tiếp tới /cart) */}
         <button
           onClick={() => navigate('/cart')}
-          className="flex flex-col items-center justify-center w-14 shrink-0 text-stone-600 sm:hover:text-[#4A2C2A] border-r border-stone-100 active:bg-stone-50 transition-colors cursor-pointer relative"
+          className="flex flex-col items-center justify-center w-14 shrink-0 text-stone-600 sm:hover:text-brand-burgundy border-r border-stone-100 active:bg-stone-50 transition-colors cursor-pointer relative"
           title="Xem giỏ hàng"
         >
           <div className="relative">
@@ -981,7 +982,7 @@ export default function ProductDetail() {
         <button
           onClick={() => openVariantSheet('buy')}
           disabled={isAdding}
-          className="flex-1 bg-gradient-to-r from-[#94432C] to-[#4A2C2A] active:from-[#7D3824] active:to-[#38201F] text-white flex flex-col items-center justify-center transition-all disabled:opacity-60 cursor-pointer px-1 text-center shadow-inner"
+          className="flex-1 bg-gradient-to-r from-[#94432C] to-brand-burgundy active:from-[#7D3824] active:to-[#38201F] text-white flex flex-col items-center justify-center transition-all disabled:opacity-60 cursor-pointer px-1 text-center shadow-inner"
         >
           <span className="text-xs font-bold uppercase tracking-wider">Mua Ngay</span>
           <span className="text-[10px] text-amber-200/90 font-medium leading-none mt-0.5">
@@ -1007,7 +1008,7 @@ export default function ProductDetail() {
             className="relative z-10 w-full max-h-[85vh] bg-white rounded-t-3xl shadow-2xl flex flex-col overflow-hidden animate-[slideUp_0.25s_ease-out]"
             style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
           >
-            {/* 1. Header Sheet: Ảnh đại diện + Giá + Tồn kho + Đang chọn + Nút X */}
+            {/* 1. Header Sheet: Ảnh đại diện + Giá + Đang chọn + Nút X */}
             <div className="p-4 border-b border-stone-100 flex items-start gap-3.5 relative bg-white">
               <div className="w-20 h-20 rounded-2xl bg-stone-100 border border-stone-200 overflow-hidden shrink-0 shadow-2xs">
                 <img 
@@ -1029,12 +1030,8 @@ export default function ProductDetail() {
                   )}
                 </div>
                 
-                <p className="text-[11px] text-stone-500 mt-1">
-                  Kho: <span className={`font-semibold ${availableStock === 0 ? 'text-red-600' : 'text-stone-700'}`}>{Number.isFinite(availableStock) ? availableStock : 'Đang cập nhật'}</span>{Number.isFinite(availableStock) ? ' sản phẩm' : ''}
-                </p>
-                
                 <p className="text-[11px] text-stone-600 font-medium truncate mt-0.5">
-                  Đã chọn: <span className="text-[#4A2C2A] font-bold">
+                  Đã chọn: <span className="text-brand-burgundy font-bold">
                     {product.variant_groups?.map(g => {
                       const opt = g.options.find(o => o.id === selectedOptions[g.id]);
                       return opt?.label;
@@ -1062,7 +1059,7 @@ export default function ProductDetail() {
                       {group.name}
                     </span>
                     <span className="text-[11px] text-stone-500 font-medium">
-                      Đang chọn: <strong className="text-[#4A2C2A]">{group.options.find(o => o.id === selectedOptions[group.id])?.label || 'Chưa chọn'}</strong>
+                      Đang chọn: <strong className="text-brand-burgundy">{group.options.find(o => o.id === selectedOptions[group.id])?.label || 'Chưa chọn'}</strong>
                     </span>
                   </div>
                   
@@ -1076,7 +1073,7 @@ export default function ProductDetail() {
                           onClick={() => handleOptionSelect(group.id, opt.id)}
                           className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 ${
                             isSelected
-                              ? 'bg-[#4A2C2A] text-white border-2 border-[#4A2C2A] shadow-2xs'
+                              ? 'bg-brand-burgundy text-white border-2 border-brand-burgundy shadow-2xs'
                               : 'bg-stone-50 text-stone-700 border border-stone-200/90 sm:hover:border-stone-400'
                           }`}
                         >
@@ -1091,14 +1088,9 @@ export default function ProductDetail() {
 
               {/* Bộ chọn số lượng */}
               <div className="pt-3 border-t border-stone-100 flex items-center justify-between">
-                <div>
-                  <span className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
-                    Số lượng
-                  </span>
-                  {Number.isFinite(availableStock) && (
-                    <span className={`text-[10px] ${availableStock === 0 ? 'font-semibold text-red-600' : 'text-stone-400'}`}>{availableStock === 0 ? 'Đã hết hàng' : `Còn ${availableStock} sản phẩm`}</span>
-                  )}
-                </div>
+                <span className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
+                  Số lượng
+                </span>
 
                 <div className="flex items-center bg-stone-50 border border-stone-200 rounded-xl p-0.5">
                   <button
@@ -1131,7 +1123,7 @@ export default function ProductDetail() {
                     closeVariantSheet();
                   }}
                   disabled={isAdding}
-                  className="w-full bg-[#4A2C2A] active:bg-[#341F1D] text-white text-xs font-bold uppercase tracking-wider rounded-xl py-3.5 px-4 flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer disabled:opacity-60"
+                  className="w-full bg-brand-burgundy active:bg-[#341F1D] text-white text-xs font-bold uppercase tracking-wider rounded-xl py-3.5 px-4 flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer disabled:opacity-60"
                 >
                   {isAdding ? (
                     <i className="ph-bold ph-spinner animate-spin text-base"></i>
@@ -1149,7 +1141,7 @@ export default function ProductDetail() {
                     closeVariantSheet();
                     handleBuyNow();
                   }}
-                  className="w-full bg-gradient-to-r from-[#94432C] to-[#4A2C2A] active:from-[#7D3824] active:to-[#38201F] text-white text-xs font-bold uppercase tracking-wider rounded-xl py-3.5 px-4 flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer"
+                  className="w-full bg-gradient-to-r from-[#94432C] to-brand-burgundy active:from-[#7D3824] active:to-[#38201F] text-white text-xs font-bold uppercase tracking-wider rounded-xl py-3.5 px-4 flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer"
                 >
                   <i className="ph-bold ph-tote text-base"></i>
                   <span>Mua Ngay ({new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(displayPrice * quantity)})</span>
@@ -1174,7 +1166,7 @@ export default function ProductDetail() {
                       closeVariantSheet();
                       handleBuyNow();
                     }}
-                    className="flex-1 bg-gradient-to-r from-[#94432C] to-[#4A2C2A] active:from-[#7D3824] active:to-[#38201F] text-white text-xs font-bold uppercase tracking-wider rounded-xl py-3.5 px-2 flex items-center justify-center gap-1.5 transition-all shadow-md cursor-pointer"
+                    className="flex-1 bg-gradient-to-r from-[#94432C] to-brand-burgundy active:from-[#7D3824] active:to-[#38201F] text-white text-xs font-bold uppercase tracking-wider rounded-xl py-3.5 px-2 flex items-center justify-center gap-1.5 transition-all shadow-md cursor-pointer"
                   >
                     <i className="ph-bold ph-tote text-sm"></i>
                     <span>Mua Ngay</span>

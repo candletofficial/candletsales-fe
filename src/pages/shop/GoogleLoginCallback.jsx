@@ -34,14 +34,14 @@ export default function GoogleLoginCallback() {
   }, [completeSocialLogin, navigate]);
 
   return (
-    <main className="min-h-screen bg-[#FAF7F2] flex items-center justify-center p-5 text-stone-800">
+    <main className="shop-theme-scope min-h-screen bg-brand-cream flex items-center justify-center p-5 text-stone-800">
       <section className="w-full max-w-md rounded-3xl bg-white border border-stone-200 shadow-xl p-8 text-center">
         {error ? (
           <>
             <div className="mx-auto mb-4 w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center"><i className="ph-fill ph-warning-circle text-2xl" /></div>
             <h1 className="font-serif-display text-xl font-bold">Đăng nhập chưa hoàn tất</h1>
             <p className="mt-2 text-sm leading-relaxed text-stone-500">{error}</p>
-            <Link to="/login" className="mt-6 inline-flex px-5 py-2.5 rounded-xl bg-[#4A2C2A] text-sm font-bold text-white sm:hover:bg-[#341816]">Quay lại đăng nhập</Link>
+            <Link to="/login" className="mt-6 inline-flex px-5 py-2.5 rounded-xl bg-brand-burgundy text-sm font-bold text-white sm:hover:bg-[#341816]">Quay lại đăng nhập</Link>
           </>
         ) : (
           <>

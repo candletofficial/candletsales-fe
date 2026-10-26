@@ -7,6 +7,8 @@ import { fundService } from '../services/fundService';
 import { adCostService } from '../services/adCostService';
 import AddressSelector from '../components/shop/AddressSelector';
 import { locationService } from '../services/locationService';
+import { useWebsiteTheme } from '../hooks/useWebsiteTheme';
+import { THEME_PRESETS } from '../theme/themePresets';
 
 const SearchableSelect = ({ value, options, onChange, placeholder = "-- Chọn --" }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -83,11 +85,14 @@ const SearchableSelect = ({ value, options, onChange, placeholder = "-- Chọn -
 };
 
 export default function Settings() {
-  const [activeTab, setActiveTab] = useState('website'); // 'website' | 'packaging' | 'finance' | 'automation'
+  const [activeTab, setActiveTab] = useState('appearance');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState({ standard: false, express: false });
   const [materialsList, setMaterialsList] = useState([]);
   const [toast, setToast] = useState(null);
+  const { config: themeConfig, applyPreset, savingTheme } = useWebsiteTheme();
+  const [themePreset, setThemePreset] = useState(themeConfig.adminPreset);
+  const [themeScope, setThemeScope] = useState('admin');
 
   // Automation
   const [autoConfirmImport, setAutoConfirmImport] = useState(false);
@@ -272,6 +277,21 @@ export default function Settings() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    setThemePreset(themeScope === 'shop' ? themeConfig.shopPreset : themeConfig.adminPreset);
+  }, [themeConfig, themeScope]);
+
+  const handleApplyTheme = async () => {
+    try {
+      await applyPreset(themePreset, themeScope);
+      const scopeLabel = themeScope === 'admin' ? 'trang Admin' : 'trang Shop';
+      showToast(`Đã áp dụng tông màu cho ${scopeLabel}`);
+    } catch (error) {
+      console.error(error);
+      showToast('Không thể lưu tông màu. Vui lòng thử lại.', 'error');
+    }
+  };
 
   const handleAddMaterial = (method) => {
     setConfigs(prev => ({
@@ -580,6 +600,7 @@ export default function Settings() {
   };
 
   const navTabs = [
+    { id: 'appearance', label: 'Giao Diện', icon: 'palette', badge: 'Màu sắc thương hiệu' },
     { id: 'website', label: 'Website & Giao Hàng', icon: 'language', badge: 'Khách hàng' },
     { id: 'packaging', label: 'Đóng Gói & Kho', icon: 'inventory_2', badge: 'Tự động trừ kho' },
     { id: 'finance', label: 'Tài Sản & Chi Phí', icon: 'account_balance', badge: 'Quỹ & Hoàn' },
@@ -652,6 +673,109 @@ export default function Settings() {
         </div>
       ) : (
         <div>
+          {activeTab === 'appearance' && (
+            <div className="space-y-6 animate-[fadeIn_0.2s_ease-out]">
+              <section className="overflow-hidden rounded-3xl border border-stone-200/80 bg-white shadow-sm">
+                <div className="border-b border-stone-100 bg-gradient-to-r from-primary-container/70 via-white to-tertiary-container/30 px-6 py-6 sm:px-8">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-white/80 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-primary">
+                        <span className="material-symbols-outlined text-[16px]">palette</span>
+                        Nhận diện Candlet
+                      </div>
+                      <h2 className="text-xl font-bold text-stone-900 sm:text-2xl">Tông màu chủ đạo</h2>
+                      <p className="mt-1 max-w-2xl text-sm leading-relaxed text-stone-500">
+                        Chọn một bộ màu có sẵn và quyết định nơi áp dụng. Thay đổi sẽ hiển thị ngay trên mọi thiết bị.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleApplyTheme}
+                      disabled={savingTheme}
+                      className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {savingTheme ? (
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                      ) : (
+                        <span className="material-symbols-outlined text-[18px]">check</span>
+                      )}
+                      Áp dụng giao diện
+                    </button>
+                  </div>
+                </div>
+
+                <div className="p-6 sm:p-8">
+                  <div className="mb-6">
+                    <p className="mb-2.5 text-xs font-bold uppercase tracking-[0.14em] text-stone-500">Phạm vi áp dụng</p>
+                    <div className="inline-flex w-full flex-col gap-1 rounded-2xl border border-stone-200 bg-stone-100/80 p-1.5 sm:w-auto sm:flex-row">
+                      {[
+                        { id: 'admin', label: 'Chỉ Admin', icon: 'space_dashboard' },
+                        { id: 'shop', label: 'Chỉ Shop', icon: 'storefront' },
+                      ].map((scope) => (
+                        <button
+                          key={scope.id}
+                          type="button"
+                          onClick={() => setThemeScope(scope.id)}
+                          className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition-all ${
+                            themeScope === scope.id
+                              ? 'bg-white text-primary shadow-sm ring-1 ring-stone-200'
+                              : 'text-stone-500 hover:bg-white/60 hover:text-stone-800'
+                          }`}
+                        >
+                          <span className="material-symbols-outlined text-[18px]">{scope.icon}</span>
+                          {scope.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
+                    {THEME_PRESETS.map((preset) => {
+                      const selected = themePreset === preset.id;
+                      const activeOnAdmin = themeConfig.adminPreset === preset.id;
+                      const activeOnShop = themeConfig.shopPreset === preset.id;
+                      return (
+                        <button
+                          key={preset.id}
+                          type="button"
+                          onClick={() => setThemePreset(preset.id)}
+                          className={`group overflow-hidden rounded-2xl border-2 bg-white text-left transition-all hover:-translate-y-1 hover:shadow-lg ${
+                            selected ? 'border-primary shadow-md ring-4 ring-primary/10' : 'border-stone-200/80'
+                          }`}
+                        >
+                          <div className="flex h-24" style={{ backgroundColor: preset.colors.background }}>
+                            <div className="w-[48%]" style={{ backgroundColor: preset.colors.primary }} />
+                            <div className="w-[22%]" style={{ backgroundColor: preset.colors.accent }} />
+                            <div className="flex flex-1 items-center justify-center" style={{ backgroundColor: preset.colors.soft }}>
+                              <span className="h-7 w-7 rounded-full shadow-sm ring-4 ring-white/60" style={{ backgroundColor: preset.colors.highlight }} />
+                            </div>
+                          </div>
+                          <div className="p-4">
+                            <div className="flex items-start justify-between gap-2">
+                              <div>
+                                <h3 className="text-sm font-bold text-stone-900">{preset.name}</h3>
+                                <p className="mt-1 min-h-10 text-[11px] leading-relaxed text-stone-500">{preset.description}</p>
+                              </div>
+                              <span className={`material-symbols-outlined text-[21px] ${selected ? 'text-primary' : 'text-stone-300'}`}>
+                                {selected ? 'check_circle' : 'circle'}
+                              </span>
+                            </div>
+                            {(activeOnAdmin || activeOnShop) && (
+                              <div className="mt-3 flex flex-wrap gap-1.5 border-t border-stone-100 pt-3">
+                                {activeOnAdmin && <span className="rounded-full bg-primary-container px-2 py-1 text-[10px] font-bold text-primary">Admin đang dùng</span>}
+                                {activeOnShop && <span className="rounded-full bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-700">Shop đang dùng</span>}
+                              </div>
+                            )}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </section>
+            </div>
+          )}
+
           {/* ========================================================================= */}
           {/* TAB 1: WEBSITE & GIAO HÀNG */}
           {/* ========================================================================= */}
@@ -820,7 +944,7 @@ export default function Settings() {
                       type="button"
                       onClick={() => handleGeocodeShop()}
                       disabled={geocodingShop}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-[#8C4A32] bg-[#FAF5EE] hover:bg-[#F3E8DB] border border-[#EADBCA] transition-colors shadow-2xs self-start sm:self-auto"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-secondary bg-[#FAF5EE] hover:bg-[#F3E8DB] border border-primary-fixed transition-colors shadow-2xs self-start sm:self-auto"
                     >
                       <span className={`material-symbols-outlined text-[16px] ${geocodingShop ? 'animate-spin' : ''}`}>
                         {geocodingShop ? 'progress_activity' : 'my_location'}
@@ -933,7 +1057,7 @@ export default function Settings() {
                     <div className="bg-gradient-to-br from-amber-50/70 via-white to-stone-50 rounded-2xl p-5 sm:p-6 border border-amber-200/90 shadow-xs space-y-4">
                       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                         <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 rounded-2xl bg-[#8C4A32] text-white flex items-center justify-center shrink-0 shadow-xs">
+                          <div className="w-10 h-10 rounded-2xl bg-secondary text-white flex items-center justify-center shrink-0 shadow-xs">
                             <i className="ph-fill ph-navigation-arrow text-xl"></i>
                           </div>
                           <div>
@@ -955,7 +1079,7 @@ export default function Settings() {
                           href="https://account.goong.io/"
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-[#8C4A32] bg-white hover:bg-amber-50 border border-amber-300 transition-colors shrink-0 shadow-2xs self-start sm:self-auto"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-secondary bg-white hover:bg-amber-50 border border-amber-300 transition-colors shrink-0 shadow-2xs self-start sm:self-auto"
                         >
                           <i className="ph-bold ph-arrow-square-out text-sm"></i>
                           <span>Đăng ký miễn phí tại goong.io</span>
@@ -977,7 +1101,7 @@ export default function Settings() {
                                 setGoongKeyStatus(null);
                               }}
                               placeholder="Nhập API Key từ Goong Console (VD: 8hAkq9...)"
-                              className="w-full border border-stone-300 rounded-xl px-4 py-2.5 pl-10 pr-10 text-xs sm:text-sm font-mono text-stone-900 bg-white focus:outline-none focus:border-[#8C4A32] focus:ring-1 focus:ring-[#8C4A32] shadow-2xs placeholder:text-stone-400"
+                              className="w-full border border-stone-300 rounded-xl px-4 py-2.5 pl-10 pr-10 text-xs sm:text-sm font-mono text-stone-900 bg-white focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary shadow-2xs placeholder:text-stone-400"
                             />
                             <i className="ph-bold ph-key absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 text-sm"></i>
                             <button

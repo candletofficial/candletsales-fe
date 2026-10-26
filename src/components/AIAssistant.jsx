@@ -47,14 +47,14 @@ const MessageBubble = ({ msg }) => {
   if (isLoading) {
     return (
       <div className="flex gap-2 items-end">
-        <div className="w-7 h-7 rounded-full bg-white border border-blue-100 flex items-center justify-center flex-shrink-0 shadow-sm overflow-hidden p-0.5">
+        <div className="w-7 h-7 rounded-full bg-white border border-primary-fixed flex items-center justify-center flex-shrink-0 shadow-sm overflow-hidden p-0.5">
           <img src="/logo.png" alt="AI" className="w-full h-full object-contain" />
         </div>
         <div className="bg-white border border-gray-100 rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm">
           <div className="flex gap-1 items-center">
-            <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-            <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-            <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+            <span className="w-2 h-2 bg-primary/65 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+            <span className="w-2 h-2 bg-primary/65 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+            <span className="w-2 h-2 bg-primary/65 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
           </div>
         </div>
       </div>
@@ -64,10 +64,7 @@ const MessageBubble = ({ msg }) => {
   if (isUser) {
     return (
       <div className="flex gap-2 items-end justify-end">
-        <div
-          className="max-w-[80%] text-white rounded-2xl rounded-br-sm px-4 py-2.5 shadow-sm text-[14px] leading-relaxed"
-          style={{ background: 'linear-gradient(135deg, #6B3530, #381B18)' }}
-        >
+        <div className="max-w-[80%] rounded-2xl rounded-br-sm bg-gradient-to-br from-primary to-on-primary-container px-4 py-2.5 text-[14px] leading-relaxed text-white shadow-sm">
           {msg.content}
         </div>
         <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
@@ -81,7 +78,7 @@ const MessageBubble = ({ msg }) => {
   return (
     <div className="flex gap-2 items-end">
       {/* Avatar AI — dùng logo Candlet */}
-      <div className="w-7 h-7 rounded-full bg-white border border-blue-100 flex items-center justify-center flex-shrink-0 shadow-sm overflow-hidden p-0.5">
+      <div className="w-7 h-7 rounded-full bg-white border border-primary-fixed flex items-center justify-center flex-shrink-0 shadow-sm overflow-hidden p-0.5">
         <img src="/logo.png" alt="AI" className="w-full h-full object-contain" />
       </div>
       <div
@@ -214,14 +211,11 @@ export default function AIAssistant({ periodLabel = 'Tháng này' }) {
       <button
         id="ai-assistant-toggle"
         onClick={() => setIsOpen((v) => !v)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 bg-white overflow-hidden"
-        style={{
-          boxShadow: '0 8px 32px rgba(91,48,40,0.30), 0 0 0 3px #4A2C2A',
-        }}
+        className="fixed bottom-5 right-4 z-50 flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-[3px] border-primary bg-white shadow-[0_10px_35px_color-mix(in_srgb,var(--color-primary)_30%,transparent)] transition-all duration-300 hover:scale-110 active:scale-95 sm:bottom-6 sm:right-6"
         title="AI Business Analyst"
       >
         {isOpen ? (
-          <span className="material-symbols-outlined text-[#4A2C2A] text-[26px]">close</span>
+          <span className="material-symbols-outlined text-primary text-[26px]">close</span>
         ) : (
           <>
             <img
@@ -230,34 +224,26 @@ export default function AIAssistant({ periodLabel = 'Tháng này' }) {
               className="w-10 h-10 object-contain"
             />
             {/* Pulse ring */}
-            <span
-              className="absolute w-14 h-14 rounded-full animate-ping"
-              style={{ background: 'rgba(30,64,175,0.2)' }}
-            />
+            <span className="absolute h-14 w-14 animate-ping rounded-full bg-primary/20" />
           </>
         )}
       </button>
 
       {/* ── Chat Panel ───────────────────────────────────────── */}
       <div
-        className={`fixed bottom-24 right-6 z-50 transition-all duration-300 ${
+        className={`fixed bottom-24 right-4 z-50 w-[calc(100vw-2rem)] transition-all duration-300 sm:right-6 sm:w-[460px] ${
           isOpen ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-4 pointer-events-none'
         }`}
-        style={{ width: '460px' }}
       >
         <div
-          className="flex flex-col rounded-2xl overflow-hidden"
+          className="flex max-h-[calc(100vh-7rem)] flex-col overflow-hidden rounded-2xl border border-outline-variant bg-surface-container-low"
           style={{
             height: '680px',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05)',
-            background: '#f9fafb',
+            boxShadow: '0 20px 60px color-mix(in srgb, var(--color-primary) 18%, transparent)',
           }}
         >
           {/* Header */}
-          <div
-            className="flex items-center gap-3 px-4 py-3.5 flex-shrink-0"
-            style={{ background: 'linear-gradient(135deg, #6B3530, #381B18)' }}
-          >
+          <div className="flex flex-shrink-0 items-center gap-3 bg-gradient-to-br from-primary to-on-primary-container px-4 py-3.5">
             {/* Logo Candlet Shop */}
             <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center flex-shrink-0 overflow-hidden p-0.5">
               <img
@@ -309,7 +295,7 @@ export default function AIAssistant({ periodLabel = 'Tháng này' }) {
                     key={i}
                     onClick={() => sendMessage(q)}
                     disabled={loading}
-                    className="text-[11.5px] font-medium px-2.5 py-1 rounded-full border border-blue-200 bg-blue-50 text-blue-800 hover:bg-blue-100 transition-colors disabled:opacity-50 leading-tight"
+                    className="rounded-full border border-primary-fixed bg-primary-container px-2.5 py-1 text-[11.5px] font-medium leading-tight text-primary transition-colors hover:border-primary/30 hover:bg-primary-fixed disabled:opacity-50"
                   >
                     {q}
                   </button>
@@ -320,7 +306,7 @@ export default function AIAssistant({ periodLabel = 'Tháng này' }) {
 
           {/* Input */}
           <div className="px-3 pb-3 pt-2 flex-shrink-0 bg-white border-t border-gray-100">
-            <div className="flex gap-2 items-end bg-gray-50 rounded-xl px-3 py-2 border border-gray-200 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+            <div className="flex items-end gap-2 rounded-xl border border-outline-variant bg-surface-container-low px-3 py-2 transition-all focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/10">
               <textarea
                 ref={inputRef}
                 id="ai-chat-input"
@@ -341,18 +327,12 @@ export default function AIAssistant({ periodLabel = 'Tháng này' }) {
                 id="ai-send-button"
                 onClick={() => sendMessage()}
                 disabled={loading || !input.trim()}
-                className="w-8 h-8 rounded-lg flex items-center justify-center transition-all flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
-                style={{
-                  background: input.trim() && !loading ? 'linear-gradient(135deg, #6B3530, #381B18)' : '#e5e7eb',
-                }}
+                className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg transition-all disabled:cursor-not-allowed disabled:opacity-40 ${input.trim() && !loading ? 'bg-gradient-to-br from-primary to-on-primary-container text-white shadow-sm' : 'bg-surface-container text-on-surface-variant'}`}
               >
                 {loading ? (
-                  <span className="w-3.5 h-3.5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+                  <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
                 ) : (
-                  <span
-                    className="material-symbols-outlined text-[16px]"
-                    style={{ color: input.trim() ? 'white' : '#9ca3af' }}
-                  >
+                  <span className="material-symbols-outlined text-[16px]">
                     send
                   </span>
                 )}

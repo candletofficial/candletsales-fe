@@ -114,8 +114,8 @@ export default function ShopStoryDetail() {
 
   if (loading) {
     return (
-      <div className="bg-[#FAF7F2] min-h-screen py-36 flex flex-col items-center justify-center space-y-4">
-        <div className="w-12 h-12 rounded-full border-2 border-[#4A2C2A]/20 border-t-[#4A2C2A] animate-spin"></div>
+      <div className="bg-brand-cream min-h-screen py-36 flex flex-col items-center justify-center space-y-4">
+        <div className="w-12 h-12 rounded-full border-2 border-brand-burgundy/20 border-t-brand-burgundy animate-spin"></div>
         <p className="font-serif-display italic text-base text-stone-600">Đang mở trang sách bên ánh lửa...</p>
       </div>
     );
@@ -123,16 +123,16 @@ export default function ShopStoryDetail() {
 
   if (!post) {
     return (
-      <div className="bg-[#FAF7F2] min-h-screen py-36 text-center px-4">
+      <div className="bg-brand-cream min-h-screen py-36 text-center px-4">
         <div className="max-w-md mx-auto bg-white p-10 rounded-3xl border border-stone-200 shadow-sm space-y-4">
           <i className="ph-thin ph-article-medium text-5xl text-amber-800/60"></i>
-          <h2 className="font-serif-display text-3xl font-bold text-[#381B18]">Không Tìm Thấy Câu Chuyện</h2>
+          <h2 className="font-serif-display text-3xl font-bold text-brand-deepWine">Không Tìm Thấy Câu Chuyện</h2>
           <p className="text-xs text-stone-600 leading-relaxed">
             Câu chuyện này có thể đã chuyển sang một tập sách khác hoặc tạm thời được lưu trữ tại xưởng.
           </p>
           <Link
             to="/stories"
-            className="inline-flex items-center gap-2 bg-[#381B18] text-amber-100 px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider sm:hover:bg-[#25110F] transition-all shadow-xs mt-2"
+            className="inline-flex items-center gap-2 bg-brand-deepWine text-amber-100 px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider sm:hover:bg-[#25110F] transition-all shadow-xs mt-2"
           >
             <i className="ph-bold ph-arrow-left"></i>
             <span>Về Danh Sách Câu Chuyện</span>
@@ -153,7 +153,7 @@ export default function ShopStoryDetail() {
   }[fontSize];
 
   return (
-    <div className="relative min-h-screen bg-white pb-32 font-jakarta text-[#2C1810] selection:bg-[#4A2C2A] selection:text-white sm:bg-[#FAF7F2]">
+    <div className="relative min-h-screen bg-white pb-32 font-jakarta text-brand-charcoal selection:bg-brand-burgundy selection:text-white sm:bg-brand-cream">
       
       {/* 1. READING PROGRESS BAR (Thanh tiến trình cuộn) */}
       <div className="fixed top-0 left-0 right-0 h-1 z-50 bg-stone-200/50">
@@ -171,9 +171,9 @@ export default function ShopStoryDetail() {
         
         {/* Breadcrumb Navigation */}
         <div className="mb-6 hidden items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-stone-500 sm:flex">
-          <Link to="/" className="sm:hover:text-[#4A2C2A] transition-colors">Trang Chủ</Link>
+          <Link to="/" className="sm:hover:text-brand-burgundy transition-colors">Trang Chủ</Link>
           <span className="text-stone-300">/</span>
-          <Link to="/stories" className="sm:hover:text-[#4A2C2A] transition-colors">Câu Chuyện</Link>
+          <Link to="/stories" className="sm:hover:text-brand-burgundy transition-colors">Câu Chuyện</Link>
           <span className="text-stone-300">/</span>
           <span className="text-stone-400 truncate max-w-[180px] sm:max-w-none">{post.category}</span>
         </div>
@@ -240,7 +240,7 @@ export default function ShopStoryDetail() {
                 type="button"
                 onClick={() => setFontSize('normal')}
                 className={`px-2 py-0.5 text-xs font-bold rounded-full transition-colors ${
-                  fontSize === 'normal' ? 'bg-[#381B18] text-white' : 'text-stone-500 sm:hover:text-stone-800'
+                  fontSize === 'normal' ? 'bg-brand-deepWine text-white' : 'text-stone-500 sm:hover:text-stone-800'
                 }`}
                 title="Cỡ chữ tiêu chuẩn"
               >
@@ -250,7 +250,7 @@ export default function ShopStoryDetail() {
                 type="button"
                 onClick={() => setFontSize('large')}
                 className={`px-2 py-0.5 text-sm font-bold rounded-full transition-colors ${
-                  fontSize === 'large' ? 'bg-[#381B18] text-white' : 'text-stone-500 sm:hover:text-stone-800'
+                  fontSize === 'large' ? 'bg-brand-deepWine text-white' : 'text-stone-500 sm:hover:text-stone-800'
                 }`}
                 title="Cỡ chữ lớn"
               >
@@ -323,7 +323,7 @@ export default function ShopStoryDetail() {
             <p className="text-[10px] uppercase font-bold tracking-[0.25em] text-stone-400 mb-2">
               Thông Điệp Khắc Ghi
             </p>
-            <blockquote className="font-serif-display text-2xl sm:text-3xl italic leading-snug text-[#2C1810]">
+            <blockquote className="font-serif-display text-2xl sm:text-3xl italic leading-snug text-brand-charcoal">
               "{post.customDesign.quoteHighlight}"
             </blockquote>
           </aside>
@@ -335,9 +335,9 @@ export default function ShopStoryDetail() {
         >
           <div
             dangerouslySetInnerHTML={{ __html: post.content }}
-            className={`space-y-6 [&>h2]:font-serif-display [&>h2]:text-2xl sm:[&>h2]:text-3xl [&>h2]:font-bold [&>h2]:text-[#2A1412] [&>h2]:mt-12 [&>h2]:mb-4 [&>h2]:pb-2 [&>h2]:border-b [&>h2]:border-stone-200/60 [&>h3]:font-serif-display [&>h3]:text-xl sm:[&>h3]:text-2xl [&>h3]:font-bold [&>h3]:text-[#2A1412] [&>h3]:mt-8 [&>h3]:mb-3 [&>p]:mb-5 [&>p]:leading-relaxed [&>blockquote]:font-serif-display [&>blockquote]:italic [&>blockquote]:border-l-4 [&>blockquote]:border-amber-600 [&>blockquote]:pl-5 [&>blockquote]:py-3 [&>blockquote]:my-8 [&>blockquote]:text-xl [&>blockquote]:text-[#2C1810] sm:[&>blockquote]:bg-[#F7EFE8] sm:[&>blockquote]:rounded-r-2xl [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:space-y-3 [&>ol]:list-decimal [&>ol]:pl-6 [&>ol]:space-y-3 [&>img]:my-8 sm:[&>img]:rounded-3xl sm:[&>img]:shadow-md [&>figure>img]:my-6 sm:[&>figure>img]:rounded-3xl sm:[&>figure>img]:shadow-md [&>.candle-tip]:border-l-4 [&>.candle-tip]:border-amber-500 [&>.candle-tip]:py-2 [&>.candle-tip]:pl-4 [&>.candle-tip]:my-6 sm:[&>.candle-tip]:bg-amber-50 sm:[&>.candle-tip]:p-5 sm:[&>.candle-tip]:rounded-r-2xl [&>.scent-callout]:border-y [&>.scent-callout]:border-amber-200/80 [&>.scent-callout]:py-5 [&>.scent-callout]:my-8 sm:[&>.scent-callout]:rounded-2xl sm:[&>.scent-callout]:bg-amber-50/80 sm:[&>.scent-callout]:border sm:[&>.scent-callout]:p-6 ${
+            className={`space-y-6 [&>h2]:font-serif-display [&>h2]:text-2xl sm:[&>h2]:text-3xl [&>h2]:font-bold [&>h2]:text-[#2A1412] [&>h2]:mt-12 [&>h2]:mb-4 [&>h2]:pb-2 [&>h2]:border-b [&>h2]:border-stone-200/60 [&>h3]:font-serif-display [&>h3]:text-xl sm:[&>h3]:text-2xl [&>h3]:font-bold [&>h3]:text-[#2A1412] [&>h3]:mt-8 [&>h3]:mb-3 [&>p]:mb-5 [&>p]:leading-relaxed [&>blockquote]:font-serif-display [&>blockquote]:italic [&>blockquote]:border-l-4 [&>blockquote]:border-amber-600 [&>blockquote]:pl-5 [&>blockquote]:py-3 [&>blockquote]:my-8 [&>blockquote]:text-xl [&>blockquote]:text-brand-charcoal sm:[&>blockquote]:bg-[#F7EFE8] sm:[&>blockquote]:rounded-r-2xl [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:space-y-3 [&>ol]:list-decimal [&>ol]:pl-6 [&>ol]:space-y-3 [&>img]:my-8 sm:[&>img]:rounded-3xl sm:[&>img]:shadow-md [&>figure>img]:my-6 sm:[&>figure>img]:rounded-3xl sm:[&>figure>img]:shadow-md [&>.candle-tip]:border-l-4 [&>.candle-tip]:border-amber-500 [&>.candle-tip]:py-2 [&>.candle-tip]:pl-4 [&>.candle-tip]:my-6 sm:[&>.candle-tip]:bg-amber-50 sm:[&>.candle-tip]:p-5 sm:[&>.candle-tip]:rounded-r-2xl [&>.scent-callout]:border-y [&>.scent-callout]:border-amber-200/80 [&>.scent-callout]:py-5 [&>.scent-callout]:my-8 sm:[&>.scent-callout]:rounded-2xl sm:[&>.scent-callout]:bg-amber-50/80 sm:[&>.scent-callout]:border sm:[&>.scent-callout]:p-6 ${
               post.customDesign?.enableDropCap !== false
-                ? '[&>p:first-of-type::first-letter]:text-5xl [&>p:first-of-type::first-letter]:font-serif-display [&>p:first-of-type::first-letter]:font-bold [&>p:first-of-type::first-letter]:float-left [&>p:first-of-type::first-letter]:mr-3 [&>p:first-of-type::first-letter]:leading-none [&>p:first-of-type::first-letter]:text-[#381B18]'
+                ? '[&>p:first-of-type::first-letter]:text-5xl [&>p:first-of-type::first-letter]:font-serif-display [&>p:first-of-type::first-letter]:font-bold [&>p:first-of-type::first-letter]:float-left [&>p:first-of-type::first-letter]:mr-3 [&>p:first-of-type::first-letter]:leading-none [&>p:first-of-type::first-letter]:text-brand-deepWine'
                 : ''
             }`}
           />
@@ -353,7 +353,7 @@ export default function ShopStoryDetail() {
               <Link
                 key={tag}
                 to={`/stories?q=${encodeURIComponent(tag)}`}
-                className="px-3.5 py-1 rounded-full bg-white border border-stone-200/90 text-stone-600 sm:hover:text-[#4A2C2A] sm:hover:border-[#4A2C2A] text-xs font-semibold transition-all shadow-2xs sm:hover:scale-105"
+                className="px-3.5 py-1 rounded-full bg-white border border-stone-200/90 text-stone-600 sm:hover:text-brand-burgundy sm:hover:border-brand-burgundy text-xs font-semibold transition-all shadow-2xs sm:hover:scale-105"
               >
                 #{tag}
               </Link>
@@ -383,7 +383,7 @@ export default function ShopStoryDetail() {
               className={`inline-flex items-center gap-2.5 px-6 py-3 rounded-full text-xs font-bold transition-all shadow-sm cursor-pointer ${
                 isLiked
                   ? 'bg-rose-600 text-white sm:hover:bg-rose-700 scale-105 shadow-rose-200 ring-4 ring-rose-100'
-                  : 'bg-[#FAF7F2] border border-stone-300 sm:hover:border-rose-300 text-stone-700 sm:hover:text-rose-600 sm:hover:bg-rose-50/60'
+                  : 'bg-brand-cream border border-stone-300 sm:hover:border-rose-300 text-stone-700 sm:hover:text-rose-600 sm:hover:bg-rose-50/60'
               }`}
             >
               <i className={`text-base ${isLiked ? 'ph-fill ph-heart animate-pulse' : 'ph-bold ph-heart'}`}></i>
@@ -420,17 +420,17 @@ export default function ShopStoryDetail() {
             </div>
 
             <div className="space-y-2 text-center sm:text-left flex-1">
-              <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-[#8C4A32]">
+              <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-brand-terracotta">
                 {post.customDesign?.authorRole || 'Tác Giả & Nghệ Nhân Chế Tác'}
               </span>
-              <h4 className="font-serif-display text-2xl font-bold text-[#2C1810]">
+              <h4 className="font-serif-display text-2xl font-bold text-brand-charcoal">
                 {post.author}
               </h4>
               <p className="text-xs sm:text-sm text-stone-600 leading-relaxed font-normal">
                 Người nuôi dưỡng những ngọn lửa thủ công tại xưởng nến Candlet. Tin rằng mỗi mùi hương là một chìa khóa mở ra cánh cửa ký ức và xoa dịu những áp lực thường nhật.
               </p>
 
-              <div className="pt-3 flex flex-wrap items-center justify-center sm:justify-start gap-4 text-xs font-semibold text-[#8C4A32]">
+              <div className="pt-3 flex flex-wrap items-center justify-center sm:justify-start gap-4 text-xs font-semibold text-brand-terracotta">
                 <Link to="/shop" className="sm:hover:underline flex items-center gap-1">
                   <i className="ph ph-shopping-bag"></i>
                   <span>Khám phá nến tại xưởng</span>
@@ -446,7 +446,7 @@ export default function ShopStoryDetail() {
         </aside>
 
         {/* 6. INVITATION BANNER (TRẢI NGHIỆM MÙI HƯƠNG TẬN TAY) */}
-        <aside className="-mx-4 mt-12 flex flex-col items-center justify-between gap-6 bg-gradient-to-r from-[#381B18] to-[#5A2722] px-4 py-9 text-amber-100 sm:mx-0 sm:flex-row sm:rounded-3xl sm:p-8 sm:shadow-lg">
+        <aside className="-mx-4 mt-12 flex flex-col items-center justify-between gap-6 bg-gradient-to-r from-brand-deepWine to-[#5A2722] px-4 py-9 text-amber-100 sm:mx-0 sm:flex-row sm:rounded-3xl sm:p-8 sm:shadow-lg">
           <div className="space-y-1.5 text-center sm:text-left">
             <h4 className="font-serif-display text-2xl font-bold text-white">
               Cảm Nhận Mùi Hương Ngay Hôm Nay
@@ -457,7 +457,7 @@ export default function ShopStoryDetail() {
           </div>
           <Link
             to="/shop"
-            className="px-6 py-3 bg-amber-400 text-[#381B18] font-bold text-xs rounded-full sm:hover:bg-amber-300 transition-all uppercase tracking-wider shrink-0 shadow-sm"
+            className="px-6 py-3 bg-amber-400 text-brand-deepWine font-bold text-xs rounded-full sm:hover:bg-amber-300 transition-all uppercase tracking-wider shrink-0 shadow-sm"
           >
             Ghé Thăm Cửa Hàng
           </Link>
@@ -467,7 +467,7 @@ export default function ShopStoryDetail() {
         <div className="mt-12 text-center">
           <Link
             to="/stories"
-            className="inline-flex items-center gap-2 px-8 py-3 rounded-full border border-stone-300 text-stone-700 sm:hover:border-[#381B18] sm:hover:text-[#381B18] text-xs font-bold uppercase tracking-wider transition-all bg-white shadow-2xs"
+            className="inline-flex items-center gap-2 px-8 py-3 rounded-full border border-stone-300 text-stone-700 sm:hover:border-brand-deepWine sm:hover:text-brand-deepWine text-xs font-bold uppercase tracking-wider transition-all bg-white shadow-2xs"
           >
             <i className="ph-bold ph-arrow-left"></i>
             <span>Về Trang Danh Sách Câu Chuyện</span>
@@ -480,10 +480,10 @@ export default function ShopStoryDetail() {
       {relatedPosts.length > 0 && (
         <section className="max-w-6xl mx-auto px-4 sm:px-8 mt-24 pt-16 border-t border-stone-200/80">
           <div className="text-center max-w-xl mx-auto mb-12">
-            <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-[#8C4A32] block mb-2">
+            <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-brand-terracotta block mb-2">
               Tiếp Nối Dòng Cảm Xúc
             </span>
-            <h3 className="font-serif-display text-3xl sm:text-4xl font-bold text-[#2C1810]">
+            <h3 className="font-serif-display text-3xl sm:text-4xl font-bold text-brand-charcoal">
               Những Câu Chuyện Cùng Chủ Đề
             </h3>
           </div>
@@ -507,7 +507,7 @@ export default function ShopStoryDetail() {
                   <div className="space-y-2">
                     <span className="text-[11px] text-stone-400 font-medium">{rel.readTime}</span>
                     <Link to={`/stories/${rel.slug}`}>
-                      <h4 className="font-serif-display text-xl font-bold text-[#2C1810] sm:group-hover:text-[#8C4A32] transition-colors leading-snug line-clamp-2">
+                      <h4 className="font-serif-display text-xl font-bold text-brand-charcoal sm:group-hover:text-brand-terracotta transition-colors leading-snug line-clamp-2">
                         {rel.title}
                       </h4>
                     </Link>
@@ -519,7 +519,7 @@ export default function ShopStoryDetail() {
                   <div className="pt-3 border-t border-stone-100 mt-4 flex items-center justify-between">
                     <Link
                       to={`/stories/${rel.slug}`}
-                      className="text-xs font-bold text-[#4A2C2A] sm:group-hover:text-[#8C4A32] flex items-center gap-1 transition-colors"
+                      className="text-xs font-bold text-brand-burgundy sm:group-hover:text-brand-terracotta flex items-center gap-1 transition-colors"
                     >
                       <span>Đọc tiếp</span>
                       <i className="ph-bold ph-caret-right text-xs transition-transform sm:group-hover:translate-x-1"></i>

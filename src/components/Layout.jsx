@@ -19,7 +19,7 @@ export default function Layout({ children }) {
   }, [sidebarOpen]);
 
   return (
-    <div className="layout">
+    <div className="layout admin-theme-scope">
       {/* Mobile backdrop */}
       {sidebarOpen && (
         <div 

@@ -54,10 +54,10 @@ export default function OrderLookup() {
   };
 
   return (
-    <main className="min-h-screen bg-white px-4 py-8 font-jakarta text-[#2C1810] sm:bg-[#FBF9F6] sm:px-6 sm:py-14 lg:px-8 lg:pb-24">
+    <main className="min-h-screen bg-white px-4 py-8 font-jakarta text-brand-charcoal sm:bg-[#FBF9F6] sm:px-6 sm:py-14 lg:px-8 lg:pb-24">
       <div className="mx-auto max-w-5xl">
         <header className="mx-auto mb-7 max-w-2xl text-center sm:mb-10">
-          <div className="mb-4 inline-flex size-12 items-center justify-center rounded-2xl bg-[#F4E9DF] text-xl text-[#8C4A32] shadow-xs">
+          <div className="mb-4 inline-flex size-12 items-center justify-center rounded-2xl bg-[#F4E9DF] text-xl text-brand-terracotta shadow-xs">
             <i className="ph-bold ph-package"></i>
           </div>
           <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[#B45309]">Theo dõi đơn hàng</p>
@@ -73,17 +73,17 @@ export default function OrderLookup() {
               <span className="mb-1.5 block text-[11px] font-bold text-stone-600">Số điện thoại nhận hàng</span>
               <input type="tel" inputMode="tel" autoComplete="tel" placeholder="Ví dụ: 0328624761" value={phone}
                 onChange={(event) => setPhone(event.target.value)}
-                className="w-full rounded-2xl border border-stone-200 bg-stone-50/70 px-4 py-3.5 font-mono text-xs outline-none transition focus:border-[#4A2C2A] focus:bg-white focus:ring-3 focus:ring-[#4A2C2A]/8" />
+                className="w-full rounded-2xl border border-stone-200 bg-stone-50/70 px-4 py-3.5 font-mono text-xs outline-none transition focus:border-brand-burgundy focus:bg-white focus:ring-3 focus:ring-brand-burgundy/8" />
             </label>
             <label className="sm:col-span-4">
               <span className="mb-1.5 block text-[11px] font-bold text-stone-600">Mã đơn hàng</span>
               <input type="text" autoCapitalize="characters" placeholder="Ví dụ: DH-1234567" value={orderId}
                 onChange={(event) => setOrderId(event.target.value.toUpperCase())}
-                className="w-full rounded-2xl border border-stone-200 bg-stone-50/70 px-4 py-3.5 font-mono text-xs uppercase outline-none transition focus:border-[#4A2C2A] focus:bg-white focus:ring-3 focus:ring-[#4A2C2A]/8" />
+                className="w-full rounded-2xl border border-stone-200 bg-stone-50/70 px-4 py-3.5 font-mono text-xs uppercase outline-none transition focus:border-brand-burgundy focus:bg-white focus:ring-3 focus:ring-brand-burgundy/8" />
             </label>
             <div className="flex items-end sm:col-span-3">
               <button type="submit" disabled={loading}
-                className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-[#4A2C2A] px-5 py-3.5 text-xs font-bold uppercase tracking-wider text-white shadow-sm transition hover:bg-[#381B18] disabled:cursor-wait disabled:opacity-70">
+                className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-brand-burgundy px-5 py-3.5 text-xs font-bold uppercase tracking-wider text-white shadow-sm transition hover:bg-brand-deepWine disabled:cursor-wait disabled:opacity-70">
                 {loading ? <i className="ph-bold ph-spinner animate-spin text-base"></i> : <i className="ph-bold ph-magnifying-glass"></i>}
                 <span>{loading ? 'Đang tìm' : 'Tra cứu'}</span>
               </button>
@@ -122,7 +122,7 @@ export default function OrderLookup() {
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                         <div>
                           <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Mã đơn hàng</p>
-                          <h3 className="mt-1 font-mono text-base font-bold text-[#4A2C2A]">#{order.orderId}</h3>
+                          <h3 className="mt-1 font-mono text-base font-bold text-brand-burgundy">#{order.orderId}</h3>
                           <p className="mt-1 text-[11px] text-stone-500">Đặt lúc {formatDate(order.ordered_at)}</p>
                         </div>
                         <span className={`inline-flex w-fit items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-bold ${meta.tone}`}>
@@ -132,9 +132,9 @@ export default function OrderLookup() {
                       <div className="mt-5 grid gap-3 border-t border-stone-100 pt-4 sm:grid-cols-3">
                         <div><span className="text-[10px] uppercase tracking-wider text-stone-400">Người nhận</span><p className="mt-1 text-xs font-semibold text-stone-700">{order.customer_name || 'Chưa cập nhật'}</p></div>
                         <div><span className="text-[10px] uppercase tracking-wider text-stone-400">Sản phẩm</span><p className="mt-1 text-xs font-semibold text-stone-700">{(order.items || []).reduce((sum, item) => sum + (item.quantity || 0), 0)} sản phẩm</p></div>
-                        <div className="sm:text-right"><span className="text-[10px] uppercase tracking-wider text-stone-400">Tổng tiền</span><p className="mt-1 text-sm font-bold text-[#4A2C2A]">{formatPrice(order.total_price)}</p></div>
+                        <div className="sm:text-right"><span className="text-[10px] uppercase tracking-wider text-stone-400">Tổng tiền</span><p className="mt-1 text-sm font-bold text-brand-burgundy">{formatPrice(order.total_price)}</p></div>
                       </div>
-                      <div className="mt-4 flex items-center justify-end gap-1.5 text-[11px] font-bold text-[#8C4A32]">
+                      <div className="mt-4 flex items-center justify-end gap-1.5 text-[11px] font-bold text-brand-terracotta">
                         <span>Xem tiến độ đơn hàng</span>
                         <i className="ph-bold ph-arrow-right transition-transform group-hover:translate-x-1"></i>
                       </div>
@@ -147,7 +147,7 @@ export default function OrderLookup() {
         )}
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-xs text-stone-500">
-          <span>Đã có tài khoản?</span><Link to="/login" className="font-bold text-[#4A2C2A] hover:underline">Đăng nhập để xem toàn bộ đơn mua</Link>
+          <span>Đã có tài khoản?</span><Link to="/login" className="font-bold text-brand-burgundy hover:underline">Đăng nhập để xem toàn bộ đơn mua</Link>
         </div>
       </div>
     </main>

@@ -40,7 +40,7 @@ export default function ShopWishlist() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FFFCF8] pb-8 pt-5 sm:bg-[#FAF7F2] sm:py-16">
+    <div className="min-h-screen bg-[#FFFCF8] pb-8 pt-5 sm:bg-brand-cream sm:py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-8">
         
         {/* Breadcrumb navigation */}
@@ -94,7 +94,7 @@ export default function ShopWishlist() {
             </p>
             <Link
               to="/shop"
-              className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#4A2C2A] sm:hover:bg-[#381B18] text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-sm sm:hover:shadow-md sm:hover:scale-[1.02] transition-all"
+              className="inline-flex items-center gap-2 px-8 py-3.5 bg-brand-burgundy sm:hover:bg-brand-deepWine text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-sm sm:hover:shadow-md sm:hover:scale-[1.02] transition-all"
             >
               <span>Khám Phá Cửa Hàng Ngay</span>
               <i className="ph-bold ph-arrow-right text-xs"></i>
@@ -166,14 +166,14 @@ export default function ShopWishlist() {
                     {/* Product Name */}
                     <Link
                       to={`/product/${product._id}`}
-                      className="mb-1.5 block min-h-9 line-clamp-2 px-3 font-serif-display text-sm font-bold leading-[1.3] text-stone-900 transition-colors sm:group-hover:text-[#8C4A32] sm:mb-2 sm:min-h-0 sm:line-clamp-1 sm:px-0 sm:text-lg"
+                      className="mb-1.5 block min-h-9 line-clamp-2 px-3 font-serif-display text-sm font-bold leading-[1.3] text-stone-900 transition-colors sm:group-hover:text-brand-terracotta sm:mb-2 sm:min-h-0 sm:line-clamp-1 sm:px-0 sm:text-lg"
                       title={product.name}
                     >
                       {product.name}
                     </Link>
 
                     {/* Price */}
-                    <div className="mb-2 mt-auto px-3 font-mono text-[13px] font-extrabold text-[#8C4A32] sm:mb-4 sm:px-0 sm:text-sm sm:text-stone-900">
+                    <div className="mb-2 mt-auto px-3 font-mono text-[13px] font-extrabold text-brand-terracotta sm:mb-4 sm:px-0 sm:text-sm sm:text-stone-900">
                       {new Intl.NumberFormat('vi-VN').format(product.base_price || 0)}đ
                     </div>
                   </div>
@@ -186,7 +186,7 @@ export default function ShopWishlist() {
                       className={`flex min-w-0 flex-1 items-center justify-center gap-1 rounded-xl px-1.5 py-2.5 text-[9px] font-bold uppercase tracking-wide shadow-sm transition-all active:scale-[0.98] sm:gap-1.5 sm:px-3 sm:text-xs ${
                         isAddedSuccess
                           ? 'bg-emerald-600 text-white'
-                          : 'bg-[#4A2C2A] sm:hover:bg-[#381B18] text-white'
+                          : 'bg-brand-burgundy sm:hover:bg-brand-deepWine text-white'
                       }`}
                     >
                       {isAdding ? (

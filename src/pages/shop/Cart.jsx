@@ -106,7 +106,7 @@ export default function Cart() {
   if (loading) {
     return (
       <div className="flex flex-col justify-center items-center h-[65vh] bg-[#fbf9f6]">
-        <div className="w-12 h-12 border-3 border-[#4A2C2A]/20 border-t-[#4A2C2A] rounded-full animate-spin mb-4"></div>
+        <div className="w-12 h-12 border-3 border-brand-burgundy/20 border-t-brand-burgundy rounded-full animate-spin mb-4"></div>
         <p className="text-sm font-serif-display text-stone-600 tracking-wider">Đang chuẩn bị giỏ hàng của bạn...</p>
       </div>
     );
@@ -120,17 +120,17 @@ export default function Cart() {
 
         {/* Breadcrumb Navigation */}
         <div className="mb-6 hidden items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-stone-400 sm:flex">
-          <Link to="/" className="sm:hover:text-[#4A2C2A] transition-colors">Trang Chủ</Link>
+          <Link to="/" className="sm:hover:text-brand-burgundy transition-colors">Trang Chủ</Link>
           <span className="text-stone-300">/</span>
-          <Link to="/shop" className="sm:hover:text-[#4A2C2A] transition-colors">Cửa Hàng</Link>
+          <Link to="/shop" className="sm:hover:text-brand-burgundy transition-colors">Cửa Hàng</Link>
           <span className="text-stone-300">/</span>
-          <span className="text-[#4A2C2A]">Giỏ Hàng ({cart?.items?.length || 0})</span>
+          <span className="text-brand-burgundy">Giỏ Hàng ({cart?.items?.length || 0})</span>
         </div>
 
         {/* Page Title & Tagline */}
         <header className="flex flex-col justify-between border-b border-stone-200/80 px-4 pb-4 pt-5 sm:mb-8 sm:flex-row sm:items-baseline sm:px-0 sm:pb-4 sm:pt-0">
           <div>
-            <h1 className="text-2xl sm:text-4xl font-serif-display text-[#4A2C2A] font-bold tracking-tight">
+            <h1 className="text-2xl sm:text-4xl font-serif-display text-brand-burgundy font-bold tracking-tight">
               Giỏ Hàng Của Bạn
             </h1>
             <p className="text-xs sm:text-sm text-stone-500 mt-1 font-normal">
@@ -140,7 +140,7 @@ export default function Cart() {
           {hasItems && (
             <Link
               to="/shop"
-              className="mt-2.5 sm:mt-0 text-[11px] sm:text-xs font-bold text-[#8C4A32] sm:hover:text-[#4A2C2A] uppercase tracking-wider flex items-center gap-1.5 group transition-colors"
+              className="mt-2.5 sm:mt-0 text-[11px] sm:text-xs font-bold text-brand-terracotta sm:hover:text-brand-burgundy uppercase tracking-wider flex items-center gap-1.5 group transition-colors"
             >
               <i className="ph-bold ph-arrow-left sm:group-hover:-translate-x-1 transition-transform"></i>
               Tiếp tục chọn thêm nến
@@ -151,10 +151,10 @@ export default function Cart() {
         {!hasItems ? (
           /* Empty Cart State */
           <section className="mx-auto max-w-2xl px-3 py-8 text-center sm:py-14">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 bg-[#FAF5EE] text-[#8C4A32] rounded-full flex items-center justify-center mx-auto mb-5 sm:mb-6 shadow-inner">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 bg-[#FAF5EE] text-brand-terracotta rounded-full flex items-center justify-center mx-auto mb-5 sm:mb-6 shadow-inner">
               <i className="ph-light ph-shopping-bag-open text-4xl sm:text-5xl"></i>
             </div>
-            <h2 className="text-xl sm:text-3xl font-serif-display text-[#4A2C2A] font-bold mb-2.5 sm:mb-3">
+            <h2 className="text-xl sm:text-3xl font-serif-display text-brand-burgundy font-bold mb-2.5 sm:mb-3">
               Giỏ hàng của bạn đang trống
             </h2>
             <p className="text-stone-500 mb-6 sm:mb-8 max-w-[480px] mx-auto text-xs sm:text-base leading-relaxed">
@@ -163,7 +163,7 @@ export default function Cart() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link
                 to="/shop"
-                className="w-full sm:w-auto inline-flex bg-[#4A2C2A] sm:hover:bg-[#341F1D] text-white text-xs font-bold uppercase tracking-widest rounded-full py-3.5 px-8 items-center justify-center gap-2 transition-all shadow-md active:scale-98"
+                className="w-full sm:w-auto inline-flex bg-brand-burgundy sm:hover:bg-[#341F1D] text-white text-xs font-bold uppercase tracking-widest rounded-full py-3.5 px-8 items-center justify-center gap-2 transition-all shadow-md active:scale-98"
               >
                 Khám phá bộ sưu tập nến
               </Link>
@@ -195,7 +195,7 @@ export default function Cart() {
                       </span>
                     ) : (
                       <span>
-                        Mua thêm <strong className="text-[#8C4A32]">{new Intl.NumberFormat('vi-VN').format(freeshipRemaining)}đ</strong> để được <strong className="text-emerald-700">Freeship</strong>
+                        Mua thêm <strong className="text-brand-terracotta">{new Intl.NumberFormat('vi-VN').format(freeshipRemaining)}đ</strong> để được <strong className="text-emerald-700">Freeship</strong>
                       </span>
                     )}
                   </div>
@@ -208,7 +208,7 @@ export default function Cart() {
                   <div
                     className={`h-full rounded-full transition-all duration-500 ${freeshipProgress >= 100
                       ? 'bg-gradient-to-r from-emerald-500 to-teal-500'
-                      : 'bg-gradient-to-r from-amber-500 to-[#8C4A32]'
+                      : 'bg-gradient-to-r from-amber-500 to-brand-terracotta'
                       }`}
                     style={{ width: `${freeshipProgress}%` }}
                   />
@@ -220,7 +220,7 @@ export default function Cart() {
                 <label className="flex items-center gap-2.5 cursor-pointer select-none">
                   <input
                     type="checkbox"
-                    className="w-4 h-4 rounded border-stone-300 text-[#4A2C2A] focus:ring-[#4A2C2A] cursor-pointer accent-[#4A2C2A]"
+                    className="w-4 h-4 rounded border-stone-300 text-brand-burgundy focus:ring-brand-burgundy cursor-pointer accent-brand-burgundy"
                     checked={isAllSelected}
                     onChange={toggleSelectAll}
                   />
@@ -276,7 +276,7 @@ export default function Cart() {
                         <div className="shrink-0 pt-7 sm:pt-10">
                           <input
                             type="checkbox"
-                            className="w-4 h-4 rounded border-stone-300 text-[#4A2C2A] focus:ring-[#4A2C2A] cursor-pointer accent-[#4A2C2A]"
+                            className="w-4 h-4 rounded border-stone-300 text-brand-burgundy focus:ring-brand-burgundy cursor-pointer accent-brand-burgundy"
                             checked={isItemActive}
                             onChange={() => toggleSelect(item)}
                           />
@@ -312,7 +312,7 @@ export default function Cart() {
                         <div className="flex-1 min-w-0 flex flex-col justify-between self-stretch">
                           <div>
                             <div className="flex items-start justify-between gap-1.5">
-                              <h3 className="text-xs sm:text-lg font-serif-display font-bold text-stone-900 leading-snug sm:hover:text-[#8C4A32] transition-colors line-clamp-2">
+                              <h3 className="text-xs sm:text-lg font-serif-display font-bold text-stone-900 leading-snug sm:hover:text-brand-terracotta transition-colors line-clamp-2">
                                 <Link to={`/product/${product._id}`}>{product.name}</Link>
                               </h3>
 
@@ -329,7 +329,7 @@ export default function Cart() {
                             {/* Scent / Variant Label */}
                             {item.sku_id && (
                               <div className="mt-1 flex items-center gap-1">
-                                <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-medium bg-[#FAF5EE] text-[#8C4A32] border border-amber-200/60 px-2 py-0.5 rounded-full truncate max-w-full">
+                                <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-medium bg-[#FAF5EE] text-brand-terracotta border border-amber-200/60 px-2 py-0.5 rounded-full truncate max-w-full">
                                   <i className="ph-fill ph-drop text-xs shrink-0"></i>
                                   <span className="truncate">{getVariantLabel(product, item.sku_id)}</span>
                                 </span>
@@ -338,7 +338,7 @@ export default function Cart() {
 
                             {/* Price Block */}
                             <div className="mt-1.5 sm:mt-2 flex items-baseline gap-1.5">
-                              <span className="text-xs sm:text-lg font-bold text-[#4A2C2A]">
+                              <span className="text-xs sm:text-lg font-bold text-brand-burgundy">
                                 {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price)}
                               </span>
                               {originalPrice > 0 && (
@@ -384,7 +384,7 @@ export default function Cart() {
                             {/* Item Subtotal */}
                             <div className="text-right">
                               <span className="text-[9px] uppercase tracking-wider text-stone-400 block font-bold">Thành tiền</span>
-                              <span className="text-xs sm:text-base font-bold text-[#8C4A32]">
+                              <span className="text-xs sm:text-base font-bold text-brand-terracotta">
                                 {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price * item.quantity)}
                               </span>
                             </div>
@@ -404,9 +404,9 @@ export default function Cart() {
 
               {/* Order Summary Sticky Card */}
               <div className="bg-white rounded-2xl shadow-sm border border-stone-200 p-5 sm:p-7 sticky top-24">
-                <h3 className="text-lg sm:text-xl font-serif-display text-[#4A2C2A] font-bold mb-4 sm:mb-5 pb-3 sm:pb-4 border-b border-stone-100 flex items-center justify-between">
+                <h3 className="text-lg sm:text-xl font-serif-display text-brand-burgundy font-bold mb-4 sm:mb-5 pb-3 sm:pb-4 border-b border-stone-100 flex items-center justify-between">
                   <span>Tóm Tắt Đơn Hàng</span>
-                  <span className="text-xs font-mono font-bold bg-[#FAF5EE] text-[#8C4A32] px-2.5 py-1 rounded-full border border-amber-200/50">
+                  <span className="text-xs font-mono font-bold bg-[#FAF5EE] text-brand-terracotta px-2.5 py-1 rounded-full border border-amber-200/50">
                     {selectedCount} món
                   </span>
                 </h3>
@@ -460,7 +460,7 @@ export default function Cart() {
                     <span className="text-xs font-bold tracking-widest uppercase text-stone-400">
                       Tổng Tạm Tính
                     </span>
-                    <span className="text-xl sm:text-3xl font-serif-display font-bold text-[#4A2C2A]">
+                    <span className="text-xl sm:text-3xl font-serif-display font-bold text-brand-burgundy">
                       {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(estimatedTotal)}
                     </span>
                   </div>
@@ -477,7 +477,7 @@ export default function Cart() {
                 <button
                   onClick={handleCheckout}
                   disabled={selectedItems.length === 0}
-                  className="w-full bg-[#4A2C2A] sm:hover:bg-[#341F1D] disabled:bg-stone-200 disabled:text-stone-400 disabled:cursor-not-allowed text-white text-xs font-bold uppercase tracking-widest rounded-xl py-4 px-6 flex items-center justify-center gap-2.5 transition-all shadow-md sm:hover:shadow-lg active:scale-98 cursor-pointer"
+                  className="w-full bg-brand-burgundy sm:hover:bg-[#341F1D] disabled:bg-stone-200 disabled:text-stone-400 disabled:cursor-not-allowed text-white text-xs font-bold uppercase tracking-widest rounded-xl py-4 px-6 flex items-center justify-center gap-2.5 transition-all shadow-md sm:hover:shadow-lg active:scale-98 cursor-pointer"
                 >
                   <span>Tiến hành đặt hàng ({selectedCount})</span>
                   <i className="ph-bold ph-arrow-right text-base"></i>
@@ -517,7 +517,7 @@ export default function Cart() {
             <label className="flex items-center gap-2 cursor-pointer select-none">
               <input
                 type="checkbox"
-                className="w-4 h-4 rounded border-stone-300 text-[#4A2C2A] focus:ring-[#4A2C2A] accent-[#4A2C2A] cursor-pointer"
+                className="w-4 h-4 rounded border-stone-300 text-brand-burgundy focus:ring-brand-burgundy accent-brand-burgundy cursor-pointer"
                 checked={isAllSelected}
                 onChange={toggleSelectAll}
               />
@@ -559,7 +559,7 @@ export default function Cart() {
             type="button"
             onClick={handleCheckout}
             disabled={selectedItems.length === 0}
-            className="flex w-32 shrink-0 cursor-pointer items-center justify-center gap-1 bg-gradient-to-r from-[#94432C] to-[#4A2C2A] px-2 text-xs font-bold uppercase tracking-wider text-white shadow-inner transition-all active:from-[#7D3824] active:to-[#38201F] disabled:cursor-not-allowed disabled:from-stone-300 disabled:to-stone-300 disabled:text-stone-400 sm:w-36 sm:text-sm"
+            className="flex w-32 shrink-0 cursor-pointer items-center justify-center gap-1 bg-gradient-to-r from-[#94432C] to-brand-burgundy px-2 text-xs font-bold uppercase tracking-wider text-white shadow-inner transition-all active:from-[#7D3824] active:to-[#38201F] disabled:cursor-not-allowed disabled:from-stone-300 disabled:to-stone-300 disabled:text-stone-400 sm:w-36 sm:text-sm"
           >
             <span>Mua Hàng</span>
             {selectedCount > 0 && (

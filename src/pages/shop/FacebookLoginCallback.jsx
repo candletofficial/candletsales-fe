@@ -34,7 +34,7 @@ export default function FacebookLoginCallback() {
   }, [completeSocialLogin, navigate]);
 
   return (
-    <main className="min-h-screen bg-[#FAF7F2] flex items-center justify-center p-5 text-stone-800">
+    <main className="shop-theme-scope min-h-screen bg-brand-cream flex items-center justify-center p-5 text-stone-800">
       <section className="w-full max-w-md rounded-3xl bg-white border border-stone-200 shadow-xl p-8 text-center">
         {error ? (
           <>
@@ -43,7 +43,7 @@ export default function FacebookLoginCallback() {
             </div>
             <h1 className="font-serif-display text-xl font-bold">Đăng nhập chưa hoàn tất</h1>
             <p className="mt-2 text-sm leading-relaxed text-stone-500">{error}</p>
-            <Link to="/login" className="mt-6 inline-flex px-5 py-2.5 rounded-xl bg-[#4A2C2A] text-sm font-bold text-white sm:hover:bg-[#341816]">
+            <Link to="/login" className="mt-6 inline-flex px-5 py-2.5 rounded-xl bg-brand-burgundy text-sm font-bold text-white sm:hover:bg-[#341816]">
               Quay lại đăng nhập
             </Link>
           </>

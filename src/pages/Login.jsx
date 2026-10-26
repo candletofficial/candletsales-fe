@@ -40,14 +40,14 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#f4e5df_0,_#faf7f5_42%,_#f5f0ed_100%)] flex flex-col items-center justify-center py-8 font-sans">
+    <div className="admin-theme-scope min-h-screen bg-[radial-gradient(circle_at_top,_var(--color-primary-container)_0,_var(--color-surface-container-low)_52%,_var(--color-surface)_100%)] flex flex-col items-center justify-center py-8 font-sans">
 
       {/* Header */}
       <div className="flex flex-col items-center mb-8">
         <div className="mb-6">
           <img src="/logo.png" alt="Candlet Shop" className="h-[48px] w-auto object-contain drop-shadow-sm" />
         </div>
-        <h1 className="text-[28px] font-bold text-[#2C1810] mb-2 tracking-tight">Đăng nhập</h1>
+        <h1 className="text-[28px] font-bold text-on-surface mb-2 tracking-tight">Đăng nhập</h1>
         <p className="text-[14px] font-medium text-[#78665E]">Hệ thống quản trị bán hàng chuyên nghiệp</p>
       </div>
 
@@ -61,7 +61,7 @@ export default function Login() {
           <div className="mb-5">
             <label className="block text-[13px] font-bold text-[#475569] mb-2">Email</label>
             <div className="relative group">
-              <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[#9b8982] group-focus-within:text-[#4A2C2A] text-[20px] transition-colors">person</span>
+              <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[#9b8982] group-focus-within:text-primary text-[20px] transition-colors">person</span>
               <input
                 name="email"
                 type="email"
@@ -69,7 +69,7 @@ export default function Login() {
                 onChange={handleChange}
                 required
                 placeholder="email@gmail.com"
-                className="w-full pl-[42px] pr-4 py-3 bg-white border border-[#d8cbc6] rounded-xl text-[14px] font-medium focus:outline-none focus:border-[#4A2C2A] focus:ring-1 focus:ring-[#4A2C2A] text-[#493a35] placeholder-[#9b8982] transition-all"
+                className="w-full pl-[42px] pr-4 py-3 bg-white border border-[#d8cbc6] rounded-xl text-[14px] font-medium focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-[#493a35] placeholder-[#9b8982] transition-all"
               />
             </div>
           </div>
@@ -78,10 +78,10 @@ export default function Login() {
           <div className="mb-6">
             <div className="flex justify-between items-center mb-2">
               <label className="text-[13px] font-bold text-[#475569]">Mật khẩu</label>
-              <Link to="/admin/forgot-password" className="text-[12px] font-bold text-[#4A2C2A] hover:text-[#381B18] hover:underline transition-colors">Quên mật khẩu?</Link>
+              <Link to="/admin/forgot-password" className="text-[12px] font-bold text-primary hover:text-on-primary-container hover:underline transition-colors">Quên mật khẩu?</Link>
             </div>
             <div className="relative group">
-              <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[#9b8982] group-focus-within:text-[#4A2C2A] text-[20px] transition-colors">lock</span>
+              <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[#9b8982] group-focus-within:text-primary text-[20px] transition-colors">lock</span>
               <input
                 name="password"
                 type={showPassword ? 'text' : 'password'}
@@ -89,7 +89,7 @@ export default function Login() {
                 onChange={handleChange}
                 required
                 placeholder="••••••••"
-                className="w-full pl-[42px] pr-[42px] py-3 bg-white border border-[#d8cbc6] rounded-xl text-[14px] font-medium focus:outline-none focus:border-[#4A2C2A] focus:ring-1 focus:ring-[#4A2C2A] text-[#493a35] placeholder-[#d8cbc6] tracking-widest transition-all"
+                className="w-full pl-[42px] pr-[42px] py-3 bg-white border border-[#d8cbc6] rounded-xl text-[14px] font-medium focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-[#493a35] placeholder-[#d8cbc6] tracking-widest transition-all"
               />
               <button
                 type="button"
@@ -107,7 +107,7 @@ export default function Login() {
               <input
                 type="checkbox"
                 id="remember"
-                className="peer appearance-none w-[18px] h-[18px] border-2 border-[#d8cbc6] rounded-[4px] checked:bg-[#4A2C2A] checked:border-[#4A2C2A] focus:outline-none focus:ring-2 focus:ring-[#4A2C2A]/20 transition-all cursor-pointer"
+                className="peer appearance-none w-[18px] h-[18px] border-2 border-[#d8cbc6] rounded-[4px] checked:bg-primary checked:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer"
               />
               <span className="material-symbols-outlined absolute text-white text-[14px] pointer-events-none opacity-0 peer-checked:opacity-100 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-bold transition-opacity">check</span>
             </div>
@@ -120,7 +120,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#4A2C2A] hover:bg-[#381B18] text-white font-bold text-[14px] py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_4px_14px_rgba(91,48,40,0.22)] hover:shadow-[0_7px_20px_rgba(91,48,40,0.28)] disabled:opacity-70 disabled:shadow-none"
+            className="w-full bg-primary hover:bg-on-primary-container text-white font-bold text-[14px] py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_4px_14px_rgba(91,48,40,0.22)] hover:shadow-[0_7px_20px_rgba(91,48,40,0.28)] disabled:opacity-70 disabled:shadow-none"
           >
             {loading ? (
               <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -137,19 +137,19 @@ export default function Login() {
         <div className="text-center pt-5 border-t border-[#f1f5f9]">
           <p className="text-[13px] font-medium text-[#475569]">
             Bạn chưa có tài khoản?{' '}
-            <Link to="/admin/register" className="font-bold text-[#4A2C2A] hover:text-[#381B18] hover:underline transition-colors ml-1">Đăng ký ngay</Link>
+            <Link to="/admin/register" className="font-bold text-primary hover:text-on-primary-container hover:underline transition-colors ml-1">Đăng ký ngay</Link>
           </p>
         </div>
       </div>
 
       {/* Footer */}
       <div className="mt-10 flex items-center gap-6 text-[13px] text-[#78665E] font-semibold">
-        <button className="flex items-center gap-1.5 hover:text-[#2C1810] transition-colors">
+        <button className="flex items-center gap-1.5 hover:text-on-surface transition-colors">
           <span className="material-symbols-outlined text-[16px]">language</span>
           Tiếng Việt
         </button>
-        <button className="hover:text-[#2C1810] transition-colors">Hỗ trợ</button>
-        <button className="hover:text-[#2C1810] transition-colors">Bảo mật</button>
+        <button className="hover:text-on-surface transition-colors">Hỗ trợ</button>
+        <button className="hover:text-on-surface transition-colors">Bảo mật</button>
       </div>
 
     </div>

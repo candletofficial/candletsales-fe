@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { orderService } from '../../services/orderService';
 import { getImageUrl } from '../../utils/imageUtils';
-import { getSpxTrackingUrl } from '../../utils/spxTracking';
+import { getCarrierTracking } from '../../utils/shippingCarriers';
 
 export default function ShopOrders() {
   const { user } = useAuth();
@@ -227,22 +227,22 @@ export default function ShopOrders() {
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="flex size-9 items-center justify-center rounded-full text-[#4A2C2A] active:bg-[#F4ECE7] sm:hidden"
+            className="flex size-9 items-center justify-center rounded-full text-brand-burgundy active:bg-[#F4ECE7] sm:hidden"
             aria-label="Quay lại"
           >
             <i className="ph-bold ph-arrow-left text-lg"></i>
           </button>
           <div>
             <div className="mb-1 hidden flex-wrap items-center text-[11px] font-bold uppercase tracking-widest text-stone-400 sm:flex">
-              <Link to="/" className="sm:hover:text-[#4A2C2A] transition-colors">
+              <Link to="/" className="sm:hover:text-brand-burgundy transition-colors">
                 Trang Chủ
               </Link>
               <span className="mx-2 text-stone-300">/</span>
-              <Link to="/profile" className="sm:hover:text-[#4A2C2A] transition-colors">
+              <Link to="/profile" className="sm:hover:text-brand-burgundy transition-colors">
                 Tài Khoản
               </Link>
               <span className="mx-2 text-stone-300">/</span>
-              <span className="text-[#8C4A32]">Đơn Mua</span>
+              <span className="text-brand-terracotta">Đơn Mua</span>
             </div>
             <h1 className="text-center text-base font-bold leading-tight text-[#3B2422] sm:text-left sm:font-serif-display sm:text-3xl">
               Đơn hàng của bạn
@@ -262,14 +262,14 @@ export default function ShopOrders() {
             </Link>
             <Link
               to="/shop"
-              className="hidden h-9 items-center gap-1.5 rounded-xl bg-[#4A2C2A] px-3 text-[11px] font-bold text-white shadow-2xs transition-colors sm:hover:bg-[#381B18] sm:inline-flex sm:h-auto sm:rounded-2xl sm:px-4 sm:py-2.5 sm:text-xs"
+              className="hidden h-9 items-center gap-1.5 rounded-xl bg-brand-burgundy px-3 text-[11px] font-bold text-white shadow-2xs transition-colors sm:hover:bg-brand-deepWine sm:inline-flex sm:h-auto sm:rounded-2xl sm:px-4 sm:py-2.5 sm:text-xs"
             >
               <span>Mua thêm nến</span>
               <i className="ph-bold ph-arrow-right text-xs"></i>
             </Link>
             <Link
               to="/shop"
-              className="flex size-9 items-center justify-center rounded-full text-[#4A2C2A] active:bg-[#F4ECE7] sm:hidden"
+              className="flex size-9 items-center justify-center rounded-full text-brand-burgundy active:bg-[#F4ECE7] sm:hidden"
               aria-label="Đến cửa hàng"
             >
               <i className="ph-bold ph-storefront text-lg"></i>
@@ -306,7 +306,7 @@ export default function ShopOrders() {
             )}
           </div>
 
-          {/* Nút lọc nhanh đơn Hỏa tốc 4h */}
+          {/* Nút lọc nhanh đơn Hỏa tốc */}
           <button
             onClick={() => setFilterExpressOnly(!filterExpressOnly)}
             className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border text-xs font-bold transition-all cursor-pointer whitespace-nowrap sm:h-auto sm:w-auto sm:gap-2 sm:rounded-2xl sm:px-4 sm:py-2.5 ${
@@ -316,7 +316,7 @@ export default function ShopOrders() {
             }`}
           >
             <i className={`ph-fill ph-lightning text-xs ${filterExpressOnly ? 'text-white' : 'text-orange-500'}`}></i>
-            <span className="hidden sm:inline">Chỉ đơn Hỏa tốc 4h</span>
+            <span className="hidden sm:inline">Chỉ đơn Hỏa tốc</span>
           </button>
         </div>
 
@@ -337,7 +337,7 @@ export default function ShopOrders() {
               onClick={() => setActiveTab(tab.key)}
               className={`flex items-center gap-1.5 whitespace-nowrap border-b-2 px-3 py-3 text-[11px] transition-all cursor-pointer sm:rounded-full sm:border sm:px-4 sm:py-2.5 sm:text-xs sm:shadow-2xs ${
                 activeTab === tab.key
-                  ? 'border-[#8C4A32] bg-transparent text-[#6B3D35] font-bold sm:bg-[#4A2C2A] sm:text-white sm:border-[#4A2C2A]'
+                  ? 'border-brand-terracotta bg-transparent text-[#6B3D35] font-bold sm:bg-brand-burgundy sm:text-white sm:border-brand-burgundy'
                   : 'border-transparent bg-transparent text-stone-500 sm:hover:text-stone-900 sm:bg-white sm:border-stone-200/80 sm:hover:bg-stone-50'
               }`}
             >
@@ -361,17 +361,17 @@ export default function ShopOrders() {
         {/* ======================================================== */}
         {loading ? (
           <div className="flex flex-col justify-center items-center py-20 bg-white rounded-3xl border border-stone-200/80">
-            <div className="w-10 h-10 border-3 border-[#4A2C2A]/20 border-t-[#4A2C2A] rounded-full animate-spin mb-3"></div>
+            <div className="w-10 h-10 border-3 border-brand-burgundy/20 border-t-brand-burgundy rounded-full animate-spin mb-3"></div>
             <p className="text-xs font-serif-display text-stone-500 tracking-wider">
               Đang tải danh sách đơn hàng nến thơm...
             </p>
           </div>
         ) : filteredOrders.length === 0 ? (
           <div className="bg-white rounded-3xl p-12 text-center border border-stone-200/90 shadow-sm space-y-4">
-            <div className="w-16 h-16 rounded-3xl bg-[#FAF5EE] text-[#8C4A32] flex items-center justify-center mx-auto text-2xl">
+            <div className="w-16 h-16 rounded-3xl bg-[#FAF5EE] text-brand-terracotta flex items-center justify-center mx-auto text-2xl">
               <i className="ph-light ph-receipt"></i>
             </div>
-            <h3 className="text-lg font-serif-display font-bold text-[#4A2C2A]">
+            <h3 className="text-lg font-serif-display font-bold text-brand-burgundy">
               Không tìm thấy đơn hàng nào
             </h3>
             <p className="text-xs sm:text-sm text-stone-500 max-w-md mx-auto leading-relaxed">
@@ -385,7 +385,7 @@ export default function ShopOrders() {
               {!user ? (
                 <Link
                   to="/order-lookup"
-                  className="inline-flex items-center gap-2 rounded-full bg-[#4A2C2A] px-6 py-3 text-xs font-bold uppercase tracking-wider text-white shadow-sm transition-all sm:hover:bg-[#381B18]"
+                  className="inline-flex items-center gap-2 rounded-full bg-brand-burgundy px-6 py-3 text-xs font-bold uppercase tracking-wider text-white shadow-sm transition-all sm:hover:bg-brand-deepWine"
                 >
                   <i className="ph-bold ph-magnifying-glass"></i>
                   <span>Tra cứu đơn hàng</span>
@@ -397,14 +397,14 @@ export default function ShopOrders() {
                     setFilterExpressOnly(false);
                     setActiveTab('all');
                   }}
-                  className="px-5 py-2.5 rounded-full text-xs font-bold text-[#4A2C2A] bg-stone-100 sm:hover:bg-stone-200 transition-colors"
+                  className="px-5 py-2.5 rounded-full text-xs font-bold text-brand-burgundy bg-stone-100 sm:hover:bg-stone-200 transition-colors"
                 >
                   Xóa bộ lọc
                 </button>
               ) : (
                 <Link
                   to="/shop"
-                  className="inline-flex items-center gap-2 bg-[#4A2C2A] sm:hover:bg-[#381B18] text-white text-xs font-bold uppercase tracking-wider py-3 px-6 rounded-full shadow-sm transition-all"
+                  className="inline-flex items-center gap-2 bg-brand-burgundy sm:hover:bg-brand-deepWine text-white text-xs font-bold uppercase tracking-wider py-3 px-6 rounded-full shadow-sm transition-all"
                 >
                   <span>Khám phá nến thơm</span>
                   <i className="ph-bold ph-arrow-right text-xs"></i>
@@ -422,7 +422,7 @@ export default function ShopOrders() {
               const mobileStatus = getMobileStatus(dStatus);
               const firstItem = order.items?.[0];
               const remainingItems = Math.max((order.items?.length || 0) - 1, 0);
-              const spxTrackingUrl = getSpxTrackingUrl(order);
+              const carrierTracking = getCarrierTracking(order);
 
               return (
                 <React.Fragment key={order._id || order.orderId}>
@@ -492,8 +492,18 @@ export default function ShopOrders() {
                   <footer className="border-t border-[#F0EAE6] bg-[#FCFAF8] px-3.5 py-3">
                     <div className="mb-3 flex items-end justify-between gap-3">
                       <div>
+                        {carrierTracking.carrierId && (
+                          <span className="mb-1.5 inline-flex items-center gap-1.5 rounded-full border border-[#E8E0DB] bg-white px-2 py-1 text-[9px] font-bold text-stone-700">
+                            {carrierTracking.carrier.logo ? (
+                              <img src={carrierTracking.carrier.logo} alt="" className="size-4 rounded object-contain" />
+                            ) : (
+                              <i className="ph-bold ph-truck" style={{ color: carrierTracking.carrier.color }}></i>
+                            )}
+                            {carrierTracking.carrier.name}
+                          </span>
+                        )}
                         <p className="text-[9px] uppercase tracking-[0.12em] text-stone-400">
-                          {isExpress ? 'Giao hỏa tốc 4h' : 'Giao hàng tiêu chuẩn'}
+                          {isExpress ? 'Giao hỏa tốc' : 'Giao hàng tiêu chuẩn'}
                         </p>
                         <p className="mt-1 text-[10px] font-medium text-stone-500">
                           {order.payment_method === 'transfer' ? 'Chuyển khoản' : 'Thanh toán khi nhận hàng'}
@@ -501,22 +511,23 @@ export default function ShopOrders() {
                       </div>
                       <div className="text-right">
                         <p className="text-[9px] text-stone-400">Tổng thanh toán</p>
-                        <p className="font-mono text-base font-bold text-[#8C4A32]">{formatPrice(order.total_price)}</p>
+                        <p className="font-mono text-base font-bold text-brand-terracotta">{formatPrice(order.total_price)}</p>
                       </div>
                     </div>
 
                     <div className="flex items-center justify-end gap-2">
-                      {spxTrackingUrl && (
+                      {carrierTracking.trackingUrl && (
                         <a
-                          href={spxTrackingUrl}
+                          href={carrierTracking.trackingUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex min-h-9 shrink-0 items-center justify-center gap-1 rounded-full border border-orange-200 bg-orange-50 px-3 text-[10px] font-bold text-orange-700"
-                          aria-label="Xem hành trình trên SPX"
-                          title="Xem hành trình trên SPX"
+                          className="inline-flex min-h-9 shrink-0 items-center justify-center gap-1 rounded-full border px-3 text-[10px] font-bold"
+                          style={{ borderColor: `${carrierTracking.carrier.color}55`, color: carrierTracking.carrier.color, backgroundColor: `${carrierTracking.carrier.color}0d` }}
+                          aria-label={`Xem hành trình trên ${carrierTracking.carrier.name}`}
+                          title={`Xem hành trình trên ${carrierTracking.carrier.name}`}
                         >
                           <i className="ph-bold ph-truck text-sm"></i>
-                          SPX
+                          {carrierTracking.carrier.shortName}
                         </a>
                       )}
                       {canCancel(order) && (
@@ -543,7 +554,7 @@ export default function ShopOrders() {
                       <button
                         type="button"
                         onClick={() => setSelectedOrderDetail(order)}
-                        className="rounded-full bg-[#4A2C2A] px-5 py-2 text-[11px] font-bold text-white"
+                        className="rounded-full bg-brand-burgundy px-5 py-2 text-[11px] font-bold text-white"
                       >
                         Xem chi tiết
                       </button>
@@ -565,7 +576,7 @@ export default function ShopOrders() {
                       : 'bg-white border-[#EEE6E1]'
                   }`}>
                     <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
-                      <span className="font-mono text-[11px] font-bold tracking-wide text-[#4A2C2A] sm:text-sm">
+                      <span className="font-mono text-[11px] font-bold tracking-wide text-brand-burgundy sm:text-sm">
                         #{order.orderId}
                       </span>
 
@@ -672,7 +683,7 @@ export default function ShopOrders() {
                           </div>
                           <span className="text-[11px] font-bold text-stone-700 mt-1.5">Đang giao</span>
                           <span className="text-[9.5px] text-stone-400">
-                            {isExpress ? 'Hỏa tốc 4h' : 'Tiêu chuẩn'}
+                            {isExpress ? 'Hỏa tốc' : 'Tiêu chuẩn'}
                           </span>
                         </div>
 
@@ -722,11 +733,11 @@ export default function ShopOrders() {
                       <div className="min-w-0">
                         <p className="truncate text-xs font-bold text-stone-900">{order.items?.[0]?.product_name || 'Đơn hàng Candlet'}</p>
                         <p className="mt-0.5 text-[10px] text-stone-400">
-                          {order.items?.length || 0} sản phẩm · {isExpress ? 'Hỏa tốc 4h' : 'Giao tiêu chuẩn'}
+                          {order.items?.length || 0} sản phẩm · {isExpress ? 'Hỏa tốc' : 'Giao tiêu chuẩn'}
                         </p>
                       </div>
                     </div>
-                    <span className="shrink-0 font-mono text-sm font-bold text-[#8C4A32]">{formatPrice(order.total_price)}</span>
+                    <span className="shrink-0 font-mono text-sm font-bold text-brand-terracotta">{formatPrice(order.total_price)}</span>
                   </div>
 
                   <div className="hidden divide-y divide-stone-100 p-4 sm:block sm:p-6">
@@ -750,7 +761,7 @@ export default function ShopOrders() {
                               {item.product_name}
                             </p>
                             {item.sku_label && (
-                              <p className="text-[11px] text-[#8C4A32] font-semibold mt-0.5">
+                              <p className="text-[11px] text-brand-terracotta font-semibold mt-0.5">
                                 {item.sku_label}
                               </p>
                             )}
@@ -761,7 +772,7 @@ export default function ShopOrders() {
                         </div>
 
                         <div className="text-right shrink-0">
-                          <p className="text-xs sm:text-sm font-bold font-mono text-[#4A2C2A]">
+                          <p className="text-xs sm:text-sm font-bold font-mono text-brand-burgundy">
                             {formatPrice((item.unit_price || 0) * (item.quantity || 1))}
                           </p>
                           <p className="text-[10px] text-stone-400">
@@ -774,12 +785,12 @@ export default function ShopOrders() {
 
                   {/* THÔNG ĐIỆP BÍ MẬT / GHI CHÚ QUÀ TẶNG (NẾU CÓ) */}
                   {order.note && (
-                    <div className="mx-4 mb-4 hidden items-start gap-3 rounded-2xl border border-[#EADBCA] bg-gradient-to-r from-[#FAF5EE] to-[#F5EFE6] p-3.5 text-xs text-[#4A2C2A] sm:mx-6 sm:flex">
-                      <div className="w-7 h-7 rounded-xl bg-white text-[#8C4A32] flex items-center justify-center shrink-0 shadow-2xs">
+                    <div className="mx-4 mb-4 hidden items-start gap-3 rounded-2xl border border-[#EADBCA] bg-gradient-to-r from-[#FAF5EE] to-brand-warmIvory p-3.5 text-xs text-brand-burgundy sm:mx-6 sm:flex">
+                      <div className="w-7 h-7 rounded-xl bg-white text-brand-terracotta flex items-center justify-center shrink-0 shadow-2xs">
                         <i className="ph-fill ph-chat-centered-text text-sm"></i>
                       </div>
                       <div>
-                        <span className="font-bold uppercase tracking-wider text-[10px] text-[#8C4A32] block">
+                        <span className="font-bold uppercase tracking-wider text-[10px] text-brand-terracotta block">
                           Lời nhắn / Thông điệp nến quà tặng:
                         </span>
                         <p className="italic text-stone-700 mt-0.5">"{order.note}"</p>
@@ -811,12 +822,23 @@ export default function ShopOrders() {
                         <span>•</span>
                         {isExpress ? (
                           <span className="inline-flex items-center gap-1 font-bold text-orange-600">
-                            <i className="ph-fill ph-lightning text-xs"></i> Hỏa tốc 4h
+                            <i className="ph-fill ph-lightning text-xs"></i> Hỏa tốc
                           </span>
                         ) : (
                           <span>Giao Tiêu chuẩn</span>
                         )}
                       </div>
+                      {carrierTracking.carrierId && (
+                        <div className="flex items-center gap-2 pt-1 text-[11px] text-stone-600">
+                          {carrierTracking.carrier.logo ? (
+                            <img src={carrierTracking.carrier.logo} alt="" className="size-5 rounded-md border border-stone-100 object-contain" />
+                          ) : (
+                            <i className="ph-bold ph-truck" style={{ color: carrierTracking.carrier.color }}></i>
+                          )}
+                          <span>Đơn vị vận chuyển: <strong className="text-stone-800">{carrierTracking.carrier.name}</strong></span>
+                          {carrierTracking.trackingNumber && <span className="font-mono text-[10px] text-stone-400">#{carrierTracking.trackingNumber}</span>}
+                        </div>
+                      )}
                     </div>
 
                     {/* Cột phải: Tổng tiền và các nút bấm */}
@@ -825,20 +847,21 @@ export default function ShopOrders() {
                         <span className="text-[10px] text-stone-500 uppercase tracking-wider block">
                           Tổng thanh toán
                         </span>
-                        <span className="text-base sm:text-lg font-bold font-mono text-[#8C4A32]">
+                        <span className="text-base sm:text-lg font-bold font-mono text-brand-terracotta">
                           {formatPrice(order.total_price)}
                         </span>
                       </div>
 
-                      {spxTrackingUrl && (
+                      {carrierTracking.trackingUrl && (
                         <a
-                          href={spxTrackingUrl}
+                          href={carrierTracking.trackingUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 rounded-2xl border border-orange-200 bg-orange-50 px-3.5 py-2 text-xs font-bold text-orange-700 transition-colors sm:hover:bg-orange-100"
+                          className="inline-flex items-center gap-1.5 rounded-2xl border px-3.5 py-2 text-xs font-bold transition-opacity hover:opacity-80"
+                          style={{ borderColor: `${carrierTracking.carrier.color}55`, color: carrierTracking.carrier.color, backgroundColor: `${carrierTracking.carrier.color}0d` }}
                         >
                           <i className="ph-bold ph-truck text-sm"></i>
-                          SPX
+                          {carrierTracking.carrier.shortName}
                         </a>
                       )}
 
@@ -882,7 +905,7 @@ export default function ShopOrders() {
                       {(dStatus === 'delivered' || isCancelled) && (
                         <Link
                           to="/shop"
-                          className="px-3.5 py-2 rounded-2xl text-xs font-bold text-white bg-[#4A2C2A] sm:hover:bg-[#381B18] transition-all shadow-2xs"
+                          className="px-3.5 py-2 rounded-2xl text-xs font-bold text-white bg-brand-burgundy sm:hover:bg-brand-deepWine transition-all shadow-2xs"
                         >
                           Mua lại
                         </Link>
@@ -908,12 +931,12 @@ export default function ShopOrders() {
             {/* Header Modal */}
             <div className="flex items-center justify-between pb-4 border-b border-stone-100">
               <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-2xl bg-[#FAF5EE] text-[#8C4A32] flex items-center justify-center text-lg">
+                <div className="w-10 h-10 rounded-2xl bg-[#FAF5EE] text-brand-terracotta flex items-center justify-center text-lg">
                   <i className="ph-bold ph-receipt"></i>
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="text-lg font-serif-display font-bold text-[#4A2C2A]">
+                    <h3 className="text-lg font-serif-display font-bold text-brand-burgundy">
                       Chi Tiết Đơn Hàng #{selectedOrderDetail.orderId}
                     </h3>
                     {selectedOrderDetail.shippingMethod === 'express' && (
@@ -954,7 +977,7 @@ export default function ShopOrders() {
 
             {/* Thông tin nhận hàng */}
             <div className="space-y-2">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[#8C4A32] flex items-center gap-1.5">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-brand-terracotta flex items-center gap-1.5">
                 <i className="ph-bold ph-map-pin"></i>
                 Địa chỉ nhận hàng
               </h4>
@@ -969,14 +992,14 @@ export default function ShopOrders() {
                   Phương thức: {selectedOrderDetail.payment_method === 'transfer'
                     ? (selectedOrderDetail.payment_status === 'refunded' ? 'Chuyển khoản — Đã hoàn tiền' : selectedOrderDetail.payment_status === 'paid' ? 'Chuyển khoản — Đã thanh toán' : 'Chuyển khoản — Chờ xác nhận')
                     : 'COD (Thanh toán khi nhận hàng)'} • Vận chuyển:{' '}
-                  {selectedOrderDetail.shippingMethod === 'express' ? 'Hỏa tốc 4h' : 'Tiêu chuẩn'}
+                  {selectedOrderDetail.shippingMethod === 'express' ? 'Hỏa tốc' : 'Tiêu chuẩn'}
                 </p>
               </div>
             </div>
 
             {/* Danh sách sản phẩm chi tiết */}
             <div className="space-y-3">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[#8C4A32] flex items-center gap-1.5">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-brand-terracotta flex items-center gap-1.5">
                 <i className="ph-bold ph-package"></i>
                 Sản phẩm đã đặt ({selectedOrderDetail.items?.length || 0})
               </h4>
@@ -998,7 +1021,7 @@ export default function ShopOrders() {
                       <div className="min-w-0">
                         <p className="text-xs font-bold text-stone-900 truncate">{item.product_name}</p>
                         {item.sku_label && (
-                          <p className="text-[11px] text-[#8C4A32]">{item.sku_label}</p>
+                          <p className="text-[11px] text-brand-terracotta">{item.sku_label}</p>
                         )}
                         <p className="text-[11px] text-stone-400">
                           {formatPrice(item.unit_price)} × {item.quantity}
@@ -1006,7 +1029,7 @@ export default function ShopOrders() {
                       </div>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-xs font-bold font-mono text-[#4A2C2A]">
+                      <p className="text-xs font-bold font-mono text-brand-burgundy">
                         {formatPrice((item.unit_price || 0) * (item.quantity || 1))}
                       </p>
                     </div>
@@ -1038,9 +1061,9 @@ export default function ShopOrders() {
                   <span className="font-mono">-{formatPrice(selectedOrderDetail.discount_amount)}</span>
                 </div>
               )}
-              <div className="pt-2 border-t border-stone-200 flex justify-between text-sm font-bold text-[#4A2C2A]">
+              <div className="pt-2 border-t border-stone-200 flex justify-between text-sm font-bold text-brand-burgundy">
                 <span>Tổng thanh toán:</span>
-                <span className="font-mono text-base text-[#8C4A32]">
+                <span className="font-mono text-base text-brand-terracotta">
                   {formatPrice(selectedOrderDetail.total_price)}
                 </span>
               </div>
@@ -1070,7 +1093,7 @@ export default function ShopOrders() {
             </div>
 
             <div className="text-center">
-              <h3 className="text-lg font-bold text-[#4A2C2A] font-serif-display">
+              <h3 className="text-lg font-bold text-brand-burgundy font-serif-display">
                 Xác nhận huỷ đơn hàng #{cancelModalOrder.orderId}
               </h3>
               <p className="text-xs text-stone-500 mt-1">
@@ -1097,7 +1120,7 @@ export default function ShopOrders() {
                     onClick={() => setCancelReason(reason)}
                     className={`text-[11px] px-2.5 py-1 rounded-xl transition-all cursor-pointer border ${
                       cancelReason === reason
-                        ? 'bg-[#4A2C2A] text-white border-[#4A2C2A]'
+                        ? 'bg-brand-burgundy text-white border-brand-burgundy'
                         : 'bg-stone-50 text-stone-600 border-stone-200 sm:hover:bg-stone-100'
                     }`}
                   >
@@ -1117,7 +1140,7 @@ export default function ShopOrders() {
                 value={cancelReason}
                 onChange={e => setCancelReason(e.target.value)}
                 placeholder="Nhập lý do huỷ đơn hàng..."
-                className="w-full text-xs p-3 rounded-2xl border border-stone-200 focus:outline-none focus:border-[#4A2C2A] resize-none"
+                className="w-full text-xs p-3 rounded-2xl border border-stone-200 focus:outline-none focus:border-brand-burgundy resize-none"
               />
             </div>
 

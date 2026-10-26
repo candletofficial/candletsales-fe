@@ -191,7 +191,7 @@ export default function ShopProfile() {
   const getMembershipTier = (spent) => {
     if (spent >= 3000000) return { title: 'Thành viên Vàng (Gold)', badge: 'bg-gradient-to-r from-amber-400 to-amber-600 text-white', icon: 'ph-crown' };
     if (spent >= 1000000) return { title: 'Thành viên Bạc (Silver)', badge: 'bg-gradient-to-r from-stone-400 to-stone-600 text-white', icon: 'ph-star' };
-    return { title: 'Thành viên Thân thiết', badge: 'bg-[#FAF5EE] text-[#8C4A32] border border-[#8C4A32]/30' };
+    return { title: 'Thành viên Thân thiết', badge: 'bg-[#FAF5EE] text-brand-terracotta border border-brand-terracotta/30' };
   };
 
   const membership = getMembershipTier(stats.totalSpent);
@@ -215,11 +215,11 @@ export default function ShopProfile() {
 
         {/* Breadcrumbs */}
         <div className="hidden flex-wrap items-center text-[11px] font-bold uppercase tracking-widest text-stone-400 sm:flex">
-          <Link to="/" className="sm:hover:text-[#4A2C2A] transition-colors">
+          <Link to="/" className="sm:hover:text-brand-burgundy transition-colors">
             Trang Chủ
           </Link>
           <span className="mx-2 text-stone-300">/</span>
-          <span className="text-[#8C4A32]">Trung Tâm Khách Hàng</span>
+          <span className="text-brand-terracotta">Trung Tâm Khách Hàng</span>
         </div>
 
         {/* TOAST ALERT BANNER */}
@@ -238,7 +238,7 @@ export default function ShopProfile() {
         {/* ======================================================== */}
         {/* HEADER HERO CARD: THẺ THÀNH VIÊN VÀ THỐNG KÊ NHANH       */}
         {/* ======================================================== */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-[#4A2C2A] via-[#3D2422] to-[#251312] p-4 text-white sm:rounded-3xl sm:border sm:border-[#4A2C2A]/40 sm:p-8 sm:shadow-xl lg:p-10">
+        <div className="relative overflow-hidden bg-gradient-to-br from-brand-burgundy via-[#3D2422] to-[#251312] p-4 text-white sm:rounded-3xl sm:border sm:border-brand-burgundy/40 sm:p-8 sm:shadow-xl lg:p-10">
           {/* Background Ambient Glow */}
           <div className="pointer-events-none absolute -bottom-20 -right-20 hidden size-80 rounded-full bg-amber-500/10 blur-3xl sm:block"></div>
           <div className="pointer-events-none absolute -left-20 -top-20 hidden size-80 rounded-full bg-rose-500/10 blur-3xl sm:block"></div>
@@ -247,10 +247,10 @@ export default function ShopProfile() {
             {/* Cột trái: Thông tin đại diện & Hạng */}
             <div className="flex items-center gap-3 sm:gap-5">
               <div className="relative shrink-0">
-                <div className="flex size-16 items-center justify-center rounded-full bg-gradient-to-br from-[#FAF5EE] to-[#EADBCA] font-serif-display text-2xl font-bold text-[#4A2C2A] ring-2 ring-white/15 sm:size-24 sm:rounded-2xl sm:text-4xl sm:shadow-lg sm:ring-4">
+                <div className="flex size-16 items-center justify-center rounded-full bg-gradient-to-br from-[#FAF5EE] to-[#EADBCA] font-serif-display text-2xl font-bold text-brand-burgundy ring-2 ring-white/15 sm:size-24 sm:rounded-2xl sm:text-4xl sm:shadow-lg sm:ring-4">
                   {user?.name ? user.name.charAt(0).toUpperCase() : 'C'}
                 </div>
-                <div className="absolute -bottom-1 -right-1 flex size-6 items-center justify-center rounded-full bg-amber-400 text-xs text-stone-900 shadow-md ring-2 ring-[#4A2C2A] sm:size-7 sm:text-sm">
+                <div className="absolute -bottom-1 -right-1 flex size-6 items-center justify-center rounded-full bg-amber-400 text-xs text-stone-900 shadow-md ring-2 ring-brand-burgundy sm:size-7 sm:text-sm">
                   <i className="ph-fill ph-flame"></i>
                 </div>
               </div>
@@ -344,7 +344,7 @@ export default function ShopProfile() {
         {/* Thống kê và điều hướng nhanh riêng cho mobile */}
         <nav className="grid grid-cols-4 border-b-8 border-stone-100 bg-white lg:hidden" aria-label="Lối tắt tài khoản">
           <Link to="/orders" className="border-r border-stone-100 px-1 py-3 text-center">
-            <strong className="block text-lg text-[#4A2C2A]">{stats.totalOrders}</strong>
+            <strong className="block text-lg text-brand-burgundy">{stats.totalOrders}</strong>
             <span className="mt-0.5 block text-[10px] text-stone-500">Đơn mua</span>
           </Link>
           <Link to="/orders" className="border-r border-stone-100 px-1 py-3 text-center">
@@ -365,14 +365,14 @@ export default function ShopProfile() {
           <button
             type="button"
             onClick={() => setActiveTab('info')}
-            className={`border-b-2 px-3 py-3.5 text-xs font-bold ${activeTab === 'info' ? 'border-[#8C4A32] text-[#4A2C2A]' : 'border-transparent text-stone-500'}`}
+            className={`border-b-2 px-3 py-3.5 text-xs font-bold ${activeTab === 'info' ? 'border-brand-terracotta text-brand-burgundy' : 'border-transparent text-stone-500'}`}
           >
             Hồ sơ & Địa chỉ
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('password')}
-            className={`border-b-2 px-3 py-3.5 text-xs font-bold ${activeTab === 'password' ? 'border-[#8C4A32] text-[#4A2C2A]' : 'border-transparent text-stone-500'}`}
+            className={`border-b-2 px-3 py-3.5 text-xs font-bold ${activeTab === 'password' ? 'border-brand-terracotta text-brand-burgundy' : 'border-transparent text-stone-500'}`}
           >
             Mật khẩu & Bảo mật
           </button>
@@ -394,12 +394,12 @@ export default function ShopProfile() {
               <button
                 onClick={() => setActiveTab('info')}
                 className={`w-full flex items-center justify-between border-l-2 px-3 py-3 text-xs sm:text-sm font-bold transition-colors cursor-pointer ${activeTab === 'info'
-                  ? 'border-[#8C4A32] bg-[#FAF5EE] text-[#4A2C2A]'
+                  ? 'border-brand-terracotta bg-[#FAF5EE] text-brand-burgundy'
                   : 'border-transparent text-stone-600 sm:hover:bg-stone-50 sm:hover:text-stone-900'
                   }`}
               >
                 <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-base ${activeTab === 'info' ? 'bg-[#4A2C2A] text-white' : 'bg-stone-100 text-stone-500'
+                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-base ${activeTab === 'info' ? 'bg-brand-burgundy text-white' : 'bg-stone-100 text-stone-500'
                     }`}>
                     <i className="ph-bold ph-user"></i>
                   </div>
@@ -412,12 +412,12 @@ export default function ShopProfile() {
               <button
                 onClick={() => setActiveTab('password')}
                 className={`w-full flex items-center justify-between border-l-2 px-3 py-3 text-xs sm:text-sm font-bold transition-colors cursor-pointer ${activeTab === 'password'
-                  ? 'border-[#8C4A32] bg-[#FAF5EE] text-[#4A2C2A]'
+                  ? 'border-brand-terracotta bg-[#FAF5EE] text-brand-burgundy'
                   : 'border-transparent text-stone-600 sm:hover:bg-stone-50 sm:hover:text-stone-900'
                   }`}
               >
                 <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-base ${activeTab === 'password' ? 'bg-[#4A2C2A] text-white' : 'bg-stone-100 text-stone-500'
+                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-base ${activeTab === 'password' ? 'bg-brand-burgundy text-white' : 'bg-stone-100 text-stone-500'
                     }`}>
                     <i className="ph-bold ph-shield-check"></i>
                   </div>
@@ -464,7 +464,7 @@ export default function ShopProfile() {
             </div>
 
             {/* Quick Box: Hỗ trợ khách hàng */}
-            <div className="space-y-3 border-b border-stone-200 bg-[#faf5ee] px-5 py-5 text-[#4A2C2A] sm:px-6">
+            <div className="space-y-3 border-b border-stone-200 bg-[#faf5ee] px-5 py-5 text-brand-burgundy sm:px-6">
               <div className="flex items-center gap-2.5 font-serif-display font-bold text-sm">
                 <i className="ph-fill ph-heart text-rose-500 text-base"></i>
                 <span>Chăm Sóc Khách Hàng</span>
@@ -475,13 +475,13 @@ export default function ShopProfile() {
               <div className="pt-1 flex items-center gap-2">
                 <a
                   href="tel:0987654321"
-                  className="flex-1 text-center py-2 px-3 rounded-xl bg-white text-xs font-bold text-[#4A2C2A] border border-[#EADBCA] sm:hover:bg-stone-50 transition-colors shadow-2xs"
+                  className="flex-1 text-center py-2 px-3 rounded-xl bg-white text-xs font-bold text-brand-burgundy border border-[#EADBCA] sm:hover:bg-stone-50 transition-colors shadow-2xs"
                 >
                   Hotline Hỗ Trợ
                 </a>
                 <Link
                   to="/shop"
-                  className="flex-1 text-center py-2 px-3 rounded-xl bg-[#4A2C2A] text-white text-xs font-bold sm:hover:bg-[#381B18] transition-colors shadow-2xs"
+                  className="flex-1 text-center py-2 px-3 rounded-xl bg-brand-burgundy text-white text-xs font-bold sm:hover:bg-brand-deepWine transition-colors shadow-2xs"
                 >
                   Mua Thêm Nến
                 </Link>
@@ -506,7 +506,7 @@ export default function ShopProfile() {
               {activeTab === 'info' && (
                 <div className="space-y-6">
                   <div className="pb-4 border-b border-stone-100">
-                    <h2 className="text-xl sm:text-2xl font-serif-display font-bold text-[#4A2C2A]">
+                    <h2 className="text-xl sm:text-2xl font-serif-display font-bold text-brand-burgundy">
                       Hồ Sơ & Địa Chỉ Giao Hàng
                     </h2>
                     <p className="text-xs sm:text-sm text-stone-500 mt-1">
@@ -517,7 +517,7 @@ export default function ShopProfile() {
                   <form onSubmit={handleUpdateInfo} className="space-y-6">
                     {/* Phần 1: Thông tin liên lạc */}
                     <div className="space-y-4">
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-[#8C4A32] flex items-center gap-2">
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-brand-terracotta flex items-center gap-2">
                         <i className="ph-bold ph-identification-badge text-sm"></i>
                         Thông tin liên hệ
                       </h3>
@@ -555,7 +555,7 @@ export default function ShopProfile() {
                               value={infoForm.name}
                               onChange={e => setInfoForm({ ...infoForm, name: e.target.value })}
                               placeholder="Nhập họ và tên đầy đủ..."
-                              className="w-full pl-10 pr-4 py-3 text-xs sm:text-sm rounded-2xl bg-stone-50/50 border border-stone-200 text-[#4A2C2A] focus:outline-none focus:border-[#4A2C2A] focus:bg-white transition-all font-medium"
+                              className="w-full pl-10 pr-4 py-3 text-xs sm:text-sm rounded-2xl bg-stone-50/50 border border-stone-200 text-brand-burgundy focus:outline-none focus:border-brand-burgundy focus:bg-white transition-all font-medium"
                             />
                           </div>
                         </div>
@@ -574,7 +574,7 @@ export default function ShopProfile() {
                               value={infoForm.phone}
                               onChange={e => setInfoForm({ ...infoForm, phone: e.target.value })}
                               placeholder="VD: 0987654321..."
-                              className="w-full pl-10 pr-4 py-3 text-xs sm:text-sm rounded-2xl bg-stone-50/50 border border-stone-200 text-[#4A2C2A] focus:outline-none focus:border-[#4A2C2A] focus:bg-white transition-all font-mono font-medium"
+                              className="w-full pl-10 pr-4 py-3 text-xs sm:text-sm rounded-2xl bg-stone-50/50 border border-stone-200 text-brand-burgundy focus:outline-none focus:border-brand-burgundy focus:bg-white transition-all font-mono font-medium"
                             />
                           </div>
                           <p className="text-[10px] text-stone-400">Shipper sẽ gọi đến số này để xác nhận giao hộp quà</p>
@@ -584,7 +584,7 @@ export default function ShopProfile() {
 
                     {/* Phần 2: Địa chỉ giao hàng mặc định */}
                     <div className="space-y-4 pt-2">
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-[#8C4A32] flex items-center gap-2">
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-brand-terracotta flex items-center gap-2">
                         <i className="ph-bold ph-map-pin text-sm"></i>
                         Địa chỉ nhận nến mặc định
                       </h3>
@@ -610,7 +610,7 @@ export default function ShopProfile() {
                       <button
                         type="submit"
                         disabled={savingInfo}
-                        className="px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[#4A2C2A] sm:hover:bg-[#381B18] text-white transition-all shadow-sm sm:hover:shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-wider bg-brand-burgundy sm:hover:bg-brand-deepWine text-white transition-all shadow-sm sm:hover:shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                       >
                         {savingInfo ? (
                           <>
@@ -633,7 +633,7 @@ export default function ShopProfile() {
               {activeTab === 'password' && (
                 <div className="space-y-6">
                   <div className="pb-4 border-b border-stone-100">
-                    <h2 className="text-xl sm:text-2xl font-serif-display font-bold text-[#4A2C2A]">
+                    <h2 className="text-xl sm:text-2xl font-serif-display font-bold text-brand-burgundy">
                       Đổi Mật Khẩu
                     </h2>
                     <p className="text-xs sm:text-sm text-stone-500 mt-1">
@@ -657,7 +657,7 @@ export default function ShopProfile() {
                           value={passForm.currentPassword}
                           onChange={e => setPassForm({ ...passForm, currentPassword: e.target.value })}
                           placeholder="Nhập mật khẩu đang sử dụng..."
-                          className="w-full pl-10 pr-12 py-3 text-xs sm:text-sm rounded-2xl bg-stone-50/50 border border-stone-200 text-[#4A2C2A] focus:outline-none focus:border-[#4A2C2A] focus:bg-white transition-all font-mono"
+                          className="w-full pl-10 pr-12 py-3 text-xs sm:text-sm rounded-2xl bg-stone-50/50 border border-stone-200 text-brand-burgundy focus:outline-none focus:border-brand-burgundy focus:bg-white transition-all font-mono"
                         />
                         <button
                           type="button"
@@ -685,7 +685,7 @@ export default function ShopProfile() {
                           value={passForm.newPassword}
                           onChange={e => setPassForm({ ...passForm, newPassword: e.target.value })}
                           placeholder="Tối thiểu 6 ký tự..."
-                          className="w-full pl-10 pr-12 py-3 text-xs sm:text-sm rounded-2xl bg-stone-50/50 border border-stone-200 text-[#4A2C2A] focus:outline-none focus:border-[#4A2C2A] focus:bg-white transition-all font-mono"
+                          className="w-full pl-10 pr-12 py-3 text-xs sm:text-sm rounded-2xl bg-stone-50/50 border border-stone-200 text-brand-burgundy focus:outline-none focus:border-brand-burgundy focus:bg-white transition-all font-mono"
                         />
                         <button
                           type="button"
@@ -712,7 +712,7 @@ export default function ShopProfile() {
                           value={passForm.confirmPassword}
                           onChange={e => setPassForm({ ...passForm, confirmPassword: e.target.value })}
                           placeholder="Nhập lại mật khẩu mới..."
-                          className="w-full pl-10 pr-12 py-3 text-xs sm:text-sm rounded-2xl bg-stone-50/50 border border-stone-200 text-[#4A2C2A] focus:outline-none focus:border-[#4A2C2A] focus:bg-white transition-all font-mono"
+                          className="w-full pl-10 pr-12 py-3 text-xs sm:text-sm rounded-2xl bg-stone-50/50 border border-stone-200 text-brand-burgundy focus:outline-none focus:border-brand-burgundy focus:bg-white transition-all font-mono"
                         />
                         <button
                           type="button"
@@ -729,7 +729,7 @@ export default function ShopProfile() {
                       <button
                         type="submit"
                         disabled={savingPass}
-                        className="px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[#4A2C2A] sm:hover:bg-[#381B18] text-white transition-all shadow-sm sm:hover:shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-wider bg-brand-burgundy sm:hover:bg-brand-deepWine text-white transition-all shadow-sm sm:hover:shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                       >
                         {savingPass ? (
                           <>
@@ -765,7 +765,7 @@ export default function ShopProfile() {
             </div>
 
             <div>
-              <h3 className="text-lg font-serif-display font-bold text-[#4A2C2A]">
+              <h3 className="text-lg font-serif-display font-bold text-brand-burgundy">
                 Đăng xuất tài khoản?
               </h3>
               <p className="text-xs text-stone-500 mt-1">

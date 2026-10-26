@@ -11,6 +11,7 @@ import { fundService } from '../services/fundService';
 import { printInvoice } from '../utils/printInvoice';
 import { getImageUrl } from '../utils/imageUtils';
 import { shippingDiscountLabel, shippingDiscountConditions } from '../utils/couponUtils';
+import { SHIPPING_CARRIERS, getShippingCarrier, getTrackingNumber, inferLegacyCarrier } from '../utils/shippingCarriers';
 
 // ── Helpers ────────────────────────────────────────────────────────
 const formatPrice = (n) =>
@@ -88,6 +89,9 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
   const [customerAddress, setCustomerAddress] = useState(order?.customer_address || '');
   const [paymentMethod, setPaymentMethod] = useState(order?.payment_method || 'cash');
   const [shippingMethod, setShippingMethod] = useState(order?.shippingMethod || 'standard');
+  const savedCarrierId = inferLegacyCarrier(order);
+  const savedCarrier = getShippingCarrier(savedCarrierId);
+  const savedTrackingNumber = getTrackingNumber(order);
   const [orderId, setOrderId] = useState(order?.orderId || '');
   const [showConfirmAcceptModal, setShowConfirmAcceptModal] = useState(false);
   const [confirmAcceptLoading, setConfirmAcceptLoading] = useState(false);
@@ -141,8 +145,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
   };
 
   // Xử lý xác nhận chấp nhận đơn hàng và cập nhật mã vận đơn / phí ship
-  const handleConfirmAcceptOrder = async ({ newOrderId, newLogisticsCost, saveDirectly }) => {
-    setOrderId(newOrderId);
+  const handleConfirmAcceptOrder = async ({ shippingCarrier, trackingNumber, trackingUrl, newLogisticsCost, saveDirectly }) => {
     setLogisticsCost(newLogisticsCost);
     setDeliveryStatus('confirmed');
 
@@ -161,7 +164,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
         })());
 
         const payload = {
-          orderId: newOrderId,
+          orderId,
           items,
           total_price: finalPrice,
           logistics_cost: newLogisticsCost,
@@ -172,6 +175,9 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
           customer_address: canEditCustomer ? customerAddress : undefined,
           payment_method: canEditCustomer ? paymentMethod : undefined,
           shippingMethod,
+          shipping_carrier: shippingCarrier,
+          tracking_number: trackingNumber,
+          tracking_url: trackingUrl,
           delivery_status: 'confirmed',
           note,
           ordered_at: finalOrderedAt,
@@ -404,7 +410,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
         {/* Header */}
         <div className="px-6 py-4 border-b border-stone-200/80 flex items-center justify-between bg-white shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#381B18] to-[#6B3530] text-white flex items-center justify-center shadow-xs shadow-primary/20">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-on-primary-container to-[#6B3530] text-white flex items-center justify-center shadow-xs shadow-primary/20">
               <span className="material-symbols-outlined text-[24px]">
                 {isReplacementMode ? 'local_shipping' : isSeedingMode ? 'campaign' : 'receipt_long'}
               </span>
@@ -1095,6 +1101,21 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                   </div>
                 </div>
 
+                {isEdit && (savedCarrierId || savedTrackingNumber) && (
+                  <div className="flex items-center justify-between gap-3 rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5">
+                    <div className="flex min-w-0 items-center gap-2.5">
+                      <span className="h-8 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: savedCarrier.color }} />
+                      <div className="min-w-0">
+                        <p className="truncate text-[11px] font-extrabold text-stone-800">{savedCarrier.name}</p>
+                        <p className="truncate font-mono text-[10px] text-stone-500">{savedTrackingNumber || 'Chưa nhập mã vận đơn'}</p>
+                      </div>
+                    </div>
+                    <button type="button" onClick={() => setShowConfirmAcceptModal(true)} className="shrink-0 rounded-lg border border-stone-300 bg-white px-2.5 py-1.5 text-[10px] font-bold text-stone-700 hover:bg-stone-100">
+                      Chỉnh sửa
+                    </button>
+                  </div>
+                )}
+
                 {/* Phí ship thực tế (Shop chịu) */}
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
@@ -1665,13 +1686,16 @@ function AcceptOrderModal({
   onConfirm,
   loading = false
 }) {
-  const [newOrderId, setNewOrderId] = useState(currentOrderId || '');
+  const [shippingCarrier, setShippingCarrier] = useState(() => inferLegacyCarrier(order) || 'spx');
+  const [trackingNumber, setTrackingNumber] = useState(() => getTrackingNumber(order));
+  const [trackingUrl, setTrackingUrl] = useState(order?.tracking_url || '');
   const [newLogisticsCost, setNewLogisticsCost] = useState(currentLogisticsCost ?? 0);
   const [copiedField, setCopiedField] = useState(null);
   const [modalError, setModalError] = useState('');
 
   const codAmount = paymentMethod === 'cash' ? finalPrice : 0;
   const quickCostPresets = [0, 16500, 22000, 30000, 35000, 45000];
+  const selectedCarrier = getShippingCarrier(shippingCarrier);
 
   const handleCopy = (text, field) => {
     if (!text) return;
@@ -1680,15 +1704,14 @@ function AcceptOrderModal({
     setTimeout(() => setCopiedField(null), 1800);
   };
 
-  // Sao chép toàn bộ thông tin đơn hàng 1-Click sang định dạng app SPX Express
-  const handleCopyAllForSPX = () => {
-    const textToCopy = `[ĐƠN HÀNG CANDLET - ĐẶT QUA SPX EXPRESS]
+  const handleCopyAllForCarrier = () => {
+    const textToCopy = `[ĐƠN HÀNG CANDLET - ${selectedCarrier.name.toUpperCase()}]
 • Người nhận: ${customerName || 'Khách hàng'}
 • Số điện thoại: ${customerPhone || 'Chưa có SĐT'}
 • Địa chỉ giao hàng: ${customerAddress || 'Chưa cập nhật'}
 • Mã tham chiếu Website: ${order?.orderId || currentOrderId}
 • Tiền thu hộ COD: ${codAmount > 0 ? formatPrice(codAmount) : '0 VNĐ (Đã chuyển khoản - KHÔNG THU TIỀN)'}
-• Gói vận chuyển: ${shippingMethod === 'express' ? 'SPX Hỏa tốc 4h' : 'SPX Tiêu chuẩn'}
+• Gói vận chuyển: ${shippingMethod === 'express' ? 'Hỏa tốc 4h' : 'Tiêu chuẩn'}
 • Tên hàng hóa: Nến thơm handmade Candlet (Hàng dễ vỡ)
 • Chỉ dẫn giao hàng: Cho xem hàng, không cho thử${note ? `\n• Ghi chú của khách: ${note}` : ''}`;
 
@@ -1699,63 +1722,96 @@ function AcceptOrderModal({
 
   const handleSave = (e) => {
     e.preventDefault();
-    if (!newOrderId.trim()) {
-      setModalError('Vui lòng nhập mã vận đơn SPX (hoặc giữ mã đơn cũ)');
+    if (!trackingNumber.trim()) {
+      setModalError(`Vui lòng nhập mã vận đơn của ${selectedCarrier.name}`);
       return;
     }
     setModalError('');
     onConfirm({
-      newOrderId: newOrderId.trim(),
+      shippingCarrier,
+      trackingNumber: trackingNumber.trim(),
+      trackingUrl: trackingUrl.trim(),
       newLogisticsCost: Math.max(0, Number(newLogisticsCost) || 0),
       saveDirectly: true
     });
   };
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-3 sm:p-4 animate-[fadeIn_0.15s_ease]">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-[580px] max-h-[92vh] flex flex-col overflow-hidden border border-stone-300">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-2.5 sm:p-5 animate-[fadeIn_0.15s_ease]">
+      <div className="absolute inset-0 bg-black/55 backdrop-blur-[3px]" onClick={onClose} />
+      <div className="relative flex max-h-[94vh] w-full max-w-[760px] flex-col overflow-hidden rounded-[28px] border border-outline-variant/60 bg-surface-container-lowest shadow-[0_28px_90px_rgba(0,0,0,0.28)]">
         
-        {/* Header SPX & Chấp nhận đơn */}
-        <div className="px-6 py-4 bg-stone-900 text-white flex items-center justify-between shrink-0">
+        {/* Header đơn vị vận chuyển & Chấp nhận đơn */}
+        <div className="flex shrink-0 items-center justify-between bg-primary px-5 py-4 text-white sm:px-7 sm:py-5">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center border border-white/20">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/20 bg-white/10 shadow-inner">
               <span className="material-symbols-outlined text-[22px] text-white">local_shipping</span>
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-bold text-[15px] text-white leading-snug">
-                  Đồng Bộ Đặt Đơn SPX Express
+                <h3 className="text-[16px] font-extrabold leading-snug text-white sm:text-[18px]">
+                  Thiết lập đơn vị vận chuyển
                 </h3>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-white text-stone-900 uppercase">
-                  Shopee Xpress
+                <span className="rounded-full border border-white/20 bg-white/15 px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-wider text-white">
+                  {selectedCarrier.shortName}
                 </span>
               </div>
-              <p className="text-[11px] text-stone-300 font-normal">
-                Copy thông tin tạo đơn trên SPX & Dán mã vận đơn SPXVN... vào đây
+              <p className="mt-0.5 text-[11px] font-normal text-white/70 sm:text-xs">
+                Chọn hãng giao hàng, nhập mã vận đơn và chi phí thực tế
               </p>
             </div>
           </div>
           <button 
             type="button" 
             onClick={onClose} 
-            className="w-8 h-8 rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-white/15 transition-colors cursor-pointer"
+            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 transition-colors hover:bg-white/15 hover:text-white"
           >
             <span className="material-symbols-outlined text-[20px]">close</span>
           </button>
         </div>
 
         {/* Modal Body */}
-        <form onSubmit={handleSave} className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 text-stone-900">
+        <form onSubmit={handleSave} className="flex-1 space-y-5 overflow-y-auto bg-surface-container-low p-4 text-on-surface sm:p-6">
           
-          {/* Nút 1-Click Sao chép toàn bộ thông tin cho SPX */}
+          <section className="rounded-2xl border border-outline-variant/55 bg-surface-container-lowest p-4 shadow-xs sm:p-5">
+            <div className="mb-3 flex items-end justify-between gap-3">
+              <div>
+                <label className="block text-[13px] font-extrabold text-on-surface">Chọn đơn vị vận chuyển</label>
+                <p className="mt-0.5 text-[10.5px] text-on-surface-variant">Chọn hãng bạn đã tạo vận đơn cho khách</p>
+              </div>
+              <span className="rounded-full bg-primary-container px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-wide text-primary">10 lựa chọn</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+              {SHIPPING_CARRIERS.map((carrier) => (
+                <button
+                  key={carrier.id}
+                  type="button"
+                  onClick={() => { setShippingCarrier(carrier.id); setTrackingUrl(''); }}
+                  className={`relative flex min-h-[92px] flex-col items-center justify-center overflow-hidden rounded-xl border px-2.5 py-2.5 text-center transition-all ${shippingCarrier === carrier.id ? 'border-primary bg-primary-container text-primary ring-2 ring-primary/15 shadow-xs' : 'border-outline-variant/55 bg-surface-container-lowest text-on-surface-variant hover:-translate-y-0.5 hover:border-primary/45 hover:shadow-sm'}`}
+                >
+                  <span className="mb-1.5 flex size-9 items-center justify-center overflow-hidden rounded-xl border border-black/5 bg-white shadow-xs">
+                    {carrier.logo ? (
+                      <img src={carrier.logo} alt={`Logo ${carrier.name}`} className="h-full w-full object-contain" loading="lazy" />
+                    ) : (
+                      <span className="material-symbols-outlined text-[20px]" style={{ color: carrier.color }}>local_shipping</span>
+                    )}
+                  </span>
+                  <span className="block w-full truncate text-[10.5px] font-extrabold">{carrier.shortName}</span>
+                  <span className="block w-full truncate text-[8px] opacity-60">{carrier.name}</span>
+                  {shippingCarrier === carrier.id && <span className="material-symbols-outlined absolute right-2 top-2 text-[15px]">check_circle</span>}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          {/* Nút 1-Click sao chép thông tin cho hãng đã chọn */}
           <button
             type="button"
-            onClick={handleCopyAllForSPX}
-            className={`w-full py-2.5 px-4 rounded-xl text-[12.5px] font-bold flex items-center justify-center gap-2 border transition-all cursor-pointer ${
+            onClick={handleCopyAllForCarrier}
+            className={`flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border px-4 py-3 text-[12.5px] font-bold transition-all ${
               copiedField === 'all'
-                ? 'bg-stone-900 text-white border-stone-900 shadow-sm'
-                : 'bg-stone-100 hover:bg-stone-200/90 text-stone-800 border-stone-300 hover:border-stone-400'
+                ? 'border-primary bg-primary text-white shadow-sm'
+                : 'border-primary/25 bg-primary-container/65 text-primary hover:border-primary/40 hover:bg-primary-container'
             }`}
           >
             <span className="material-symbols-outlined text-[17px]">
@@ -1763,14 +1819,14 @@ function AcceptOrderModal({
             </span>
             <span>
               {copiedField === 'all' 
-                ? '✓ Đã sao chép toàn bộ thông tin đơn hàng cho SPX!' 
-                : '📋 Sao chép nhanh toàn bộ thông tin để dán vào SPX Express'
+                ? `✓ Đã sao chép thông tin cho ${selectedCarrier.shortName}!`
+                : `Sao chép thông tin để tạo đơn trên ${selectedCarrier.shortName}`
               }
             </span>
           </button>
 
           {/* Quick Copy Panel theo từng ô thông tin */}
-          <div className="bg-stone-50 rounded-2xl p-4 border border-stone-300 space-y-2.5">
+          <div className="space-y-2.5 rounded-2xl border border-outline-variant/55 bg-surface-container-lowest p-4 shadow-xs sm:p-5">
             <div className="flex items-center justify-between pb-2 border-b border-stone-200">
               <span className="text-[11px] font-bold uppercase tracking-wider text-stone-600 flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-[15px]">pin_drop</span>
@@ -1820,7 +1876,7 @@ function AcceptOrderModal({
             {/* Địa chỉ giao hàng */}
             <div className="flex items-start justify-between bg-white px-3 py-2.5 rounded-xl border border-stone-200 gap-2">
               <div className="flex-1">
-                <span className="text-[9.5px] text-stone-400 block font-semibold uppercase">Địa chỉ nhận hàng SPX</span>
+                <span className="text-[9.5px] text-stone-400 block font-semibold uppercase">Địa chỉ nhận hàng</span>
                 <p className="font-semibold text-stone-900 text-[12px] leading-snug">
                   {customerAddress || 'Chưa cập nhật địa chỉ'}
                 </p>
@@ -1841,7 +1897,7 @@ function AcceptOrderModal({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[12px]">
               <div className="flex items-center justify-between bg-white px-3 py-2 rounded-xl border border-stone-200">
                 <div>
-                  <span className="text-[9.5px] text-stone-400 block font-semibold uppercase">Tiền COD trên SPX</span>
+                  <span className="text-[9.5px] text-stone-400 block font-semibold uppercase">Tiền thu hộ COD</span>
                   <span className="font-mono font-bold text-stone-900">
                     {paymentMethod === 'cash' ? formatPrice(codAmount) : '0 VNĐ (Đã CK)'}
                   </span>
@@ -1882,48 +1938,55 @@ function AcceptOrderModal({
           </div>
 
           {/* Form inputs */}
-          <div className="space-y-4 pt-1">
+          <section className="space-y-5 rounded-2xl border border-outline-variant/55 bg-surface-container-lowest p-4 shadow-xs sm:p-5">
             
-            {/* Mã đơn mới / Mã vận đơn SPX */}
+            {/* Mã vận đơn */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="text-[12.5px] font-bold text-stone-900 flex items-center gap-1">
-                  <span>Mã vận đơn SPX Express (Tracking Number)</span>
+                  <span>Mã vận đơn {selectedCarrier.name}</span>
                   <span className="text-stone-500 font-normal text-xs">(bắt buộc)</span>
                 </label>
-                {order?.orderId && newOrderId !== order.orderId && (
-                  <button
-                    type="button"
-                    onClick={() => setNewOrderId(order.orderId)}
-                    className="text-[11px] text-stone-600 hover:underline font-semibold cursor-pointer"
-                  >
-                    Khôi phục mã cũ ({order.orderId})
-                  </button>
-                )}
               </div>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-500 font-bold text-xs font-mono">
-                  SPX
+                  {selectedCarrier.shortName}
                 </div>
                 <input
                   type="text"
                   required
-                  value={newOrderId}
-                  onChange={e => setNewOrderId(e.target.value)}
-                  placeholder="Dán mã SPX tại đây (VD: SPXVN0482910483...)"
-                  className="w-full pl-12 pr-4 py-2.5 bg-white border border-stone-300 rounded-xl text-[14px] font-mono font-bold text-stone-900 focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
+                  value={trackingNumber}
+                  onChange={e => setTrackingNumber(e.target.value)}
+                  placeholder={`Nhập mã vận đơn ${selectedCarrier.shortName}`}
+                  className="w-full rounded-xl border border-outline-variant bg-surface-container-lowest py-3 pl-24 pr-4 font-mono text-[14px] font-bold text-on-surface outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10"
                 />
               </div>
               <p className="text-[11px] text-stone-500 mt-1">
-                Dán mã vận đơn do app/web SPX cấp sau khi bạn tạo đơn thành công. Mã này sẽ được tạo Barcode để bưu tá SPX quét nhận hàng.
+                Nhập mã do {selectedCarrier.name} cấp sau khi tạo đơn. Mã đơn website #{order?.orderId || currentOrderId} vẫn được giữ nguyên.
               </p>
             </div>
 
-            {/* Phí ship thực tế SPX báo (Shop chịu) */}
+            <div>
+              <label className="mb-1.5 block text-[12.5px] font-bold text-stone-900">
+                Liên kết tra cứu <span className="font-normal text-stone-500">(không bắt buộc)</span>
+              </label>
+              <input
+                type="url"
+                value={trackingUrl}
+                onChange={e => setTrackingUrl(e.target.value)}
+                placeholder="https://..."
+                className="w-full rounded-xl border border-outline-variant bg-surface-container-lowest px-3.5 py-3 text-[13px] text-on-surface outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10"
+              />
+              <p className="mt-1 text-[11px] text-stone-500">
+                Hệ thống tự tạo liên kết cho các hãng được hỗ trợ. Với Ahamove, GrabExpress hoặc hãng khác, bạn có thể dán liên kết theo dõi do hãng cung cấp.
+              </p>
+            </div>
+
+            {/* Phí ship thực tế hãng vận chuyển báo (Shop chịu) */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="text-[12.5px] font-bold text-stone-900 flex items-center gap-1">
-                  <span>Phí ship thực tế do SPX báo (VNĐ)</span>
+                  <span>Phí ship thực tế do {selectedCarrier.shortName} báo (VNĐ)</span>
                   <span className="text-stone-500 font-normal text-xs">(trừ vào chi phí shop)</span>
                 </label>
                 <span className="text-[12px] font-mono font-bold text-stone-900">
@@ -1938,16 +2001,16 @@ function AcceptOrderModal({
                   value={newLogisticsCost}
                   onChange={e => setNewLogisticsCost(Number(e.target.value))}
                   placeholder="0"
-                  className="w-full px-3.5 pr-12 py-2.5 bg-white border border-stone-300 rounded-xl text-[14px] font-mono font-bold text-stone-900 focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
+                  className="w-full rounded-xl border border-outline-variant bg-surface-container-lowest px-3.5 py-3 pr-12 font-mono text-[14px] font-bold text-on-surface outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10"
                 />
                 <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-stone-500 font-bold text-xs">
                   VNĐ
                 </div>
               </div>
 
-              {/* Preset Chips chuẩn mức cước SPX */}
+              {/* Preset cước nhanh */}
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-[11px] text-stone-500 font-medium mr-1">Cước SPX nhanh:</span>
+                <span className="text-[11px] text-stone-500 font-medium mr-1">Chọn nhanh:</span>
                 {quickCostPresets.map(preset => (
                   <button
                     key={preset}
@@ -1955,8 +2018,8 @@ function AcceptOrderModal({
                     onClick={() => setNewLogisticsCost(preset)}
                     className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold border transition-colors cursor-pointer ${
                       newLogisticsCost === preset
-                        ? 'bg-stone-900 border-stone-900 text-white shadow-2xs'
-                        : 'bg-stone-100 border-stone-200 text-stone-800 hover:bg-stone-200'
+                        ? 'border-primary bg-primary text-white shadow-2xs'
+                        : 'border-outline-variant/70 bg-surface-container-low text-on-surface-variant hover:border-primary/35 hover:bg-primary-container/45'
                     }`}
                   >
                     {preset === 0 ? '0đ (Freeship)' : `${(preset / 1000).toLocaleString('vi-VN')}k`}
@@ -1964,10 +2027,10 @@ function AcceptOrderModal({
                 ))}
               </div>
               <p className="text-[11px] text-stone-500 mt-1.5">
-                Khoản cước phí bạn trả cho SPX Express — tự động ghi nhận vào chi phí giao vận trong báo cáo tài chính của shop.
+                Khoản cước trả cho {selectedCarrier.name} sẽ được ghi nhận vào chi phí giao vận trong báo cáo tài chính của shop.
               </p>
             </div>
-          </div>
+          </section>
 
           {/* Error Message */}
           {modalError && (
@@ -1978,22 +2041,22 @@ function AcceptOrderModal({
           )}
 
           {/* Action buttons */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-stone-200">
+          <div className="sticky -bottom-4 z-10 -mx-4 -mb-4 flex items-center justify-end gap-2 border-t border-outline-variant/60 bg-surface-container-lowest/95 px-4 py-3 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] backdrop-blur sm:-bottom-6 sm:-mx-6 sm:-mb-6 sm:px-6 sm:py-4">
             <button
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2.5 rounded-xl border border-stone-300 text-stone-700 hover:bg-stone-100 text-[13px] font-bold transition-colors cursor-pointer"
+              className="cursor-pointer rounded-xl border border-outline-variant bg-surface-container-lowest px-4 py-2.5 text-[13px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container"
             >
               Hủy bỏ
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-5 py-2.5 rounded-xl bg-stone-900 hover:bg-black text-white text-[13px] font-bold flex items-center gap-2 shadow-sm transition-all cursor-pointer disabled:opacity-50"
+              className="flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-[13px] font-bold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md disabled:opacity-50 disabled:hover:translate-y-0"
             >
               {loading && <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
-              <span>Xác nhận & Cập nhật đơn SPX</span>
+              <span>Xác nhận đơn vận chuyển</span>
             </button>
           </div>
         </form>

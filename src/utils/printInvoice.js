@@ -16,13 +16,10 @@ export const printInvoice = (order) => {
   const isWebsite = order.source === 'website';
   const orderCode = order.orderId || (order._id ? order._id.toString().slice(-8).toUpperCase() : 'DH-CHUA-CO-MA');
   const isExpress = order.shippingMethod === 'express';
-  const carrierName = String(order.pancake_details?.carrier || order.carrier || '');
-  const explicitlySpx = /\bspx\b|shopee\s*express/i.test(carrierName);
-  const usesSpx = isWebsite || explicitlySpx || (!carrierName && (
-    isExpress
-    || Number(order.logistics_cost || 0) > 0
-    || (order.tracking_enabled && Boolean(order.customer_address))
-  ));
+  const carrierName = String(order.shipping_carrier || order.pancake_details?.carrier || order.carrier || '');
+  const explicitlySpx = /^(spx|shopee[\s_-]*express)$/i.test(carrierName.trim());
+  const legacySpx = !order.shipping_carrier && /^SPX(?:VN)?[A-Z0-9-]+$/i.test(String(order.orderId || ''));
+  const usesSpx = explicitlySpx || legacySpx;
   const isCOD = order.payment_method === 'cash';
   const isTransfer = order.payment_method === 'transfer';
   const isManualTransfer = isTransfer && !isWebsite;

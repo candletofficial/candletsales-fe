@@ -532,7 +532,7 @@ export default function Checkout() {
   if (loading) {
     return (
       <div className="flex flex-col justify-center items-center h-[65vh] bg-[#fbf9f6]">
-        <div className="w-12 h-12 border-3 border-[#4A2C2A]/20 border-t-[#4A2C2A] rounded-full animate-spin mb-4"></div>
+        <div className="w-12 h-12 border-3 border-brand-burgundy/20 border-t-brand-burgundy rounded-full animate-spin mb-4"></div>
         <p className="text-sm font-serif-display text-stone-600 tracking-wider">Đang tải thông tin thanh toán...</p>
       </div>
     );
@@ -553,7 +553,7 @@ export default function Checkout() {
             Đặt Hàng Thành Công
           </span>
 
-          <h1 className="text-3xl sm:text-4xl font-serif-display font-bold text-[#4A2C2A] mt-4 mb-2">
+          <h1 className="text-3xl sm:text-4xl font-serif-display font-bold text-brand-burgundy mt-4 mb-2">
             Cảm Ơn Bạn Đã Tin Chọn Candlet
           </h1>
           <p className="text-sm sm:text-base text-stone-600 mb-8 max-w-md mx-auto leading-relaxed">
@@ -590,7 +590,7 @@ export default function Checkout() {
             </div>
             <div className="flex justify-between items-center pt-3 border-t border-stone-200">
               <span className="text-sm font-bold uppercase tracking-wider text-stone-700">Tổng thanh toán:</span>
-              <span className="text-xl font-bold font-serif-display text-[#4A2C2A]">
+              <span className="text-xl font-bold font-serif-display text-brand-burgundy">
                 {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(finalTotal)}
               </span>
             </div>
@@ -599,7 +599,7 @@ export default function Checkout() {
           {/* If bank transfer, display QR instructions */}
           {formData.payment_method === 'transfer' && (
             <div className="bg-[#FAF5EE] border border-amber-200 rounded-2xl p-6 mb-8 text-center space-y-3">
-              <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#8C4A32] uppercase tracking-wider">
+              <div className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-terracotta uppercase tracking-wider">
                 <i className="ph-bold ph-qr-code text-base"></i>
                 Quét mã VietQR để thanh toán nhanh
               </div>
@@ -620,7 +620,7 @@ export default function Checkout() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link 
               to="/shop" 
-              className="w-full sm:w-auto inline-flex bg-[#4A2C2A] sm:hover:bg-[#341F1D] text-white text-xs font-bold uppercase tracking-widest rounded-xl py-4 px-8 items-center justify-center gap-2 transition-all shadow-md active:scale-98"
+              className="w-full sm:w-auto inline-flex bg-brand-burgundy sm:hover:bg-[#341F1D] text-white text-xs font-bold uppercase tracking-widest rounded-xl py-4 px-8 items-center justify-center gap-2 transition-all shadow-md active:scale-98"
             >
               <i className="ph-bold ph-storefront text-base"></i>
               Tiếp tục mua sắm
@@ -648,7 +648,7 @@ export default function Checkout() {
           <button
             type="button"
             onClick={() => navigate('/cart')}
-            className="flex h-9 w-9 cursor-pointer items-center justify-start text-stone-700 transition-colors active:text-[#4A2C2A]"
+            className="flex h-9 w-9 cursor-pointer items-center justify-start text-stone-700 transition-colors active:text-brand-burgundy"
             aria-label="Quay lại giỏ hàng"
           >
             <i className="ph ph-arrow-left text-xl"></i>
@@ -668,8 +668,8 @@ export default function Checkout() {
             <span>1. Giỏ hàng</span>
           </div>
           <span className="text-stone-300">———</span>
-          <div className="flex items-center gap-2 text-[#4A2C2A]">
-            <span className="w-6 h-6 rounded-full bg-[#4A2C2A] text-white flex items-center justify-center text-xs">
+          <div className="flex items-center gap-2 text-brand-burgundy">
+            <span className="w-6 h-6 rounded-full bg-brand-burgundy text-white flex items-center justify-center text-xs">
               2
             </span>
             <span>2. Thông tin & Thanh toán</span>
@@ -713,7 +713,7 @@ export default function Checkout() {
                   <button
                     type="button"
                     onClick={() => setIsAddressDetailsOpen((open) => !open)}
-                    className="flex shrink-0 items-center gap-1 text-[11px] font-bold text-[#8C4A32] sm:hidden"
+                    className="flex shrink-0 items-center gap-1 text-[11px] font-bold text-brand-terracotta sm:hidden"
                   >
                     <span>{isAddressDetailsOpen ? 'Thu gọn' : 'Xem chi tiết'}</span>
                     <i className={`ph-bold ${isAddressDetailsOpen ? 'ph-caret-up' : 'ph-caret-down'} text-xs`}></i>
@@ -774,7 +774,7 @@ export default function Checkout() {
                         type="checkbox"
                         checked={saveAsDefaultAddress}
                         onChange={e => setSaveAsDefaultAddress(e.target.checked)}
-                        className="rounded border-stone-300 text-[#4A2C2A] focus:ring-[#4A2C2A] accent-[#4A2C2A]"
+                        className="rounded border-stone-300 text-brand-burgundy focus:ring-brand-burgundy accent-brand-burgundy"
                       />
                       <span>Lưu làm địa chỉ nhận hàng mặc định cho các lần mua sau</span>
                     </label>
@@ -801,7 +801,7 @@ export default function Checkout() {
                 <button
                   type="button"
                   onClick={() => setIsShippingDetailsOpen((open) => !open)}
-                  className="flex shrink-0 items-center gap-1 text-[11px] font-bold text-[#8C4A32] sm:hidden"
+                  className="flex shrink-0 items-center gap-1 text-[11px] font-bold text-brand-terracotta sm:hidden"
                 >
                   <span>{isShippingDetailsOpen ? 'Thu gọn' : 'Xem chi tiết'}</span>
                   <i className={`ph-bold ${isShippingDetailsOpen ? 'ph-caret-up' : 'ph-caret-down'} text-xs`}></i>
@@ -816,7 +816,7 @@ export default function Checkout() {
                       {formData.shippingMethod === 'express' ? 'Giao Hỏa Tốc 4h' : 'Giao Tiêu Chuẩn'}
                     </span>
                   </div>
-                  <span className={`shrink-0 font-bold ${shippingFee === 0 ? 'text-emerald-700' : 'text-[#8C4A32]'}`}>
+                  <span className={`shrink-0 font-bold ${shippingFee === 0 ? 'text-emerald-700' : 'text-brand-terracotta'}`}>
                     {shippingFee === 0
                       ? 'Miễn phí'
                       : new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(shippingFee)}
@@ -844,7 +844,7 @@ export default function Checkout() {
                     </div>
                     <div className="min-w-0">
                       <p className="font-semibold text-stone-900 text-xs sm:text-sm">
-                        Mua thêm <strong className="text-[#8C4A32] font-bold">{new Intl.NumberFormat('vi-VN').format(freeshipRemaining)}đ</strong> để được <strong className="text-emerald-700 font-bold">Freeship toàn quốc</strong>
+                        Mua thêm <strong className="text-brand-terracotta font-bold">{new Intl.NumberFormat('vi-VN').format(freeshipRemaining)}đ</strong> để được <strong className="text-emerald-700 font-bold">Freeship toàn quốc</strong>
                       </p>
                       <p className="text-[11px] text-stone-500 mt-0.5">
                         Đơn dưới 100.000đ thu thêm 16.000đ phí giao hàng tiêu chuẩn.
@@ -853,7 +853,7 @@ export default function Checkout() {
                   </div>
                   <Link 
                     to="/shop" 
-                    className="shrink-0 text-xs font-bold text-[#8C4A32] sm:hover:text-[#4A2C2A] bg-white border border-amber-300 px-3 py-1.5 rounded-lg shadow-2xs sm:hover:bg-amber-50 transition-all flex items-center gap-1"
+                    className="shrink-0 text-xs font-bold text-brand-terracotta sm:hover:text-brand-burgundy bg-white border border-amber-300 px-3 py-1.5 rounded-lg shadow-2xs sm:hover:bg-amber-50 transition-all flex items-center gap-1"
                   >
                     <span>Chọn thêm</span>
                     <i className="ph-bold ph-arrow-right text-[11px]"></i>
@@ -866,7 +866,7 @@ export default function Checkout() {
                 <label 
                   className={`flex items-start gap-3 rounded-xl border-2 p-3 cursor-pointer transition-all sm:p-4 ${
                     formData.shippingMethod === 'standard'
-                      ? 'border-[#4A2C2A] bg-stone-50/70 shadow-xs'
+                      ? 'border-brand-burgundy bg-stone-50/70 shadow-xs'
                       : 'border-stone-200 sm:hover:border-stone-300'
                   }`}
                 >
@@ -876,7 +876,7 @@ export default function Checkout() {
                     value="standard"
                     checked={formData.shippingMethod === 'standard'}
                     onChange={() => setFormData({ ...formData, shippingMethod: 'standard' })}
-                    className="mt-1 accent-[#4A2C2A]"
+                    className="mt-1 accent-brand-burgundy"
                   />
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
@@ -886,7 +886,7 @@ export default function Checkout() {
                           Miễn Phí
                         </span>
                       ) : (
-                        <span className="text-xs font-bold text-[#8C4A32] bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-md">
+                        <span className="text-xs font-bold text-brand-terracotta bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-md">
                           16.000đ
                         </span>
                       )}
@@ -998,7 +998,7 @@ export default function Checkout() {
                 <label 
                   className={`flex cursor-pointer items-start gap-3 rounded-xl border-2 p-3 transition-all sm:gap-3.5 sm:p-4 ${
                     formData.payment_method === 'cash'
-                      ? 'border-[#4A2C2A] bg-stone-50/70 shadow-xs'
+                      ? 'border-brand-burgundy bg-stone-50/70 shadow-xs'
                       : 'border-stone-200 sm:hover:border-stone-300'
                   }`}
                 >
@@ -1008,7 +1008,7 @@ export default function Checkout() {
                     value="cash"
                     checked={formData.payment_method === 'cash'}
                     onChange={() => setFormData({ ...formData, payment_method: 'cash' })}
-                    className="mt-1 accent-[#4A2C2A]"
+                    className="mt-1 accent-brand-burgundy"
                   />
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
@@ -1025,7 +1025,7 @@ export default function Checkout() {
                 <label 
                   className={`flex cursor-pointer items-start gap-3 rounded-xl border-2 p-3 transition-all sm:gap-3.5 sm:p-4 ${
                     formData.payment_method === 'transfer'
-                      ? 'border-[#4A2C2A] bg-stone-50/70 shadow-xs'
+                      ? 'border-brand-burgundy bg-stone-50/70 shadow-xs'
                       : 'border-stone-200 sm:hover:border-stone-300'
                   }`}
                 >
@@ -1035,7 +1035,7 @@ export default function Checkout() {
                     value="transfer"
                     checked={formData.payment_method === 'transfer'}
                     onChange={() => setFormData({ ...formData, payment_method: 'transfer' })}
-                    className="mt-1 accent-[#4A2C2A]"
+                    className="mt-1 accent-brand-burgundy"
                   />
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
@@ -1112,7 +1112,7 @@ export default function Checkout() {
                             <i className="ph ph-image text-xl"></i>
                           </div>
                         )}
-                        <span className="absolute bottom-0 right-0 bg-[#4A2C2A] text-white text-[9px] font-bold px-1.5 rounded-tl-md font-mono">
+                        <span className="absolute bottom-0 right-0 bg-brand-burgundy text-white text-[9px] font-bold px-1.5 rounded-tl-md font-mono">
                           x{item.quantity}
                         </span>
                       </div>
@@ -1122,7 +1122,7 @@ export default function Checkout() {
                           {item.product_id?.name}
                         </h4>
                         {item.sku_id && (
-                          <p className="text-[10.5px] text-[#8C4A32] truncate mt-0.5 font-medium">
+                          <p className="text-[10.5px] text-brand-terracotta truncate mt-0.5 font-medium">
                             {getVariantLabel(item.product_id, item.sku_id)}
                           </p>
                         )}
@@ -1143,7 +1143,7 @@ export default function Checkout() {
                   <button 
                     type="button"
                     onClick={() => setShowCouponModal(true)}
-                    className="text-xs text-[#8C4A32] font-bold sm:hover:underline flex items-center gap-0.5"
+                    className="text-xs text-brand-terracotta font-bold sm:hover:underline flex items-center gap-0.5"
                   >
                     {selectedCouponCode ? 'Đổi mã khác' : 'Chọn mã'}
                     <i className="ph-bold ph-caret-right text-xs"></i>
@@ -1157,11 +1157,11 @@ export default function Checkout() {
                         <i className="ph-fill ph-ticket text-lg"></i>
                       </span>
                       <div className="min-w-0">
-                        <span className="font-mono text-xs font-bold text-[#D97706] tracking-wider block">
+                        <span className="font-mono text-xs font-bold text-brand-gold tracking-wider block">
                           {selectedCouponCode}
                         </span>
                         <span className="text-xs text-stone-600 block">
-                          Đã giảm <strong className="text-[#8C4A32]">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(discountAmount)}</strong>
+                          Đã giảm <strong className="text-brand-terracotta">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(discountAmount)}</strong>
                         </span>
                       </div>
                     </div>
@@ -1180,7 +1180,7 @@ export default function Checkout() {
                     onClick={() => setShowCouponModal(true)}
                     className="w-full bg-stone-50 sm:hover:bg-stone-100 border border-stone-200 border-dashed rounded-xl p-3.5 flex items-center justify-center gap-2 text-xs font-bold text-stone-600 transition-colors shadow-2xs"
                   >
-                    <i className="ph-bold ph-ticket text-base text-[#8C4A32]"></i>
+                    <i className="ph-bold ph-ticket text-base text-brand-terracotta"></i>
                     Bấm để áp dụng mã giảm giá voucher
                   </button>
                 )}
@@ -1223,7 +1223,7 @@ export default function Checkout() {
                 </div>
 
                 {discountAmount > 0 && (
-                  <div className="flex justify-between text-[#8C4A32]">
+                  <div className="flex justify-between text-brand-terracotta">
                     <span>{isFreeshipCoupon ? 'Giảm phí vận chuyển từ voucher' : 'Giảm giá từ voucher'}</span>
                     <span className="font-bold">
                       - {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(discountAmount)}
@@ -1235,7 +1235,7 @@ export default function Checkout() {
                   <span className="text-xs font-bold tracking-widest uppercase text-stone-500">
                     Tổng Thanh Toán
                   </span>
-                  <span className="text-2xl sm:text-3xl font-serif-display font-bold text-[#4A2C2A]">
+                  <span className="text-2xl sm:text-3xl font-serif-display font-bold text-brand-burgundy">
                     {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(finalTotal)}
                   </span>
                 </div>
@@ -1246,7 +1246,7 @@ export default function Checkout() {
                 type="button"
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="hidden lg:flex w-full bg-[#4A2C2A] sm:hover:bg-[#341F1D] text-white text-xs font-bold uppercase tracking-widest rounded-xl py-4 px-6 items-center justify-center gap-2.5 transition-all shadow-md sm:hover:shadow-lg active:scale-98 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                className="hidden lg:flex w-full bg-brand-burgundy sm:hover:bg-[#341F1D] text-white text-xs font-bold uppercase tracking-widest rounded-xl py-4 px-6 items-center justify-center gap-2.5 transition-all shadow-md sm:hover:shadow-lg active:scale-98 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
               >
                 {submitting ? (
                   <>
@@ -1301,7 +1301,7 @@ export default function Checkout() {
           type="button"
           onClick={handleSubmit}
           disabled={submitting}
-          className="w-36 sm:w-40 bg-gradient-to-r from-[#94432C] to-[#4A2C2A] active:from-[#7D3824] active:to-[#38201F] text-white text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all disabled:opacity-60 cursor-pointer shrink-0 shadow-inner px-2"
+          className="w-36 sm:w-40 bg-gradient-to-r from-[#94432C] to-brand-burgundy active:from-[#7D3824] active:to-[#38201F] text-white text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all disabled:opacity-60 cursor-pointer shrink-0 shadow-inner px-2"
         >
           {submitting ? (
             <>
@@ -1320,8 +1320,8 @@ export default function Checkout() {
           <div className="bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl w-full max-w-[540px] overflow-hidden flex flex-col max-h-[88vh] sm:max-h-[85vh] border border-stone-200 animate-[fadeIn_0.2s_ease-out]">
             <div className="flex justify-between items-center p-4 sm:p-5 border-b border-stone-100 bg-stone-50/70">
               <div className="flex items-center gap-2">
-                <i className="ph-fill ph-ticket text-[#8C4A32] text-xl"></i>
-                <h3 className="text-base font-serif-display font-bold text-[#4A2C2A]">Phiếu Ưu Đãi Candlet</h3>
+                <i className="ph-fill ph-ticket text-brand-terracotta text-xl"></i>
+                <h3 className="text-base font-serif-display font-bold text-brand-burgundy">Phiếu Ưu Đãi Candlet</h3>
               </div>
               <button 
                 onClick={() => { setShowCouponModal(false); setCustomError(''); }}
@@ -1346,7 +1346,7 @@ export default function Checkout() {
                   <button 
                     onClick={handleApplyCustomCoupon}
                     disabled={validatingCustom || !customCouponCode.trim()}
-                    className="bg-[#4A2C2A] sm:hover:bg-[#341F1D] text-white px-4 py-2 rounded-lg text-xs font-bold uppercase disabled:opacity-40 transition-colors shrink-0"
+                    className="bg-brand-burgundy sm:hover:bg-[#341F1D] text-white px-4 py-2 rounded-lg text-xs font-bold uppercase disabled:opacity-40 transition-colors shrink-0"
                   >
                     {validatingCustom ? 'Đang kiểm tra...' : 'Áp dụng'}
                   </button>
@@ -1404,7 +1404,7 @@ export default function Checkout() {
                         <div className="flex">
                           {/* Graphic Left */}
                           <div className={`w-28 flex flex-col items-center justify-center p-3 text-white ${
-                            !isApplicable ? 'bg-stone-300' : isSelected ? 'bg-[#F59E0B]' : 'bg-[#D97706]'
+                            !isApplicable ? 'bg-stone-300' : isSelected ? 'bg-[#F59E0B]' : 'bg-brand-gold'
                           }`}>
                             <span className="text-xl font-bold font-serif-display leading-tight text-center">
                               {coupon.type === 'freeship'
@@ -1421,7 +1421,7 @@ export default function Checkout() {
                                 <h4 className="text-xs sm:text-sm font-bold text-stone-900 leading-tight">
                                   {coupon.name}
                                 </h4>
-                                <span className="font-mono text-[10px] font-bold text-[#8C4A32] bg-[#FAF5EE] border border-amber-200/80 px-1.5 py-0.5 rounded shrink-0">
+                                <span className="font-mono text-[10px] font-bold text-brand-terracotta bg-[#FAF5EE] border border-amber-200/80 px-1.5 py-0.5 rounded shrink-0">
                                   {coupon.code}
                                 </span>
                               </div>
@@ -1464,7 +1464,7 @@ export default function Checkout() {
                             
                             <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-stone-100">
                               <span className={`text-xs font-bold ${
-                                isApplicable ? 'text-[#D97706]' : 'text-stone-500 font-medium'
+                                isApplicable ? 'text-brand-gold' : 'text-stone-500 font-medium'
                               }`}>
                                 {labelSuffix}
                               </span>

@@ -44,12 +44,14 @@ import ShopWishlist from './pages/shop/ShopWishlist';
 import ShopGuide from './pages/shop/ShopGuide';
 import ShopStories from './pages/shop/ShopStories';
 import ShopStoryDetail from './pages/shop/ShopStoryDetail';
+import { WebsiteThemeProvider } from './hooks/useWebsiteTheme';
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <ScrollToTop />
-      <AuthProvider>
+    <WebsiteThemeProvider>
+      <BrowserRouter>
+        <ScrollToTop />
+        <AuthProvider>
         <CartProvider>
           <WishlistProvider>
             <Routes>
@@ -106,7 +108,8 @@ export default function App() {
           </Routes>
           </WishlistProvider>
         </CartProvider>
-      </AuthProvider>
-    </BrowserRouter>
+        </AuthProvider>
+      </BrowserRouter>
+    </WebsiteThemeProvider>
   );
 }

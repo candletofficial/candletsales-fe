@@ -131,7 +131,7 @@ export default function SmartAlerts() {
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
         {/* Modal Header */}
-        <div className="bg-gradient-to-r from-[#4A2C2A] to-[#381B18] px-6 py-4 flex items-center justify-between">
+        <div className="bg-gradient-to-r from-primary to-on-primary-container px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2 text-white">
             <span className="material-symbols-outlined text-[24px]">auto_awesome</span>
             <h3 className="text-[16px] font-bold tracking-wide">AI Phân tích & Cảnh báo</h3>

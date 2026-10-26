@@ -113,9 +113,9 @@ function blocksToHtml(blocks) {
             : '';
         case 'callout':
           return `<div class="scent-callout p-6 rounded-2xl bg-amber-50/80 border border-amber-200/80 my-8">
-            <h4 class="font-serif-display text-xl font-bold text-[#381B18] mb-2">${block.title || 'Mùi hương gợi ý'}</h4>
+            <h4 class="font-serif-display text-xl font-bold text-on-primary-container mb-2">${block.title || 'Mùi hương gợi ý'}</h4>
             <p class="text-xs text-stone-600 mb-4 leading-relaxed">${block.description || ''}</p>
-            <a href="${block.link || '/shop'}" class="inline-flex items-center gap-1.5 text-xs font-bold text-[#4A2C2A] uppercase tracking-wider hover:underline">
+            <a href="${block.link || '/shop'}" class="inline-flex items-center gap-1.5 text-xs font-bold text-primary uppercase tracking-wider hover:underline">
               <span>Trải nghiệm ngay</span> →
             </a>
           </div>`;
@@ -483,7 +483,7 @@ export default function PostManagement() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold text-stone-900 tracking-tight flex items-center gap-2">
-              <span className="material-symbols-outlined text-[#4A2C2A] text-28px">auto_stories</span>
+              <span className="material-symbols-outlined text-primary text-28px">auto_stories</span>
               Quản lý Bài Viết & Câu Chuyện
             </h1>
             <p className="text-xs text-stone-500 mt-1">
@@ -494,7 +494,7 @@ export default function PostManagement() {
           <button
             type="button"
             onClick={handleOpenCreateModal}
-            className="px-5 py-2.5 bg-[#4A2C2A] hover:bg-[#381B18] text-white rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow-sm cursor-pointer shrink-0"
+            className="px-5 py-2.5 bg-primary hover:bg-on-primary-container text-white rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow-sm cursor-pointer shrink-0"
           >
             <span className="material-symbols-outlined text-lg">add_circle</span>
             <span>Soạn Bài Viết Mới</span>
@@ -535,14 +535,14 @@ export default function PostManagement() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Tìm bài viết theo tiêu đề..."
-                className="w-full pl-9 pr-3 py-2 text-xs border border-stone-200 rounded-lg focus:outline-none focus:border-[#4A2C2A]"
+                className="w-full pl-9 pr-3 py-2 text-xs border border-stone-200 rounded-lg focus:outline-none focus:border-primary"
               />
             </form>
 
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-2 text-xs border border-stone-200 rounded-lg focus:outline-none focus:border-[#4A2C2A] bg-white text-stone-700"
+              className="px-3 py-2 text-xs border border-stone-200 rounded-lg focus:outline-none focus:border-primary bg-white text-stone-700"
             >
               <option value="">Tất cả danh mục</option>
               {CATEGORIES.map((cat) => (
@@ -553,7 +553,7 @@ export default function PostManagement() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 text-xs border border-stone-200 rounded-lg focus:outline-none focus:border-[#4A2C2A] bg-white text-stone-700"
+              className="px-3 py-2 text-xs border border-stone-200 rounded-lg focus:outline-none focus:border-primary bg-white text-stone-700"
             >
               <option value="">Tất cả trạng thái</option>
               <option value="true">Đã xuất bản</option>
@@ -564,7 +564,7 @@ export default function PostManagement() {
           <button
             type="button"
             onClick={fetchPosts}
-            className="p-2 text-stone-500 hover:text-[#4A2C2A] rounded-lg border border-stone-200 hover:bg-stone-50 text-xs flex items-center gap-1 cursor-pointer"
+            className="p-2 text-stone-500 hover:text-primary rounded-lg border border-stone-200 hover:bg-stone-50 text-xs flex items-center gap-1 cursor-pointer"
             title="Tải lại"
           >
             <span className="material-symbols-outlined text-base">refresh</span>
@@ -591,7 +591,7 @@ export default function PostManagement() {
                 {loading ? (
                   <tr>
                     <td colSpan="7" className="text-center py-12 text-stone-400">
-                      <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-[#4A2C2A] mb-2"></div>
+                      <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary mb-2"></div>
                       <p>Đang tải bài viết...</p>
                     </td>
                   </tr>
@@ -614,7 +614,7 @@ export default function PostManagement() {
                         {/* Cột Bài viết */}
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-3.5 max-w-xs sm:max-w-sm">
-                            <div className="w-14 h-10 rounded-lg bg-stone-100 overflow-hidden shrink-0 border border-stone-200 group-hover:border-[#4A2C2A]/40 transition-colors">
+                            <div className="w-14 h-10 rounded-lg bg-stone-100 overflow-hidden shrink-0 border border-stone-200 group-hover:border-primary/40 transition-colors">
                               {post.thumbnail ? (
                                 <img src={post.thumbnail} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                               ) : (
@@ -624,7 +624,7 @@ export default function PostManagement() {
                               )}
                             </div>
                             <div className="min-w-0">
-                              <h4 className="font-bold text-stone-900 truncate group-hover:text-[#4A2C2A] text-xs sm:text-sm transition-colors">
+                              <h4 className="font-bold text-stone-900 truncate group-hover:text-primary text-xs sm:text-sm transition-colors">
                                 {post.title}
                               </h4>
                               <p className="text-[11px] text-stone-400 font-mono truncate">
@@ -737,7 +737,7 @@ export default function PostManagement() {
             {/* Modal Header */}
             <div className="px-6 py-3.5 border-b border-stone-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-stone-50/80 shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-[#381B18] text-amber-200 flex items-center justify-center shadow-xs">
+                <div className="w-10 h-10 rounded-2xl bg-on-primary-container text-amber-200 flex items-center justify-center shadow-xs">
                   <span className="material-symbols-outlined text-xl">
                     {editingPost ? 'edit_note' : 'draw'}
                   </span>
@@ -805,7 +805,7 @@ export default function PostManagement() {
                   {/* PHẦN 1: THÔNG TIN CƠ BẢN */}
                   <div className="p-6 rounded-3xl bg-white border border-stone-200/90 shadow-xs space-y-4">
                     <div className="flex items-center gap-2 text-stone-800 font-bold text-xs uppercase tracking-wider pb-2 border-b border-stone-100">
-                      <span className="material-symbols-outlined text-base text-[#4A2C2A]">info</span>
+                      <span className="material-symbols-outlined text-base text-primary">info</span>
                       <span>Thông Tin Tiêu Điểm</span>
                     </div>
 
@@ -817,7 +817,7 @@ export default function PostManagement() {
                           value={formData.title}
                           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                           placeholder="Ví dụ: Nghệ thuật thắp nến chánh niệm: Tìm lại bình yên trong từng nhịp thở..."
-                          className="w-full px-4 py-2.5 text-xs sm:text-sm font-semibold border border-stone-200 rounded-xl focus:outline-none focus:border-[#4A2C2A] bg-stone-50/50"
+                          className="w-full px-4 py-2.5 text-xs sm:text-sm font-semibold border border-stone-200 rounded-xl focus:outline-none focus:border-primary bg-stone-50/50"
                           required
                         />
                       </div>
@@ -826,7 +826,7 @@ export default function PostManagement() {
                         <select
                           value={formData.category}
                           onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                          className="w-full px-3.5 py-2.5 text-xs border border-stone-200 rounded-xl focus:outline-none focus:border-[#4A2C2A] bg-white font-medium"
+                          className="w-full px-3.5 py-2.5 text-xs border border-stone-200 rounded-xl focus:outline-none focus:border-primary bg-white font-medium"
                         >
                           {CATEGORIES.map((cat) => (
                             <option key={cat} value={cat}>{cat}</option>
@@ -843,7 +843,7 @@ export default function PostManagement() {
                         value={formData.summary}
                         onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
                         placeholder="Một vài câu văn mộc mạc dẫn dắt tâm trí người đọc vào bài viết..."
-                        className="w-full px-4 py-2.5 text-xs border border-stone-200 rounded-xl focus:outline-none focus:border-[#4A2C2A] bg-stone-50/50 leading-relaxed font-serif-display text-sm italic"
+                        className="w-full px-4 py-2.5 text-xs border border-stone-200 rounded-xl focus:outline-none focus:border-primary bg-stone-50/50 leading-relaxed font-serif-display text-sm italic"
                         required
                       />
                     </div>
@@ -857,7 +857,7 @@ export default function PostManagement() {
                           value={formData.thumbnail}
                           onChange={(e) => setFormData({ ...formData, thumbnail: e.target.value })}
                           placeholder="https://images.unsplash.com/..."
-                          className="w-full px-3.5 py-2 text-xs border border-stone-200 rounded-xl focus:outline-none focus:border-[#4A2C2A] bg-stone-50/50"
+                          className="w-full px-3.5 py-2 text-xs border border-stone-200 rounded-xl focus:outline-none focus:border-primary bg-stone-50/50"
                         />
                       </div>
                       <div className="space-y-1.5">
@@ -867,7 +867,7 @@ export default function PostManagement() {
                           value={formData.author}
                           onChange={(e) => setFormData({ ...formData, author: e.target.value })}
                           placeholder="Nghệ nhân Candlet"
-                          className="w-full px-3.5 py-2 text-xs border border-stone-200 rounded-xl focus:outline-none focus:border-[#4A2C2A] bg-stone-50/50"
+                          className="w-full px-3.5 py-2 text-xs border border-stone-200 rounded-xl focus:outline-none focus:border-primary bg-stone-50/50"
                         />
                       </div>
                       <div className="space-y-1.5">
@@ -877,7 +877,7 @@ export default function PostManagement() {
                           value={formData.readTime}
                           onChange={(e) => setFormData({ ...formData, readTime: e.target.value })}
                           placeholder="5 phút đọc"
-                          className="w-full px-3.5 py-2 text-xs border border-stone-200 rounded-xl focus:outline-none focus:border-[#4A2C2A] bg-stone-50/50"
+                          className="w-full px-3.5 py-2 text-xs border border-stone-200 rounded-xl focus:outline-none focus:border-primary bg-stone-50/50"
                         />
                       </div>
                     </div>
@@ -1084,7 +1084,7 @@ export default function PostManagement() {
                                 value={block.content}
                                 onChange={(e) => handleUpdateBlock(block.id, 'content', e.target.value)}
                                 placeholder="Nhập nội dung đoạn văn tại đây..."
-                                className="w-full p-2.5 text-xs text-stone-800 leading-relaxed border border-stone-200/80 rounded-xl focus:outline-none focus:border-[#4A2C2A] bg-stone-50/30"
+                                className="w-full p-2.5 text-xs text-stone-800 leading-relaxed border border-stone-200/80 rounded-xl focus:outline-none focus:border-primary bg-stone-50/30"
                               />
                             )}
 
@@ -1257,7 +1257,7 @@ export default function PostManagement() {
                       <button
                         type="button"
                         onClick={() => handleAddBlock('paragraph')}
-                        className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full border-2 border-dashed border-stone-300 hover:border-[#4A2C2A] text-stone-600 hover:text-[#4A2C2A] font-bold text-xs transition-colors bg-white cursor-pointer shadow-2xs"
+                        className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full border-2 border-dashed border-stone-300 hover:border-primary text-stone-600 hover:text-primary font-bold text-xs transition-colors bg-white cursor-pointer shadow-2xs"
                       >
                         <span className="material-symbols-outlined text-base">add_circle</span>
                         <span>Thêm một đoạn văn mới</span>
@@ -1397,7 +1397,7 @@ export default function PostManagement() {
                                   customDesign: { ...formData.customDesign, enableDropCap: e.target.checked },
                                 })
                               }
-                              className="w-4 h-4 text-[#4A2C2A] rounded border-stone-300 focus:ring-[#4A2C2A]"
+                              className="w-4 h-4 text-primary rounded border-stone-300 focus:ring-primary"
                             />
                             <div>
                               <span className="font-bold text-stone-800 text-xs block">Hiệu ứng Drop Cap (Chữ cái đầu to bản)</span>
@@ -1425,7 +1425,7 @@ export default function PostManagement() {
                             })
                           }
                           placeholder="Ví dụ: Tiếng mưa rơi tí tách bên thềm cửa..."
-                          className="w-full px-3.5 py-2 text-xs border border-stone-200 rounded-xl bg-white focus:outline-none focus:border-[#4A2C2A]"
+                          className="w-full px-3.5 py-2 text-xs border border-stone-200 rounded-xl bg-white focus:outline-none focus:border-primary"
                         />
 
                         <div className="flex flex-wrap gap-1.5 pt-1">
@@ -1464,7 +1464,7 @@ export default function PostManagement() {
                             })
                           }
                           placeholder="Ví dụ: Nghệ nhân nến thơm & Chuyên gia khứu giác..."
-                          className="w-full px-3.5 py-2 text-xs border border-stone-200 rounded-xl bg-white focus:outline-none focus:border-[#4A2C2A]"
+                          className="w-full px-3.5 py-2 text-xs border border-stone-200 rounded-xl bg-white focus:outline-none focus:border-primary"
                         />
 
                         {/* Quote Highlight */}
@@ -1482,7 +1482,7 @@ export default function PostManagement() {
                               })
                             }
                             placeholder="Một câu trích dẫn nổi bật to bản trong bài..."
-                            className="w-full px-3.5 py-2 text-xs font-serif-display text-sm italic border border-stone-200 rounded-xl bg-white focus:outline-none focus:border-[#4A2C2A]"
+                            className="w-full px-3.5 py-2 text-xs font-serif-display text-sm italic border border-stone-200 rounded-xl bg-white focus:outline-none focus:border-primary"
                           />
                         </div>
                       </div>
@@ -1525,7 +1525,7 @@ export default function PostManagement() {
                               }
                             }}
                             placeholder="Nhập tag rồi ấn Enter..."
-                            className="px-3 py-1 text-xs border border-stone-200 rounded-full bg-white focus:outline-none focus:border-[#4A2C2A]"
+                            className="px-3 py-1 text-xs border border-stone-200 rounded-full bg-white focus:outline-none focus:border-primary"
                           />
                           <button
                             type="button"
@@ -1544,7 +1544,7 @@ export default function PostManagement() {
 
               {/* TAB 3: XEM TRƯỚC TRỰC TIẾP (LIVE PREVIEW) */}
               {modalTab === 'preview' && (
-                <div className="p-6 sm:p-10 rounded-3xl bg-[#FAF7F2] border border-stone-200 space-y-6 max-w-3xl mx-auto shadow-inner animate-in fade-in duration-150">
+                <div className="p-6 sm:p-10 rounded-3xl bg-surface-container-low border border-stone-200 space-y-6 max-w-3xl mx-auto shadow-inner animate-in fade-in duration-150">
                   <div className="text-center space-y-3 pb-6 border-b border-stone-200">
                     <span
                       className="inline-block text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-xs"
@@ -1586,7 +1586,7 @@ export default function PostManagement() {
                       style={{ borderColor: formData.customDesign.themeColor }}
                     >
                       <p className="text-[10px] uppercase font-bold tracking-widest text-stone-400 mb-1">Thông điệp cốt lõi</p>
-                      <blockquote className="font-serif-display italic text-lg sm:text-xl text-[#2C1810]">
+                      <blockquote className="font-serif-display italic text-lg sm:text-xl text-on-surface">
                         "{formData.customDesign.quoteHighlight}"
                       </blockquote>
                     </div>
@@ -1618,7 +1618,7 @@ export default function PostManagement() {
                     type="checkbox"
                     checked={formData.isPublished}
                     onChange={(e) => setFormData({ ...formData, isPublished: e.target.checked })}
-                    className="w-4 h-4 text-[#4A2C2A] rounded border-stone-300 focus:ring-[#4A2C2A]"
+                    className="w-4 h-4 text-primary rounded border-stone-300 focus:ring-primary"
                   />
                   <span className="font-bold text-stone-800 text-xs">
                     Xuất bản công khai bài viết này ra ngoài Cửa hàng
@@ -1641,7 +1641,7 @@ export default function PostManagement() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-7 py-2.5 rounded-xl bg-[#381B18] hover:bg-[#200E0C] text-amber-100 font-bold transition-all shadow-md disabled:opacity-50 flex items-center gap-2 cursor-pointer text-xs uppercase tracking-wider"
+                  className="px-7 py-2.5 rounded-xl bg-on-primary-container hover:bg-[#200E0C] text-amber-100 font-bold transition-all shadow-md disabled:opacity-50 flex items-center gap-2 cursor-pointer text-xs uppercase tracking-wider"
                 >
                   {isSubmitting ? (
                     <span>Đang lưu...</span>

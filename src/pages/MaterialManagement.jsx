@@ -31,9 +31,22 @@ const UNIT_ICON_MAP = {
 
 const EMPTY_FORM = { name: '', sku: '', category: '', unit: '', price: '', supplier: '', stock: '', minStock: '10' };
 
+const duplicateMaterialForm = (material) => ({
+  ...EMPTY_FORM,
+  name: `${material.name} (Bản sao)`,
+  category: material.category || '',
+  unit: material.unit || '',
+  price: material.price ?? '',
+  supplier: material.supplier || '',
+  stock: 0,
+  minStock: material.minStock ?? 10,
+});
+
 // ── Modal Thêm/Sửa ────────────────────────────────────────────────
-function MaterialModal({ material, categories, onClose, onSave, onDelete, onCategoryDeleted }) {
-  const [form, setForm] = useState(material ? { ...material, price: material.price, stock: material.stock, minStock: material.minStock || 10, category: material.category || '' } : { ...EMPTY_FORM });
+function MaterialModal({ material, duplicateOf, categories, onClose, onSave, onDelete, onCategoryDeleted }) {
+  const [form, setForm] = useState(material
+    ? { ...material, price: material.price, stock: material.stock, minStock: material.minStock || 10, category: material.category || '' }
+    : duplicateOf ? duplicateMaterialForm(duplicateOf) : { ...EMPTY_FORM });
   const [isNewCategory, setIsNewCategory] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -80,7 +93,7 @@ function MaterialModal({ material, categories, onClose, onSave, onDelete, onCate
         {/* Modal Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-outline-variant/30 flex-shrink-0">
           <h3 className="text-[20px] font-bold text-on-surface">
-            {isEdit ? 'Chỉnh sửa nguyên vật liệu' : 'Thêm mới nguyên vật liệu'}
+            {isEdit ? 'Chỉnh sửa nguyên vật liệu' : duplicateOf ? 'Nhân bản nguyên vật liệu' : 'Thêm mới nguyên vật liệu'}
           </h3>
           <button onClick={onClose} className="text-on-surface-variant hover:bg-surface-container p-1 rounded-md transition-colors">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -95,6 +108,13 @@ function MaterialModal({ material, categories, onClose, onSave, onDelete, onCate
           {error && (
             <div className="bg-error-container text-on-error-container text-sm px-4 py-3 rounded-lg mb-4">
               {error}
+            </div>
+          )}
+
+          {duplicateOf && (
+            <div className="mb-5 flex items-start gap-2.5 rounded-xl border border-primary/20 bg-primary-container/55 px-4 py-3 text-xs leading-relaxed text-on-primary-container">
+              <span className="material-symbols-outlined text-[18px]">content_copy</span>
+              <p>Đang tạo bản sao từ <strong>{duplicateOf.name}</strong>. SKU mới sẽ được tạo tự động và tồn kho ban đầu được đặt về 0.</p>
             </div>
           )}
 
@@ -537,9 +557,10 @@ export default function MaterialManagement() {
   useEffect(() => { fetchMaterials(); }, [fetchMaterials]);
 
   const handleSave = () => {
+    const savedType = modal?.type;
     setModal(null);
     setActionError('');
-    showToast(modal?.type === 'edit' ? 'Đã cập nhật nguyên liệu' : 'Đã tạo nguyên liệu mới');
+    showToast(savedType === 'edit' ? 'Đã cập nhật nguyên liệu' : savedType === 'duplicate' ? 'Đã nhân bản nguyên liệu' : 'Đã tạo nguyên liệu mới');
     fetchMaterials();
   };
 
@@ -616,6 +637,9 @@ export default function MaterialManagement() {
       {/* Modals */}
       {modal?.type === 'add' && (
         <MaterialModal categories={uniqueCategories} onClose={() => { setModal(null); setActionError(''); }} onSave={handleSave} onCategoryDeleted={fetchMaterials} />
+      )}
+      {modal?.type === 'duplicate' && (
+        <MaterialModal duplicateOf={modal.data} categories={uniqueCategories} onClose={() => { setModal(null); setActionError(''); }} onSave={handleSave} onCategoryDeleted={fetchMaterials} />
       )}
       {modal?.type === 'edit' && (
         <MaterialModal material={modal.data} categories={uniqueCategories} onClose={() => { setModal(null); setActionError(''); }} onSave={handleSave} onDelete={() => { setModal({ type: 'delete', data: modal.data }); setActionError(''); }} onCategoryDeleted={fetchMaterials} />
@@ -789,7 +813,7 @@ export default function MaterialManagement() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-surface-container-lowest">
-                  {['Nguyên liệu', 'Phân loại', 'Đơn vị', 'Đơn giá nhập', 'Nhà cung cấp', 'Tồn kho', 'Trạng thái'].map((h) => (
+                  {['Nguyên liệu', 'Phân loại', 'Đơn vị', 'Đơn giá nhập', 'Nhà cung cấp', 'Tồn kho', 'Trạng thái', 'Thao tác'].map((h) => (
                     <th key={h} className="px-lg py-md text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold">
                       {h}
                     </th>
@@ -800,7 +824,7 @@ export default function MaterialManagement() {
                 {loading ? (
                   [...Array(5)].map((_, i) => (
                     <tr key={i}>
-                      {[...Array(7)].map((_, j) => (
+                      {[...Array(8)].map((_, j) => (
                         <td key={j} className="px-lg py-md">
                           <div className="h-4 bg-surface-container-high rounded animate-pulse" />
                         </td>
@@ -809,7 +833,7 @@ export default function MaterialManagement() {
                   ))
                 ) : filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-lg py-16 text-center">
+                    <td colSpan={8} className="px-lg py-16 text-center">
                       <span className="material-symbols-outlined text-[48px] text-on-surface-variant opacity-30 block mb-3">inventory_2</span>
                       <p className="text-on-surface-variant text-sm">Chưa có nguyên liệu nào</p>
                       <button onClick={() => setModal({ type: 'add' })} className="mt-3 text-primary text-sm font-semibold hover:underline">
@@ -856,6 +880,17 @@ export default function MaterialManagement() {
                           <span className={`inline-flex items-center px-2 py-1 rounded-full text-[11px] font-bold ${statusInfo.className}`}>
                             {statusInfo.label}
                           </span>
+                        </td>
+                        <td className="px-lg py-md">
+                          <button
+                            type="button"
+                            onClick={(event) => { event.stopPropagation(); setModal({ type: 'duplicate', data: m }); }}
+                            className="inline-flex size-9 items-center justify-center rounded-lg border border-outline-variant/60 bg-surface-container-lowest text-on-surface-variant transition-colors hover:border-primary/30 hover:bg-primary-container hover:text-primary"
+                            title={`Nhân bản ${m.name}`}
+                            aria-label={`Nhân bản nguyên liệu ${m.name}`}
+                          >
+                            <span className="material-symbols-outlined text-[18px]">content_copy</span>
+                          </button>
                         </td>
                       </tr>
                     );

@@ -57,7 +57,7 @@ export default function ShopRegister() {
   };
 
   return (
-    <div className="min-h-screen w-full flex bg-[#FAF7F2] text-stone-800 font-sans selection:bg-[#F5EFE6] selection:text-[#4A2C2A]">
+    <div className="shop-theme-scope min-h-screen w-full flex bg-brand-cream text-stone-800 font-sans selection:bg-brand-warmIvory selection:text-brand-burgundy">
       
       {/* ─────────────────────────────────────────────────────────────
        * CỘT TRÁI: SHOWCASE ĐẶC QUYỀN THÀNH VIÊN (Desktop & Tablet)
@@ -143,7 +143,7 @@ export default function ShopRegister() {
               <div className="w-8 h-8 rounded-full ring-2 ring-[#200B0E] bg-amber-600 flex items-center justify-center text-[10px] font-bold text-white leading-none shrink-0 shadow-xs">
                 <span>MA</span>
               </div>
-              <div className="w-8 h-8 rounded-full ring-2 ring-[#200B0E] bg-[#8C4A32] flex items-center justify-center text-[10px] font-bold text-white leading-none shrink-0 shadow-xs">
+              <div className="w-8 h-8 rounded-full ring-2 ring-[#200B0E] bg-brand-terracotta flex items-center justify-center text-[10px] font-bold text-white leading-none shrink-0 shadow-xs">
                 <span>HL</span>
               </div>
               <div className="w-8 h-8 rounded-full ring-2 ring-[#200B0E] bg-amber-800 flex items-center justify-center text-[10px] font-bold text-white leading-none shrink-0 shadow-xs">
@@ -177,9 +177,9 @@ export default function ShopRegister() {
         <div className="flex items-center justify-between mb-6">
           <Link 
             to="/" 
-            className="inline-flex items-center gap-2 text-xs font-semibold text-stone-600 sm:hover:text-[#4A2C2A] py-2 px-3.5 rounded-full bg-white/80 sm:hover:bg-white border border-stone-200/80 shadow-2xs transition-all group"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-stone-600 sm:hover:text-brand-burgundy py-2 px-3.5 rounded-full bg-white/80 sm:hover:bg-white border border-stone-200/80 shadow-2xs transition-all group"
           >
-            <i className="ph-bold ph-arrow-left text-sm text-stone-400 sm:group-hover:-translate-x-0.5 sm:group-hover:text-[#4A2C2A] transition-transform" />
+            <i className="ph-bold ph-arrow-left text-sm text-stone-400 sm:group-hover:-translate-x-0.5 sm:group-hover:text-brand-burgundy transition-transform" />
             <span>Về trang chủ</span>
           </Link>
 
@@ -195,7 +195,7 @@ export default function ShopRegister() {
         <div className="w-full max-w-[430px] mx-auto my-auto py-2">
           
           <div className="mb-6">
-            <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#8C4A32] block mb-1.5">
+            <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-terracotta block mb-1.5">
               Khởi Đầu Hành Trình Cảm Xúc
             </span>
             <h1 className="text-2xl sm:text-3xl font-serif-display font-bold text-[#381418] tracking-tight mb-2">
@@ -228,7 +228,7 @@ export default function ShopRegister() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Ví dụ: Hoàng Mai Anh"
-                  className="w-full pl-11 pr-4 py-2.5 sm:py-3 text-sm rounded-2xl bg-white border border-stone-200 text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#4A2C2A] focus:ring-4 focus:ring-[#4A2C2A]/10 shadow-2xs transition-all font-medium"
+                  className="w-full pl-11 pr-4 py-2.5 sm:py-3 text-sm rounded-2xl bg-white border border-stone-200 text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-brand-burgundy focus:ring-4 focus:ring-brand-burgundy/10 shadow-2xs transition-all font-medium"
                 />
                 <i className="ph-bold ph-user absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 text-lg" />
               </div>
@@ -246,7 +246,7 @@ export default function ShopRegister() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="nhap.email@cuaban.com"
-                  className="w-full pl-11 pr-4 py-2.5 sm:py-3 text-sm rounded-2xl bg-white border border-stone-200 text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#4A2C2A] focus:ring-4 focus:ring-[#4A2C2A]/10 shadow-2xs transition-all font-medium"
+                  className="w-full pl-11 pr-4 py-2.5 sm:py-3 text-sm rounded-2xl bg-white border border-stone-200 text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-brand-burgundy focus:ring-4 focus:ring-brand-burgundy/10 shadow-2xs transition-all font-medium"
                 />
                 <i className="ph-bold ph-envelope-simple absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 text-lg" />
               </div>
@@ -265,7 +265,7 @@ export default function ShopRegister() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Tối thiểu 6 ký tự"
-                  className="w-full pl-11 pr-11 py-2.5 sm:py-3 text-sm rounded-2xl bg-white border border-stone-200 text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#4A2C2A] focus:ring-4 focus:ring-[#4A2C2A]/10 shadow-2xs transition-all font-mono"
+                  className="w-full pl-11 pr-11 py-2.5 sm:py-3 text-sm rounded-2xl bg-white border border-stone-200 text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-brand-burgundy focus:ring-4 focus:ring-brand-burgundy/10 shadow-2xs transition-all font-mono"
                 />
                 <i className="ph-bold ph-lock-key absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 text-lg" />
                 
@@ -293,7 +293,7 @@ export default function ShopRegister() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Nhập lại mật khẩu vừa tạo"
-                  className="w-full pl-11 pr-11 py-2.5 sm:py-3 text-sm rounded-2xl bg-white border border-stone-200 text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#4A2C2A] focus:ring-4 focus:ring-[#4A2C2A]/10 shadow-2xs transition-all font-mono"
+                  className="w-full pl-11 pr-11 py-2.5 sm:py-3 text-sm rounded-2xl bg-white border border-stone-200 text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-brand-burgundy focus:ring-4 focus:ring-brand-burgundy/10 shadow-2xs transition-all font-mono"
                 />
                 <i className="ph-bold ph-shield-check absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 text-lg" />
                 
@@ -315,7 +315,7 @@ export default function ShopRegister() {
                   type="checkbox"
                   checked={agreeTerms}
                   onChange={(e) => setAgreeTerms(e.target.checked)}
-                  className="w-4 h-4 mt-0.5 rounded-md border-stone-300 text-[#4A2C2A] focus:ring-[#4A2C2A] accent-[#4A2C2A] cursor-pointer"
+                  className="w-4 h-4 mt-0.5 rounded-md border-stone-300 text-brand-burgundy focus:ring-brand-burgundy accent-brand-burgundy cursor-pointer"
                 />
                 <span>
                   Tôi đồng ý với{' '}
@@ -325,7 +325,7 @@ export default function ShopRegister() {
                       e.preventDefault();
                       setShowTermsModal(true);
                     }}
-                    className="text-[#8C4A32] font-semibold sm:hover:underline cursor-pointer"
+                    className="text-brand-terracotta font-semibold sm:hover:underline cursor-pointer"
                   >
                     Điều khoản dịch vụ & Chính sách
                   </button>{' '}
@@ -339,7 +339,7 @@ export default function ShopRegister() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#4A2C2A] sm:hover:bg-[#341816] text-white text-xs sm:text-sm font-bold uppercase tracking-widest rounded-2xl py-3.5 px-6 flex items-center justify-center gap-2 shadow-md sm:hover:shadow-lg transition-all transform active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                className="w-full bg-brand-burgundy sm:hover:bg-[#341816] text-white text-xs sm:text-sm font-bold uppercase tracking-widest rounded-2xl py-3.5 px-6 flex items-center justify-center gap-2 shadow-md sm:hover:shadow-lg transition-all transform active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
               >
                 {loading ? (
                   <>
@@ -362,7 +362,7 @@ export default function ShopRegister() {
               <div className="w-full border-t border-stone-200" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="px-3 bg-[#FAF7F2] text-stone-400 font-medium">Hoặc đăng ký nhanh bằng</span>
+              <span className="px-3 bg-brand-cream text-stone-400 font-medium">Hoặc đăng ký nhanh bằng</span>
             </div>
           </div>
 
@@ -399,7 +399,7 @@ export default function ShopRegister() {
               <Link 
                 to="/login" 
                 state={{ from: location.state?.from }}
-                className="font-bold text-[#8C4A32] sm:hover:text-[#4A2C2A] underline underline-offset-4 decoration-[#8C4A32]/40 sm:hover:decoration-[#8C4A32] transition-colors"
+                className="font-bold text-brand-terracotta sm:hover:text-brand-burgundy underline underline-offset-4 decoration-brand-terracotta/40 sm:hover:decoration-brand-terracotta transition-colors"
               >
                 Đăng nhập ngay
               </Link>
@@ -419,7 +419,7 @@ export default function ShopRegister() {
           <div className="bg-white w-full max-w-md rounded-3xl p-6 sm:p-7 shadow-2xl border border-stone-200 space-y-4 animate-[scaleUp_0.2s_ease-out] max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-stone-100 pb-3">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-amber-100 text-[#8C4A32] flex items-center justify-center text-lg">
+                <div className="w-9 h-9 rounded-xl bg-amber-100 text-brand-terracotta flex items-center justify-center text-lg">
                   <i className="ph-bold ph-shield-check" />
                 </div>
                 <div>
@@ -437,9 +437,9 @@ export default function ShopRegister() {
             </div>
 
             <div className="space-y-3 text-xs text-stone-600 leading-relaxed">
-              <div className="p-3 rounded-2xl bg-[#FAF7F2] border border-stone-200/60">
+              <div className="p-3 rounded-2xl bg-brand-cream border border-stone-200/60">
                 <h4 className="font-bold text-stone-800 flex items-center gap-1.5 mb-1">
-                  <i className="ph-fill ph-lock-key text-[#8C4A32]" />
+                  <i className="ph-fill ph-lock-key text-brand-terracotta" />
                   Bảo mật thông điệp bí mật
                 </h4>
                 <p>
@@ -447,9 +447,9 @@ export default function ShopRegister() {
                 </p>
               </div>
 
-              <div className="p-3 rounded-2xl bg-[#FAF7F2] border border-stone-200/60">
+              <div className="p-3 rounded-2xl bg-brand-cream border border-stone-200/60">
                 <h4 className="font-bold text-stone-800 flex items-center gap-1.5 mb-1">
-                  <i className="ph-fill ph-sparkle text-[#8C4A32]" />
+                  <i className="ph-fill ph-sparkle text-brand-terracotta" />
                   Cam kết nến thủ công 100% sáp thiên nhiên
                 </h4>
                 <p>
@@ -457,9 +457,9 @@ export default function ShopRegister() {
                 </p>
               </div>
 
-              <div className="p-3 rounded-2xl bg-[#FAF7F2] border border-stone-200/60">
+              <div className="p-3 rounded-2xl bg-brand-cream border border-stone-200/60">
                 <h4 className="font-bold text-stone-800 flex items-center gap-1.5 mb-1">
-                  <i className="ph-fill ph-arrow-counter-clockwise text-[#8C4A32]" />
+                  <i className="ph-fill ph-arrow-counter-clockwise text-brand-terracotta" />
                   Đổi trả & bảo hành vận chuyển
                 </h4>
                 <p>
@@ -474,7 +474,7 @@ export default function ShopRegister() {
                 setAgreeTerms(true);
                 setShowTermsModal(false);
               }}
-              className="w-full py-2.5 rounded-xl bg-[#4A2C2A] sm:hover:bg-[#341816] text-white text-xs font-bold transition-colors cursor-pointer shadow-sm"
+              className="w-full py-2.5 rounded-xl bg-brand-burgundy sm:hover:bg-[#341816] text-white text-xs font-bold transition-colors cursor-pointer shadow-sm"
             >
               Tôi Đã Hiểu & Đồng Ý
             </button>
