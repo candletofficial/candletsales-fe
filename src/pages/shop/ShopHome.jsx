@@ -202,7 +202,7 @@ export default function ShopHome() {
                 ✦ 100% Sáp Thực Vật
               </span>
               <span className="bg-amber-400 text-stone-950 text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm">
-                Thông Điệp Ẩn
+                Hương Thơm Thủ Công
               </span>
             </div>
           </div>
@@ -214,7 +214,7 @@ export default function ShopHome() {
               <span className="italic font-light text-brand-burgundy">trong từng nhịp thở</span>
             </h1>
             <p className="text-stone-600 text-xs sm:text-sm leading-relaxed max-w-md mx-auto font-normal">
-              Chế tác từ 100% sáp thực vật hữu cơ cùng tinh dầu trị liệu nguyên chất. Từng ngọn nến ôm ấp thông điệp bí mật dần hé lộ theo từng nhịp nến tan chảy.
+              Chế tác từ 100% sáp thực vật cùng hương thơm được tuyển chọn kỹ lưỡng. Từng ngọn nến mang đến một khoảng lặng ấm áp và dễ chịu cho không gian sống.
             </p>
           </div>
 
@@ -253,9 +253,9 @@ export default function ShopHome() {
               <span className="text-[9.5px] text-stone-500 mt-0.5">Không khói độc</span>
             </div>
             <div className="flex flex-col items-center px-1 sm:rounded-xl sm:border sm:border-stone-200/80 sm:bg-white/90 sm:p-2.5 sm:shadow-2xs">
-              <i className="ph-fill ph-envelope-open text-xl text-rose-600 mb-1"></i>
-              <span className="text-[11px] font-bold text-brand-charcoal leading-tight">Lời Nhắn Ẩn</span>
-              <span className="text-[9.5px] text-stone-500 mt-0.5">Quà tặng xúc cảm</span>
+              <i className="ph-fill ph-hand-heart text-xl text-rose-600 mb-1"></i>
+              <span className="text-[11px] font-bold text-brand-charcoal leading-tight">Rót Tay Thủ Công</span>
+              <span className="text-[9.5px] text-stone-500 mt-0.5">Chăm chút từng hũ</span>
             </div>
           </div>
         </div>
@@ -370,7 +370,7 @@ export default function ShopHome() {
 
             <div className="lg:col-span-5 reveal-on-scroll reveal-delay-200 lg:pb-2">
               <p className="text-stone-600 text-xs sm:text-base leading-relaxed mb-4 sm:mb-6 font-normal">
-                Mỗi ngọn nến thủ công tại Candlet không đơn thuần chỉ để thắp sáng, mà là một chiếc neo tĩnh lặng kéo bạn về với hiện tại — vỗ về tâm trí bằng hương thơm trị liệu và thông điệp ẩn giấu sâu lắng.
+                Mỗi ngọn nến thủ công tại Candlet không đơn thuần chỉ để thắp sáng, mà còn tạo nên một khoảng lặng kéo bạn về với hiện tại — vỗ về tâm trí bằng hương thơm dịu dàng và ánh lửa ấm áp.
               </p>
               <div className="flex items-center gap-6">
                 <a
@@ -481,7 +481,7 @@ export default function ShopHome() {
                 </div>
               </div>
 
-              {/* Card 03: Hidden Message Ritual & Self-Care */}
+              {/* Card 03: Relaxation Ritual & Self-Care */}
               <div className="card-hover-lift group reveal-on-scroll reveal-delay-300 relative flex-1 overflow-hidden py-7 lg:rounded-3xl lg:border lg:border-stone-200/80 lg:bg-white/85 lg:p-8 lg:pb-9 lg:shadow-xs lg:backdrop-blur-xs lg:hover:border-rose-400/40">
                 {/* Background Watermark */}
                 <span className="absolute -top-3 right-3 font-serif-display text-5xl sm:text-8xl font-light text-stone-200/50 select-none sm:group-hover:text-rose-950/10 transition-colors pointer-events-none">
@@ -503,14 +503,14 @@ export default function ShopHome() {
                 </div>
 
                 <p className="text-stone-600 text-xs sm:text-sm leading-relaxed mb-4">
-                  Dành tặng chính mình khoảng lặng dịu êm sau ngày dài, tái tạo nguồn năng lượng tích cực và khám phá thông điệp cá nhân hóa ẩn sâu dưới lớp sáp tan chảy.
+                  Dành tặng chính mình khoảng lặng dịu êm sau ngày dài. Ánh nến ấm cùng hương thơm nhẹ nhàng giúp không gian trở nên thư thái và dễ chịu hơn.
                 </p>
 
-                {/* Secret Message Preview Tag */}
+                {/* Relaxation ritual preview */}
                 <div className="p-3 rounded-xl bg-brand-cream border border-dashed border-rose-300/70 flex items-center gap-3">
-                  <i className="ph-fill ph-chat-centered-text text-brand-burgundy text-base shrink-0"></i>
+                  <i className="ph-fill ph-sparkle text-brand-burgundy text-base shrink-0"></i>
                   <p className="text-[12px] italic font-serif-display text-stone-700 leading-snug">
-                    “Dưới đáy nến là một lời thì thầm dịu dàng đang chờ bạn mở ra...”
+                    “Thắp nến, hít thở sâu và dành vài phút thật chậm cho riêng mình.”
                   </p>
                 </div>
               </div>
@@ -908,7 +908,7 @@ export default function ShopHome() {
                 <span className="italic font-light text-brand-burgundy">thắp sáng tâm hồn</span>
               </h2>
               <p className="text-stone-600 text-xs sm:text-base leading-relaxed mt-2 sm:mt-4 font-normal">
-                Chế tác từ 100% sáp thực vật hữu cơ hòa quyện cùng tinh dầu thiên nhiên nguyên chất. Từng ngọn nến mang trong mình một thông điệp xúc cảm bí mật, dần hé lộ khi ngọn lửa cháy êm dịu.
+                Chế tác từ sáp thực vật hòa quyện cùng những tầng hương được tuyển chọn kỹ lưỡng. Mỗi sản phẩm được rót tay để mang đến ánh sáng ấm áp và trải nghiệm hương thơm trọn vẹn.
               </p>
             </div>
 
@@ -924,11 +924,11 @@ export default function ShopHome() {
           </div>
 
           {/* Quick Category Filter Pills */}
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-3 mb-5 -mx-3 px-3 sm:mx-0 sm:px-0">
+          <div className="halloween-category-filters flex items-center gap-2 overflow-x-auto no-scrollbar pb-3 mb-5 -mx-3 px-3 sm:mx-0 sm:px-0">
             {[
               { id: 'all', label: 'Tất Cả', icon: 'ph-squares-four' },
               { id: 'bestseller', label: 'Bán Chạy Nhất', icon: 'ph-fire' },
-              { id: 'message', label: 'Nến Ẩn Thư', icon: 'ph-envelope-open' },
+              { id: 'scented', label: 'Nến Thơm', icon: 'ph-flame' },
               { id: 'gift', label: 'Set Quà Tặng', icon: 'ph-gift' },
             ].map(cat => (
               <button
@@ -973,8 +973,9 @@ export default function ShopHome() {
                   if (selectedCategoryFilter === 'bestseller') {
                     return (product.tag && (product.tag.toLowerCase().includes('bán chạy') || product.tag.toLowerCase().includes('hot') || product.tag.toLowerCase().includes('best'))) || Number(product.avgRating) >= 4.8;
                   }
-                  if (selectedCategoryFilter === 'message') {
-                    return product.name?.toLowerCase().includes('thư') || product.name?.toLowerCase().includes('thông điệp') || product.description?.toLowerCase().includes('thông điệp') || product.tag?.toLowerCase().includes('thư') || true;
+                  if (selectedCategoryFilter === 'scented') {
+                    const category = typeof product.category === 'string' ? product.category : product.category?.name;
+                    return !category || category.toLowerCase().includes('nến');
                   }
                   if (selectedCategoryFilter === 'gift') {
                     return product.name?.toLowerCase().includes('quà') || product.name?.toLowerCase().includes('set') || product.category?.name?.toLowerCase().includes('quà');

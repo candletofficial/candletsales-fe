@@ -403,21 +403,12 @@ export default function ProductDetail() {
 
   return (
     <div className="min-h-screen bg-white pb-[calc(58px+env(safe-area-inset-bottom,0px))] md:pb-0 sm:bg-[#f9f9f9]">
-      <div className="mx-auto max-w-7xl px-4 pt-3 sm:px-6 sm:pt-8 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 pt-0 sm:px-6 md:pt-8 lg:px-8">
         
         {/* Top Navigation & Breadcrumbs */}
-        <div className="mb-3 flex items-center justify-between sm:mb-8">
-          {/* Mobile Back Button */}
-          <button 
-            onClick={() => navigate(-1)} 
-            className="inline-flex cursor-pointer items-center gap-1.5 py-2 text-xs font-bold text-stone-600 transition-colors active:text-brand-burgundy md:hidden"
-          >
-            <i className="ph-bold ph-arrow-left text-sm"></i>
-            <span>Quay lại</span>
-          </button>
-
+        <div className="mb-8 hidden items-center justify-between md:flex">
           {/* Desktop & Tablet Breadcrumb */}
-          <div className="hidden md:flex items-center flex-wrap text-[11px] font-bold uppercase tracking-wider text-stone-400">
+          <div className="flex items-center flex-wrap text-[11px] font-bold uppercase tracking-wider text-stone-400">
             <button onClick={() => navigate('/')} className="sm:hover:text-brand-burgundy transition-colors whitespace-nowrap cursor-pointer">
               TRANG CHỦ
             </button>
@@ -429,16 +420,6 @@ export default function ProductDetail() {
             <span className="text-brand-charcoal truncate max-w-xs">{product.name}</span>
           </div>
 
-          {/* Mobile Quick Action Buttons (Wishlist & Share) */}
-          <div className="flex md:hidden items-center gap-2">
-            <button
-              onClick={() => toggleWishlist(product, navigate)}
-              className="flex size-9 cursor-pointer items-center justify-center text-stone-600 transition-colors active:text-rose-500"
-              title={isInWishlist(product._id) ? "Bỏ yêu thích" : "Yêu thích"}
-            >
-              <i className={`text-base ${isInWishlist(product._id) ? 'ph-fill ph-heart text-rose-500' : 'ph-bold ph-heart text-stone-400'}`}></i>
-            </button>
-          </div>
         </div>
 
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-12 lg:gap-14">
@@ -448,17 +429,17 @@ export default function ProductDetail() {
             <div className="group relative -mx-4 aspect-square w-[calc(100%+2rem)] select-none overflow-hidden bg-white sm:mx-0 sm:w-full sm:rounded-3xl sm:border sm:border-stone-200/80 sm:shadow-xs md:w-5/6">
               {product.tag && (
                 <div
-                  className="absolute top-3.5 left-3.5 text-white text-[10px] font-bold tracking-widest px-3 py-1 uppercase z-20 rounded-full shadow-sm pointer-events-none"
+                  className="absolute left-3.5 top-3.5 z-20 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white shadow-sm pointer-events-none"
                   style={{ backgroundColor: resolveTagColor(product.tag, product.tag_color) }}
                 >
                   {product.tag}
                 </div>
               )}
 
-              {/* Nút Yêu Thích trên ảnh lớn (Desktop) */}
+              {/* Nút Yêu Thích nổi trên ảnh */}
               <button
                 onClick={() => toggleWishlist(product, navigate)}
-                className="hidden md:flex absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-md rounded-full items-center justify-center shadow-md z-20 sm:hover:scale-110 active:scale-90 transition-all focus:outline-none cursor-pointer"
+                className="absolute right-3 top-3 z-30 flex size-9 cursor-pointer items-center justify-center rounded-full border border-white/70 bg-white/88 shadow-md backdrop-blur-md transition-all focus:outline-none sm:hover:scale-110 active:scale-90 md:right-4 md:top-4 md:size-10"
                 title={isInWishlist(product._id) ? "Bỏ yêu thích" : "Thêm vào danh sách yêu thích"}
               >
                 <i className={`text-xl transition-colors ${isInWishlist(product._id)
@@ -505,7 +486,7 @@ export default function ProductDetail() {
                   <button
                     type="button"
                     onClick={handlePrevImage}
-                    className="absolute left-2.5 top-1/2 z-20 hidden size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-stone-200/80 bg-white/85 text-stone-700 shadow-md backdrop-blur-md transition-all sm:hover:bg-white sm:hover:text-brand-burgundy active:scale-90 sm:flex"
+                    className="absolute left-2.5 top-1/2 z-20 flex size-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/70 bg-white/82 text-stone-700 shadow-md backdrop-blur-md transition-all sm:hover:bg-white sm:hover:text-brand-burgundy active:scale-90 md:size-10"
                     aria-label="Xem ảnh trước"
                   >
                     <i className="ph-bold ph-caret-left text-base sm:text-lg"></i>
@@ -513,7 +494,7 @@ export default function ProductDetail() {
                   <button
                     type="button"
                     onClick={handleNextImage}
-                    className="absolute right-2.5 top-1/2 z-20 hidden size-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-stone-200/80 bg-white/85 text-stone-700 shadow-md backdrop-blur-md transition-all sm:hover:bg-white sm:hover:text-brand-burgundy active:scale-90 sm:flex"
+                    className="absolute right-2.5 top-1/2 z-20 flex size-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/70 bg-white/82 text-stone-700 shadow-md backdrop-blur-md transition-all sm:hover:bg-white sm:hover:text-brand-burgundy active:scale-90 md:size-10"
                     aria-label="Xem ảnh kế tiếp"
                   >
                     <i className="ph-bold ph-caret-right text-base sm:text-lg"></i>

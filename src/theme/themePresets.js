@@ -1,6 +1,7 @@
 export const DEFAULT_THEME_CONFIG = {
   adminPreset: 'candlet',
   shopPreset: 'candlet',
+  halloweenEnabled: false,
 };
 
 export const THEME_PRESETS = [
@@ -66,5 +67,6 @@ export const normalizeThemeConfig = (value) => {
   return {
     adminPreset: validIds.has(source.adminPreset) ? source.adminPreset : DEFAULT_THEME_CONFIG.adminPreset,
     shopPreset: validIds.has(source.shopPreset) ? source.shopPreset : DEFAULT_THEME_CONFIG.shopPreset,
+    halloweenEnabled: source.halloweenEnabled === true,
   };
 };

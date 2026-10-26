@@ -30,6 +30,7 @@ export function WebsiteThemeProvider({ children }) {
     setPaletteVariables(root, 'shop-theme', config.shopPreset);
     root.dataset.adminTheme = config.adminPreset;
     root.dataset.shopTheme = config.shopPreset;
+    root.dataset.halloween = config.halloweenEnabled ? 'on' : 'off';
     localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
   }, [config]);
 
@@ -45,6 +46,7 @@ export function WebsiteThemeProvider({ children }) {
 
   const applyPreset = useCallback(async (presetId, scope) => {
     const nextConfig = normalizeThemeConfig({
+      ...config,
       adminPreset: scope === 'shop' ? config.adminPreset : presetId,
       shopPreset: scope === 'admin' ? config.shopPreset : presetId,
     });
@@ -58,7 +60,22 @@ export function WebsiteThemeProvider({ children }) {
     }
   }, [config]);
 
-  const value = useMemo(() => ({ config, applyPreset, savingTheme }), [config, applyPreset, savingTheme]);
+  const setHalloweenEnabled = useCallback(async (enabled) => {
+    const nextConfig = normalizeThemeConfig({ ...config, halloweenEnabled: Boolean(enabled) });
+    setSavingTheme(true);
+    try {
+      await systemConfigService.updateConfig('website_theme', nextConfig);
+      setConfig(nextConfig);
+      return nextConfig;
+    } finally {
+      setSavingTheme(false);
+    }
+  }, [config]);
+
+  const value = useMemo(
+    () => ({ config, applyPreset, setHalloweenEnabled, savingTheme }),
+    [config, applyPreset, setHalloweenEnabled, savingTheme],
+  );
   return <WebsiteThemeContext.Provider value={value}>{children}</WebsiteThemeContext.Provider>;
 }
 

@@ -5,6 +5,46 @@ import { useWishlist } from '../../hooks/useWishlist';
 import { useAuth } from '../../hooks/useAuth';
 import systemConfigService from '../../services/systemConfigService';
 import { orderService } from '../../services/orderService';
+import { useWebsiteTheme } from '../../hooks/useWebsiteTheme';
+import HalloweenDecor from '../../components/shop/HalloweenDecor';
+
+const HalloweenBatMark = ({ className = '' }) => (
+  <svg className={className} viewBox="0 0 64 28" fill="none" aria-hidden="true">
+    <path d="M32 13C27 5 18 2 8 4c3 3 4 6 4 9-4-2-8-2-12 0 6 2 10 6 13 11 5-4 10-4 15-2 1-4 2-7 4-9Zm0 0C37 5 46 2 56 4c-3 3-4 6-4 9 4-2 8-2 12 0-6 2-10 6-13 11-5-4-10-4-15-2-1-4-2-7-4-9Z" fill="currentColor" />
+    <ellipse cx="32" cy="15" rx="4" ry="9" fill="currentColor" />
+  </svg>
+);
+
+const HalloweenPumpkinMark = ({ className = '' }) => (
+  <svg className={className} viewBox="0 0 76 68" fill="none" aria-hidden="true">
+    <defs>
+      <linearGradient id="pumpkin-body" x1="11" y1="13" x2="65" y2="61" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#FFB13B" />
+        <stop offset="0.48" stopColor="#F47616" />
+        <stop offset="1" stopColor="#B9360A" />
+      </linearGradient>
+      <linearGradient id="pumpkin-glow" x1="23" y1="27" x2="54" y2="49" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#FFE19A" />
+        <stop offset="1" stopColor="#FF9D2E" />
+      </linearGradient>
+      <filter id="pumpkin-shadow" x="-20%" y="-20%" width="140%" height="150%">
+        <feDropShadow dx="0" dy="4" stdDeviation="3" floodColor="#16091D" floodOpacity=".38" />
+      </filter>
+    </defs>
+    <g filter="url(#pumpkin-shadow)">
+      <path d="M36 16c-1-7 2-12 7-15 2 6 1 11-2 16" fill="#547044" />
+      <path d="M39 12c7-5 13-4 18-1-6 1-9 4-13 8" fill="#6F8A4F" />
+      <path d="M38 14C18 11 7 24 9 41c2 17 17 23 29 23s27-6 29-23C69 24 58 11 38 14Z" fill="url(#pumpkin-body)" />
+      <path d="M37 15C24 15 20 28 21 41c1 13 7 21 17 23" stroke="#B9400D" strokeWidth="3" strokeLinecap="round" opacity=".55" />
+      <path d="M40 15c13 0 17 13 16 26-1 13-7 21-17 23" stroke="#8E2A0C" strokeWidth="3" strokeLinecap="round" opacity=".5" />
+      <path d="M38 16v46" stroke="#FFB54C" strokeWidth="2" strokeLinecap="round" opacity=".45" />
+      <path d="m20 31 14 4-12 9-5-5 3-8Zm36 0-14 4 12 9 5-5-3-8Z" fill="#26102D" />
+      <path d="M22 49c9 4 23 4 32 0l-4 10-6-4-6 6-6-6-6 4-4-10Z" fill="#26102D" />
+      <path d="m24 50 5 2-3 3m24-5-5 2 3 3" stroke="url(#pumpkin-glow)" strokeWidth="1.4" strokeLinecap="round" opacity=".75" />
+      <path d="M17 24c5-6 12-8 18-8" stroke="#FFD27A" strokeWidth="2.2" strokeLinecap="round" opacity=".62" />
+    </g>
+  </svg>
+);
 
 export default function ShopLayout() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -18,6 +58,7 @@ export default function ShopLayout() {
   const { cartItemCount } = useCart();
   const { wishlistCount } = useWishlist();
   const { user, logout } = useAuth();
+  const { config: websiteTheme } = useWebsiteTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const userId = user?._id || user?.id;
@@ -112,7 +153,9 @@ export default function ShopLayout() {
   ];
 
   return (
-    <div className="shop-theme-scope font-jakarta bg-brand-cream text-brand-charcoal antialiased selection:bg-brand-burgundy selection:text-white min-h-screen flex flex-col">
+    <div className={`shop-theme-scope font-jakarta bg-brand-cream text-brand-charcoal antialiased selection:bg-brand-burgundy selection:text-white min-h-screen flex flex-col ${websiteTheme.halloweenEnabled ? 'halloween-shop' : ''}`}>
+
+      {websiteTheme.halloweenEnabled && <HalloweenDecor />}
 
       {/* 1. TOP ANNOUNCEMENT BAR (Cuộn tự nhiên cùng trang, không giật layout) */}
       <aside
@@ -122,7 +165,9 @@ export default function ShopLayout() {
         <div className="max-w-7xl mx-auto flex items-center justify-between text-[10.5px] sm:text-xs">
           <div className="flex items-center space-x-1.5 sm:space-x-2 text-amber-200/95 font-medium truncate">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
-            <span className="truncate">Miễn phí giao hàng toàn quốc đơn từ 100K</span>
+            <span className="truncate">
+              {websiteTheme.halloweenEnabled ? 'Halloween huyền bí · Miễn phí giao hàng đơn từ 100K' : 'Miễn phí giao hàng toàn quốc đơn từ 100K'}
+            </span>
           </div>
 
           <div className="hidden md:flex items-center space-x-2 text-stone-300">
@@ -375,7 +420,44 @@ export default function ShopLayout() {
             style={{ width: `${scrollProgress}%` }}
           />
         </div>
+
+        {websiteTheme.halloweenEnabled && (
+          <div className="halloween-header-garland" aria-hidden="true">
+            <svg className="halloween-garland-line" viewBox="0 0 400 30" preserveAspectRatio="none">
+              <path d="M1 3C104 20 296 20 399 3" />
+            </svg>
+            <span className="halloween-garland-pin pin-left" />
+            <span className="halloween-garland-pin pin-right" />
+            <span className="halloween-garland-charm charm-bat-left"><HalloweenBatMark /></span>
+            <span className="halloween-garland-charm charm-star">✦</span>
+            <span className="halloween-garland-charm charm-moon" />
+            <span className="halloween-garland-charm charm-bat-right"><HalloweenBatMark /></span>
+          </div>
+        )}
       </header>
+
+      {websiteTheme.halloweenEnabled && (
+        <section className="halloween-season-banner" aria-label="Chủ đề Halloween Candlet">
+          <div className="halloween-season-banner-inner">
+            <div className="halloween-banner-motifs">
+              <HalloweenBatMark className="halloween-banner-bat halloween-banner-bat-one" />
+              <HalloweenBatMark className="halloween-banner-bat halloween-banner-bat-two" />
+              <span className="halloween-banner-star halloween-banner-star-one">✦</span>
+              <span className="halloween-banner-star halloween-banner-star-two">✧</span>
+            </div>
+            <HalloweenPumpkinMark className="halloween-mini-pumpkin" />
+            <div className="min-w-0 flex-1">
+              <p className="halloween-season-eyebrow">Halloween Seasonal Edition</p>
+              <p className="halloween-season-title">Thắp một đêm hương thật huyền bí</p>
+              <p className="halloween-season-copy">Ánh nến ấm, sắc cam bí ngô và những tầng hương dành cho đêm thu.</p>
+            </div>
+            <Link to="/shop" className="halloween-season-action">
+              Khám phá ngay
+              <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+            </Link>
+          </div>
+        </section>
+      )}
 
       {/* 4. MOBILE DRAWER MENU (Giao diện trượt mềm mại trên thiết bị di động) */}
       {mobileMenuOpen && (
@@ -536,13 +618,15 @@ export default function ShopLayout() {
       )}
 
       <main
-        className={`flex-1 ${
+        className={`relative z-10 flex-1 isolate ${
           isBottomNavHidden
             ? 'pb-0'
             : 'pb-[calc(5rem+env(safe-area-inset-bottom,0px))] lg:pb-0'
         }`}
       >
-        <Outlet />
+        <div className="relative z-10 min-h-full" data-purpose="shop-page-content">
+          <Outlet />
+        </div>
       </main>
 
       {/* Mobile footer */}
@@ -631,7 +715,7 @@ export default function ShopLayout() {
       )}
 
       {/* BEGIN: MainFooter (Thiết kế sang trọng, ấm áp phong cách Atelier Nến Thủ Công) */}
-      <footer className="relative mt-auto hidden overflow-hidden bg-gradient-to-b from-[#2B0C10] via-[#21070A] to-[#150406] text-xs text-[#E8D9D5] lg:block" data-purpose="main-footer">
+      <footer className="relative z-10 mt-auto hidden overflow-hidden bg-gradient-to-b from-[#2B0C10] via-[#21070A] to-[#150406] text-xs text-[#E8D9D5] lg:block" data-purpose="main-footer">
         {/* Họa tiết quầng sáng vàng ấm nghệ thuật */}
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute bottom-0 right-10 w-80 h-80 bg-red-900/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -920,6 +1004,7 @@ export default function ShopLayout() {
       {!isBottomNavHidden && (
         <nav
           className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-stone-200/90 shadow-[0_-4px_25px_rgba(44,24,16,0.08)] lg:hidden"
+          data-purpose="mobile-bottom-navigation"
           style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
           aria-label="Điều hướng di động"
         >

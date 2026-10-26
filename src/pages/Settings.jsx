@@ -90,7 +90,7 @@ export default function Settings() {
   const [saving, setSaving] = useState({ standard: false, express: false });
   const [materialsList, setMaterialsList] = useState([]);
   const [toast, setToast] = useState(null);
-  const { config: themeConfig, applyPreset, savingTheme } = useWebsiteTheme();
+  const { config: themeConfig, applyPreset, setHalloweenEnabled, savingTheme } = useWebsiteTheme();
   const [themePreset, setThemePreset] = useState(themeConfig.adminPreset);
   const [themeScope, setThemeScope] = useState('admin');
 
@@ -290,6 +290,17 @@ export default function Settings() {
     } catch (error) {
       console.error(error);
       showToast('Không thể lưu tông màu. Vui lòng thử lại.', 'error');
+    }
+  };
+
+  const handleToggleHalloween = async () => {
+    const nextEnabled = !themeConfig.halloweenEnabled;
+    try {
+      await setHalloweenEnabled(nextEnabled);
+      showToast(nextEnabled ? 'Đã bật chủ đề Halloween cho trang Shop' : 'Đã tắt chủ đề Halloween');
+    } catch (error) {
+      console.error(error);
+      showToast('Không thể cập nhật chủ đề Halloween. Vui lòng thử lại.', 'error');
     }
   };
 
@@ -770,6 +781,63 @@ export default function Settings() {
                         </button>
                       );
                     })}
+                  </div>
+                </div>
+              </section>
+
+              <section className="overflow-hidden rounded-3xl border border-[#3f294d] bg-[#17101e] text-white shadow-[0_18px_55px_rgba(35,16,44,0.18)]">
+                <div className="grid lg:grid-cols-[minmax(0,1fr)_360px]">
+                  <div className="relative overflow-hidden px-6 py-7 sm:px-8 sm:py-9">
+                    <div className="pointer-events-none absolute -left-20 -top-28 h-64 w-64 rounded-full bg-[#ff781f]/15 blur-3xl" />
+                    <div className="pointer-events-none absolute -bottom-24 right-0 h-56 w-56 rounded-full bg-purple-600/20 blur-3xl" />
+                    <div className="relative z-10">
+                      <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-orange-300/20 bg-orange-400/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-orange-200">
+                        <span className="material-symbols-outlined text-[16px]">dark_mode</span>
+                        Trang trí theo mùa
+                      </div>
+                      <h2 className="font-serif-display text-3xl font-bold text-white sm:text-4xl">Halloween tại Candlet</h2>
+                      <p className="mt-2 max-w-2xl text-sm leading-6 text-[#cfc2d8]">
+                        Đổi toàn bộ tông màu Shop sang tím mận, cam bí ngô và kem ánh trăng; đồng thời trang trí trực tiếp header, navbar, nút bấm, card sản phẩm và footer mà không phủ hiệu ứng lên nội dung.
+                      </p>
+
+                      <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center">
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={themeConfig.halloweenEnabled}
+                          onClick={handleToggleHalloween}
+                          disabled={savingTheme}
+                          className={`group inline-flex min-w-[210px] items-center justify-between gap-4 rounded-2xl border px-4 py-3 text-left transition-all disabled:cursor-wait disabled:opacity-60 ${themeConfig.halloweenEnabled
+                            ? 'border-orange-400/50 bg-orange-500/15 shadow-[0_0_24px_rgba(249,115,22,0.14)]'
+                            : 'border-white/15 bg-white/5 hover:bg-white/10'
+                          }`}
+                        >
+                          <span>
+                            <span className="block text-sm font-bold">{themeConfig.halloweenEnabled ? 'Đang hoạt động' : 'Đang tắt'}</span>
+                            <span className="mt-0.5 block text-[10px] text-[#aa9ab7]">Chỉ áp dụng cho trang Shop</span>
+                          </span>
+                          <span className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${themeConfig.halloweenEnabled ? 'bg-orange-500' : 'bg-white/20'}`}>
+                            <span className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow-md transition-transform ${themeConfig.halloweenEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                          </span>
+                        </button>
+                        <p className="flex items-center gap-2 text-xs font-semibold text-[#aa9ab7]">
+                          <span className={`h-2 w-2 rounded-full ${themeConfig.halloweenEnabled ? 'animate-pulse bg-emerald-400' : 'bg-stone-500'}`} />
+                          {themeConfig.halloweenEnabled ? 'Khách truy cập đang thấy giao diện Halloween' : 'Trang Shop đang dùng giao diện thông thường'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="relative min-h-56 overflow-hidden border-t border-white/10 bg-gradient-to-br from-[#261531] via-[#160e20] to-[#35130b] lg:border-l lg:border-t-0">
+                    <div className="absolute right-7 top-6 h-20 w-20 rounded-full bg-[#ffd992] shadow-[0_0_45px_rgba(255,190,90,0.5)]" />
+                    <span className="absolute left-8 top-10 text-3xl text-[#17101e]">⌁</span>
+                    <span className="absolute left-24 top-20 rotate-12 text-2xl text-[#09070d]">⌁</span>
+                    <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent" />
+                    <span className="absolute bottom-7 left-10 material-symbols-outlined text-[58px] text-orange-500 drop-shadow-[0_0_12px_rgba(249,115,22,0.45)]">deceased</span>
+                    <span className="absolute bottom-5 right-12 material-symbols-outlined text-[72px] text-orange-400 drop-shadow-[0_0_16px_rgba(249,115,22,0.45)]">skull</span>
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full border border-orange-300/20 bg-black/35 px-3 py-1 text-[9px] font-black uppercase tracking-[0.2em] text-orange-200 backdrop-blur-sm">
+                      Seasonal preview
+                    </div>
                   </div>
                 </div>
               </section>
