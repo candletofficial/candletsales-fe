@@ -166,7 +166,7 @@ export default function ShopPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#F6F2ED] sm:bg-[#f9f9f9]">
+    <main className="min-h-screen bg-brand-cream">
       {/* Header Area (Thiết kế tinh gọn cho Mobile & trang nhã cho Desktop) */}
       <div className="mx-auto hidden max-w-7xl border-b border-dashed border-stone-300 px-8 pb-6 pt-8 md:block">
         <div className="flex items-center text-[10px] sm:text-xs font-bold uppercase tracking-widest text-stone-500 mb-2 sm:mb-4">
@@ -204,7 +204,7 @@ export default function ShopPage() {
       </div>
 
       {/* Categories Navigation Bar (Pills cuộn ngang mượt mà với icon sinh động) */}
-      <section className="mx-auto max-w-7xl border-b border-stone-200 bg-[#FFFCF8] px-3 py-3 sm:bg-transparent sm:px-8 sm:py-5">
+      <section className="mx-auto max-w-7xl border-b border-brand-warmIvory bg-brand-cream px-3 py-3 sm:bg-transparent sm:px-8 sm:py-5">
         <div className="flex items-center gap-2 sm:gap-2.5 overflow-x-auto no-scrollbar py-0.5 -mx-1 px-1">
           {CATEGORIES.map(cat => {
             const count = cat.name === 'Tất cả' 
@@ -237,7 +237,7 @@ export default function ShopPage() {
 
       {/* Promo Voucher Alert trên Mobile (Nếu có coupon) */}
       {activeCoupons.length > 0 && (
-        <section className="mx-auto max-w-7xl border-b-[8px] border-[#F6F2ED] bg-white px-4 py-3 lg:hidden">
+        <section className="mx-auto max-w-7xl border-b-[8px] border-brand-warmIvory bg-brand-cream px-4 py-3 lg:hidden">
           {(() => {
             const bestCoupon = activeCoupons[0];
             return (
@@ -270,7 +270,7 @@ export default function ShopPage() {
       )}
 
       {/* Toolbar (Tìm kiếm & Sắp xếp & Nút Mở Bộ Lọc Mobile) */}
-      <section className="mx-auto max-w-7xl border-b border-stone-200 bg-white px-3 py-2.5 sm:border-dashed sm:border-stone-300 sm:bg-transparent sm:px-8 sm:py-4">
+      <section className="mx-auto max-w-7xl border-b border-brand-warmIvory bg-brand-cream px-3 py-2.5 sm:border-dashed sm:border-stone-300 sm:bg-transparent sm:px-8 sm:py-4">
         {/* Hàng tìm kiếm (Full width trên mobile) */}
         <div className="flex items-center justify-between gap-2 sm:gap-4">
           {/* Ô tìm kiếm */}
@@ -415,7 +415,7 @@ export default function ShopPage() {
       </section>
 
       {/* Main Layout Grid */}
-      <section className="mx-auto grid max-w-7xl grid-cols-1 gap-6 bg-[#FFFCF8] px-3 py-4 sm:gap-8 sm:bg-transparent sm:px-8 sm:py-8 lg:grid-cols-4">
+      <section className="mx-auto grid max-w-7xl grid-cols-1 gap-6 bg-brand-cream px-3 py-4 sm:gap-8 sm:bg-transparent sm:px-8 sm:py-8 lg:grid-cols-4">
         
         {/* Left Sidebar - Filters (Desktop Chỉ Định) */}
         <div className="hidden lg:block lg:col-span-1 space-y-6">

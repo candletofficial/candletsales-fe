@@ -119,14 +119,14 @@ export default function ProductReviews({ productId }) {
 
   if (loading) {
     return (
-      <div className="mt-0 flex justify-center border-t-8 border-stone-100 bg-white py-10 sm:mt-16 sm:border-t sm:border-stone-200 sm:bg-[#FFFDF9] sm:pb-8 sm:pt-16">
+      <div className="mt-0 flex justify-center border-t-8 border-brand-warmIvory bg-transparent py-10 sm:mt-16 sm:border-t sm:border-stone-200 sm:bg-[#FFFDF9] sm:pb-8 sm:pt-16">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-burgundy"></div>
       </div>
     );
   }
 
   return (
-    <section className="relative mt-0 border-t-8 border-stone-100 bg-white pb-4 pt-8 sm:mt-16 sm:border-t sm:border-stone-200 sm:bg-[#FFFDF9] sm:pb-8 sm:pt-16">
+    <section className="relative mt-0 border-t-8 border-brand-warmIvory bg-transparent pb-4 pt-8 sm:mt-16 sm:border-t sm:border-stone-200 sm:bg-[#FFFDF9] sm:pb-8 sm:pt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-8">
         
         {/* Header */}
@@ -149,7 +149,7 @@ export default function ProductReviews({ productId }) {
         </header>
 
         {/* Summary Card */}
-        <section className="mb-8 flex flex-col items-center gap-7 border-y border-stone-200 py-7 md:mb-10 md:flex-row md:gap-12 md:rounded-xl md:border md:border-stone-100 md:bg-white md:p-12 md:shadow-sm">
+        <section className="mb-8 flex flex-col items-center gap-7 border-y border-brand-sand/60 py-7 md:mb-10 md:flex-row md:gap-12 md:rounded-xl md:border md:border-stone-100 md:bg-white md:p-12 md:shadow-sm">
           
           {/* Left: Overall Rating */}
           <div className="flex flex-col items-center justify-center text-center w-full md:w-1/3 md:border-r border-stone-100 md:pr-12">
@@ -249,7 +249,7 @@ export default function ProductReviews({ productId }) {
 
           if (currentFilteredCount === 0) {
             return (
-              <div className="border-y border-stone-200 py-12 text-center md:rounded-xl md:border md:border-stone-100 md:bg-white">
+              <div className="border-y border-brand-sand/60 py-12 text-center md:rounded-xl md:border md:border-stone-100 md:bg-white">
                 <p className="text-sm text-stone-500">Chưa có đánh giá {selectedRating} sao nào.</p>
                 <button
                   type="button"

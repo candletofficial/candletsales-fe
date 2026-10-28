@@ -197,11 +197,11 @@ export default function ShopProfile() {
   const membership = getMembershipTier(stats.totalSpent);
 
   return (
-    <div className="bg-[#f5f5f5] sm:px-6 sm:py-10 lg:px-8">
-      <div className="mx-auto max-w-6xl bg-white animate-[fadeIn_0.25s_ease-out] sm:space-y-6 sm:bg-transparent">
+    <div className="bg-brand-cream sm:px-6 sm:py-10 lg:px-8">
+      <div className="mx-auto max-w-6xl bg-transparent animate-[fadeIn_0.25s_ease-out] sm:space-y-6">
 
         {/* Thanh tiêu đề riêng cho trải nghiệm tài khoản trên mobile */}
-        <header className="flex min-h-14 items-center justify-between border-b border-stone-200 bg-white px-4 sm:hidden">
+        <header className="flex min-h-14 items-center justify-between border-b border-brand-warmIvory bg-brand-cream px-4 sm:hidden">
           <h1 className="text-[17px] font-extrabold text-stone-900">Tài khoản của tôi</h1>
           <button
             type="button"
@@ -342,7 +342,7 @@ export default function ShopProfile() {
         </div>
 
         {/* Thống kê và điều hướng nhanh riêng cho mobile */}
-        <nav className="grid grid-cols-4 border-b-8 border-stone-100 bg-white lg:hidden" aria-label="Lối tắt tài khoản">
+        <nav className="grid grid-cols-4 border-b-8 border-brand-warmIvory bg-brand-cream lg:hidden" aria-label="Lối tắt tài khoản">
           <Link to="/orders" className="border-r border-stone-100 px-1 py-3 text-center">
             <strong className="block text-lg text-brand-burgundy">{stats.totalOrders}</strong>
             <span className="mt-0.5 block text-[10px] text-stone-500">Đơn mua</span>
@@ -361,7 +361,7 @@ export default function ShopProfile() {
           </span>
         </nav>
 
-        <nav className="grid grid-cols-2 border-b-8 border-stone-100 bg-white lg:hidden" aria-label="Cài đặt tài khoản">
+        <nav className="grid grid-cols-2 border-b-8 border-brand-warmIvory bg-brand-cream lg:hidden" aria-label="Cài đặt tài khoản">
           <button
             type="button"
             onClick={() => setActiveTab('info')}
@@ -499,7 +499,7 @@ export default function ShopProfile() {
           </div>
 
           {/* CỘT PHẢI: CHI TIẾT TỪNG TAB NỘI DUNG (8 COLS) */}
-          <div className="bg-white lg:col-span-8">
+          <div className="bg-transparent lg:col-span-8 lg:bg-white">
             <div className="px-4 py-6 sm:px-8 sm:py-8 lg:px-10 lg:py-10">
 
               {/* TAB 1: THÔNG TIN CÁ NHÂN */}

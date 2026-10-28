@@ -818,15 +818,6 @@
   .halloween-shop.shop-product-detail-route .halloween-scene-frame {
     background: none;
   }
-  .halloween-shop.shop-product-detail-route {
-    background: #fff !important;
-  }
-  .halloween-shop.shop-product-detail-route [data-purpose="shop-page-content"] > :first-child {
-    background: #fff !important;
-  }
-  .halloween-shop.shop-product-detail-route .halloween-scene::before {
-    background: none;
-  }
   .halloween-shop.shop-product-detail-route .halloween-header-garland {
     display: none;
   }
@@ -910,29 +901,30 @@
   .halloween-scene-pumpkin-mouth { top: 27px; width: 22px; height: 8px; }
   .halloween-scene-mist { bottom: 38px; height: 58px; opacity: .26; }
 
-  .halloween-season-banner { padding: 26px 12px 10px; }
+  .halloween-season-banner {
+    min-height: 74px;
+    padding: 22px 15px 11px;
+  }
   .halloween-season-banner-inner {
-    display: grid;
-    grid-template-columns: 45px minmax(0, 1fr);
-    gap: 4px 10px;
+    display: flex;
+    align-items: center;
+    gap: 11px;
   }
   .halloween-mini-pumpkin {
-    grid-row: 1 / span 2;
-    align-self: center;
-    width: 45px;
-    height: 42px;
+    width: 38px;
+    height: 36px;
     transform: rotate(-4deg);
   }
-  .halloween-season-eyebrow { font-size: 7.5px; letter-spacing: .16em; }
-  .halloween-season-title { font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .halloween-season-eyebrow { font-size: 7px; letter-spacing: .15em; line-height: 1.2; }
+  .halloween-season-title { margin-top: 2px; font-size: 16px; line-height: 1.08; white-space: normal; }
   .halloween-season-copy { display: none; }
   .halloween-season-action {
     display: none;
   }
-  .halloween-banner-bat-one { right: 4%; top: 4px; width: 25px; opacity: .54; }
+  .halloween-banner-bat-one { right: 5%; top: 7px; width: 23px; opacity: .48; }
   .halloween-banner-bat-two,
   .halloween-banner-star-two { display: none; }
-  .halloween-banner-star-one { left: auto; right: 17%; top: 2px; }
+  .halloween-banner-star-one { left: auto; right: 19%; top: 5px; }
   .halloween-shop [data-purpose="product-collection"] .card-hover-lift {
     box-shadow: 0 5px 18px rgba(59, 25, 63, 0.07) !important;
   }

@@ -826,7 +826,7 @@ export default function ProductDetail() {
               </div>
 
               {/* Nội Dung Tabs */}
-              <div className="bg-white px-0 py-6 sm:rounded-b-2xl sm:border-x sm:border-b sm:border-stone-200/80 sm:p-8 sm:shadow-2xs">
+              <div className="bg-transparent px-0 py-6 sm:rounded-b-2xl sm:border-x sm:border-b sm:border-stone-200/80 sm:bg-white sm:p-8 sm:shadow-2xs">
                 {activeTab === 'description' ? (
                   <div className="animate-in fade-in duration-300">
                     <h2 className="font-serif-display text-2xl sm:text-3xl text-brand-burgundy mb-4 leading-tight">
