@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { locationService } from '../../services/locationService';
@@ -346,6 +347,40 @@ function AddressEditModal({ isOpen, onClose, onSave, initialData, isMergedMode: 
   const streetInputRef = useRef(null);
   const isUserTyping = useRef(false);
   const isInitialized = useRef(false);
+  const [visibleViewport, setVisibleViewport] = useState({ height: 0, offsetTop: 0 });
+
+  // Keep the mobile fullscreen modal isolated from background scrolling.
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = previousOverflow; };
+  }, [isOpen]);
+
+  // Embedded mobile browsers can report 100dvh behind their top and bottom bars.
+  // Track the actual visible viewport so the modal always stays inside those bars.
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    const viewport = window.visualViewport;
+    const updateVisibleViewport = () => {
+      setVisibleViewport({
+        height: Math.round(viewport?.height || window.innerHeight),
+        offsetTop: Math.round(viewport?.offsetTop || 0),
+      });
+    };
+
+    updateVisibleViewport();
+    viewport?.addEventListener('resize', updateVisibleViewport);
+    viewport?.addEventListener('scroll', updateVisibleViewport);
+    window.addEventListener('resize', updateVisibleViewport);
+
+    return () => {
+      viewport?.removeEventListener('resize', updateVisibleViewport);
+      viewport?.removeEventListener('scroll', updateVisibleViewport);
+      window.removeEventListener('resize', updateVisibleViewport);
+    };
+  }, [isOpen]);
 
   // Tải provinces khi mở / đổi chế độ
   useEffect(() => {
@@ -573,14 +608,20 @@ function AddressEditModal({ isOpen, onClose, onSave, initialData, isMergedMode: 
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-stone-900/60 backdrop-blur-xs animate-[fadeIn_0.15s_ease-out]">
+  return createPortal(
+    <div
+      className="fixed inset-x-0 top-0 z-[9999] flex items-stretch justify-center bg-stone-900/60 backdrop-blur-xs animate-[fadeIn_0.15s_ease-out] sm:items-center"
+      style={{
+        height: visibleViewport.height ? `${visibleViewport.height}px` : '100svh',
+        top: visibleViewport.offsetTop ? `${visibleViewport.offsetTop}px` : 0,
+      }}
+    >
       <div
-        className="bg-white w-full sm:max-w-xl rounded-t-3xl sm:rounded-3xl shadow-2xl border border-stone-200 overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh] animate-[scaleUp_0.2s_ease-out]"
+        className="flex h-full max-h-none w-full flex-col overflow-hidden border-0 bg-white shadow-2xl animate-[scaleUp_0.2s_ease-out] sm:h-auto sm:max-h-[90%] sm:max-w-xl sm:rounded-3xl sm:border sm:border-stone-200"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-5 py-4 border-b border-stone-100 flex items-center justify-between bg-[#FAF5EE] shrink-0">
+        <div className="flex shrink-0 items-center justify-between border-b border-stone-100 bg-[#FAF5EE] px-5 pb-4 pt-[calc(1rem+env(safe-area-inset-top,0px))] sm:py-4">
           <div className="flex items-center gap-2.5">
             <span className="w-8 h-8 rounded-xl bg-[#EE4D2D] text-white flex items-center justify-center shadow-xs">
               <i className="ph-fill ph-map-pin text-sm" />
@@ -599,7 +640,7 @@ function AddressEditModal({ isOpen, onClose, onSave, initialData, isMergedMode: 
         </div>
 
         {/* Nội dung scroll */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+        <div className="custom-scrollbar flex-1 overscroll-contain overflow-y-auto p-4 space-y-4">
 
           {/* Phần 1: Địa giới hành chính */}
           <div>
@@ -729,7 +770,7 @@ function AddressEditModal({ isOpen, onClose, onSave, initialData, isMergedMode: 
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-3 border-t border-stone-100 bg-stone-50 shrink-0 flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-3 border-t border-stone-100 bg-stone-50 px-4 pb-[calc(.75rem+env(safe-area-inset-bottom,0px))] pt-3 sm:py-3">
           <button type="button" onClick={onClose}
             className="flex-1 py-2.5 rounded-xl border border-stone-200 text-xs font-bold text-stone-600 sm:hover:bg-stone-100 transition-colors cursor-pointer">
             Huỷ
@@ -741,7 +782,8 @@ function AddressEditModal({ isOpen, onClose, onSave, initialData, isMergedMode: 
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

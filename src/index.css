@@ -815,6 +815,21 @@
       linear-gradient(90deg, rgba(79, 25, 78, .08), transparent 13px) left center / 20px 100% no-repeat,
       linear-gradient(270deg, rgba(220, 91, 19, .07), transparent 13px) right center / 20px 100% no-repeat;
   }
+  .halloween-shop.shop-product-detail-route .halloween-scene-frame {
+    background: none;
+  }
+  .halloween-shop.shop-product-detail-route {
+    background: #fff !important;
+  }
+  .halloween-shop.shop-product-detail-route [data-purpose="shop-page-content"] > :first-child {
+    background: #fff !important;
+  }
+  .halloween-shop.shop-product-detail-route .halloween-scene::before {
+    background: none;
+  }
+  .halloween-shop.shop-product-detail-route .halloween-header-garland {
+    display: none;
+  }
   .halloween-scene-frame::before,
   .halloween-scene-frame::after {
     top: 39%;
@@ -912,10 +927,7 @@
   .halloween-season-title { font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .halloween-season-copy { display: none; }
   .halloween-season-action {
-    grid-column: 2;
-    justify-self: start;
-    padding: 5px 10px;
-    font-size: 8px;
+    display: none;
   }
   .halloween-banner-bat-one { right: 4%; top: 4px; width: 25px; opacity: .54; }
   .halloween-banner-bat-two,

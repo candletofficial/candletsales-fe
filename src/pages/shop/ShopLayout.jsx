@@ -62,9 +62,10 @@ export default function ShopLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const userId = user?._id || user?.id;
+  const isProductDetailRoute = location.pathname.startsWith('/product/');
 
   // Ẩn thanh Bottom Nav 5 tab ở trang chi tiết sản phẩm, giỏ hàng và thanh toán
-  const isBottomNavHidden = location.pathname.startsWith('/product/')
+  const isBottomNavHidden = isProductDetailRoute
     || location.pathname.startsWith('/order-success/')
     || location.pathname.startsWith('/payment/')
     || location.pathname === '/cart'
@@ -153,7 +154,7 @@ export default function ShopLayout() {
   ];
 
   return (
-    <div className={`shop-theme-scope font-jakarta bg-brand-cream text-brand-charcoal antialiased selection:bg-brand-burgundy selection:text-white min-h-screen flex flex-col ${websiteTheme.halloweenEnabled ? 'halloween-shop' : ''}`}>
+    <div className={`shop-theme-scope font-jakarta bg-brand-cream text-brand-charcoal antialiased selection:bg-brand-burgundy selection:text-white min-h-screen flex flex-col ${websiteTheme.halloweenEnabled ? 'halloween-shop' : ''} ${isProductDetailRoute ? 'shop-product-detail-route' : ''}`}>
 
       {websiteTheme.halloweenEnabled && <HalloweenDecor />}
 
@@ -188,7 +189,7 @@ export default function ShopLayout() {
 
       {/* 2. MAIN HEADER (Chuyển động mượt mà, viền cố định không bao giờ nhấp nháy) */}
       <header
-        className={`sticky top-0 z-40 transition-all duration-300 ease-out border-b relative ${isScrolled
+        className={`sticky top-0 z-40 border-b transition-all duration-300 ease-out ${isScrolled
           ? 'bg-white/95 backdrop-blur-xl shadow-[0_4px_25px_rgba(44,24,16,0.06)] border-stone-200/90 py-0'
           : 'bg-[#fbf9f6]/95 backdrop-blur-md border-stone-200/50 py-0'
           }`}
@@ -196,7 +197,7 @@ export default function ShopLayout() {
       >
         <div className="max-w-7xl mx-auto px-3 sm:px-8">
           <div
-            className={`flex items-center justify-between transition-all duration-300 ease-out ${isScrolled ? 'h-14 sm:h-16' : 'h-16 sm:h-22'
+            className={`flex h-16 items-center justify-between transition-all duration-300 ease-out ${isScrolled ? 'sm:h-16' : 'sm:h-22'
               }`}
           >
 
@@ -621,7 +622,7 @@ export default function ShopLayout() {
         className={`relative z-10 flex-1 isolate ${
           isBottomNavHidden
             ? 'pb-0'
-            : 'pb-[calc(5rem+env(safe-area-inset-bottom,0px))] lg:pb-0'
+            : 'pb-[calc(3.75rem+env(safe-area-inset-bottom,0px))] lg:pb-0'
         }`}
       >
         <div className="relative z-10 min-h-full" data-purpose="shop-page-content">

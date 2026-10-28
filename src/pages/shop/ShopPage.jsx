@@ -697,7 +697,7 @@ export default function ShopPage() {
                             Giá
                           </span>
                           <div className="flex items-baseline gap-1">
-                            <span className="font-serif-display font-bold text-xs sm:text-base text-brand-charcoal sm:group-hover:text-brand-burgundy transition-colors">
+                            <span className="font-serif-display text-[17px] font-extrabold leading-none tracking-[-0.02em] text-brand-charcoal transition-colors sm:text-lg sm:group-hover:text-brand-burgundy">
                               {product.base_price?.toLocaleString('vi-VN')}đ
                             </span>
                             {product.original_price > product.base_price && (
@@ -814,7 +814,7 @@ export default function ShopPage() {
                       {/* Bottom Actions & Price */}
                       <div className="pt-2 border-t border-stone-200/70 flex items-center justify-between gap-2 mt-auto">
                         <div className="flex items-baseline gap-1.5">
-                          <span className="font-serif-display font-bold text-sm sm:text-xl text-brand-charcoal">
+                          <span className="font-serif-display text-[18px] font-extrabold leading-none tracking-[-0.02em] text-brand-charcoal sm:text-xl">
                             {product.base_price?.toLocaleString('vi-VN')}đ
                           </span>
                           {product.original_price > product.base_price && (

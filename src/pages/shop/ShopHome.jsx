@@ -1072,7 +1072,7 @@ export default function ShopHome() {
                           <span className="pb-0.5 font-mono text-[8px] font-semibold uppercase tracking-wider text-stone-400 sm:text-[11px]">
                             Từ
                           </span>
-                          <span className="font-serif-display text-[17px] font-bold leading-none text-brand-terracotta transition-colors sm:group-hover:text-brand-burgundy sm:text-xl">
+                          <span className="font-serif-display text-[20px] font-extrabold leading-none tracking-[-0.02em] text-brand-terracotta transition-colors sm:group-hover:text-brand-burgundy sm:text-xl">
                             {product.base_price?.toLocaleString('vi-VN')}đ
                           </span>
                         </div>
