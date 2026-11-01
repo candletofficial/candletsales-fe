@@ -2,6 +2,7 @@ export const DEFAULT_THEME_CONFIG = {
   adminPreset: 'candlet',
   shopPreset: 'candlet',
   halloweenEnabled: false,
+  christmasEnabled: false,
 };
 
 export const THEME_PRESETS = [
@@ -64,9 +65,11 @@ export const getThemePreset = (id) => (
 export const normalizeThemeConfig = (value) => {
   const validIds = new Set(THEME_PRESETS.map((preset) => preset.id));
   const source = value && typeof value === 'object' ? value : {};
+  const christmasEnabled = source.christmasEnabled === true;
   return {
     adminPreset: validIds.has(source.adminPreset) ? source.adminPreset : DEFAULT_THEME_CONFIG.adminPreset,
     shopPreset: validIds.has(source.shopPreset) ? source.shopPreset : DEFAULT_THEME_CONFIG.shopPreset,
-    halloweenEnabled: source.halloweenEnabled === true,
+    halloweenEnabled: source.halloweenEnabled === true && !christmasEnabled,
+    christmasEnabled,
   };
 };

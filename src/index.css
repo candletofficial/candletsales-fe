@@ -65,6 +65,149 @@
   --font-jakarta: "Plus Jakarta Sans", sans-serif;
 }
 
+/* Seasonal storefront: Christmas */
+.christmas-shop {
+  --color-brand-burgundy: #1f5b49;
+  --color-brand-deepWine: #0b3029;
+  --color-brand-terracotta: #b8463f;
+  --color-brand-cream: #edf6f0;
+  --color-brand-warmIvory: #dbeadf;
+  --color-brand-sand: #bfd4c5;
+  --color-brand-gold: #c89432;
+  --color-brand-charcoal: #17332d;
+  --color-brand-muted: #66766f;
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 96% 10%, rgba(188, 52, 52, .13), transparent 24rem),
+    radial-gradient(circle at 4% 65%, rgba(31, 91, 73, .15), transparent 26rem),
+    repeating-linear-gradient(135deg, rgba(23, 82, 64, .018) 0 1px, transparent 1px 18px),
+    linear-gradient(180deg, #f4faf5 0%, #e4f0e7 100%);
+}
+
+.christmas-scene {
+  position: fixed;
+  z-index: 45;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  contain: layout paint;
+}
+.christmas-scene-glow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 100% 18%, rgba(210, 52, 49, .1), transparent 17rem),
+    radial-gradient(circle at 0 72%, rgba(24, 100, 72, .11), transparent 19rem);
+}
+.christmas-pine { position: absolute; width: 118px; opacity: .55; filter: drop-shadow(0 7px 12px rgba(10, 55, 43, .14)); }
+.christmas-pine-left { left: -28px; top: 25%; transform: rotate(-14deg); }
+.christmas-pine-right { right: -28px; top: 58%; transform: scaleX(-1) rotate(-12deg); }
+.christmas-pine-stem { stroke: #754b2d; stroke-width: 5; stroke-linecap: round; }
+.christmas-pine-needles { stroke: #175b45; stroke-width: 5; stroke-linecap: round; }
+.christmas-pine-berry { fill: #b93438; stroke: #fff0d3; stroke-width: 1.5; }
+.christmas-snowfall { position: absolute; inset: 0; color: rgba(255,255,255,.9); }
+.christmas-snowfall span { position: absolute; text-shadow: 0 0 8px rgba(255,255,255,.8); animation: christmasSnowDrift 7s ease-in-out infinite alternate; }
+.christmas-snowfall-near span:nth-child(1) { left: 3%; top: 13%; font-size: 9px; }
+.christmas-snowfall-near span:nth-child(2) { left: 11%; top: 44%; font-size: 6px; animation-delay: -2s; }
+.christmas-snowfall-near span:nth-child(3) { right: 5%; top: 29%; font-size: 10px; animation-delay: -4s; }
+.christmas-snowfall-near span:nth-child(4) { right: 12%; top: 67%; font-size: 7px; }
+.christmas-snowfall-near span:nth-child(5) { left: 7%; top: 82%; font-size: 8px; animation-delay: -3s; }
+.christmas-snowfall-near span:nth-child(6) { right: 3%; top: 88%; font-size: 8px; animation-delay: -1s; }
+.christmas-snowfall-near span:nth-child(n+7) { display: none; }
+.christmas-snowfall-far span:nth-child(1) { left: 2%; top: 35%; }
+.christmas-snowfall-far span:nth-child(2) { right: 2%; top: 47%; }
+.christmas-snowfall-far span:nth-child(3) { left: 5%; top: 62%; }
+.christmas-snowfall-far span:nth-child(4) { right: 6%; top: 78%; }
+.christmas-snowfall-far span:nth-child(n+5) { display: none; }
+.christmas-ornament { position: absolute; top: 34%; width: 28px; height: 38px; border-radius: 50%; background: linear-gradient(145deg, #e76a62, #a9232e); box-shadow: inset 5px 3px 8px rgba(255,255,255,.22), 0 6px 14px rgba(93,25,32,.2); opacity: .46; }
+.christmas-ornament::before { content: ''; position: absolute; left: 12px; bottom: 100%; width: 1px; height: 58px; background: rgba(41,81,67,.34); }
+.christmas-ornament span { position: absolute; left: 9px; top: -5px; width: 10px; height: 7px; border-radius: 2px 2px 0 0; background: #c99d4d; }
+.christmas-ornament.ornament-left { left: -11px; }
+.christmas-ornament.ornament-right { right: -12px; top: 76%; width: 24px; height: 33px; background: linear-gradient(145deg, #e7bd63, #b27b20); }
+
+@keyframes christmasSnowDrift {
+  from { transform: translate3d(-2px, -3px, 0) rotate(0deg); opacity: .45; }
+  to { transform: translate3d(5px, 10px, 0) rotate(35deg); opacity: .9; }
+}
+
+.christmas-shop > main { background-color: transparent !important; }
+.christmas-shop [data-purpose="shop-page-content"] > :first-child {
+  background:
+    radial-gradient(circle at 100% 8%, rgba(190, 61, 58, .1), transparent 18rem),
+    linear-gradient(180deg, rgba(242, 249, 244, .97), rgba(231, 242, 234, .97)) !important;
+}
+.christmas-shop [data-purpose="top-announcement"] { background: linear-gradient(90deg, #082b25, #15513f 58%, #7f252b); border-color: rgba(231, 190, 105, .4); }
+.christmas-shop [data-purpose="site-navigation"] { background: rgba(255, 251, 244, .97) !important; border-color: rgba(24, 91, 70, .16) !important; box-shadow: 0 5px 26px rgba(17, 75, 58, .09), 0 1px 0 rgba(188, 57, 57, .08); }
+.christmas-shop [data-purpose="site-navigation"] nav a:hover { background: rgba(29, 101, 77, .07); border-color: rgba(29, 101, 77, .17); }
+.christmas-shop [data-purpose="site-navigation"] a[href="/admin/dashboard"] { background: linear-gradient(135deg, #0d3b31, #1f6b50) !important; }
+.christmas-shop [data-purpose="mobile-bottom-navigation"] { background: rgba(255, 250, 242, .97) !important; border-color: rgba(24, 91, 70, .15) !important; box-shadow: 0 -6px 26px rgba(14, 69, 53, .09) !important; }
+.christmas-shop [data-purpose="mobile-bottom-navigation"] a.font-bold { background: linear-gradient(145deg, rgba(31,91,73,.11), rgba(190,61,58,.08)); box-shadow: inset 0 0 0 1px rgba(31,91,73,.08); }
+.christmas-shop [data-purpose="editorial-hero"],
+.christmas-shop [data-purpose="mindfulness-philosophy"],
+.christmas-shop [data-purpose="product-collection"],
+.christmas-shop [data-purpose="newsletter-signup"] { background: linear-gradient(145deg, rgba(246,251,247,.96), rgba(224,239,229,.97)) !important; border-color: rgba(31,91,73,.16) !important; }
+.christmas-shop [data-purpose="brand-differentiation"],
+.christmas-shop [data-purpose="main-footer"] { background: linear-gradient(145deg, #082a24, #154b3b 55%, #70252a) !important; }
+.christmas-shop [data-purpose="product-collection"] .card-hover-lift { border-color: rgba(31,91,73,.16) !important; background: rgba(255,252,247,.96) !important; box-shadow: 0 8px 24px rgba(17,73,56,.08) !important; }
+.christmas-shop .btn-shimmer { border-color: rgba(237,202,126,.25) !important; background: linear-gradient(110deg, #0e3a30, #1f664d 58%, #a33438) !important; color: #fffaf0 !important; box-shadow: 0 9px 22px rgba(17,75,57,.18), inset 0 1px 0 rgba(255,255,255,.14) !important; }
+
+.christmas-header-garland { position: absolute; z-index: 2; left: 12px; right: 12px; top: calc(100% - 4px); height: 22px; pointer-events: none; }
+.christmas-garland-branch { position: absolute; left: 0; right: 0; top: 0; height: 8px; border-radius: 50%; border-bottom: 5px solid #1d684f; box-shadow: 0 3px 0 #0f4738, 0 5px 7px rgba(15,71,56,.2); }
+.christmas-garland-branch::before { content: ''; position: absolute; inset: 2px 3% -8px; background: repeating-linear-gradient(115deg, transparent 0 18px, rgba(33,112,82,.8) 19px 22px, transparent 23px 31px); }
+.christmas-garland-light { position: absolute; top: 8px; width: 7px; height: 9px; border-radius: 50% 50% 45% 45%; box-shadow: 0 0 8px currentColor; }
+.christmas-garland-light::before { content: ''; position: absolute; left: 3px; bottom: 8px; width: 1px; height: 5px; background: #755d43; }
+.christmas-garland-light.light-one { left: 15%; color: #e5544e; background: currentColor; }
+.christmas-garland-light.light-two { left: 37%; color: #e8b94e; background: currentColor; }
+.christmas-garland-light.light-three { right: 37%; color: #f5eee0; background: currentColor; }
+.christmas-garland-light.light-four { right: 15%; color: #d84447; background: currentColor; }
+.christmas-garland-bow { position: absolute; left: 50%; top: 5px; transform: translateX(-50%); color: #c43c41; font-size: 14px; text-shadow: 0 0 7px rgba(196,60,65,.35); }
+
+.christmas-season-banner { position: relative; z-index: 33; overflow: hidden; padding: 28px 16px 11px; color: #fffaf0; background: radial-gradient(circle at 83% -70%, rgba(245,211,143,.42), transparent 13rem), linear-gradient(105deg, #082f28 0%, #16513f 55%, #8d2d31 100%); border-bottom: 1px solid rgba(237,202,126,.38); box-shadow: 0 10px 28px rgba(12,67,51,.13); }
+.christmas-season-banner::after { content: ''; position: absolute; right: -38px; top: -88px; width: 170px; height: 170px; border: 1px solid rgba(255,244,222,.08); border-radius: 50%; box-shadow: 0 0 0 24px rgba(255,255,255,.018), 0 0 0 48px rgba(255,255,255,.012); }
+.christmas-season-banner-inner { position: relative; z-index: 1; display: flex; align-items: center; gap: 16px; width: min(100%,1280px); margin: 0 auto; }
+.christmas-banner-snow { position: absolute; inset: -16px 0; pointer-events: none; color: rgba(255,244,218,.72); }
+.christmas-banner-snow span { position: absolute; text-shadow: 0 0 8px rgba(255,255,255,.55); }
+.christmas-banner-snow span:nth-child(1) { left: 18%; top: 1px; }
+.christmas-banner-snow span:nth-child(2) { right: 28%; top: 12px; }
+.christmas-banner-snow span:nth-child(3) { right: 15%; bottom: 4px; }
+.christmas-banner-snow span:nth-child(4) { left: 43%; bottom: 0; }
+.christmas-mini-tree { display: block; width: 52px; height: 52px; flex: 0 0 auto; overflow: visible; }
+.christmas-season-eyebrow { color: #f3d38b; font-size: 9px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; }
+.christmas-season-title { margin-top: 1px; font-family: 'Cormorant Garamond', serif; font-size: 21px; font-weight: 700; line-height: 1.05; }
+.christmas-season-copy { margin-top: 2px; color: rgba(255,248,235,.72); font-size: 10px; }
+.christmas-season-action { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 7px; padding: 9px 14px; border: 1px solid rgba(245,211,143,.42); border-radius: 999px; color: #fffaf0; background: rgba(255,255,255,.09); font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; transition: transform .2s ease, background-color .2s ease; }
+.christmas-season-action:hover { transform: translateY(-1px); background: rgba(255,255,255,.16); }
+
+@media (max-width: 640px) {
+  .christmas-shop [data-purpose="shop-page-content"] > :first-child {
+    background: linear-gradient(180deg, rgba(241,249,243,.97), rgba(228,241,232,.97)) !important;
+  }
+  .christmas-pine { width: 72px; opacity: .42; }
+  .christmas-pine-left { left: -25px; top: 30%; }
+  .christmas-pine-right { right: -25px; top: 68%; }
+  .christmas-ornament { width: 21px; height: 29px; opacity: .38; }
+  .christmas-ornament::before { left: 9px; height: 38px; }
+  .christmas-ornament span { left: 6px; width: 9px; }
+  .christmas-header-garland { left: 9px; right: 9px; height: 20px; }
+  .christmas-season-banner { min-height: 74px; padding: 22px 15px 11px; }
+  .christmas-season-banner-inner { gap: 11px; }
+  .christmas-mini-tree { width: 39px; height: 39px; }
+  .christmas-season-eyebrow { font-size: 7px; letter-spacing: .15em; line-height: 1.2; }
+  .christmas-season-title { margin-top: 2px; font-size: 16px; line-height: 1.08; }
+  .christmas-season-copy,
+  .christmas-season-action { display: none; }
+  .christmas-banner-snow span:nth-child(2),
+  .christmas-banner-snow span:nth-child(4) { display: none; }
+  .christmas-banner-snow span:nth-child(1) { left: auto; right: 20%; top: 3px; }
+  .christmas-banner-snow span:nth-child(3) { right: 6%; bottom: 6px; }
+  .christmas-shop.shop-product-detail-route .christmas-header-garland { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .christmas-snowfall span { animation: none; }
+}
+
 @layer base {
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   
@@ -213,6 +356,24 @@
   --color-brand-muted: var(--shop-theme-muted, #78665E);
   background-color: var(--shop-theme-background, #FAF7F2);
   color: var(--shop-theme-text, #2C1810);
+}
+
+.shop-theme-scope.christmas-shop {
+  --color-brand-burgundy: #1f5b49;
+  --color-brand-deepWine: #0b3029;
+  --color-brand-terracotta: #b8463f;
+  --color-brand-cream: #edf6f0;
+  --color-brand-warmIvory: #dbeadf;
+  --color-brand-sand: #bfd4c5;
+  --color-brand-gold: #c89432;
+  --color-brand-charcoal: #17332d;
+  --color-brand-muted: #66766f;
+  background:
+    radial-gradient(circle at 96% 10%, rgba(188, 52, 52, .13), transparent 24rem),
+    radial-gradient(circle at 4% 65%, rgba(31, 91, 73, .15), transparent 26rem),
+    repeating-linear-gradient(135deg, rgba(23, 82, 64, .018) 0 1px, transparent 1px 18px),
+    linear-gradient(180deg, #f4faf5 0%, #e4f0e7 100%);
+  color: #17332d;
 }
 
 /* Seasonal storefront: Halloween */

@@ -5,11 +5,11 @@ const fmtPct = (n) => (n || 0).toFixed(1) + '%';
 const fmtNum = (n) => (n || 0).toLocaleString('vi-VN');
 
 const PLATFORM_META = {
+  pos:        { label: 'POS',       color: '#059669', bg: '#ecfdf5', icon: '🏪' },
   shopee:    { label: 'Shopee',    color: '#ee4d2d', bg: '#fff1ee', icon: '🛒' },
   tiktok:    { label: 'TikTok',    color: '#000000', bg: '#f3f3f3', icon: '🎵' },
   facebook:  { label: 'Facebook',  color: '#1877f2', bg: '#eef4ff', icon: '📘' },
   instagram: { label: 'Instagram', color: '#e1306c', bg: '#fff0f5', icon: '📸' },
-  youtube:   { label: 'YouTube',   color: '#ff0000', bg: '#fff0f0', icon: '▶️' },
   website:    { label: 'Website',    color: '#4285f4', bg: '#f0f5ff', icon: '🌐' },
   'khác':    { label: 'Khác',      color: '#6b7280', bg: '#f3f4f6', icon: '📦' },
 };

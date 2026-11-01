@@ -7,6 +7,7 @@ import systemConfigService from '../../services/systemConfigService';
 import { orderService } from '../../services/orderService';
 import { useWebsiteTheme } from '../../hooks/useWebsiteTheme';
 import HalloweenDecor from '../../components/shop/HalloweenDecor';
+import ChristmasDecor from '../../components/shop/ChristmasDecor';
 
 const HalloweenBatMark = ({ className = '' }) => (
   <svg className={className} viewBox="0 0 64 28" fill="none" aria-hidden="true">
@@ -42,6 +43,30 @@ const HalloweenPumpkinMark = ({ className = '' }) => (
       <path d="M22 49c9 4 23 4 32 0l-4 10-6-4-6 6-6-6-6 4-4-10Z" fill="#26102D" />
       <path d="m24 50 5 2-3 3m24-5-5 2 3 3" stroke="url(#pumpkin-glow)" strokeWidth="1.4" strokeLinecap="round" opacity=".75" />
       <path d="M17 24c5-6 12-8 18-8" stroke="#FFD27A" strokeWidth="2.2" strokeLinecap="round" opacity=".62" />
+    </g>
+  </svg>
+);
+
+const ChristmasTreeMark = ({ className = '' }) => (
+  <svg className={className} viewBox="0 0 76 76" fill="none" aria-hidden="true">
+    <defs>
+      <linearGradient id="christmas-tree" x1="15" y1="13" x2="61" y2="68" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#2F8B65" />
+        <stop offset="1" stopColor="#0C4937" />
+      </linearGradient>
+      <filter id="christmas-tree-shadow" x="-30%" y="-20%" width="160%" height="160%">
+        <feDropShadow dx="0" dy="5" stdDeviation="4" floodColor="#062D25" floodOpacity=".4" />
+      </filter>
+    </defs>
+    <g filter="url(#christmas-tree-shadow)">
+      <path d="m38 3 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1 3-6Z" fill="#FFD477" />
+      <path d="M38 13 20 38h9L15 57h46L47 38h9L38 13Z" fill="url(#christmas-tree)" />
+      <path d="M34 57h8v13h-8z" fill="#8E4F2F" />
+      <path d="M25 40c8 5 18 6 27 1M21 54c11 5 24 5 34 0" stroke="#F6D58B" strokeWidth="2" strokeLinecap="round" opacity=".8" />
+      <circle cx="30" cy="35" r="2.5" fill="#D84B43" />
+      <circle cx="45" cy="40" r="2.5" fill="#F1B84B" />
+      <circle cx="31" cy="51" r="2.5" fill="#F4F0E5" />
+      <circle cx="48" cy="54" r="2.5" fill="#D84B43" />
     </g>
   </svg>
 );
@@ -154,9 +179,10 @@ export default function ShopLayout() {
   ];
 
   return (
-    <div className={`shop-theme-scope font-jakarta bg-brand-cream text-brand-charcoal antialiased selection:bg-brand-burgundy selection:text-white min-h-screen flex flex-col ${websiteTheme.halloweenEnabled ? 'halloween-shop' : ''} ${isProductDetailRoute ? 'shop-product-detail-route' : ''}`}>
+    <div className={`shop-theme-scope font-jakarta bg-brand-cream text-brand-charcoal antialiased selection:bg-brand-burgundy selection:text-white min-h-screen flex flex-col ${websiteTheme.halloweenEnabled ? 'halloween-shop' : ''} ${websiteTheme.christmasEnabled ? 'christmas-shop' : ''} ${isProductDetailRoute ? 'shop-product-detail-route' : ''}`}>
 
       {websiteTheme.halloweenEnabled && <HalloweenDecor />}
+      {websiteTheme.christmasEnabled && <ChristmasDecor />}
 
       {/* 1. TOP ANNOUNCEMENT BAR (Cuộn tự nhiên cùng trang, không giật layout) */}
       <aside
@@ -167,7 +193,11 @@ export default function ShopLayout() {
           <div className="flex items-center space-x-1.5 sm:space-x-2 text-amber-200/95 font-medium truncate">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
             <span className="truncate">
-              {websiteTheme.halloweenEnabled ? 'Halloween huyền bí · Miễn phí giao hàng đơn từ 100K' : 'Miễn phí giao hàng toàn quốc đơn từ 100K'}
+              {websiteTheme.christmasEnabled
+                ? 'Giáng sinh an lành · Miễn phí giao hàng đơn từ 100K'
+                : websiteTheme.halloweenEnabled
+                  ? 'Halloween huyền bí · Miễn phí giao hàng đơn từ 100K'
+                  : 'Miễn phí giao hàng toàn quốc đơn từ 100K'}
             </span>
           </div>
 
@@ -435,6 +465,16 @@ export default function ShopLayout() {
             <span className="halloween-garland-charm charm-bat-right"><HalloweenBatMark /></span>
           </div>
         )}
+        {websiteTheme.christmasEnabled && (
+          <div className="christmas-header-garland" aria-hidden="true">
+            <span className="christmas-garland-branch" />
+            <span className="christmas-garland-light light-one" />
+            <span className="christmas-garland-light light-two" />
+            <span className="christmas-garland-light light-three" />
+            <span className="christmas-garland-light light-four" />
+            <span className="christmas-garland-bow">✦</span>
+          </div>
+        )}
       </header>
 
       {websiteTheme.halloweenEnabled && (
@@ -454,6 +494,26 @@ export default function ShopLayout() {
             </div>
             <Link to="/shop" className="halloween-season-action">
               Khám phá ngay
+              <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+            </Link>
+          </div>
+        </section>
+      )}
+
+      {websiteTheme.christmasEnabled && (
+        <section className="christmas-season-banner" aria-label="Chủ đề Giáng sinh Candlet">
+          <div className="christmas-season-banner-inner">
+            <div className="christmas-banner-snow" aria-hidden="true">
+              <span>✦</span><span>•</span><span>✧</span><span>•</span>
+            </div>
+            <ChristmasTreeMark className="christmas-mini-tree" />
+            <div className="min-w-0 flex-1">
+              <p className="christmas-season-eyebrow">Candlet Christmas Collection</p>
+              <p className="christmas-season-title">Thắp sáng mùa yêu thương</p>
+              <p className="christmas-season-copy">Hương nến ấm áp, sắc thông xanh và những món quà dành cho mùa đoàn viên.</p>
+            </div>
+            <Link to="/shop" className="christmas-season-action">
+              Chọn quà Giáng sinh
               <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
             </Link>
           </div>

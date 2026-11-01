@@ -17,6 +17,25 @@ export const getShippingCarrier = (id) => (
   SHIPPING_CARRIERS.find((carrier) => carrier.id === id) || SHIPPING_CARRIERS.at(-1)
 );
 
+export const getCarrierFromFundAccount = (accountId) => {
+  const value = String(accountId || '');
+  if (!value.startsWith('carrier_')) return null;
+  return SHIPPING_CARRIERS.find(carrier => carrier.id === value.slice('carrier_'.length)) || null;
+};
+
+export const getFundAccountLabel = (accountId) => {
+  if (accountId === 'common') return 'Quỹ chung';
+  const baseLabels = {
+    pos: 'POS',
+    shopee: 'Shopee',
+    tiktok: 'TikTok',
+    website: 'Website',
+  };
+  if (baseLabels[accountId]) return baseLabels[accountId];
+  const carrier = getCarrierFromFundAccount(accountId);
+  return carrier ? `${carrier.shortName} COD` : String(accountId || '');
+};
+
 export const inferLegacyCarrier = (order) => {
   if (order?.shipping_carrier) return order.shipping_carrier;
   const value = String(order?.tracking_number || order?.orderId || '');

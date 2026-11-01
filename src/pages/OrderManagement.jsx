@@ -924,7 +924,6 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                       { id: 'pos', label: 'POS Quầy', color: 'hover:border-emerald-500' },
                       { id: 'facebook', label: 'Facebook', color: 'hover:border-blue-600' },
                       { id: 'instagram', label: 'Instagram', color: 'hover:border-pink-500' },
-                      { id: 'youtube', label: 'YouTube', color: 'hover:border-red-500' },
                       { id: 'khác', label: 'Khác', color: 'hover:border-stone-400' },
                     ].map(src => {
                       const isSelected = source === src.id;
@@ -1021,6 +1020,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                       />
                     </div>
 
+                    {!['shopee', 'tiktok'].includes(source) ? (
                     <div>
                       <label className="block text-[11.5px] font-bold text-stone-600 mb-1.5">Hình thức thanh toán</label>
                       <div className="grid grid-cols-2 gap-2">
@@ -1044,6 +1044,15 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                         ))}
                       </div>
                     </div>
+                    ) : (
+                      <div className="flex items-center gap-2.5 rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5">
+                        <span className="material-symbols-outlined text-[18px] text-primary">account_balance_wallet</span>
+                        <div>
+                          <p className="text-[11.5px] font-bold text-stone-700">Thanh toán qua nền tảng</p>
+                          <p className="text-[10.5px] text-stone-500">Doanh thu tự động vào quỹ {source === 'shopee' ? 'Shopee' : 'TikTok'}.</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -2702,7 +2711,6 @@ export default function OrderManagement() {
                   <option value="pos">POS (Quầy)</option>
                   <option value="facebook">Facebook</option>
                   <option value="instagram">Instagram</option>
-                  <option value="youtube">YouTube</option>
                   <option value="khác">Khác</option>
                 </select>
               </div>
@@ -2883,7 +2891,6 @@ export default function OrderManagement() {
                                   tiktok: 'bg-black text-white border border-black/20',
                                   facebook: 'bg-[#1877f2]/10 text-[#1877f2] border border-[#1877f2]/20',
                                   instagram: 'bg-[#e1306c]/10 text-[#e1306c] border border-[#e1306c]/20',
-                                  youtube: 'bg-[#ff0000]/10 text-[#ff0000] border border-[#ff0000]/20',
                                   website: 'bg-blue-50 text-blue-700 border border-blue-200',
                                   pos: 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                                 }[order.source] || 'bg-stone-100 text-stone-600 border border-stone-200'}`}>
@@ -2960,9 +2967,11 @@ export default function OrderManagement() {
                             {formatPrice(order.total_price)}
                           </p>
                           <span className="text-[10px] font-bold text-stone-400 uppercase">
-                            {order.payment_method === 'cash' ? 'COD (Thu tiền)' : order.payment_method === 'transfer' ? 'Chuyển khoản' : 'Đã thanh toán'}
+                            {['shopee', 'tiktok'].includes(order.source)
+                              ? 'Thanh toán qua sàn'
+                              : order.payment_method === 'cash' ? 'COD (Thu tiền)' : order.payment_method === 'transfer' ? 'Chuyển khoản' : 'Đã thanh toán'}
                           </span>
-                          {order.payment_method === 'transfer' && (
+                          {order.payment_method === 'transfer' && !['shopee', 'tiktok'].includes(order.source) && (
                             <span className={`block mt-1 text-[10px] font-bold uppercase ${
                               order.payment_status === 'refunded'
                                 ? 'text-stone-500'
@@ -2977,7 +2986,7 @@ export default function OrderManagement() {
                                   : 'Chờ SePay xác nhận'}
                             </span>
                           )}
-                          {order.payment_method === 'transfer' && order.payment_status === 'refunded' && order.refund_transaction_id && (
+                          {order.payment_method === 'transfer' && !['shopee', 'tiktok'].includes(order.source) && order.payment_status === 'refunded' && order.refund_transaction_id && (
                             <span className="block mt-0.5 text-[9.5px] font-mono text-stone-400 truncate" title={order.refund_transaction_id}>
                               Mã hoàn: {order.refund_transaction_id}
                             </span>
@@ -3002,7 +3011,7 @@ export default function OrderManagement() {
                                   </span>
                                 )}
                                 {order.delivery_status === 'shipping' && (
-                                  <span className="inline-flex items-center gap-1 text-[10.5px] uppercase font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                  <span className="inline-flex items-center gap-1 text-[10.5px] uppercase font-bold px-2 py-0.5 rounded-full bg-violet-50 text-violet-800 border border-violet-300">
                                     <span className="material-symbols-outlined text-[13px]">local_shipping</span>
                                     Đang giao hàng
                                   </span>

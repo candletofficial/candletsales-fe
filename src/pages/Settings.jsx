@@ -9,6 +9,16 @@ import AddressSelector from '../components/shop/AddressSelector';
 import { locationService } from '../services/locationService';
 import { useWebsiteTheme } from '../hooks/useWebsiteTheme';
 import { THEME_PRESETS } from '../theme/themePresets';
+import { SHIPPING_CARRIERS, getCarrierFromFundAccount, getFundAccountLabel } from '../utils/shippingCarriers';
+
+const AD_PLATFORM_LABELS = {
+  facebook: 'Facebook',
+  instagram: 'Instagram',
+  tiktok: 'TikTok',
+  shopee: 'Shopee',
+  other: 'Khác',
+  website: 'Website',
+};
 
 const SearchableSelect = ({ value, options, onChange, placeholder = "-- Chọn --" }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -90,7 +100,7 @@ export default function Settings() {
   const [saving, setSaving] = useState({ standard: false, express: false });
   const [materialsList, setMaterialsList] = useState([]);
   const [toast, setToast] = useState(null);
-  const { config: themeConfig, applyPreset, setHalloweenEnabled, savingTheme } = useWebsiteTheme();
+  const { config: themeConfig, applyPreset, setHalloweenEnabled, setChristmasEnabled, savingTheme } = useWebsiteTheme();
   const [themePreset, setThemePreset] = useState(themeConfig.adminPreset);
   const [themeScope, setThemeScope] = useState('admin');
 
@@ -99,7 +109,7 @@ export default function Settings() {
   const [savingAutoConfirm, setSavingAutoConfirm] = useState(false);
 
   // Return Costs
-  const defaultPlatforms = ['shopee', 'tiktok', 'facebook', 'instagram', 'youtube', 'website', 'khác'];
+  const defaultPlatforms = ['shopee', 'tiktok', 'facebook', 'instagram', 'website', 'khác'];
   const [returnCosts, setReturnCosts] = useState(
     defaultPlatforms.reduce((acc, p) => ({ ...acc, [p]: 0 }), {})
   );
@@ -115,6 +125,8 @@ export default function Settings() {
   const [adBalances, setAdBalances] = useState([]);
   const [adSyncValues, setAdSyncValues] = useState({});
   const [syncingAdTarget, setSyncingAdTarget] = useState(null);
+  const [carrierCodAccounts, setCarrierCodAccounts] = useState(['spx']);
+  const [savingCarrierAccounts, setSavingCarrierAccounts] = useState(false);
 
   // Website Settings
   const [expressShippingFee, setExpressShippingFee] = useState(30000);
@@ -155,7 +167,7 @@ export default function Settings() {
     try {
       const [resMaterials, resConfigs, resAutoConfirm, resReturnCost, resFund, resAd,
              resExpressFee, resStandardThreshold, resStandardFeeBelow,
-             resShopAddress, resShopCoords, resMaxDist, resBaseFee, resPerKmFee, resGoongKey, resBankTransferInfo] = await Promise.all([
+             resShopAddress, resShopCoords, resMaxDist, resBaseFee, resPerKmFee, resGoongKey, resBankTransferInfo, resCarrierCodAccounts] = await Promise.all([
         materialService.getMaterials(),
         shippingConfigService.getAllConfigs(),
         systemConfigService.getConfig('auto_confirm_out_of_stock_imports'),
@@ -172,6 +184,7 @@ export default function Settings() {
         systemConfigService.getConfig('express_per_km_fee'),
         systemConfigService.getConfig('goong_api_key'),
         systemConfigService.getConfig('bank_transfer_info'),
+        systemConfigService.getConfig('carrier_cod_accounts'),
       ]);
 
       if (resMaterials.data.success) {
@@ -223,6 +236,9 @@ export default function Settings() {
             setBankTransferInfo((current) => ({ ...current, ...saved }));
           }
         } catch (e) {}
+      }
+      if (Array.isArray(resCarrierCodAccounts?.data?.value)) {
+        setCarrierCodAccounts(resCarrierCodAccounts.data.value);
       }
 
       if (resConfigs.data.success) {
@@ -301,6 +317,17 @@ export default function Settings() {
     } catch (error) {
       console.error(error);
       showToast('Không thể cập nhật chủ đề Halloween. Vui lòng thử lại.', 'error');
+    }
+  };
+
+  const handleToggleChristmas = async () => {
+    const nextEnabled = !themeConfig.christmasEnabled;
+    try {
+      await setChristmasEnabled(nextEnabled);
+      showToast(nextEnabled ? 'Đã bật chủ đề Giáng sinh cho trang Shop' : 'Đã tắt chủ đề Giáng sinh');
+    } catch (error) {
+      console.error(error);
+      showToast('Không thể cập nhật chủ đề Giáng sinh. Vui lòng thử lại.', 'error');
     }
   };
 
@@ -510,6 +537,25 @@ export default function Settings() {
       showToast(err.response?.data?.message || 'Lỗi khi đồng bộ', 'error');
     } finally {
       setSyncingAdTarget(null);
+    }
+  };
+
+  const handleToggleCarrierCodAccount = async (carrierId) => {
+    const nextAccounts = carrierCodAccounts.includes(carrierId)
+      ? carrierCodAccounts.filter(id => id !== carrierId)
+      : [...carrierCodAccounts, carrierId];
+    setCarrierCodAccounts(nextAccounts);
+    setSavingCarrierAccounts(true);
+    try {
+      await systemConfigService.updateConfig('carrier_cod_accounts', nextAccounts);
+      showToast('Đã cập nhật tài khoản nhận tiền COD theo đơn vị vận chuyển');
+      await fetchData();
+    } catch (err) {
+      console.error(err);
+      setCarrierCodAccounts(carrierCodAccounts);
+      showToast('Không thể cập nhật tài khoản COD', 'error');
+    } finally {
+      setSavingCarrierAccounts(false);
     }
   };
 
@@ -822,7 +868,11 @@ export default function Settings() {
                         </button>
                         <p className="flex items-center gap-2 text-xs font-semibold text-[#aa9ab7]">
                           <span className={`h-2 w-2 rounded-full ${themeConfig.halloweenEnabled ? 'animate-pulse bg-emerald-400' : 'bg-stone-500'}`} />
-                          {themeConfig.halloweenEnabled ? 'Khách truy cập đang thấy giao diện Halloween' : 'Trang Shop đang dùng giao diện thông thường'}
+                          {themeConfig.halloweenEnabled
+                            ? 'Khách truy cập đang thấy giao diện Halloween'
+                            : themeConfig.christmasEnabled
+                              ? 'Chủ đề Giáng sinh đang hoạt động'
+                              : 'Trang Shop đang dùng giao diện thông thường'}
                         </p>
                       </div>
                     </div>
@@ -841,6 +891,66 @@ export default function Settings() {
                   </div>
                 </div>
               </section>
+
+              <section className="overflow-hidden rounded-3xl border border-[#285e4d] bg-[#092f28] text-white shadow-[0_18px_55px_rgba(18,76,58,0.18)]">
+                <div className="grid lg:grid-cols-[minmax(0,1fr)_360px]">
+                  <div className="relative overflow-hidden px-6 py-7 sm:px-8 sm:py-9">
+                    <div className="pointer-events-none absolute -left-20 -top-28 h-64 w-64 rounded-full bg-emerald-400/10 blur-3xl" />
+                    <div className="pointer-events-none absolute -bottom-24 right-0 h-56 w-56 rounded-full bg-red-500/15 blur-3xl" />
+                    <div className="relative z-10">
+                      <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-amber-200/20 bg-amber-200/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-amber-100">
+                        <span className="material-symbols-outlined text-[16px]">ac_unit</span>
+                        Trang trí theo mùa
+                      </div>
+                      <h2 className="font-serif-display text-3xl font-bold text-white sm:text-4xl">Giáng sinh tại Candlet</h2>
+                      <p className="mt-2 max-w-2xl text-sm leading-6 text-[#c8ddd5]">
+                        Phủ tông xanh thông, đỏ berry và vàng ánh nến lên trang Shop; kèm tuyết nhẹ, cành thông, dây đèn, banner quà tặng và các điểm nhấn lễ hội tối ưu cho cả desktop lẫn mobile.
+                      </p>
+
+                      <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center">
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={themeConfig.christmasEnabled}
+                          onClick={handleToggleChristmas}
+                          disabled={savingTheme}
+                          className={`group inline-flex min-w-[210px] items-center justify-between gap-4 rounded-2xl border px-4 py-3 text-left transition-all disabled:cursor-wait disabled:opacity-60 ${themeConfig.christmasEnabled
+                            ? 'border-amber-200/50 bg-white/10 shadow-[0_0_24px_rgba(245,211,143,0.12)]'
+                            : 'border-white/15 bg-white/5 hover:bg-white/10'
+                          }`}
+                        >
+                          <span>
+                            <span className="block text-sm font-bold">{themeConfig.christmasEnabled ? 'Đang hoạt động' : 'Đang tắt'}</span>
+                            <span className="mt-0.5 block text-[10px] text-[#9fc0b3]">Chỉ áp dụng cho trang Shop</span>
+                          </span>
+                          <span className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${themeConfig.christmasEnabled ? 'bg-red-500' : 'bg-white/20'}`}>
+                            <span className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow-md transition-transform ${themeConfig.christmasEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                          </span>
+                        </button>
+                        <p className="flex items-center gap-2 text-xs font-semibold text-[#9fc0b3]">
+                          <span className={`h-2 w-2 rounded-full ${themeConfig.christmasEnabled ? 'animate-pulse bg-amber-300' : 'bg-stone-500'}`} />
+                          {themeConfig.christmasEnabled ? 'Khách truy cập đang thấy giao diện Giáng sinh' : 'Chủ đề Giáng sinh đang tắt'}
+                        </p>
+                      </div>
+                      <p className="mt-4 text-[11px] text-[#82a99a]">Khi bật Giáng sinh, các chủ đề khác sẽ tự tắt để giao diện luôn đồng nhất.</p>
+                    </div>
+                  </div>
+
+                  <div className="relative min-h-56 overflow-hidden border-t border-white/10 bg-gradient-to-br from-[#124b3c] via-[#092f28] to-[#812d31] lg:border-l lg:border-t-0">
+                    <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-white/5 to-transparent" />
+                    <span className="absolute left-8 top-7 text-lg text-white/80">✦</span>
+                    <span className="absolute right-12 top-12 text-sm text-amber-100/80">✧</span>
+                    <span className="absolute left-20 top-24 text-xs text-white/60">✦</span>
+                    <span className="material-symbols-outlined absolute bottom-3 left-1/2 -translate-x-1/2 text-[150px] leading-none text-emerald-300/90 drop-shadow-[0_10px_15px_rgba(0,0,0,0.25)]">park</span>
+                    <span className="absolute bottom-8 left-[43%] h-3 w-3 rounded-full bg-red-400 shadow-[0_0_10px_rgba(248,113,113,.7)]" />
+                    <span className="absolute bottom-16 right-[38%] h-3 w-3 rounded-full bg-amber-300 shadow-[0_0_10px_rgba(252,211,77,.7)]" />
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full border border-amber-200/20 bg-black/30 px-3 py-1 text-[9px] font-black uppercase tracking-[0.2em] text-amber-100 backdrop-blur-sm">
+                      Christmas preview
+                    </div>
+                  </div>
+                </div>
+              </section>
+
             </div>
           )}
 
@@ -1337,22 +1447,78 @@ export default function Settings() {
                         </div>
                       </div>
 
+                      <div className="bg-white rounded-2xl border border-stone-200/80 shadow-xs p-5 sm:p-6">
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between pb-4 mb-5 border-b border-stone-100">
+                          <div>
+                            <h4 className="text-sm font-bold text-stone-900 flex items-center gap-2">
+                              <span className="material-symbols-outlined text-[19px] text-indigo-700">local_shipping</span>
+                              Tài khoản nhận tiền COD theo đơn vị vận chuyển
+                            </h4>
+                            <p className="text-xs text-stone-500 mt-1 max-w-3xl leading-relaxed">
+                              Áp dụng cho các nguồn ngoài POS, Shopee, TikTok và Website. Đơn có link theo dõi, thanh toán COD sẽ vào tài khoản riêng của hãng đang bật; các trường hợp còn lại vào quỹ chung.
+                            </p>
+                          </div>
+                          {savingCarrierAccounts && (
+                            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-indigo-700 shrink-0">
+                              <span className="w-3.5 h-3.5 border-2 border-indigo-200 border-t-indigo-700 rounded-full animate-spin" />
+                              Đang lưu
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+                          {SHIPPING_CARRIERS.filter(carrier => carrier.id !== 'other').map(carrier => {
+                            const enabled = carrierCodAccounts.includes(carrier.id);
+                            return (
+                              <button
+                                key={carrier.id}
+                                type="button"
+                                role="switch"
+                                aria-checked={enabled}
+                                disabled={savingCarrierAccounts}
+                                onClick={() => handleToggleCarrierCodAccount(carrier.id)}
+                                className={`flex items-center justify-between gap-3 rounded-xl border p-3 text-left transition-all disabled:opacity-60 ${enabled ? 'border-indigo-300 bg-indigo-50/70 shadow-xs' : 'border-stone-200 bg-stone-50/50 hover:bg-white hover:border-stone-300'}`}
+                              >
+                                <span className="flex items-center gap-3 min-w-0">
+                                  {carrier.logo ? (
+                                    <img src={carrier.logo} alt="" className="w-8 h-8 rounded-lg object-contain bg-white border border-stone-200 p-0.5 shrink-0" />
+                                  ) : (
+                                    <span className="w-8 h-8 rounded-lg bg-white border border-stone-200 flex items-center justify-center shrink-0">
+                                      <span className="material-symbols-outlined text-[18px]" style={{ color: carrier.color }}>local_shipping</span>
+                                    </span>
+                                  )}
+                                  <span className="min-w-0">
+                                    <span className="block text-xs font-bold text-stone-900 truncate">{carrier.name}</span>
+                                    <span className="block text-[10px] text-stone-500 mt-0.5">{enabled ? 'Có tài khoản COD riêng' : 'COD về quỹ chung'}</span>
+                                  </span>
+                                </span>
+                                <span className={`relative h-6 w-10 shrink-0 rounded-full transition-colors ${enabled ? 'bg-indigo-600' : 'bg-stone-300'}`}>
+                                  <span className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow transition-transform ${enabled ? 'translate-x-5' : 'translate-x-1'}`} />
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
                       {/* Platforms Grid */}
                       <div>
                         <h4 className="text-xs font-bold uppercase tracking-wider text-stone-500 mb-3 flex items-center gap-1.5">
                           <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
-                          <span>Chi tiết quỹ các kênh bán & tài khoản quảng cáo</span>
+                          <span>Chi tiết quỹ các nguồn bán & COD vận chuyển</span>
                         </h4>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
                           {fundSummary.platformBalances.map(p => {
-                            const adP = adBalances.find(a => a.platform === p.platform);
+                            const carrierAccount = getCarrierFromFundAccount(p.platform);
                             return (
                               <div key={p.platform} className="bg-white rounded-2xl border border-stone-200/80 shadow-xs p-5 flex flex-col justify-between hover:border-stone-300 transition-colors">
                                 {/* Header platform */}
                                 <div className="flex items-center justify-between pb-3 border-b border-stone-100 mb-4">
                                   <div className="flex items-center gap-2">
-                                    {p.platform !== 'khác' && (
+                                    {carrierAccount?.logo ? (
+                                      <img src={carrierAccount.logo} alt="" className="w-5 h-5 rounded object-contain" />
+                                    ) : p.platform !== 'khác' && (
                                       <span
                                         className="w-4 h-4 bg-current inline-block opacity-80"
                                         style={{
@@ -1363,9 +1529,9 @@ export default function Settings() {
                                         }}
                                       />
                                     )}
-                                    <span className="text-sm font-bold text-stone-900 uppercase">{p.platform}</span>
+                                    <span className="text-sm font-bold text-stone-900 uppercase">{getFundAccountLabel(p.platform)}</span>
                                   </div>
-                                  <span className="text-[10px] font-mono text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full">Kênh bán</span>
+                                  <span className="text-[10px] font-mono text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full">{carrierAccount ? 'COD vận chuyển' : 'Kênh bán'}</span>
                                 </div>
 
                                 {/* Quỹ khả dụng */}
@@ -1397,39 +1563,87 @@ export default function Settings() {
                                   </div>
                                 </div>
 
-                                {/* Quỹ quảng cáo nếu có */}
-                                {adP && (
-                                  <div className="pt-3 mt-3 border-t border-stone-100 space-y-2">
-                                    <div className="flex items-center justify-between text-xs">
-                                      <span className="font-medium text-pink-700">Quỹ Ads</span>
-                                      <span className="font-bold text-pink-700 font-mono">{adP.balance.toLocaleString('vi-VN')}đ</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      <div className="relative flex-1">
-                                        <input
-                                          type="number"
-                                          min="0"
-                                          step="1000"
-                                          value={adSyncValues[p.platform] ?? ''}
-                                          onChange={(e) => setAdSyncValues(prev => ({ ...prev, [p.platform]: e.target.value }))}
-                                          className="w-full border border-stone-200 rounded-lg px-2.5 py-1.5 text-xs font-bold text-right focus:outline-none focus:border-pink-500 pr-6 bg-stone-50"
-                                        />
-                                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-stone-400">đ</span>
-                                      </div>
-                                      <button
-                                        onClick={() => handleSyncAd(p.platform)}
-                                        disabled={syncingAdTarget === p.platform}
-                                        className="px-2.5 py-1.5 bg-pink-50 hover:bg-pink-100 text-pink-700 text-xs font-bold rounded-lg transition-colors flex items-center gap-1 shrink-0"
-                                      >
-                                        {syncingAdTarget === p.platform ? <span className="w-3 h-3 border-2 border-pink-400 border-t-pink-700 rounded-full animate-spin" /> : <span className="material-symbols-outlined text-[14px]">sync</span>}
-                                        <span>Lưu</span>
-                                      </button>
-                                    </div>
-                                  </div>
-                                )}
                               </div>
                             );
                           })}
+                        </div>
+                      </div>
+
+                      <div className="bg-white rounded-2xl border border-stone-200/80 shadow-xs p-5 sm:p-6">
+                        <div className="flex items-start gap-3 pb-4 mb-5 border-b border-stone-100">
+                          <div className="w-10 h-10 rounded-xl bg-pink-50 text-pink-700 border border-pink-200/70 flex items-center justify-center shrink-0">
+                            <span className="material-symbols-outlined text-[22px]">campaign</span>
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-bold text-stone-900">Đồng bộ chi phí quảng cáo</h4>
+                            <p className="text-xs text-stone-500 mt-1 leading-relaxed">
+                              Nhập số dư thực tế còn lại trên từng tài khoản quảng cáo rồi bấm Đồng bộ. Hệ thống sẽ ghi nhận phần chênh lệch vào quỹ quảng cáo.
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                          {adBalances.map(adPlatform => (
+                            <div key={adPlatform.platform} className="rounded-xl border border-stone-200/80 bg-stone-50/60 p-4 hover:bg-white hover:border-pink-200 transition-colors">
+                              <div className="flex items-center justify-between gap-3 mb-4">
+                                <div className="flex items-center gap-2 min-w-0">
+                                  {!['website', 'other'].includes(adPlatform.platform) ? (
+                                    <span
+                                      className="w-4 h-4 bg-pink-700 inline-block shrink-0"
+                                      style={{
+                                        maskImage: `url(https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/${adPlatform.platform}.svg)`,
+                                        maskSize: 'contain', maskRepeat: 'no-repeat', maskPosition: 'center',
+                                        WebkitMaskImage: `url(https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/${adPlatform.platform}.svg)`,
+                                        WebkitMaskSize: 'contain', WebkitMaskRepeat: 'no-repeat', WebkitMaskPosition: 'center'
+                                      }}
+                                    />
+                                  ) : (
+                                    <span className="material-symbols-outlined text-[18px] text-pink-700">
+                                      {adPlatform.platform === 'website' ? 'language' : 'campaign'}
+                                    </span>
+                                  )}
+                                  <span className="text-sm font-bold text-stone-900 truncate">
+                                    {AD_PLATFORM_LABELS[adPlatform.platform] || adPlatform.platform}
+                                  </span>
+                                </div>
+                                <span className="text-[10px] font-bold text-pink-700 bg-pink-50 border border-pink-100 px-2 py-0.5 rounded-full shrink-0">QUẢNG CÁO</span>
+                              </div>
+
+                              <div className="grid grid-cols-2 gap-3 mb-3 text-xs">
+                                <div>
+                                  <span className="block text-stone-400 mb-1">Đã chi</span>
+                                  <strong className="font-mono text-stone-700">{(adPlatform.totalSpent || 0).toLocaleString('vi-VN')}đ</strong>
+                                </div>
+                                <div className="text-right">
+                                  <span className="block text-stone-400 mb-1">Số dư hiện tại</span>
+                                  <strong className="font-mono text-pink-700">{(adPlatform.balance || 0).toLocaleString('vi-VN')}đ</strong>
+                                </div>
+                              </div>
+
+                              <label className="block text-[11px] font-medium text-stone-600 mb-1.5">Số dư thực tế trên nền tảng</label>
+                              <div className="flex items-center gap-2">
+                                <div className="relative flex-1 min-w-0">
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    step="1000"
+                                    value={adSyncValues[adPlatform.platform] ?? ''}
+                                    onChange={(e) => setAdSyncValues(prev => ({ ...prev, [adPlatform.platform]: e.target.value }))}
+                                    className="w-full border border-stone-200 rounded-lg px-2.5 py-2 text-xs font-bold text-right focus:outline-none focus:border-pink-500 pr-7 bg-white"
+                                  />
+                                  <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-stone-400">đ</span>
+                                </div>
+                                <button
+                                  onClick={() => handleSyncAd(adPlatform.platform)}
+                                  disabled={syncingAdTarget === adPlatform.platform}
+                                  className="px-3 py-2 bg-pink-700 hover:bg-pink-800 text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5 shrink-0 disabled:opacity-60"
+                                >
+                                  {syncingAdTarget === adPlatform.platform ? <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" /> : <span className="material-symbols-outlined text-[15px]">sync</span>}
+                                  <span>Đồng bộ</span>
+                                </button>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     </>

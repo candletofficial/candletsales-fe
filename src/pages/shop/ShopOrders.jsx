@@ -173,7 +173,7 @@ export default function ShopOrders() {
         );
       case 'shipping':
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-violet-50 text-violet-800 border border-violet-300">
             <i className="ph-bold ph-truck text-sm"></i>
             Đang giao hàng
           </span>
@@ -208,7 +208,7 @@ export default function ShopOrders() {
     const statuses = {
       pending: { label: 'Chờ xác nhận', icon: 'ph-clock', iconClass: 'bg-amber-50 text-amber-700' },
       confirmed: { label: 'Đang chuẩn bị', icon: 'ph-package', iconClass: 'bg-sky-50 text-sky-700' },
-      shipping: { label: 'Đang giao hàng', icon: 'ph-truck', iconClass: 'bg-indigo-50 text-indigo-700' },
+      shipping: { label: 'Đang giao hàng', icon: 'ph-truck', iconClass: 'bg-violet-100 text-violet-800' },
       delivered: { label: 'Giao thành công', icon: 'ph-check', iconClass: 'bg-emerald-50 text-emerald-700' },
       cancelled: { label: 'Đã huỷ', icon: 'ph-x', iconClass: 'bg-stone-100 text-stone-500' },
       failed: { label: 'Giao thất bại', icon: 'ph-warning', iconClass: 'bg-rose-50 text-rose-700' }
