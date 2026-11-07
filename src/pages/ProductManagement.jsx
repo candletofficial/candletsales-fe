@@ -9,6 +9,7 @@ import { TAG_PRESETS, TAG_COLORS, resolveTagColor } from '../utils/productTagUti
 import { uploadService } from '../services/uploadService';
 import { getImageUrl, isManagedUploadedImage } from '../utils/imageUtils';
 import RichTextEditor from '../components/RichTextEditor';
+import FormulaSummaryModal from '../components/FormulaSummaryModal';
 import { sanitizeRichHtml } from '../utils/richText';
 
 const getEmptyForm = () => ({
@@ -38,6 +39,14 @@ const getVariantCombinations = (groups = []) => {
     )),
     [[]],
   );
+};
+
+const getVariantOptionLabel = (groups = [], optionId) => {
+  for (const group of groups) {
+    const option = (group.options || []).find(item => item.id === optionId);
+    if (option) return option.label || 'Chưa đặt tên';
+  }
+  return 'Chưa đặt tên';
 };
 
 function ProductModal({ product, products = [], materials, onClose, onSave, onDelete, onDuplicate }) {
@@ -1247,34 +1256,6 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
                       {group.options.map((opt, oIdx) => (
                         <div key={oIdx} className="flex gap-2.5 items-center">
                           <input 
-                            value={opt.id} 
-                            onChange={e => {
-                              const nextId = e.target.value;
-                              setForm(current => {
-                                const previousId = current.variant_groups[gIdx].options[oIdx].id;
-                                const newGroups = current.variant_groups.map((currentGroup, currentGroupIndex) => (
-                                  currentGroupIndex !== gIdx
-                                    ? currentGroup
-                                    : {
-                                      ...currentGroup,
-                                      options: currentGroup.options.map((currentOption, currentOptionIndex) => (
-                                        currentOptionIndex === oIdx ? { ...currentOption, id: nextId } : currentOption
-                                      )),
-                                    }
-                                ));
-                                const newSkus = (current.skus || []).map(sku => ({
-                                  ...sku,
-                                  combination: (sku.combination || []).map(optionId => (
-                                    optionId === previousId ? nextId : optionId
-                                  )),
-                                }));
-                                return { ...current, variant_groups: newGroups, skus: newSkus };
-                              });
-                            }}
-                            placeholder="Mã (VD: RBY)" 
-                            className="w-[100px] text-xs font-mono font-bold uppercase border border-stone-200 rounded-lg px-2.5 py-1.5 bg-stone-50" 
-                          />
-                          <input 
                             value={opt.label} 
                             onChange={e => {
                               const newGroups = [...form.variant_groups];
@@ -1361,7 +1342,7 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
                           <div className="flex flex-wrap gap-1">
                             {sku.combination.map(c => (
                               <span key={c} className="bg-stone-200/80 px-2 py-0.5 rounded text-[11px] font-bold text-stone-700">
-                                {c}
+                                {getVariantOptionLabel(form.variant_groups, c)}
                               </span>
                             ))}
                           </div>
@@ -1560,6 +1541,7 @@ export default function ProductManagement() {
   const [modal, setModal] = useState(null); // { type: 'add' | 'edit' | 'delete', data?: any }
   const [toast, setToast] = useState(null);
   const [expandedProducts, setExpandedProducts] = useState({});
+  const [showFormulaSummary, setShowFormulaSummary] = useState(false);
   const [searchParams] = useSearchParams();
   const searchTerm = searchParams.get('q') || '';
 
@@ -1702,6 +1684,15 @@ export default function ProductManagement() {
         </div>
       )}
 
+      {showFormulaSummary && (
+        <FormulaSummaryModal
+          products={products}
+          materials={materials}
+          onClose={() => setShowFormulaSummary(false)}
+          onSuccess={message => showToast(message)}
+        />
+      )}
+
       <div>
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 sm:gap-0 mb-lg">
@@ -1709,11 +1700,22 @@ export default function ProductManagement() {
             <h2 className="text-[24px] font-bold text-on-surface">Danh sách Sản phẩm</h2>
             <p className="text-on-surface-variant mt-1 text-[14px]">Quản lý danh mục, công thức và biến thể sản phẩm</p>
           </div>
-          <button onClick={() => setModal({ type: 'add' })}
-            className="flex items-center gap-xs px-lg py-sm bg-primary text-white rounded-lg hover:opacity-90 transition-all shadow-sm font-semibold text-sm">
-            <span className="material-symbols-outlined text-[20px]">add</span>
-            <span>Tạo mới sản phẩm</span>
-          </button>
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+            <button
+              type="button"
+              onClick={() => setShowFormulaSummary(true)}
+              disabled={loading}
+              className="flex items-center justify-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-lg py-sm text-sm font-bold text-emerald-800 shadow-sm transition-all hover:border-emerald-300 hover:bg-emerald-100 disabled:opacity-50"
+            >
+              <span className="material-symbols-outlined text-[19px]">lab_profile</span>
+              <span>Phiếu pha chế</span>
+            </button>
+            <button onClick={() => setModal({ type: 'add' })}
+              className="flex items-center justify-center gap-xs px-lg py-sm bg-primary text-white rounded-lg hover:opacity-90 transition-all shadow-sm font-semibold text-sm">
+              <span className="material-symbols-outlined text-[20px]">add</span>
+              <span>Tạo mới sản phẩm</span>
+            </button>
+          </div>
         </div>
 
         {/* Table */}

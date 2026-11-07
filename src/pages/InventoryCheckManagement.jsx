@@ -33,7 +33,8 @@ function InventoryCheckModal({ materials, user, onClose, onSave }) {
       
       const initialItems = sortedMaterials.map(m => ({
         material_id: m._id,
-        system_stock: m.actualStock,
+        // stock là số hệ thống trước khi kiểm; actualStock sẽ nhận số đếm thực tế.
+        system_stock: m.stock,
         actual_stock: ''
       }));
       setItems(initialItems);
@@ -296,8 +297,8 @@ function TicketDetailsModal({ ticket, onClose }) {
                 <thead>
                 <tr className="bg-surface-container-lowest">
                   <th className="px-4 py-3 text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold">Nguyên liệu</th>
-                  <th className="px-4 py-3 text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold text-right">Hệ thống</th>
-                  <th className="px-4 py-3 text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold text-right">Thực tế</th>
+                  <th className="px-4 py-3 text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold text-right">Hệ thống lúc kiểm</th>
+                  <th className="px-4 py-3 text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold text-right">Thực tế lúc kiểm</th>
                   <th className="px-4 py-3 text-on-surface-variant border-b border-outline-variant uppercase tracking-wider text-[11px] font-bold text-right">Chênh lệch</th>
                 </tr>
               </thead>
