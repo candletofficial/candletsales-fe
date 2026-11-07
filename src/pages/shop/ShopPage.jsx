@@ -6,6 +6,32 @@ import { useWishlist } from '../../hooks/useWishlist';
 import { resolveTagColor } from '../../utils/productTagUtils';
 import { getImageUrl } from '../../utils/imageUtils';
 
+function OutOfStockStamp({ compact = false }) {
+  return (
+    <div className="pointer-events-none absolute left-1/2 top-1/2 z-40 -translate-x-1/2 -translate-y-1/2 -rotate-[7deg] opacity-90 mix-blend-multiply">
+      <div className={`relative overflow-hidden rounded-[4px] border-[#7A2F2B] shadow-[inset_0_0_0_1px_rgba(122,47,43,0.32),0_2px_0_rgba(122,47,43,0.18)] ${compact ? 'border-2 px-0.5 py-0.5' : 'border-[3px] px-1 py-1'}`}>
+        <div className={`flex items-center justify-center border-y-2 border-[#7A2F2B] text-[#7A2F2B] ${compact ? 'min-w-[82px] gap-0.5 px-1 py-1' : 'min-w-[132px] gap-1.5 px-2 py-1.5 sm:min-w-[154px] sm:gap-2 sm:px-3 sm:py-2'}`}>
+          <span className={compact ? 'text-[5px]' : 'text-[8px] sm:text-[10px]'} aria-hidden="true">★</span>
+          <span className={`font-mono font-black uppercase leading-none tracking-[0.04em] ${compact ? 'text-[8px]' : 'text-[12px] sm:text-[14px]'}`}>
+            Tạm hết hàng
+          </span>
+          <span className={compact ? 'text-[5px]' : 'text-[8px] sm:text-[10px]'} aria-hidden="true">★</span>
+        </div>
+
+        {/* Những vệt nhạt tạo cảm giác mực đóng không hoàn toàn đều */}
+        <span className="absolute left-[12%] top-[3px] h-[3px] w-7 -rotate-6 bg-white/75" aria-hidden="true" />
+        <span className="absolute right-[9%] top-1/2 h-[2px] w-5 rotate-3 bg-white/65" aria-hidden="true" />
+        <span className="absolute bottom-[4px] left-[38%] h-[3px] w-9 rotate-2 bg-white/70" aria-hidden="true" />
+        <span className="absolute left-[6px] top-[42%] h-2 w-[3px] bg-white/60" aria-hidden="true" />
+      </div>
+    </div>
+  );
+}
+
+const isProductOutOfStock = (product) => product?.stock !== null
+  && product?.stock !== undefined
+  && Number(product.stock) <= 0;
+
 export default function ShopPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -131,7 +157,12 @@ export default function ShopPage() {
     } else if (sortBy === 'newest') {
       list.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
     }
-    return list;
+
+    // Luôn đưa sản phẩm hết hàng xuống cuối nhưng giữ nguyên thứ tự đang chọn
+    // trong từng nhóm nhờ Array#sort ổn định.
+    return list.sort(
+      (a, b) => Number(isProductOutOfStock(a)) - Number(isProductOutOfStock(b))
+    );
   }, [products, selectedCategory, selectedVolume, selectedWaxes, selectedWicks, priceRange, searchQuery, sortBy]);
 
   const handleBuyNow = (e, product) => {
@@ -616,13 +647,21 @@ export default function ShopPage() {
             /* =================== CHẾ ĐỘ LƯỚI (GRID VIEW - 2 CỘT MOBILE, 3 CỘT DESKTOP) =================== */
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-6">
               {filteredProducts.map((product) => {
+                const isOutOfStock = isProductOutOfStock(product);
+
                 return (
                   <article
                     key={product._id} 
-                    className="group flex flex-col justify-between overflow-hidden rounded-[18px] border border-[#E8DED5] bg-white shadow-[0_3px_14px_rgba(74,44,42,0.06)] transition-all sm:hover:-translate-y-0.5 sm:hover:shadow-md sm:p-4"
+                    className={`group relative flex flex-col justify-between overflow-hidden rounded-[18px] border border-[#E8DED5] bg-white shadow-[0_3px_14px_rgba(74,44,42,0.06)] transition-all sm:p-4 ${isOutOfStock ? 'border-stone-200' : 'sm:hover:-translate-y-0.5 sm:hover:shadow-md'}`}
                   >
                     {/* Image Area with badges & wishlist button */}
                     <div className="relative mb-2.5 aspect-square overflow-hidden bg-brand-warmIvory sm:mb-3.5 sm:rounded-xl">
+                      {isOutOfStock && (
+                        <>
+                          <div className="pointer-events-none absolute inset-0 z-30 bg-white/45 backdrop-grayscale-[35%]" />
+                          <OutOfStockStamp />
+                        </>
+                      )}
                       {/* Product Tag */}
                       {product.tag && (
                         <div 
@@ -668,7 +707,7 @@ export default function ShopPage() {
                     </div>
                     
                     {/* Info Area */}
-                    <div className="flex flex-1 flex-col px-3 pb-3 sm:p-0">
+                    <div className={`flex flex-1 flex-col px-3 pb-3 transition-opacity sm:p-0 ${isOutOfStock ? 'opacity-55' : ''}`}>
                       {/* Category & Star Rating */}
                       <div className="flex items-center justify-between gap-1 mb-1 sm:mb-1.5">
                         <span className="text-[8.5px] sm:text-[9.5px] font-mono uppercase tracking-wider text-stone-500 truncate">
@@ -712,7 +751,8 @@ export default function ShopPage() {
                         <button 
                           type="button"
                           onClick={(e) => handleBuyNow(e, product)}
-                          className="w-full py-2 px-2.5 rounded-full bg-brand-charcoal sm:hover:bg-brand-burgundy text-white text-[9.5px] sm:text-[11px] font-semibold tracking-wider uppercase transition-all duration-200 shadow-2xs sm:hover:shadow-md active:scale-95 cursor-pointer flex items-center justify-center gap-1"
+                          disabled={isOutOfStock}
+                          className="w-full py-2 px-2.5 rounded-full bg-brand-charcoal sm:hover:bg-brand-burgundy text-white text-[9.5px] sm:text-[11px] font-semibold tracking-wider uppercase transition-all duration-200 shadow-2xs sm:hover:shadow-md active:scale-95 cursor-pointer flex items-center justify-center gap-1 disabled:cursor-not-allowed"
                         >
                           <i className="ph-bold ph-shopping-bag-open text-xs"></i>
                           <span>Mua Ngay</span>
@@ -727,13 +767,21 @@ export default function ShopPage() {
             /* =================== CHẾ ĐỘ DANH SÁCH (LIST VIEW - MOBILE COMPACT ROW) =================== */
             <div className="flex flex-col space-y-3 sm:space-y-4">
               {filteredProducts.map((product) => {
+                const isOutOfStock = isProductOutOfStock(product);
+
                 return (
                   <article
                     key={product._id} 
-                    className="group flex items-stretch gap-3 overflow-hidden rounded-[18px] border border-[#E8DED5] bg-white p-2.5 shadow-[0_3px_14px_rgba(74,44,42,0.06)] transition-all sm:hover:shadow-md sm:gap-5 sm:p-4"
+                    className={`group relative flex items-stretch gap-3 overflow-hidden rounded-[18px] border border-[#E8DED5] bg-white p-2.5 shadow-[0_3px_14px_rgba(74,44,42,0.06)] transition-all sm:gap-5 sm:p-4 ${isOutOfStock ? 'border-stone-200' : 'sm:hover:shadow-md'}`}
                   >
                     {/* Image Area (Compact Square on Mobile) */}
                     <div className="relative w-24 sm:w-44 md:w-52 aspect-square rounded-xl bg-brand-warmIvory overflow-hidden shrink-0">
+                      {isOutOfStock && (
+                        <>
+                          <div className="pointer-events-none absolute inset-0 z-30 bg-white/45 backdrop-grayscale-[35%]" />
+                          <OutOfStockStamp compact />
+                        </>
+                      )}
                       {product.tag && (
                         <div 
                           className="absolute top-1.5 left-1.5 text-white text-[8px] sm:text-[9px] font-bold tracking-widest px-1.5 py-0.5 uppercase z-20 rounded shadow-xs"
@@ -776,7 +824,7 @@ export default function ShopPage() {
                     </div>
 
                     {/* Info Area (Right) */}
-                    <div className="flex flex-col justify-between flex-1 min-w-0 py-0.5">
+                    <div className={`flex min-w-0 flex-1 flex-col justify-between py-0.5 transition-opacity ${isOutOfStock ? 'opacity-55' : ''}`}>
                       <div>
                         {/* Top Category & Rating */}
                         <div className="flex items-center justify-between gap-1 mb-1">
@@ -827,7 +875,8 @@ export default function ShopPage() {
                         <button 
                           type="button"
                           onClick={(e) => handleBuyNow(e, product)}
-                          className="bg-brand-charcoal sm:hover:bg-brand-burgundy text-white text-[10px] sm:text-xs font-bold tracking-wider px-3 sm:px-4 py-1.5 sm:py-2 rounded-full transition-all flex items-center gap-1 cursor-pointer active:scale-95 shadow-2xs"
+                          disabled={isOutOfStock}
+                          className="bg-brand-charcoal sm:hover:bg-brand-burgundy text-white text-[10px] sm:text-xs font-bold tracking-wider px-3 sm:px-4 py-1.5 sm:py-2 rounded-full transition-all flex items-center gap-1 cursor-pointer active:scale-95 shadow-2xs disabled:cursor-not-allowed"
                         >
                           <i className="ph-bold ph-shopping-bag-open text-xs"></i>
                           <span>Mua ngay</span>

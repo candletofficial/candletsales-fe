@@ -1085,7 +1085,6 @@ export default function ShopHome() {
                           <span>Mua Ngay</span>
                         </button>
 
-                        {product.stock === 0 && <div className="rounded-lg border border-red-200 bg-red-50 px-2 py-1 text-center text-[9px] font-bold uppercase tracking-wider text-red-700 sm:text-[10px]">Tạm hết hàng</div>}
                       </div>
                     </div>
                   );

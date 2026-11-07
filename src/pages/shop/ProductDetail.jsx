@@ -163,12 +163,20 @@ export default function ProductDetail() {
         const images = [res.data.image, ...(res.data.images || [])].filter(Boolean);
         if (images.length > 0) setActiveImage(images[0]);
 
-        // Mặc định chọn option đầu tiên cho mỗi nhóm
+        // Ưu tiên tổ hợp còn hàng để không mở trang với một phân loại đã hết.
         if (res.data.variant_groups && res.data.variant_groups.length > 0) {
           const defaults = {};
+          const firstAvailableSku = res.data.skus?.find(
+            sku => sku.stock === null || sku.stock === undefined || Number(sku.stock) > 0
+          );
+          const availableCombination = new Set(
+            (firstAvailableSku?.combination || []).map(optionId => String(optionId))
+          );
+
           res.data.variant_groups.forEach(group => {
             if (group.options.length > 0) {
-              defaults[group.id] = group.options[0].id;
+              const availableOption = group.options.find(opt => availableCombination.has(String(opt.id)));
+              defaults[group.id] = availableOption?.id ?? group.options[0].id;
             }
           });
           setSelectedOptions(defaults);
@@ -198,6 +206,23 @@ export default function ProductDetail() {
     return product.skus.find(sku => {
       const skuCombo = [...sku.combination].sort().join(',');
       return skuCombo === selectedCombo;
+    });
+  };
+
+  const isOptionUnavailable = (groupId, optionId) => {
+    if (!product?.skus?.length) return false;
+
+    const requiredOptionIds = Object.entries(selectedOptions)
+      .filter(([selectedGroupId]) => String(selectedGroupId) !== String(groupId))
+      .map(([, selectedOptionId]) => String(selectedOptionId));
+
+    return !product.skus.some((sku) => {
+      const combination = new Set((sku.combination || []).map(id => String(id)));
+      const matchesOption = combination.has(String(optionId));
+      const matchesOtherSelections = requiredOptionIds.every(id => combination.has(id));
+      const hasStock = sku.stock === null || sku.stock === undefined || Number(sku.stock) > 0;
+
+      return matchesOption && matchesOtherSelections && hasStock;
     });
   };
 
@@ -265,6 +290,7 @@ export default function ProductDetail() {
 
   const activeSku = currentSku();
   const availableStock = activeSku?.stock ?? product?.stock;
+  const isOutOfStock = Number.isFinite(availableStock) && availableStock <= 0;
   const basePrice = activeSku && activeSku.price > 0 ? activeSku.price : (product?.base_price || 0);
 
   // Tính toán voucher tốt nhất (Phải gọi trước các lệnh return)
@@ -679,19 +705,29 @@ export default function ProductDetail() {
                     <div className="flex flex-wrap gap-2">
                       {group.options.map((opt) => {
                         const isSelected = selectedOptions[group.id] === opt.id;
+                        const isUnavailable = isOptionUnavailable(group.id, opt.id);
                         return (
                           <button
                             key={opt.id}
                             type="button"
                             onClick={() => handleOptionSelect(group.id, opt.id)}
+                            disabled={isUnavailable}
+                            aria-label={isUnavailable ? `${opt.label} - Hết hàng` : opt.label}
                             className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 cursor-pointer active:scale-95 ${
-                              isSelected
+                              isUnavailable
+                                ? 'cursor-not-allowed border border-stone-200 bg-stone-100 text-stone-400 opacity-65'
+                                : isSelected
                                 ? 'bg-brand-burgundy text-white border-2 border-brand-burgundy shadow-xs'
                                 : 'bg-white text-stone-700 border border-stone-200 sm:hover:border-stone-400'
                             }`}
                           >
-                            {isSelected && <i className="ph-bold ph-check text-xs"></i>}
-                            <span>{opt.label}</span>
+                            {isUnavailable ? (
+                              <i className="ph-bold ph-prohibit text-xs" />
+                            ) : isSelected ? (
+                              <i className="ph-bold ph-check text-xs" />
+                            ) : null}
+                            <span className={isUnavailable ? 'line-through decoration-stone-400' : ''}>{opt.label}</span>
+                            {isUnavailable && <span className="text-[8px] font-bold uppercase tracking-wide">Hết</span>}
                           </button>
                         );
                       })}
@@ -749,7 +785,7 @@ export default function ProductDetail() {
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={handleAddToCart}
-                  disabled={isAdding}
+                  disabled={isAdding || isOutOfStock}
                   className="flex-1 border-2 border-brand-burgundy text-brand-burgundy bg-white sm:hover:bg-brand-burgundy/5 active:bg-brand-burgundy/10 text-xs sm:text-sm font-bold uppercase tracking-wider rounded-xl py-3.5 px-4 flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed shadow-xs cursor-pointer"
                 >
                   {isAdding ? (
@@ -757,17 +793,17 @@ export default function ProductDetail() {
                   ) : (
                     <>
                       <i className="ph-bold ph-shopping-cart-simple text-base"></i>
-                      <span>Thêm vào giỏ hàng</span>
+                      <span>{isOutOfStock ? 'Tạm hết hàng' : 'Thêm vào giỏ hàng'}</span>
                     </>
                   )}
                 </button>
                 <button
                   onClick={handleBuyNow}
-                  disabled={isAdding}
+                  disabled={isAdding || isOutOfStock}
                   className="flex-1 bg-brand-burgundy sm:hover:bg-[#3A2221] active:bg-[#2A1817] text-white text-xs sm:text-sm font-bold uppercase tracking-wider rounded-xl py-3.5 px-4 flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed shadow-md cursor-pointer"
                 >
                   <i className="ph-bold ph-tote text-base"></i>
-                  <span>Mua Ngay</span>
+                  <span>{isOutOfStock ? 'Tạm hết hàng' : 'Mua Ngay'}</span>
                 </button>
               </div>
             </div>
@@ -946,15 +982,15 @@ export default function ProductDetail() {
         {/* 3. Nút "Thêm vào giỏ" phong cách Shopee (Mở Bottom Sheet chọn phân loại) */}
         <button
           onClick={() => openVariantSheet('cart')}
-          disabled={isAdding}
-          className="flex-1 bg-[#FFF5EC] active:bg-[#FFEAD6] text-[#B45309] flex flex-col items-center justify-center transition-colors disabled:opacity-60 cursor-pointer px-1 text-center"
+          disabled={isAdding || isOutOfStock}
+          className="flex-1 bg-[#FFF5EC] active:bg-[#FFEAD6] text-[#B45309] flex flex-col items-center justify-center transition-colors disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-400 cursor-pointer px-1 text-center"
         >
           {isAdding ? (
             <i className="ph-bold ph-spinner animate-spin text-base text-[#B45309]"></i>
           ) : (
             <>
               <i className="ph-bold ph-shopping-cart-simple text-base mb-0.5"></i>
-              <span className="text-[11px] sm:text-xs font-bold uppercase tracking-tight">Thêm Vào Giỏ</span>
+              <span className="text-[11px] sm:text-xs font-bold uppercase tracking-tight">{isOutOfStock ? 'Tạm Hết Hàng' : 'Thêm Vào Giỏ'}</span>
             </>
           )}
         </button>
@@ -962,13 +998,15 @@ export default function ProductDetail() {
         {/* 4. Nút "Mua Ngay" phong cách Shopee (Mở Bottom Sheet chọn phân loại) */}
         <button
           onClick={() => openVariantSheet('buy')}
-          disabled={isAdding}
-          className="flex-1 bg-gradient-to-r from-[#94432C] to-brand-burgundy active:from-[#7D3824] active:to-[#38201F] text-white flex flex-col items-center justify-center transition-all disabled:opacity-60 cursor-pointer px-1 text-center shadow-inner"
+          disabled={isAdding || isOutOfStock}
+          className="flex-1 bg-gradient-to-r from-[#94432C] to-brand-burgundy active:from-[#7D3824] active:to-[#38201F] text-white flex flex-col items-center justify-center transition-all disabled:cursor-not-allowed disabled:from-stone-300 disabled:to-stone-400 cursor-pointer px-1 text-center shadow-inner"
         >
-          <span className="text-xs font-bold uppercase tracking-wider">Mua Ngay</span>
-          <span className="text-[10px] text-amber-200/90 font-medium leading-none mt-0.5">
-            {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(displayPrice)}
-          </span>
+          <span className="text-xs font-bold uppercase tracking-wider">{isOutOfStock ? 'Tạm Hết Hàng' : 'Mua Ngay'}</span>
+          {!isOutOfStock && (
+            <span className="text-[10px] text-amber-200/90 font-medium leading-none mt-0.5">
+              {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(displayPrice)}
+            </span>
+          )}
         </button>
       </div>
 
@@ -1047,19 +1085,29 @@ export default function ProductDetail() {
                   <div className="flex flex-wrap gap-2">
                     {group.options.map((opt) => {
                       const isSelected = selectedOptions[group.id] === opt.id;
+                      const isUnavailable = isOptionUnavailable(group.id, opt.id);
                       return (
                         <button
                           key={`sheet-opt-${opt.id}`}
                           type="button"
                           onClick={() => handleOptionSelect(group.id, opt.id)}
+                          disabled={isUnavailable}
+                          aria-label={isUnavailable ? `${opt.label} - Hết hàng` : opt.label}
                           className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 ${
-                            isSelected
+                            isUnavailable
+                              ? 'cursor-not-allowed border border-stone-200 bg-stone-100 text-stone-400 opacity-65'
+                              : isSelected
                               ? 'bg-brand-burgundy text-white border-2 border-brand-burgundy shadow-2xs'
                               : 'bg-stone-50 text-stone-700 border border-stone-200/90 sm:hover:border-stone-400'
                           }`}
                         >
-                          {isSelected && <i className="ph-bold ph-check text-xs"></i>}
-                          <span>{opt.label}</span>
+                          {isUnavailable ? (
+                            <i className="ph-bold ph-prohibit text-xs" />
+                          ) : isSelected ? (
+                            <i className="ph-bold ph-check text-xs" />
+                          ) : null}
+                          <span className={isUnavailable ? 'line-through decoration-stone-400' : ''}>{opt.label}</span>
+                          {isUnavailable && <span className="text-[8px] font-bold uppercase tracking-wide">Hết</span>}
                         </button>
                       );
                     })}
@@ -1103,7 +1151,7 @@ export default function ProductDetail() {
                     await handleAddToCart();
                     closeVariantSheet();
                   }}
-                  disabled={isAdding}
+                  disabled={isAdding || isOutOfStock}
                   className="w-full bg-brand-burgundy active:bg-[#341F1D] text-white text-xs font-bold uppercase tracking-wider rounded-xl py-3.5 px-4 flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer disabled:opacity-60"
                 >
                   {isAdding ? (
@@ -1111,7 +1159,7 @@ export default function ProductDetail() {
                   ) : (
                     <>
                       <i className="ph-bold ph-shopping-cart-simple text-base"></i>
-                      <span>Thêm Vào Giỏ Hàng</span>
+                      <span>{isOutOfStock ? 'Tạm Hết Hàng' : 'Thêm Vào Giỏ Hàng'}</span>
                     </>
                   )}
                 </button>
@@ -1122,10 +1170,11 @@ export default function ProductDetail() {
                     closeVariantSheet();
                     handleBuyNow();
                   }}
-                  className="w-full bg-gradient-to-r from-[#94432C] to-brand-burgundy active:from-[#7D3824] active:to-[#38201F] text-white text-xs font-bold uppercase tracking-wider rounded-xl py-3.5 px-4 flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer"
+                  disabled={isOutOfStock}
+                  className="w-full bg-gradient-to-r from-[#94432C] to-brand-burgundy active:from-[#7D3824] active:to-[#38201F] text-white text-xs font-bold uppercase tracking-wider rounded-xl py-3.5 px-4 flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer disabled:cursor-not-allowed disabled:from-stone-300 disabled:to-stone-400"
                 >
                   <i className="ph-bold ph-tote text-base"></i>
-                  <span>Mua Ngay ({new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(displayPrice * quantity)})</span>
+                  <span>{isOutOfStock ? 'Tạm Hết Hàng' : `Mua Ngay (${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(displayPrice * quantity)})`}</span>
                 </button>
               ) : (
                 <div className="flex gap-2.5">
@@ -1135,11 +1184,11 @@ export default function ProductDetail() {
                       await handleAddToCart();
                       closeVariantSheet();
                     }}
-                    disabled={isAdding}
+                    disabled={isAdding || isOutOfStock}
                     className="flex-1 bg-[#FFF5EC] active:bg-[#FFEAD6] text-[#B45309] text-xs font-bold uppercase tracking-wider rounded-xl py-3.5 px-2 flex items-center justify-center gap-1.5 transition-colors cursor-pointer border border-[#B45309]/20"
                   >
                     <i className="ph-bold ph-shopping-cart-simple text-sm"></i>
-                    <span>Thêm Vào Giỏ</span>
+                    <span>{isOutOfStock ? 'Tạm Hết Hàng' : 'Thêm Vào Giỏ'}</span>
                   </button>
                   <button
                     type="button"
@@ -1147,10 +1196,11 @@ export default function ProductDetail() {
                       closeVariantSheet();
                       handleBuyNow();
                     }}
-                    className="flex-1 bg-gradient-to-r from-[#94432C] to-brand-burgundy active:from-[#7D3824] active:to-[#38201F] text-white text-xs font-bold uppercase tracking-wider rounded-xl py-3.5 px-2 flex items-center justify-center gap-1.5 transition-all shadow-md cursor-pointer"
+                    disabled={isOutOfStock}
+                    className="flex-1 bg-gradient-to-r from-[#94432C] to-brand-burgundy active:from-[#7D3824] active:to-[#38201F] text-white text-xs font-bold uppercase tracking-wider rounded-xl py-3.5 px-2 flex items-center justify-center gap-1.5 transition-all shadow-md cursor-pointer disabled:cursor-not-allowed disabled:from-stone-300 disabled:to-stone-400"
                   >
                     <i className="ph-bold ph-tote text-sm"></i>
-                    <span>Mua Ngay</span>
+                    <span>{isOutOfStock ? 'Tạm Hết Hàng' : 'Mua Ngay'}</span>
                   </button>
                 </div>
               )}
