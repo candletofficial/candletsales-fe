@@ -14,6 +14,10 @@ export default function Header({ onMenuClick }) {
   const [localSearch, setLocalSearch] = useState(searchParams.get('q') || '');
 
   useEffect(() => {
+    setLocalSearch(searchParams.get('q') || '');
+  }, [searchParams]);
+
+  useEffect(() => {
     const fetchLowStock = async () => {
       try {
         const res = await materialService.getMaterials();
@@ -57,7 +61,8 @@ export default function Header({ onMenuClick }) {
 
   let placeholder = "Tìm kiếm...";
   if (location.pathname.includes('/products')) placeholder = "Tìm kiếm sản phẩm...";
-  if (location.pathname.includes('/materials')) placeholder = "Tìm kiếm nguyên vật liệu...";
+  if (location.pathname.includes('/essential-oils')) placeholder = "Tìm kiếm tinh dầu...";
+  else if (location.pathname.includes('/materials')) placeholder = "Tìm kiếm nguyên vật liệu...";
   if (location.pathname.includes('/orders')) placeholder = "Tìm kiếm đơn hàng...";
   if (location.pathname.includes('/users')) placeholder = "Tìm kiếm người dùng...";
 

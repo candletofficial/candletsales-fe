@@ -25,6 +25,7 @@ const ROUTE_TITLES = {
   '/admin/messenger-bot': 'Bot Messenger | Candlet Admin',
   '/admin/pos': 'Bán Hàng Tại Quầy (POS) | Candlet Admin',
   '/admin/materials': 'Quản Lý Nguyên Vật Liệu | Candlet Admin',
+  '/admin/essential-oils': 'Quản Lý Tinh Dầu | Candlet Admin',
   '/admin/imports': 'Quản Lý Nhập Kho | Candlet Admin',
   '/admin/inventory-checks': 'Kiểm Kê Kho | Candlet Admin',
   '/admin/ad-costs': 'Chi Phí Quảng Cáo | Candlet Admin',

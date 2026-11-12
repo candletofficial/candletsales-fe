@@ -7,7 +7,14 @@ const materialId = entry => String(typeof entry?.ingredient_id === 'object' ? en
 const resolveMaterial = (entry, byId) => typeof entry?.ingredient_id === 'object' && entry.ingredient_id ? entry.ingredient_id : byId.get(materialId(entry));
 
 export const getFormulaMaterialType = material => {
-  const text = normalizeText(`${material?.name || ''} ${material?.category || ''}`);
+  const name = normalizeText(material?.name);
+  const category = normalizeText(material?.category).trim();
+  const isColor = ['mau ', 'mau sap', 'color', 'colour', 'pigment', 'dye', 'nhuom']
+    .some(keyword => name.includes(keyword))
+    || ['mau', 'mau nen', 'mau sap', 'color', 'pigment'].includes(category);
+  if (isColor) return null;
+
+  const text = `${name} ${category}`;
   if (text.includes('tinh dau') || text.includes('essential oil')) return 'oil';
   if (text.includes('sap') || text.includes('wax')) return 'wax';
   return null;

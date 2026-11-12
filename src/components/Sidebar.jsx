@@ -35,6 +35,13 @@ const NAV_ITEMS = [
     label: 'Nguyên vật liệu',
   },
   {
+    to: '/admin/essential-oils',
+    icon: (
+      <span className="material-symbols-outlined text-[20px]">water_drop</span>
+    ),
+    label: 'Tinh dầu',
+  },
+  {
     to: '/admin/imports',
     icon: (
       <span className="material-symbols-outlined text-[20px]">local_shipping</span>

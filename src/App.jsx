@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
 import UserManagement from './pages/UserManagement';
 import MaterialManagement from './pages/MaterialManagement';
+import EssentialOilManagement from './pages/EssentialOilManagement';
 import ProductManagement from './pages/ProductManagement';
 import OrderManagement from './pages/OrderManagement';
 import AdCostManagement from './pages/AdCostManagement';
@@ -61,6 +62,7 @@ export default function App() {
           <Route path="/admin/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="/admin/users" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
           <Route path="/admin/materials" element={<ProtectedRoute><MaterialManagement /></ProtectedRoute>} />
+          <Route path="/admin/essential-oils" element={<ProtectedRoute><EssentialOilManagement /></ProtectedRoute>} />
           <Route path="/admin/imports" element={<ProtectedRoute><ImportManagement /></ProtectedRoute>} />
           <Route path="/admin/inventory-checks" element={<ProtectedRoute><InventoryCheckManagement /></ProtectedRoute>} />
           <Route path="/admin/products" element={<ProtectedRoute><ProductManagement /></ProtectedRoute>} />
