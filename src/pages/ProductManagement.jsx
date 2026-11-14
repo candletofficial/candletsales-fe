@@ -22,6 +22,7 @@ const getEmptyForm = () => ({
   original_price: 0,
   tag: '',
   tag_color: '',
+  shop_order: null,
   category: 'Nến Hũ Đơn',
   volume: '200g (~50 giờ đốt)',
   wax_type: [],
@@ -30,6 +31,25 @@ const getEmptyForm = () => ({
   variant_groups: [],
   skus: []
 });
+
+const isProductOutOfStock = (product) => product?.stock !== null
+  && product?.stock !== undefined
+  && Number.isFinite(Number(product.stock))
+  && Number(product.stock) <= 0;
+
+const sortProductsForShop = (items) => [...items].sort((a, b) => {
+  const stockDifference = Number(isProductOutOfStock(a)) - Number(isProductOutOfStock(b));
+  if (stockDifference) return stockDifference;
+  const orderA = Number(a.shop_order) > 0 ? Number(a.shop_order) : Number.POSITIVE_INFINITY;
+  const orderB = Number(b.shop_order) > 0 ? Number(b.shop_order) : Number.POSITIVE_INFINITY;
+  if (orderA !== orderB) return orderA - orderB;
+  return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+});
+
+const keepOutOfStockAtEnd = (items) => [
+  ...items.filter((product) => !isProductOutOfStock(product)),
+  ...items.filter(isProductOutOfStock),
+];
 
 const getVariantCombinations = (groups = []) => {
   if (!groups.length || groups.some(group => !group.options?.length)) return [];
@@ -157,6 +177,7 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
     if (!p.productId) p.productId = `SP-${Math.floor(1000000 + Math.random() * 9000000)}`;
     if (p.tag === undefined) p.tag = '';
     if (p.tag_color === undefined) p.tag_color = '';
+    if (!Number.isFinite(Number(p.shop_order)) || Number(p.shop_order) < 1) p.shop_order = null;
     if (!Array.isArray(p.images)) p.images = [];
 
     // Normalize populated base_ingredients
@@ -528,7 +549,7 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="md:col-span-2">
+                  <div>
                     <label className="block text-[13px] font-bold text-stone-700 mb-1.5">Tên sản phẩm *</label>
                     <input 
                       value={form.name} 
@@ -577,6 +598,20 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
                     <datalist id="volume-list">
                       {VOLUME_OPTIONS.map(opt => <option key={opt} value={opt} />)}
                     </datalist>
+                  </div>
+
+                  <div>
+                    <label className="block text-[13px] font-bold text-stone-700 mb-1.5">Thứ tự trên cửa hàng</label>
+                    <input
+                      type="number"
+                      min="1"
+                      step="1"
+                      value={form.shop_order ?? ''}
+                      onChange={e => setForm({ ...form, shop_order: e.target.value === '' ? null : Math.max(1, Math.trunc(Number(e.target.value) || 1)) })}
+                      placeholder="Để trống: tự động"
+                      className="w-full border border-stone-200 rounded-lg px-3.5 py-2.5 text-[14px] font-mono font-bold bg-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-xs"
+                    />
+                    <p className="mt-1 text-[11px] text-stone-400">Số 1 xuất hiện đầu tiên. Sản phẩm hết hàng vẫn nằm cuối.</p>
                   </div>
                 </div>
               </div>
@@ -1542,6 +1577,11 @@ export default function ProductManagement() {
   const [toast, setToast] = useState(null);
   const [expandedProducts, setExpandedProducts] = useState({});
   const [showFormulaSummary, setShowFormulaSummary] = useState(false);
+  const [isReorderMode, setIsReorderMode] = useState(false);
+  const [reorderProducts, setReorderProducts] = useState([]);
+  const [draggedProductId, setDraggedProductId] = useState(null);
+  const [reorderSaving, setReorderSaving] = useState(false);
+  const [reorderSaved, setReorderSaved] = useState(false);
   const [searchParams] = useSearchParams();
   const searchTerm = searchParams.get('q') || '';
 
@@ -1612,16 +1652,69 @@ export default function ProductManagement() {
     }
   };
 
+  const openReorderMode = () => {
+    setReorderProducts(sortProductsForShop(products));
+    setIsReorderMode(true);
+    setReorderSaved(false);
+  };
+
+  const persistProductOrder = async (nextItems) => {
+    if (reorderSaving) return;
+    const normalizedItems = keepOutOfStockAtEnd(nextItems);
+    const previousItems = reorderProducts;
+    const previousProducts = products;
+    const orderMap = new Map(normalizedItems.map((product, index) => [String(product._id), index + 1]));
+    const updatedItems = normalizedItems.map((product, index) => ({ ...product, shop_order: index + 1 }));
+
+    setReorderProducts(updatedItems);
+    setProducts((current) => current.map((product) => ({
+      ...product,
+      shop_order: orderMap.get(String(product._id)) ?? product.shop_order,
+    })));
+    setReorderSaving(true);
+    setReorderSaved(false);
+    try {
+      await productService.updateShopOrder(updatedItems.map((product) => product._id));
+      setReorderSaved(true);
+    } catch (error) {
+      setReorderProducts(previousItems);
+      setProducts(previousProducts);
+      showToast(error.response?.data?.message || 'Không thể lưu thứ tự sản phẩm', 'error');
+    } finally {
+      setReorderSaving(false);
+    }
+  };
+
+  const moveReorderProduct = (productId, targetProductId) => {
+    if (reorderSaving || productId === targetProductId) return;
+    const fromIndex = reorderProducts.findIndex((product) => product._id === productId);
+    const targetIndex = reorderProducts.findIndex((product) => product._id === targetProductId);
+    if (fromIndex < 0 || targetIndex < 0) return;
+    const nextItems = [...reorderProducts];
+    const [movedItem] = nextItems.splice(fromIndex, 1);
+    nextItems.splice(targetIndex, 0, movedItem);
+    persistProductOrder(nextItems);
+  };
+
+  const nudgeReorderProduct = (index, direction) => {
+    const targetIndex = index + direction;
+    if (reorderSaving || targetIndex < 0 || targetIndex >= reorderProducts.length) return;
+    const nextItems = [...reorderProducts];
+    [nextItems[index], nextItems[targetIndex]] = [nextItems[targetIndex], nextItems[index]];
+    persistProductOrder(nextItems);
+  };
+
   const filteredProducts = useMemo(() => {
-    if (!searchTerm) return products;
     const term = searchTerm.toLowerCase();
-    return products.filter(p => {
+    const result = products.filter(p => {
+      if (!term) return true;
       const matchName = p.name?.toLowerCase().includes(term);
       const matchSku = p.productId?.toLowerCase().includes(term);
       // Also check inner SKUs
       const matchInnerSku = p.skus?.some(sku => sku.sku?.toLowerCase().includes(term));
       return matchName || matchSku || matchInnerSku;
     });
+    return sortProductsForShop(result);
   }, [products, searchTerm]);
 
   // Reset page when search term changes
@@ -1659,6 +1752,7 @@ export default function ProductManagement() {
             delete newForm.__v;
             newForm.productId = `SP-${Math.floor(1000000 + Math.random() * 9000000)}`;
             newForm.name = newForm.name + ' (Copy)';
+            newForm.shop_order = null;
             newForm.skus = newForm.skus.map(sku => ({ ...sku, id: `V${Math.floor(1000 + Math.random() * 9000)}` }));
             // Set modal to add with new data
             setModal({ type: 'add', data: newForm });
@@ -1703,6 +1797,15 @@ export default function ProductManagement() {
           <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
             <button
               type="button"
+              onClick={() => isReorderMode ? setIsReorderMode(false) : openReorderMode()}
+              disabled={loading || reorderSaving}
+              className={`flex items-center justify-center gap-2 rounded-lg border px-lg py-sm text-sm font-bold shadow-sm transition-all disabled:opacity-50 ${isReorderMode ? 'border-primary bg-primary text-white' : 'border-violet-200 bg-violet-50 text-violet-800 hover:bg-violet-100'}`}
+            >
+              <span className="material-symbols-outlined text-[19px]">{isReorderMode ? 'check' : 'swap_vert'}</span>
+              <span>{isReorderMode ? 'Xong sắp xếp' : 'Sắp xếp cửa hàng'}</span>
+            </button>
+            <button
+              type="button"
               onClick={() => setShowFormulaSummary(true)}
               disabled={loading}
               className="flex items-center justify-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-lg py-sm text-sm font-bold text-emerald-800 shadow-sm transition-all hover:border-emerald-300 hover:bg-emerald-100 disabled:opacity-50"
@@ -1718,8 +1821,70 @@ export default function ProductManagement() {
           </div>
         </div>
 
+        {isReorderMode && (
+          <section className="overflow-hidden rounded-xl border border-violet-200 bg-white shadow-sm">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-violet-100 bg-violet-50/70 px-5 py-4">
+              <div>
+                <h3 className="flex items-center gap-2 text-sm font-black text-violet-950"><span className="material-symbols-outlined text-xl">drag_indicator</span>Kéo để đổi thứ tự trên cửa hàng</h3>
+                <p className="mt-1 text-xs text-violet-700/75">Thả sản phẩm vào vị trí mới, thứ tự sẽ tự động lưu. Sản phẩm hết hàng luôn nằm ở nhóm cuối.</p>
+              </div>
+              <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold ${reorderSaving ? 'bg-amber-100 text-amber-800' : reorderSaved ? 'bg-emerald-100 text-emerald-700' : 'bg-white text-violet-700'}`}>
+                <span className={`material-symbols-outlined text-base ${reorderSaving ? 'animate-spin' : ''}`}>{reorderSaving ? 'progress_activity' : reorderSaved ? 'cloud_done' : 'cloud'}</span>
+                {reorderSaving ? 'Đang lưu...' : reorderSaved ? 'Đã tự động lưu' : `${reorderProducts.length} sản phẩm`}
+              </span>
+            </div>
+
+            <div className="divide-y divide-stone-100">
+              {reorderProducts.map((product, index) => {
+                const outOfStock = isProductOutOfStock(product);
+                const previousIsSameGroup = index > 0 && isProductOutOfStock(reorderProducts[index - 1]) === outOfStock;
+                const nextIsSameGroup = index < reorderProducts.length - 1 && isProductOutOfStock(reorderProducts[index + 1]) === outOfStock;
+                return (
+                  <div
+                    key={product._id}
+                    draggable={!reorderSaving}
+                    onDragStart={(event) => {
+                      setDraggedProductId(product._id);
+                      event.dataTransfer.effectAllowed = 'move';
+                      event.dataTransfer.setData('text/plain', product._id);
+                    }}
+                    onDragOver={(event) => {
+                      event.preventDefault();
+                      event.dataTransfer.dropEffect = 'move';
+                    }}
+                    onDrop={(event) => {
+                      event.preventDefault();
+                      moveReorderProduct(draggedProductId || event.dataTransfer.getData('text/plain'), product._id);
+                      setDraggedProductId(null);
+                    }}
+                    onDragEnd={() => setDraggedProductId(null)}
+                    className={`flex items-center gap-3 px-4 py-3 transition ${draggedProductId === product._id ? 'bg-violet-100/70 opacity-50' : 'bg-white hover:bg-violet-50/40'} ${reorderSaving ? 'cursor-wait' : 'cursor-grab active:cursor-grabbing'} ${outOfStock ? 'opacity-60 grayscale-[25%]' : ''}`}
+                  >
+                    <span className="material-symbols-outlined shrink-0 text-stone-300">drag_indicator</span>
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-violet-100 font-mono text-sm font-black text-violet-800">{index + 1}</span>
+                    {product.image ? (
+                      <img src={getImageUrl(product.image)} alt="" className="size-11 shrink-0 rounded-xl border border-stone-200 object-cover" />
+                    ) : (
+                      <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-stone-100 font-bold text-stone-400">{product.name?.charAt(0)}</span>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-bold text-stone-900">{product.name}</p>
+                      <p className="mt-0.5 truncate font-mono text-[11px] text-stone-400">{product.productId}</p>
+                    </div>
+                    {outOfStock && <span className="hidden rounded-full bg-stone-100 px-2.5 py-1 text-[10px] font-bold uppercase text-stone-500 sm:inline-flex">Hết hàng · nằm cuối</span>}
+                    <div className="flex shrink-0 items-center gap-1">
+                      <button type="button" onClick={() => nudgeReorderProduct(index, -1)} disabled={reorderSaving || !previousIsSameGroup} className="flex size-8 items-center justify-center rounded-lg border border-stone-200 text-stone-500 transition hover:border-violet-300 hover:bg-violet-50 hover:text-violet-700 disabled:cursor-not-allowed disabled:opacity-25" aria-label={`Đưa ${product.name} lên`}><span className="material-symbols-outlined text-lg">keyboard_arrow_up</span></button>
+                      <button type="button" onClick={() => nudgeReorderProduct(index, 1)} disabled={reorderSaving || !nextIsSameGroup} className="flex size-8 items-center justify-center rounded-lg border border-stone-200 text-stone-500 transition hover:border-violet-300 hover:bg-violet-50 hover:text-violet-700 disabled:cursor-not-allowed disabled:opacity-25" aria-label={`Đưa ${product.name} xuống`}><span className="material-symbols-outlined text-lg">keyboard_arrow_down</span></button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
         {/* Table */}
-        <div className="bg-white rounded-xl shadow-sm border border-outline-variant/30 overflow-hidden">
+        {!isReorderMode && <div className="bg-white rounded-xl shadow-sm border border-outline-variant/30 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -1729,6 +1894,7 @@ export default function ProductManagement() {
                   <th className="px-lg py-md text-[12px] font-bold text-on-surface-variant uppercase tracking-wider text-right">Có thể sản xuất</th>
                   <th className="px-lg py-md text-[12px] font-bold text-on-surface-variant uppercase tracking-wider text-right">Giá vốn</th>
                   <th className="px-lg py-md text-[12px] font-bold text-on-surface-variant uppercase tracking-wider text-right text-primary pr-8">Giá bán</th>
+                  <th className="px-lg py-md text-[12px] font-bold text-on-surface-variant uppercase tracking-wider text-center">Thứ tự shop</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant/20">
@@ -1740,11 +1906,12 @@ export default function ProductManagement() {
                       <td className="px-lg py-md"><div className="h-4 bg-surface-container rounded w-12 ml-auto"></div></td>
                       <td className="px-lg py-md"><div className="h-4 bg-surface-container rounded w-20 ml-auto"></div></td>
                       <td className="px-lg py-md"><div className="h-4 bg-surface-container rounded w-16 ml-auto"></div></td>
+                      <td className="px-lg py-md"><div className="h-4 bg-surface-container rounded w-10 mx-auto"></div></td>
                     </tr>
                   ))
                 ) : products.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className="px-lg py-[60px] text-center text-on-surface-variant">
+                    <td colSpan="6" className="px-lg py-[60px] text-center text-on-surface-variant">
                       <div className="w-16 h-16 mx-auto bg-surface-container rounded-full flex items-center justify-center mb-4">
                         <span className="material-symbols-outlined text-[32px] opacity-50">inventory_2</span>
                       </div>
@@ -1823,6 +1990,13 @@ export default function ProductManagement() {
                           <td className="px-lg py-md text-right font-mono text-[14px] text-primary font-bold pr-8">
                             {priceDisplay}
                           </td>
+                          <td className="px-lg py-md text-center">
+                            {Number(p.shop_order) > 0 ? (
+                              <span className="inline-flex min-w-8 items-center justify-center rounded-lg bg-primary-container px-2 py-1 font-mono text-[13px] font-black text-primary">{p.shop_order}</span>
+                            ) : (
+                              <span className="text-xs text-on-surface-variant/60">Tự động</span>
+                            )}
+                          </td>
                         </tr>
 
                         {/* SKUs toggle row removed - moved inline */}
@@ -1863,6 +2037,7 @@ export default function ProductManagement() {
                               <td className="px-lg py-sm text-right font-mono text-[13px] text-primary font-bold pr-8">
                                 {formatPrice(sku.price || p.base_price || 0)}
                               </td>
+                              <td className="px-lg py-sm" />
                             </tr>
                           );
                         })}
@@ -1904,7 +2079,7 @@ export default function ProductManagement() {
               )}
             </div>
           )}
-        </div>
+        </div>}
       </div>
     </Layout>
   );

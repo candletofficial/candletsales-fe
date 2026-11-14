@@ -12,7 +12,7 @@ function OutOfStockStamp({ compact = false }) {
       <div className={`relative overflow-hidden rounded-[4px] border-[#7A2F2B] shadow-[inset_0_0_0_1px_rgba(122,47,43,0.32),0_2px_0_rgba(122,47,43,0.18)] ${compact ? 'border-2 px-0.5 py-0.5' : 'border-[3px] px-1 py-1'}`}>
         <div className={`flex items-center justify-center border-y-2 border-[#7A2F2B] text-[#7A2F2B] ${compact ? 'min-w-[82px] gap-0.5 px-1 py-1' : 'min-w-[132px] gap-1.5 px-2 py-1.5 sm:min-w-[154px] sm:gap-2 sm:px-3 sm:py-2'}`}>
           <span className={compact ? 'text-[5px]' : 'text-[8px] sm:text-[10px]'} aria-hidden="true">★</span>
-          <span className={`font-mono font-black uppercase leading-none tracking-[0.04em] ${compact ? 'text-[8px]' : 'text-[12px] sm:text-[14px]'}`}>
+          <span className={`whitespace-nowrap font-mono font-black uppercase leading-none tracking-[0.04em] ${compact ? 'text-[8px]' : 'text-[12px] sm:text-[14px]'}`}>
             Tạm hết hàng
           </span>
           <span className={compact ? 'text-[5px]' : 'text-[8px] sm:text-[10px]'} aria-hidden="true">★</span>

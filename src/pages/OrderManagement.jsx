@@ -2851,6 +2851,7 @@ export default function OrderManagement() {
                   currentOrders.map(order => {
                     const isExpress = order.shippingMethod === 'express';
                     const isReturned = order.status === 'returned';
+                    const isCancelled = order.status === 'cancelled' || order.delivery_status === 'cancelled';
                     const isManualTransfer = order.payment_method === 'transfer' && order.source !== 'website';
                     const isTransferPaid = order.payment_status === 'paid' || isManualTransfer;
 
@@ -2859,7 +2860,9 @@ export default function OrderManagement() {
                         key={order._id}
                         onClick={() => setModal({ type: 'edit', data: order })}
                         className={`transition-colors cursor-pointer group ${
-                          isReturned
+                          isCancelled
+                            ? 'bg-stone-50/80 opacity-[0.52] grayscale-[35%] hover:bg-stone-100/80 hover:opacity-75'
+                            : isReturned
                             ? 'bg-amber-50/40 hover:bg-amber-50/80'
                             : isExpress
                             ? 'bg-orange-50/35 hover:bg-orange-100/50 border-l-4 border-l-orange-500'
