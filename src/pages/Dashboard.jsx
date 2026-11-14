@@ -15,6 +15,15 @@ import AIAssistant from '../components/AIAssistant';
 
 // ─── Formatting helpers ───
 const formatCurrency = (n) => Math.round(n || 0).toLocaleString('vi-VN', { maximumFractionDigits: 0 }) + ' ₫';
+const DAY_MS = 24 * 60 * 60 * 1000;
+const VIETNAM_OFFSET_MS = 7 * 60 * 60 * 1000;
+
+const getVietnamCalendarDate = () => {
+  const shifted = new Date(Date.now() + VIETNAM_OFFSET_MS);
+  return new Date(Date.UTC(shifted.getUTCFullYear(), shifted.getUTCMonth(), shifted.getUTCDate()));
+};
+
+const getVietnamDateInputValue = () => getVietnamCalendarDate().toISOString().slice(0, 10);
 
 const formatCompactCurrency = (n) => {
   if (!n) return '0 ₫';
@@ -50,8 +59,8 @@ export default function Dashboard() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState('this_month');
-  const [customStartDate, setCustomStartDate] = useState(new Date().toISOString().split('T')[0]);
-  const [customEndDate, setCustomEndDate] = useState(new Date().toISOString().split('T')[0]);
+  const [customStartDate, setCustomStartDate] = useState(getVietnamDateInputValue);
+  const [customEndDate, setCustomEndDate] = useState(getVietnamDateInputValue);
   const [isExporting, setIsExporting] = useState(false);
   const [showAnalysis, setShowAnalysis] = useState(false);
   const [showOrderAnalysis, setShowOrderAnalysis] = useState(false);
@@ -79,39 +88,39 @@ export default function Dashboard() {
   const fetchData = React.useCallback(() => {
     setLoading(true);
     let params = { days: 30 };
-    const now = new Date();
+    const now = getVietnamCalendarDate();
     
     if (filterType === 'today') {
       params = { days: 1 };
     } else if (filterType === 'this_week') {
-      const dayOfWeek = now.getDay(); // 0 = Sunday
+      const dayOfWeek = now.getUTCDay(); // 0 = Sunday
       const days = dayOfWeek === 0 ? 7 : dayOfWeek;
       params = { days };
     } else if (filterType === 'this_month') {
-      params = { days: now.getDate() };
+      params = { days: now.getUTCDate() };
     } else if (filterType === 'last_month') {
-      const firstDayOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const firstDayOfThisMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
       const lastDayOfLastMonth = new Date(firstDayOfThisMonth.getTime() - 1);
       
-      const year = lastDayOfLastMonth.getFullYear();
-      const month = String(lastDayOfLastMonth.getMonth() + 1).padStart(2, '0');
-      const date = String(lastDayOfLastMonth.getDate()).padStart(2, '0');
+      const year = lastDayOfLastMonth.getUTCFullYear();
+      const month = String(lastDayOfLastMonth.getUTCMonth() + 1).padStart(2, '0');
+      const date = String(lastDayOfLastMonth.getUTCDate()).padStart(2, '0');
       
       params = { 
-        days: lastDayOfLastMonth.getDate(), 
+        days: lastDayOfLastMonth.getUTCDate(),
         endDate: `${year}-${month}-${date}` 
       };
     } else if (filterType === 'this_year') {
-      const startOfYear = new Date(now.getFullYear(), 0, 1);
+      const startOfYear = new Date(Date.UTC(now.getUTCFullYear(), 0, 1));
       // diff in ms -> days. If today is Jan 1st, diff is 0, days should be 1.
-      const days = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24)) + 1;
+      const days = Math.floor((now - startOfYear) / DAY_MS) + 1;
       params = { days };
     } else if (filterType === 'custom') {
-      const start = new Date(customStartDate);
-      const end = new Date(customEndDate);
+      const start = new Date(`${customStartDate}T00:00:00.000Z`);
+      const end = new Date(`${customEndDate}T00:00:00.000Z`);
       if (start <= end) {
         const diffTime = Math.abs(end - start);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        const diffDays = Math.ceil(diffTime / DAY_MS) + 1;
         params = { days: diffDays, endDate: customEndDate };
       } else {
         params = { days: 1, endDate: customEndDate };
