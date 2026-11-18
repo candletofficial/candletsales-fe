@@ -18,6 +18,7 @@ const statusDetails = {
   shipping: { label: 'Đơn hàng đang được giao', eyebrow: 'Đang vận chuyển', description: 'Đơn hàng đang trên đường đến bạn. Vui lòng để ý điện thoại khi tài xế liên hệ.', icon: 'local_shipping', tone: 'bg-blue-50 text-blue-950', iconTone: 'bg-blue-600 text-white shadow-blue-200' },
   delivered: { label: 'Giao hàng thành công', eyebrow: 'Đơn hàng đã hoàn tất', description: 'Cảm ơn bạn đã mua sắm cùng shop. Chúc bạn có trải nghiệm thật vui!', icon: 'task_alt', tone: 'bg-emerald-50 text-emerald-950', iconTone: 'bg-emerald-600 text-white shadow-emerald-200' },
   failed: { label: 'Giao hàng chưa thành công', eyebrow: 'Cần hỗ trợ', description: 'Đơn hàng chưa thể giao thành công. Vui lòng liên hệ shop để được hỗ trợ.', icon: 'error', tone: 'bg-rose-50 text-rose-950', iconTone: 'bg-rose-600 text-white shadow-rose-200' },
+  returning: { label: 'Đơn hàng đang hoàn về shop', eyebrow: 'Đang chuyển hoàn', description: 'Đơn vị vận chuyển đang chuyển đơn hàng về shop. Vui lòng liên hệ shop nếu bạn cần hỗ trợ.', icon: 'keyboard_return', tone: 'bg-orange-50 text-orange-950', iconTone: 'bg-orange-600 text-white shadow-orange-200' },
   returned: { label: 'Đơn hàng đã hoàn về shop', eyebrow: 'Đã hoàn hàng', description: 'Đơn hàng đã được ghi nhận hoàn về shop. Vui lòng liên hệ shop nếu bạn cần hỗ trợ.', icon: 'keyboard_return', tone: 'bg-orange-50 text-orange-950', iconTone: 'bg-orange-600 text-white shadow-orange-200' },
   cancelled: { label: 'Đơn hàng đã huỷ', eyebrow: 'Đã kết thúc', description: 'Đơn hàng này đã được huỷ. Vui lòng liên hệ shop nếu bạn cần hỗ trợ.', icon: 'cancel', tone: 'bg-stone-100 text-stone-900', iconTone: 'bg-stone-600 text-white shadow-stone-200' },
 };
@@ -65,7 +66,7 @@ export default function OrderTracking() {
     : order?.status === 'returned' ? 'returned'
     : order?.delivery_status === 'failed' ? 'failed' : order?.delivery_status || 'pending';
   const stepIndex = steps.findIndex(step => step.value === status);
-  const exceptionProgress = status === 'failed' || status === 'returned' ? 2 : -1;
+  const exceptionProgress = ['returning', 'failed', 'returned'].includes(status) ? 2 : -1;
   const statusDetail = statusDetails[status] || statusDetails.pending;
   const { carrierId, carrier, trackingNumber, trackingUrl } = getCarrierTracking(order);
   const isPaidTransfer = order?.payment_method === 'transfer' && order?.payment_status === 'paid';

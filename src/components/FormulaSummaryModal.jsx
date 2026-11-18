@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { createFormulaPreviewUrl, exportFormulaSummaryPdf, getFormulaProducts } from '../utils/formulaSummaryPdf';
 
 const SIZE_PRESETS = [
+  { id: 'a4', label: 'A4 màu · 210 × 297 mm', width: 210, height: 297 },
   { id: '70x100', label: 'Nhãn 70 × 100 mm', width: 70, height: 100 },
   { id: '50x70', label: 'Nhãn 50 × 70 mm', width: 50, height: 70 },
   { id: 'a6', label: 'Khổ A6 · 105 × 148 mm', width: 105, height: 148 },
@@ -11,9 +12,9 @@ const SIZE_PRESETS = [
 export default function FormulaSummaryModal({ products, materials, onClose, onSuccess }) {
   const eligibleProducts = useMemo(() => getFormulaProducts(products, materials), [products, materials]);
   const [selectedIds, setSelectedIds] = useState(() => new Set(eligibleProducts.map(product => product._id)));
-  const [sizePreset, setSizePreset] = useState('70x100');
-  const [width, setWidth] = useState(70);
-  const [height, setHeight] = useState(100);
+  const [sizePreset, setSizePreset] = useState('a4');
+  const [width, setWidth] = useState(210);
+  const [height, setHeight] = useState(297);
   const [batchQuantity, setBatchQuantity] = useState(1);
   const [error, setError] = useState('');
   const [previewUrl, setPreviewUrl] = useState('');
@@ -82,7 +83,7 @@ export default function FormulaSummaryModal({ products, materials, onClose, onSu
     }
     try {
       const result = exportFormulaSummaryPdf({ products: selectedProducts, materials, width, height, batchQuantity });
-      onSuccess?.(`Đã tạo ${result.sheets} phiếu pha chế.`);
+      onSuccess?.(`Đã tạo ${result.sheets} phiếu pha chế (${result.pages} trang PDF).`);
       onClose();
     } catch (exportError) {
       setError(exportError.message || 'Không thể tạo file công thức.');
@@ -113,7 +114,7 @@ export default function FormulaSummaryModal({ products, materials, onClose, onSu
             <section>
               <div className="mb-2 flex items-center justify-between">
                 <label className="text-xs font-extrabold uppercase tracking-wide text-stone-600">Kích thước phiếu</label>
-                <span className="text-[11px] text-stone-400">Mặc định 70 × 100 mm</span>
+                <span className="text-[11px] text-stone-400">Mặc định A4 màu</span>
               </div>
               <select value={sizePreset} onChange={event => selectPreset(event.target.value)} className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm font-semibold text-stone-800 outline-none focus:border-primary">
                 {SIZE_PRESETS.map(size => <option key={size.id} value={size.id}>{size.label}</option>)}
@@ -134,8 +135,8 @@ export default function FormulaSummaryModal({ products, materials, onClose, onSu
                 </div>
               </label>
               <div className="mt-4 rounded-xl border border-stone-200 bg-stone-50 p-3 text-xs leading-relaxed text-stone-700">
-                <strong className="block text-sm">Một sản phẩm, một công thức sáp</strong>
-                Phân loại trùng công thức tinh dầu chỉ xuất hiện một lần, kèm tất cả tên và mã SKU áp dụng.
+                <strong className="block text-sm">Bố cục gom trang thông minh</strong>
+                Công thức chính gom chung 1 tờ A4, các công thức phụ gom chung 1 tờ A4 (chỉ tạo trang mới khi vượt quá khổ giấy). Sản phẩm có gắn công thức phụ sẽ tách riêng, không cộng nguyên liệu phụ vào công thức chính trên tờ in.
               </div>
             </section>
           </div>
@@ -143,24 +144,24 @@ export default function FormulaSummaryModal({ products, materials, onClose, onSu
           <section className="mt-5">
             <div className="mb-2 flex items-center justify-between gap-3">
               <div>
-                <h4 className="text-sm font-extrabold text-stone-800">Sản phẩm có công thức phù hợp</h4>
-                <p className="mt-0.5 text-xs text-stone-500">Chỉ hiện sản phẩm có sáp chung và tinh dầu theo phân loại.</p>
+                <h4 className="text-sm font-extrabold text-stone-800">Sản phẩm và công thức phụ</h4>
+                <p className="mt-0.5 text-xs text-stone-500">Sản phẩm chính và nhóm công thức phụ được bố trí theo từng tờ riêng.</p>
               </div>
-              <button type="button" onClick={() => setSelectedIds(selectedIds.size === eligibleProducts.length ? new Set() : new Set(eligibleProducts.map(product => product._id)))} className="shrink-0 text-xs font-bold text-primary hover:underline">
+              {eligibleProducts.length > 0 && <button type="button" onClick={() => setSelectedIds(selectedIds.size === eligibleProducts.length ? new Set() : new Set(eligibleProducts.map(product => product._id)))} className="shrink-0 text-xs font-bold text-primary hover:underline">
                 {selectedIds.size === eligibleProducts.length ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
-              </button>
+              </button>}
             </div>
             <div className="max-h-[260px] space-y-2 overflow-y-auto rounded-2xl border border-stone-200 p-2">
               {eligibleProducts.length ? eligibleProducts.map(product => (
                 <label key={product._id} className="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-stone-50">
                   <input type="checkbox" checked={selectedIds.has(product._id)} onChange={() => toggleProduct(product._id)} className="size-4 shrink-0 accent-primary" />
                   <span className="min-w-0 flex-1">
-                    <strong className="block truncate text-sm text-stone-800">{product.name}</strong>
-                    <span className="block text-[11px] text-stone-500">{product.productId} · {product.base_ingredients?.length || 0} nguyên liệu gốc · {product.skus?.length || 0} SKU</span>
+                    <span className="flex items-center gap-1.5"><strong className="block min-w-0 truncate text-sm text-stone-800">{product.name}</strong>{product.product_type === 'sub_formula' && <span className="shrink-0 rounded-full bg-indigo-50 px-2 py-0.5 text-[8px] font-black uppercase text-indigo-700 ring-1 ring-inset ring-indigo-200">Công thức phụ</span>}</span>
+                    <span className="block text-[11px] text-stone-500">{product.productId} · {product.base_ingredients?.length || 0} nguyên liệu · {product.product_type === 'sub_formula' ? `1 mẻ → ${Math.max(1, Number(product.batch_yield) || 1)} sản phẩm` : `${product.skus?.length || 0} SKU`}</span>
                   </span>
                 </label>
               )) : (
-                <div className="py-8 text-center text-sm text-stone-500">Chưa có sản phẩm nào có cả công thức sáp và tinh dầu theo phân loại.</div>
+                <div className="py-8 text-center text-sm text-stone-500">Chưa có sản phẩm hoặc công thức phụ phù hợp để in.</div>
               )}
             </div>
           </section>

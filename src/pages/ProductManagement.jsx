@@ -5,6 +5,7 @@ import { materialService } from '../services/materialService';
 import Layout from '../components/Layout';
 import SearchableSelect from '../components/SearchableSelect';
 import { formatPrice } from '../utils/formatPrice';
+import { materialSelectOption } from '../utils/materialAppearance';
 import { TAG_PRESETS, TAG_COLORS, resolveTagColor } from '../utils/productTagUtils';
 import { uploadService } from '../services/uploadService';
 import { getImageUrl, isManagedUploadedImage } from '../utils/imageUtils';
@@ -13,6 +14,8 @@ import FormulaSummaryModal from '../components/FormulaSummaryModal';
 import { sanitizeRichHtml } from '../utils/richText';
 
 const getEmptyForm = () => ({
+  product_type: 'sellable',
+  batch_yield: 1,
   productId: `SP-${Math.floor(1000000 + Math.random() * 9000000)}`,
   name: '',
   image: '',
@@ -28,6 +31,7 @@ const getEmptyForm = () => ({
   wax_type: [],
   wick_type: [],
   base_ingredients: [],
+  formula_components: [],
   variant_groups: [],
   skus: []
 });
@@ -38,6 +42,8 @@ const isProductOutOfStock = (product) => product?.stock !== null
   && Number(product.stock) <= 0;
 
 const sortProductsForShop = (items) => [...items].sort((a, b) => {
+  const typeDifference = Number(a.product_type === 'sub_formula') - Number(b.product_type === 'sub_formula');
+  if (typeDifference) return typeDifference;
   const stockDifference = Number(isProductOutOfStock(a)) - Number(isProductOutOfStock(b));
   if (stockDifference) return stockDifference;
   const orderA = Number(a.shop_order) > 0 ? Number(a.shop_order) : Number.POSITIVE_INFINITY;
@@ -166,10 +172,13 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
     );
   };
 
-  const materialOptions = useMemo(() => materials.map(m => ({
-    value: m._id,
-    label: `${m.name} (${formatPrice(m.price)} / ${m.unit})`
-  })), [materials]);
+  const materialOptions = useMemo(() => materials.map(m => materialSelectOption(
+    m,
+    `${m.name} (${formatPrice(m.price)} / ${m.unit})`,
+  )), [materials]);
+  const subFormulaOptions = useMemo(() => products
+    .filter(item => item.product_type === 'sub_formula' && item._id !== product?._id)
+    .map(item => ({ value: item._id, label: `${item.name} (${item.productId}) · ${Math.max(1, Number(item.batch_yield) || 1)} SP/mẻ` })), [products, product?._id]);
 
   const [form, setForm] = useState(() => {
     if (!product) return getEmptyForm();
@@ -179,6 +188,13 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
     if (p.tag_color === undefined) p.tag_color = '';
     if (!Number.isFinite(Number(p.shop_order)) || Number(p.shop_order) < 1) p.shop_order = null;
     if (!Array.isArray(p.images)) p.images = [];
+    if (!p.product_type) p.product_type = 'sellable';
+    if (!Number.isFinite(Number(p.batch_yield)) || Number(p.batch_yield) < 1) p.batch_yield = 1;
+    if (!Array.isArray(p.formula_components)) p.formula_components = [];
+    p.formula_components = p.formula_components.map(item => ({
+      ...item,
+      formula_id: typeof item.formula_id === 'object' && item.formula_id ? item.formula_id._id : item.formula_id,
+    }));
 
     // Normalize populated base_ingredients
     if (p.base_ingredients) {
@@ -231,11 +247,15 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
 
   // Calculate dynamic costs
   const currentBaseCost = useMemo(() => {
-    return (form.base_ingredients || []).reduce((total, item) => {
+    const directCost = (form.base_ingredients || []).reduce((total, item) => {
       const mat = materials.find(m => m._id === item.ingredient_id);
       return total + (mat ? mat.price * (Number(item.quantity) || 0) : 0);
     }, 0);
-  }, [form.base_ingredients, materials]);
+    return directCost + (form.formula_components || []).reduce((total, item) => {
+      const formula = products.find(entry => entry._id === item.formula_id);
+      return total + (formula ? (Number(formula.base_cost || 0) * (Number(item.quantity) || 0)) / Math.max(1, Number(formula.batch_yield) || 1) : 0);
+    }, 0);
+  }, [form.base_ingredients, form.formula_components, materials, products]);
 
   const calculateSkuCost = (sku) => {
     const extraCost = (sku.extra_ingredients || []).reduce((total, item) => {
@@ -318,7 +338,10 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
     setLoading(true);
     try {
       const description = sanitizeRichHtml(form.description);
-      await onSave({ ...form, description });
+      const payload = form.product_type === 'sub_formula'
+        ? { ...form, description, batch_yield: Math.max(1, Math.trunc(Number(form.batch_yield) || 1)), base_price: 0, original_price: 0, shop_order: null, variant_groups: [], skus: [], formula_components: [] }
+        : { ...form, description };
+      await onSave(payload);
     } catch (error) {
       setSaveError(error.response?.data?.message || error.message || 'Không thể lưu sản phẩm. Vui lòng thử lại.');
     } finally {
@@ -441,14 +464,14 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
             {form.image ? (
               <img src={getImageUrl(form.image)} alt="Thumbnail" className="w-12 h-12 rounded-xl object-cover border border-stone-200 shadow-sm shrink-0" />
             ) : (
-              <div className="w-12 h-12 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center border border-amber-200 shadow-sm shrink-0">
-                <span className="material-symbols-outlined text-[24px]">local_fire_department</span>
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center border shadow-sm shrink-0 ${form.product_type === 'sub_formula' ? 'border-indigo-200 bg-indigo-100 text-indigo-800' : 'border-amber-200 bg-amber-100 text-amber-800'}`}>
+                <span className="material-symbols-outlined text-[24px]">{form.product_type === 'sub_formula' ? 'account_tree' : 'local_fire_department'}</span>
               </div>
             )}
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="text-lg font-bold text-stone-900 truncate">
-                  {product && product._id ? (form.name || 'Chỉnh sửa Sản phẩm') : 'Tạo Sản phẩm mới'}
+                  {product && product._id ? (form.name || (form.product_type === 'sub_formula' ? 'Chỉnh sửa công thức phụ' : 'Chỉnh sửa sản phẩm')) : (form.product_type === 'sub_formula' ? 'Tạo công thức phụ mới' : 'Tạo sản phẩm mới')}
                 </h2>
                 <span className="font-mono text-xs bg-stone-200/80 text-stone-700 px-2 py-0.5 rounded font-bold">
                   {form.productId || 'NEW'}
@@ -463,7 +486,7 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
                 )}
               </div>
               <p className="text-xs text-stone-500 mt-0.5 truncate">
-                Danh mục: <span className="font-medium text-stone-700">{form.category || 'Nến Hũ Đơn'}</span>
+                {form.product_type === 'sub_formula' ? 'Công thức nội bộ · Không đăng bán' : <>Danh mục: <span className="font-medium text-stone-700">{form.category || 'Nến Hũ Đơn'}</span></>}
               </p>
             </div>
           </div>
@@ -477,11 +500,11 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
                 </span>
                 <span className="text-xs font-bold text-stone-800">{formatMoneyRange(financialSummary.cost)}</span>
               </div>
-              <div className="text-left pl-1">
+              {form.product_type !== 'sub_formula' && <div className="text-left pl-1">
                 <span className="block text-[10px] uppercase font-bold text-stone-400">Giá bán cơ bản</span>
                 <span className="text-xs font-bold text-primary">{formatPrice(form.base_price || 0)}</span>
-              </div>
-              {financialSummary.price.max > 0 && (
+              </div>}
+              {form.product_type !== 'sub_formula' && financialSummary.price.max > 0 && (
                 <span className={`ml-1 border text-[10px] font-bold px-1.5 py-0.5 rounded ${financialSummary.margin.min >= 0
                   ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                   : 'bg-red-50 text-red-700 border-red-200'
@@ -505,10 +528,10 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
         <div className="flex border-b border-stone-200 px-6 bg-white gap-2 pt-2 overflow-x-auto custom-scrollbar">
           {[
             { id: 'basic', label: 'Thông tin chung', icon: 'info' },
-            { id: 'base_ingredients', label: 'Công thức gốc (BOM)', icon: 'science', count: (form.base_ingredients || []).length },
+            { id: 'base_ingredients', label: form.product_type === 'sub_formula' ? 'Thành phần công thức' : 'Công thức gốc (BOM)', icon: 'science', count: (form.base_ingredients || []).length + (form.formula_components || []).length },
             { id: 'variants', label: 'Nhóm phân loại', icon: 'tune', count: (form.variant_groups || []).length },
             { id: 'skus', label: 'Danh sách phân loại (SKU)', icon: 'inventory_2', count: (form.skus || []).length }
-          ].map(tab => {
+          ].filter(tab => form.product_type !== 'sub_formula' || !['variants', 'skus'].includes(tab.id)).map(tab => {
             const isActive = activeTab === tab.id;
             return (
               <button 
@@ -571,7 +594,7 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
                     />
                   </div>
 
-                  <div className="md:col-span-2">
+                  {form.product_type !== 'sub_formula' && <><div className="md:col-span-2">
                     <label className="block text-[13px] font-bold text-stone-700 mb-1.5">Danh mục sản phẩm</label>
                     <select 
                       value={form.category || 'Nến Hũ Đơn'} 
@@ -613,11 +636,12 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
                     />
                     <p className="mt-1 text-[11px] text-stone-400">Số 1 xuất hiện đầu tiên. Sản phẩm hết hàng vẫn nằm cuối.</p>
                   </div>
+                  </>}
                 </div>
               </div>
 
               {/* Card 2: Thiết lập Giá bán & Khuyến mãi */}
-              <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-xs space-y-4">
+              {form.product_type !== 'sub_formula' && <><div className="bg-white border border-stone-200 rounded-xl p-5 shadow-xs space-y-4">
                 <div className="flex items-center justify-between border-b border-stone-100 pb-3">
                   <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-primary text-[20px]">payments</span>
@@ -1148,6 +1172,7 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
                   <p className="mt-1.5 text-[10.5px] text-stone-400">Có thể dán nội dung đã định dạng. Hỗ trợ in đậm, in nghiêng, gạch chân, màu chữ và danh sách.</p>
                 </div>
               </div>
+              </>}
 
             </div>
           )}
@@ -1156,19 +1181,45 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
             <div className="max-w-4xl mx-auto space-y-4">
               <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 bg-white p-4 rounded-xl border border-stone-200 shadow-xs">
                 <div>
-                  <h3 className="text-sm font-bold text-stone-900">Công thức gốc áp dụng cho tất cả phân loại (BOM)</h3>
+                  <h3 className="text-sm font-bold text-stone-900">{form.product_type === 'sub_formula' ? 'Thành phần của công thức phụ' : 'Công thức gốc áp dụng cho tất cả phân loại (BOM)'}</h3>
                   <p className="text-xs text-stone-500 mt-0.5">
-                    Tổng giá vốn nguyên liệu gốc: <span className="font-bold text-primary">{formatPrice(currentBaseCost)}</span>
+                    {form.product_type === 'sub_formula' ? 'Giá vốn một mẻ' : 'Tổng giá vốn nguyên liệu gốc'}: <span className="font-bold text-primary">{formatPrice(currentBaseCost)}</span>
+                    {form.product_type === 'sub_formula' && <span> · {formatPrice(currentBaseCost / Math.max(1, Number(form.batch_yield) || 1))}/sản phẩm</span>}
                   </p>
                 </div>
-                <button 
-                  type="button" 
-                  onClick={() => setForm({ ...form, base_ingredients: [{ ingredient_id: '', quantity: 1 }, ...form.base_ingredients] })}
-                  className="bg-primary hover:bg-primary/95 text-white text-xs font-bold flex items-center gap-1.5 px-4 py-2 rounded-lg transition-all shadow-xs shrink-0"
-                >
-                  <span className="material-symbols-outlined text-[18px]">add</span> Thêm nguyên liệu
-                </button>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+                  {form.product_type === 'sub_formula' && <label className="text-xs font-bold text-stone-700"><span className="mb-1 block">Số sản phẩm / mẻ</span><input type="number" min="1" step="1" value={form.batch_yield} onChange={event => setForm(current => ({ ...current, batch_yield: Math.max(1, Math.trunc(Number(event.target.value) || 1)) }))} className="w-full rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm font-black text-indigo-900 outline-none focus:border-indigo-500 sm:w-32" /></label>}
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, base_ingredients: [{ ingredient_id: '', quantity: 1 }, ...form.base_ingredients] })}
+                    className="bg-primary hover:bg-primary/95 text-white text-xs font-bold flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg transition-all shadow-xs shrink-0"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">add</span> Thêm nguyên liệu
+                  </button>
+                </div>
               </div>
+
+              {form.product_type !== 'sub_formula' && (
+                <section className="rounded-xl border border-indigo-200 bg-indigo-50/40 p-4 shadow-xs">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <h4 className="flex items-center gap-2 text-sm font-bold text-indigo-950"><span className="material-symbols-outlined text-lg">account_tree</span>Công thức phụ</h4>
+                      <p className="mt-1 text-xs text-indigo-700/75">Gắn công thức pha sẵn; hệ thống tự chia nguyên liệu theo số sản phẩm thu được trong một mẻ.</p>
+                    </div>
+                    <button type="button" disabled={!subFormulaOptions.length} onClick={() => setForm(current => ({ ...current, formula_components: [...(current.formula_components || []), { formula_id: '', quantity: 1 }] }))} className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-indigo-200 bg-white px-3 py-2 text-xs font-bold text-indigo-800 transition hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-45"><span className="material-symbols-outlined text-lg">add</span>Gắn công thức phụ</button>
+                  </div>
+                  {!subFormulaOptions.length && <p className="mt-3 rounded-lg bg-white/80 px-3 py-2 text-xs text-indigo-700">Chưa có công thức phụ. Hãy tạo công thức phụ trước rồi quay lại gắn vào sản phẩm.</p>}
+                  {(form.formula_components || []).length > 0 && <div className="mt-3 space-y-2">
+                    {form.formula_components.map((item, index) => (
+                      <div key={index} className="flex flex-col gap-2 rounded-xl border border-indigo-100 bg-white p-3 sm:flex-row sm:items-center">
+                        <div className="min-w-0 flex-1"><SearchableSelect options={subFormulaOptions.filter(option => option.value === item.formula_id || !(form.formula_components || []).some(component => component.formula_id === option.value))} value={item.formula_id} onChange={value => setForm(current => ({ ...current, formula_components: current.formula_components.map((component, componentIndex) => componentIndex === index ? { ...component, formula_id: value } : component) }))} placeholder="-- Chọn công thức phụ --" /></div>
+                        <label className="flex items-center gap-2 text-xs font-semibold text-stone-600"><span className="whitespace-nowrap">Số phần / SP</span><input type="number" min="0.0001" step="0.01" value={item.quantity} onChange={event => setForm(current => ({ ...current, formula_components: current.formula_components.map((component, componentIndex) => componentIndex === index ? { ...component, quantity: Number(event.target.value) } : component) }))} className="w-24 rounded-lg border border-stone-200 px-3 py-2 text-sm font-bold outline-none focus:border-primary" /></label>
+                        <button type="button" onClick={() => setForm(current => ({ ...current, formula_components: current.formula_components.filter((_, componentIndex) => componentIndex !== index) }))} className="flex size-9 shrink-0 items-center justify-center self-end rounded-lg text-stone-400 transition hover:bg-red-50 hover:text-red-600 sm:self-auto" aria-label="Bỏ công thức phụ"><span className="material-symbols-outlined text-lg">delete</span></button>
+                      </div>
+                    ))}
+                  </div>}
+                </section>
+              )}
 
               <div className="space-y-2.5">
                 {form.base_ingredients.map((item, idx) => {
@@ -1526,7 +1577,7 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
                 type="button"
                 className="px-4 py-2 bg-red-50 text-red-600 border border-red-200 rounded-xl text-xs font-bold hover:bg-red-600 hover:text-white transition-all flex items-center gap-1"
               >
-                <span className="material-symbols-outlined text-[16px]">delete</span> Xoá sản phẩm
+                <span className="material-symbols-outlined text-[16px]">delete</span> Xoá {form.product_type === 'sub_formula' ? 'công thức' : 'sản phẩm'}
               </button>
             )}
             {product && product._id && (
@@ -1558,7 +1609,7 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
               ) : (
                 <span className="material-symbols-outlined text-[16px]">check_circle</span>
               )}
-              Lưu Sản Phẩm
+              Lưu {form.product_type === 'sub_formula' ? 'Công Thức Phụ' : 'Sản Phẩm'}
             </button>
           </div>
         </div>
@@ -1653,7 +1704,7 @@ export default function ProductManagement() {
   };
 
   const openReorderMode = () => {
-    setReorderProducts(sortProductsForShop(products));
+    setReorderProducts(sortProductsForShop(products.filter(product => product.product_type !== 'sub_formula')));
     setIsReorderMode(true);
     setReorderSaved(false);
   };
@@ -1813,6 +1864,10 @@ export default function ProductManagement() {
               <span className="material-symbols-outlined text-[19px]">lab_profile</span>
               <span>Phiếu pha chế</span>
             </button>
+            <button type="button" onClick={() => setModal({ type: 'add', data: { ...getEmptyForm(), product_type: 'sub_formula', productId: `CTP-${Math.floor(100000 + Math.random() * 900000)}` } })} className="flex items-center justify-center gap-2 rounded-lg border border-indigo-200 bg-indigo-50 px-lg py-sm text-sm font-bold text-indigo-800 shadow-sm transition-all hover:bg-indigo-100">
+              <span className="material-symbols-outlined text-[20px]">account_tree</span>
+              <span>Tạo công thức phụ</span>
+            </button>
             <button onClick={() => setModal({ type: 'add' })}
               className="flex items-center justify-center gap-xs px-lg py-sm bg-primary text-white rounded-lg hover:opacity-90 transition-all shadow-sm font-semibold text-sm">
               <span className="material-symbols-outlined text-[20px]">add</span>
@@ -1922,8 +1977,10 @@ export default function ProductManagement() {
                 ) : (
                   currentProducts.map(p => {
                     const costs = p.skus?.map(s => s.cost) || [];
-                    const minCost = costs.length > 0 ? Math.min(...costs) : p.base_cost;
-                    const maxCost = costs.length > 0 ? Math.max(...costs) : p.base_cost;
+                    const batchYield = Math.max(1, Number(p.batch_yield) || 1);
+                    const subFormulaUnitCost = Number(p.base_cost || 0) / batchYield;
+                    const minCost = p.product_type === 'sub_formula' ? subFormulaUnitCost : costs.length > 0 ? Math.min(...costs) : p.base_cost;
+                    const maxCost = p.product_type === 'sub_formula' ? subFormulaUnitCost : costs.length > 0 ? Math.max(...costs) : p.base_cost;
                     const costDisplay = minCost === maxCost ? formatPrice(minCost) : `${formatPrice(minCost)} - ${formatPrice(maxCost)}`;
 
                     const prices = p.skus?.map(s => s.price) || [];
@@ -1950,6 +2007,7 @@ export default function ProductManagement() {
                               <div>
                                 <div className="flex items-center gap-2">
                                   <p className="font-bold text-[14px] text-on-surface">{p.name}</p>
+                                  {p.product_type === 'sub_formula' && <span className="rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-[9px] font-black uppercase tracking-wide text-indigo-700">Công thức phụ</span>}
                                   {p.tag && (
                                     <span
                                       className="text-white text-[9px] font-bold tracking-wider px-2 py-0.5 uppercase rounded-sm shadow-xs"
@@ -1982,16 +2040,16 @@ export default function ProductManagement() {
                             </span>
                           </td>
                           <td className={`px-lg py-md text-right font-mono text-[14px] font-bold ${p.stock === 0 ? 'text-error' : 'text-on-surface'}`}>
-                            {Number.isFinite(p.stock) ? p.stock : '—'}
+                            {Number.isFinite(p.stock) ? (p.product_type === 'sub_formula' ? <><span>{p.stock} mẻ</span><span className="mt-0.5 block text-[10px] font-semibold text-stone-400">≈ {p.stock * Math.max(1, Number(p.batch_yield) || 1)} sản phẩm</span></> : p.stock) : '—'}
                           </td>
                           <td className="px-lg py-md text-right font-mono text-[14px] text-on-surface-variant font-semibold">
-                            {costDisplay}
+                            {costDisplay}{p.product_type === 'sub_formula' && <span className="mt-0.5 block text-[10px] font-semibold text-stone-400">/ sản phẩm</span>}
                           </td>
                           <td className="px-lg py-md text-right font-mono text-[14px] text-primary font-bold pr-8">
-                            {priceDisplay}
+                            {p.product_type === 'sub_formula' ? <span className="text-xs font-semibold text-stone-400">Không đăng bán</span> : priceDisplay}
                           </td>
                           <td className="px-lg py-md text-center">
-                            {Number(p.shop_order) > 0 ? (
+                            {p.product_type === 'sub_formula' ? <span className="text-xs text-stone-400">—</span> : Number(p.shop_order) > 0 ? (
                               <span className="inline-flex min-w-8 items-center justify-center rounded-lg bg-primary-container px-2 py-1 font-mono text-[13px] font-black text-primary">{p.shop_order}</span>
                             ) : (
                               <span className="text-xs text-on-surface-variant/60">Tự động</span>

@@ -333,7 +333,7 @@ export default function CouponManagement() {
     try {
       const [resCoupons, resProducts] = await Promise.all([
         couponService.getCoupons(),
-        productService.getProducts()
+        productService.getProducts({ type: 'sellable' })
       ]);
       setCoupons(resCoupons.data.data);
       setProducts(resProducts.data.data);

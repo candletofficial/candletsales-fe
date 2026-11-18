@@ -57,7 +57,7 @@ export default function POS() {
 
   const fetchProducts = async () => {
     try {
-      const res = await productService.getProducts();
+      const res = await productService.getProducts({ type: 'sellable' });
       // Lọc các sản phẩm không bị khóa
       setProducts(res.data.data.filter(p => !p.isDisabled));
     } catch (error) {

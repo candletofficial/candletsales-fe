@@ -36,8 +36,11 @@ export default function SearchableSelect({ options, value, onChange, placeholder
         aria-expanded={isOpen && !disabled}
         onClick={() => { if (!disabled) { setIsOpen(!isOpen); setSearch(''); } }}
       >
-        <span className={`truncate flex-1 min-w-0 text-left pr-2 ${!selectedOption ? 'text-on-surface-variant' : 'text-on-surface font-medium'}`}>
-          {selectedOption ? selectedOption.label : placeholder}
+        <span className="flex min-w-0 flex-1 items-center gap-1.5 rounded-md px-1.5 py-0.5 pr-2 text-left">
+          <span style={selectedOption?.toneColor ? { color: selectedOption.toneColor } : undefined} className={`min-w-0 truncate ${!selectedOption ? 'text-on-surface-variant' : selectedOption.toneColor ? 'font-semibold' : 'font-medium text-on-surface'}`}>
+            {selectedOption ? selectedOption.label : placeholder}
+          </span>
+          {selectedOption?.badge && <span className={`shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold ring-1 ring-inset ${selectedOption.badgeClass || ''}`}>{selectedOption.badge}</span>}
         </span>
         <span className={`material-symbols-outlined text-[20px] transition-transform ${isOpen ? 'rotate-180 text-primary' : 'text-on-surface-variant group-hover:text-on-surface'}`}>
           expand_more
@@ -69,8 +72,9 @@ export default function SearchableSelect({ options, value, onChange, placeholder
                   <button
                     type="button"
                     key={opt.value}
-                    className={`w-full text-left px-3 py-2.5 text-[14px] cursor-pointer rounded-lg transition-colors flex items-center justify-between focus-visible:outline-2 focus-visible:outline-primary
-                      ${isSelected ? 'bg-primary-container text-on-primary-container font-bold' : 'text-on-surface hover:bg-surface-container-low'}`}
+                    style={opt.toneColor ? { color: opt.toneColor } : undefined}
+                    className={`w-full text-left px-3 py-2.5 text-[14px] cursor-pointer rounded-lg transition-colors flex items-center justify-between gap-2 focus-visible:outline-2 focus-visible:outline-primary
+                      ${isSelected ? 'ring-1 ring-inset ring-primary/25 font-bold' : 'hover:bg-surface-container-low'} ${opt.toneColor ? '' : (isSelected ? 'bg-primary-container text-on-primary-container' : 'text-on-surface')}`}
                     onClick={() => {
                       onChange(opt.value);
                       setIsOpen(false);
@@ -78,7 +82,10 @@ export default function SearchableSelect({ options, value, onChange, placeholder
                     }}
                   >
                     <span className={inlineMenu ? 'min-w-0 break-words' : 'truncate'}>{opt.label}</span>
-                    {isSelected && <span className="material-symbols-outlined text-[18px]">check</span>}
+                    <span className="ml-auto flex shrink-0 items-center gap-1.5">
+                      {opt.badge && <span className={`rounded-full px-2 py-0.5 text-[9px] font-bold ring-1 ring-inset ${opt.badgeClass || ''}`}>{opt.badge}</span>}
+                      {isSelected && <span className="material-symbols-outlined text-[18px]">check</span>}
+                    </span>
                   </button>
                 );
               })

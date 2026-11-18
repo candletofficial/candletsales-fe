@@ -5,6 +5,7 @@ import { materialService } from '../services/materialService';
 import { inventoryCheckService } from '../services/inventoryCheckService';
 import { inventorySyncService } from '../services/inventorySyncService';
 import { formatPrice } from '../utils/formatPrice';
+import { getMaterialAppearance, isEssentialOilMaterial, OIL_COLOR_OPTIONS } from '../utils/materialAppearance';
 
 // ── Helpers ────────────────────────────────────────────────────────
 const STATUS_MAP = {
@@ -29,7 +30,7 @@ const UNIT_ICON_MAP = {
   'Túi': 'shopping_bag',
 };
 
-const EMPTY_FORM = { name: '', sku: '', category: '', unit: '', price: '', supplier: '', stock: '', minStock: '10' };
+const EMPTY_FORM = { name: '', sku: '', category: '', unit: '', price: '', supplier: '', stock: '', minStock: '10', isConcentratedOil: false, oilColor: '#7c3aed' };
 
 const duplicateMaterialForm = (material) => ({
   ...EMPTY_FORM,
@@ -40,19 +41,21 @@ const duplicateMaterialForm = (material) => ({
   supplier: material.supplier || '',
   stock: 0,
   minStock: material.minStock ?? 10,
+  isConcentratedOil: Boolean(material.isConcentratedOil),
+  oilColor: getMaterialAppearance(material).color || '#7c3aed',
 });
 
 // ── Modal Thêm/Sửa ────────────────────────────────────────────────
 function MaterialModal({ material, duplicateOf, categories, onClose, onSave, onDelete, onCategoryDeleted }) {
   const [form, setForm] = useState(material
-    ? { ...material, price: material.price, stock: material.stock, minStock: material.minStock || 10, category: material.category || '' }
+    ? { ...material, price: material.price, stock: material.stock, minStock: material.minStock || 10, category: material.category || '', isConcentratedOil: Boolean(material.isConcentratedOil), oilColor: getMaterialAppearance(material).color || '#7c3aed' }
     : duplicateOf ? duplicateMaterialForm(duplicateOf) : { ...EMPTY_FORM });
   const [isNewCategory, setIsNewCategory] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const isEdit = !!material;
 
-  const handleChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+  const handleChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -237,6 +240,13 @@ function MaterialModal({ material, duplicateOf, categories, onClose, onSave, onD
                 className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-[15px] text-on-surface placeholder-on-surface-variant/50 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 placeholder="10" />
             </div>
+            {isEssentialOilMaterial(form) && <div className="col-span-2 space-y-3 rounded-xl border border-violet-100 bg-violet-50/50 p-4">
+              <label className="flex cursor-pointer items-center justify-between gap-4">
+                <span><strong className="block text-sm text-on-surface">Tinh dầu đậm đặc</strong><small className="text-xs text-on-surface-variant">Thêm tag “Đậm đặc” cạnh tên tinh dầu.</small></span>
+                <input name="isConcentratedOil" type="checkbox" checked={Boolean(form.isConcentratedOil)} onChange={handleChange} className="size-5 cursor-pointer accent-violet-800" />
+              </label>
+              <fieldset><legend className="mb-2 text-xs font-bold text-on-surface-variant">Màu tinh dầu</legend><div className="flex flex-wrap items-center gap-2">{OIL_COLOR_OPTIONS.map((option, index) => <label key={option.color} title={`Màu mẫu ${index + 1}`} className={`cursor-pointer rounded-lg border p-1.5 ${form.oilColor === option.color ? 'border-slate-800 ring-2 ring-slate-200' : 'border-white'}`}><input type="radio" name="oilColor" value={option.color} checked={form.oilColor === option.color} onChange={handleChange} className="sr-only" /><span className={`block size-7 rounded-full ${option.swatch}`} /></label>)}<label title="Chọn màu tùy thích" className="relative flex size-10 cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-dashed border-slate-400"><input type="color" name="oilColor" value={form.oilColor} onChange={handleChange} className="absolute inset-[-8px] size-14 cursor-pointer border-0 bg-transparent" /><span className="material-symbols-outlined pointer-events-none relative z-10 rounded-full bg-white/80 p-0.5 text-sm">palette</span></label></div></fieldset>
+            </div>}
           </div>
         </form>
 
@@ -846,18 +856,20 @@ export default function MaterialManagement() {
                     const actualStock = m.actualStock !== null && m.actualStock !== undefined ? m.actualStock : m.stock;
                     const mStatus = actualStock < 0 ? 'negative_stock' : m.status;
                     const statusInfo = STATUS_MAP[mStatus] || STATUS_MAP.in_stock;
+                    const appearance = getMaterialAppearance(m);
                     return (
-                      <tr key={m._id} onClick={() => setModal({ type: 'edit', data: m })} className="hover:bg-surface-container-lowest transition-colors group cursor-pointer">
+                      <tr key={m._id} onClick={() => setModal({ type: 'edit', data: m })} className="transition-colors group cursor-pointer hover:bg-surface-container-lowest">
                         <td className="px-lg py-md">
                           <div className="flex items-center gap-md">
                             <div className="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center flex-shrink-0">
-                              <span className="material-symbols-outlined text-primary text-[20px]">
+                              <span className="material-symbols-outlined text-[20px]">
                                 {UNIT_ICON_MAP[m.unit] || 'category'}
                               </span>
                             </div>
                             <div>
-                              <p className="text-sm font-bold text-on-surface">{m.name}</p>
+                              <p style={{ color: appearance.textColor || undefined }} className="text-sm font-bold text-on-surface">{m.name}</p>
                               <p className="text-[12px] text-on-surface-variant">{m.sku}</p>
+                              {appearance.isOil && <span className="mt-1 flex items-center gap-1.5"><span style={{ color: appearance.textColor }} className="text-[9px] font-bold">{appearance.label}</span>{appearance.concentrationLabel && <span className="rounded border border-slate-300 px-1.5 py-0.5 text-[8px] font-bold text-slate-600">{appearance.concentrationLabel}</span>}</span>}
                             </div>
                           </div>
                         </td>

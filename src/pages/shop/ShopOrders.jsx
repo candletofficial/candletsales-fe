@@ -115,7 +115,7 @@ export default function ShopOrders() {
       else if (s === 'confirmed') c.confirmed++;
       else if (s === 'shipping') c.shipping++;
       else if (s === 'delivered') c.delivered++;
-      else if (s === 'cancelled' || s === 'failed' || o.status === 'returned') c.cancelled++;
+      else if (['returning', 'returned', 'cancelled', 'failed'].includes(s) || o.status === 'returned') c.cancelled++;
     });
     return c;
   }, [orders]);
@@ -130,7 +130,7 @@ export default function ShopOrders() {
       if (activeTab === 'confirmed' && dStatus !== 'confirmed') return false;
       if (activeTab === 'shipping' && dStatus !== 'shipping') return false;
       if (activeTab === 'delivered' && dStatus !== 'delivered') return false;
-      if (activeTab === 'cancelled' && !['cancelled', 'failed'].includes(dStatus) && order.status !== 'returned') return false;
+      if (activeTab === 'cancelled' && !['returning', 'returned', 'cancelled', 'failed'].includes(dStatus) && order.status !== 'returned') return false;
 
       // 2. Lọc theo hỏa tốc
       if (filterExpressOnly && order.shippingMethod !== 'express') return false;
@@ -192,6 +192,18 @@ export default function ShopOrders() {
             Giao thất bại
           </span>
         );
+      case 'returning':
+        return (
+          <span className="inline-flex items-center gap-1 rounded-full border border-orange-300 bg-orange-50 px-2.5 py-1 text-[11px] font-bold text-orange-800">
+            <i className="ph ph-arrow-u-up-left" /> Đang hoàn hàng
+          </span>
+        );
+      case 'returned':
+        return (
+          <span className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 text-[11px] font-bold text-amber-800">
+            <i className="ph ph-arrow-u-up-left" /> Đã hoàn hàng
+          </span>
+        );
       case 'cancelled':
         return (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-stone-100 text-stone-600 border border-stone-200">
@@ -211,7 +223,9 @@ export default function ShopOrders() {
       shipping: { label: 'Đang giao hàng', icon: 'ph-truck', iconClass: 'bg-violet-100 text-violet-800' },
       delivered: { label: 'Giao thành công', icon: 'ph-check', iconClass: 'bg-emerald-50 text-emerald-700' },
       cancelled: { label: 'Đã huỷ', icon: 'ph-x', iconClass: 'bg-stone-100 text-stone-500' },
-      failed: { label: 'Giao thất bại', icon: 'ph-warning', iconClass: 'bg-rose-50 text-rose-700' }
+      failed: { label: 'Giao thất bại', icon: 'ph-warning', iconClass: 'bg-rose-50 text-rose-700' },
+      returning: { label: 'Đang hoàn hàng', icon: 'ph-arrow-u-up-left', iconClass: 'bg-orange-50 text-orange-700' },
+      returned: { label: 'Đã hoàn hàng', icon: 'ph-arrow-u-up-left', iconClass: 'bg-amber-50 text-amber-700' },
     };
     return statuses[status] || statuses.pending;
   };
@@ -968,6 +982,8 @@ export default function ShopOrders() {
                   {selectedOrderDetail.delivery_status === 'confirmed' && 'Shop đã chấp nhận đơn, đang chuẩn bị nến'}
                   {selectedOrderDetail.delivery_status === 'shipping' && 'Shipper đang giao hộp nến đến bạn'}
                   {selectedOrderDetail.delivery_status === 'delivered' && 'Đơn hàng đã được giao thành công'}
+                  {selectedOrderDetail.delivery_status === 'returning' && 'Đơn vị vận chuyển đang hoàn hàng về shop'}
+                  {selectedOrderDetail.delivery_status === 'returned' && 'Đơn hàng đã được hoàn về shop'}
                   {selectedOrderDetail.delivery_status === 'cancelled' && 'Đơn hàng đã được huỷ'}
                   {selectedOrderDetail.delivery_status === 'failed' && 'Giao hàng thất bại'}
                 </span>

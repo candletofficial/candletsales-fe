@@ -3,6 +3,7 @@ import { orderService } from '../services/orderService';
 import { materialService } from '../services/materialService';
 import { formatPrice } from '../utils/formatPrice';
 import SearchableSelect from './SearchableSelect';
+import { getMaterialAppearance, materialSelectOption } from '../utils/materialAppearance';
 
 const quantityText = value => Number(value).toLocaleString('vi-VN', { maximumFractionDigits: 4 });
 
@@ -105,7 +106,9 @@ export default function OrderItemMaterialsModal({ orderId, index, item, onClose,
                     options={rows.map((row, rowIndex) => {
                       const material = byId.get(row.source_id || row.ingredient_id) || original.ingredients.find(entry => entry.ingredient_id === row.source_id);
                       const changed = row.source_id && (row.ingredient_id !== row.source_id || Number(row.quantity) !== Number(row.source_quantity));
-                      return { value: rowIndex, label: material ? material.name + (material.sku ? ' · ' + material.sku : '') + (changed ? ' · Đã chỉnh sửa' : '') : 'Nguyên liệu mới — chưa chọn' };
+                      if (!material) return { value: rowIndex, label: 'Nguyên liệu mới — chưa chọn' };
+                      const appearance = getMaterialAppearance(material);
+                      return { value: rowIndex, label: material.name + (material.sku ? ' · ' + material.sku : '') + (changed ? ' · Đã chỉnh sửa' : ''), toneColor: appearance.isOil ? appearance.textColor : '', badge: appearance.concentrationLabel, badgeClass: appearance.concentrationLabel ? 'text-slate-700 ring-slate-400/50' : '' };
                     })}
                     value={selectedRow ?? ''}
                     onChange={setSelectedRow}
@@ -126,14 +129,14 @@ export default function OrderItemMaterialsModal({ orderId, index, item, onClose,
                   </div>
                   {selected ? <div className="space-y-4">
                     {sourceMaterial && <div className="flex items-center justify-between gap-3 rounded-lg bg-stone-50 px-3 py-2.5">
-                      <div className="min-w-0"><p className="text-[11px] font-medium text-stone-500">Đang dùng / 1 sản phẩm</p><p className="mt-0.5 break-words text-sm font-semibold text-stone-700">{sourceMaterial.name}</p></div>
+                      <div className="min-w-0"><p className="text-[11px] font-medium text-stone-500">Đang dùng / 1 sản phẩm</p><div className="mt-0.5 flex flex-wrap items-center gap-1.5"><p style={getMaterialAppearance(sourceMaterial).isOil ? { color: getMaterialAppearance(sourceMaterial).textColor } : undefined} className="break-words text-sm font-semibold text-stone-700">{sourceMaterial.name}</p>{getMaterialAppearance(sourceMaterial).concentrationLabel && <span className="rounded-full px-1.5 py-0.5 text-[9px] font-bold text-slate-700 ring-1 ring-inset ring-slate-400/50">{getMaterialAppearance(sourceMaterial).concentrationLabel}</span>}</div></div>
                       <span className="shrink-0 text-sm font-semibold tabular-nums text-stone-600">{quantityText(selected.source_quantity)} {sourceMaterial.unit}</span>
                     </div>}
                     <div className="space-y-1.5">
                       <p className="text-xs font-semibold text-stone-600">{selected.source_id ? 'Thay bằng' : 'Nguyên liệu'}</p>
                       <SearchableSelect
                         key={selectedRow}
-                        options={materials.filter(candidate => !rows.some((other, i) => i !== selectedRow && other.ingredient_id === candidate._id)).map(candidate => ({ value: candidate._id, label: candidate.name + (candidate.sku ? ' · ' + candidate.sku : '') + ' (' + candidate.unit + ')' }))}
+                        options={materials.filter(candidate => !rows.some((other, i) => i !== selectedRow && other.ingredient_id === candidate._id)).map(candidate => materialSelectOption(candidate, candidate.name + (candidate.sku ? ' · ' + candidate.sku : '') + ' (' + candidate.unit + ')'))}
                         value={selected.ingredient_id}
                         onChange={value => updateRow(selectedRow, 'ingredient_id', value)}
                         placeholder={selected.ingredient_id && !selectedMaterial ? 'Nguyên liệu đã bị xoá — chọn thay thế' : 'Tìm nguyên liệu mới'}
@@ -181,7 +184,7 @@ export default function OrderItemMaterialsModal({ orderId, index, item, onClose,
                       const remaining = Number(material?.actualStock ?? 0) - change.quantity;
                       return <div key={change.id} className="flex items-start gap-2.5">
                         <span aria-hidden="true" className={'material-symbols-outlined flex size-8 shrink-0 items-center justify-center rounded-lg text-lg ' + (refund ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600')}>{refund ? 'add' : 'remove'}</span>
-                        <div className="min-w-0 flex-1"><div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-1"><span className={'text-[11px] font-semibold ' + (refund ? 'text-emerald-700' : 'text-amber-700')}>{refund ? 'Hoàn về kho' : 'Trừ thêm từ kho'}</span><strong className={'text-sm tabular-nums ' + (refund ? 'text-emerald-700' : 'text-amber-700')}>{refund ? '+' : '−'}{quantityText(Math.abs(change.quantity))} {material?.unit}</strong></div><p className="mt-0.5 break-words text-sm font-medium text-stone-800">{material?.name || 'Nguyên liệu đã bị xoá'}</p>{remaining < 0 && <p className="mt-1 text-xs font-medium text-red-600">Thiếu {quantityText(-remaining)} {material?.unit}</p>}</div>
+                        <div className="min-w-0 flex-1"><div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-1"><span className={'text-[11px] font-semibold ' + (refund ? 'text-emerald-700' : 'text-amber-700')}>{refund ? 'Hoàn về kho' : 'Trừ thêm từ kho'}</span><strong className={'text-sm tabular-nums ' + (refund ? 'text-emerald-700' : 'text-amber-700')}>{refund ? '+' : '−'}{quantityText(Math.abs(change.quantity))} {material?.unit}</strong></div><div className="mt-0.5 flex flex-wrap items-center gap-1.5"><p style={material && getMaterialAppearance(material).isOil ? { color: getMaterialAppearance(material).textColor } : undefined} className="break-words text-sm font-medium text-stone-800">{material?.name || 'Nguyên liệu đã bị xoá'}</p>{material && getMaterialAppearance(material).concentrationLabel && <span className="rounded-full px-1.5 py-0.5 text-[9px] font-bold text-slate-700 ring-1 ring-inset ring-slate-400/50">{getMaterialAppearance(material).concentrationLabel}</span>}</div>{remaining < 0 && <p className="mt-1 text-xs font-medium text-red-600">Thiếu {quantityText(-remaining)} {material?.unit}</p>}</div>
                       </div>;
                     }) : <div className="py-7 text-center"><span aria-hidden="true" className="material-symbols-outlined text-3xl text-stone-300">inventory_2</span><p className="mt-2 text-sm font-medium text-stone-500">Chưa có thay đổi</p><p className="mt-1 text-xs leading-relaxed text-stone-400">Nguyên liệu hoàn về và trừ thêm sẽ xuất hiện tại đây.</p></div>}
                   </div>

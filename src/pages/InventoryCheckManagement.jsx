@@ -4,6 +4,7 @@ import { inventoryCheckService } from '../services/inventoryCheckService';
 import { materialService } from '../services/materialService';
 import { useAuth } from '../hooks/useAuth';
 import SearchableSelect from '../components/SearchableSelect';
+import { getMaterialAppearance } from '../utils/materialAppearance';
 
 function InventoryCheckModal({ materials, user, onClose, onSave }) {
   const [items, setItems] = useState([]);
@@ -185,11 +186,13 @@ function InventoryCheckModal({ materials, user, onClose, onSave }) {
                         {groupItems.map(({ item, index, material }) => {
                           const diff = calculateDifference(item.system_stock, item.actual_stock);
                           const isChecked = item.actual_stock !== '';
+                          const appearance = getMaterialAppearance(material);
                           return (
-                            <div key={index} className={`flex flex-row items-center justify-between gap-3 p-3 sm:p-4 rounded-xl border transition-all shadow-sm relative ${isChecked ? 'bg-primary/5 border-primary/30 shadow-primary/10' : 'bg-white border-outline-variant/40 hover:border-primary/30'}`}>
+                            <div key={index} className={`flex flex-row items-center justify-between gap-3 p-3 sm:p-4 rounded-xl border transition-all shadow-sm relative ${isChecked ? 'border-primary/30 shadow-primary/10 bg-primary/5' : 'border-outline-variant/40 hover:border-primary/30 bg-white'}`}>
                               <div className="w-full sm:flex-1 min-w-0 flex flex-col justify-center gap-0.5">
-                                <div className={`text-[14px] sm:text-[15px] font-bold truncate flex items-center gap-1.5 ${isChecked ? 'text-primary' : 'text-on-surface'}`}>
+                                <div style={{ color: appearance.textColor || undefined }} className={`text-[14px] sm:text-[15px] font-bold truncate flex items-center gap-1.5 ${appearance.isOil ? '' : isChecked ? 'text-primary' : 'text-on-surface'}`}>
                                   {material?.name || 'Nguyên liệu không xác định'}
+                                  {appearance.concentrationLabel && <span className="rounded border border-slate-300 px-1.5 py-0.5 text-[8px] font-bold text-slate-600">{appearance.concentrationLabel}</span>}
                                   {isChecked && <span className="material-symbols-outlined text-[16px]">check_circle</span>}
                                 </div>
                                 <div className="text-[12px] text-on-surface-variant mb-1">
@@ -306,7 +309,7 @@ function TicketDetailsModal({ ticket, onClose }) {
                 {ticket.items.map((item, idx) => (
                   <tr key={idx} className="hover:bg-surface-container-low/50 transition-colors">
                     <td className="px-4 py-3">
-                      <p className="text-[14px] font-semibold text-on-surface">{item.material_id?.name || 'Nguyên liệu đã xóa'}</p>
+                      <p style={{ color: getMaterialAppearance(item.material_id).textColor || undefined }} className="flex items-center gap-1.5 text-[14px] font-semibold text-on-surface">{item.material_id?.name || 'Nguyên liệu đã xóa'}{getMaterialAppearance(item.material_id).concentrationLabel && <span className="rounded border border-slate-300 px-1.5 py-0.5 text-[8px] font-bold text-slate-600">Đậm đặc</span>}</p>
                       {item.material_id?.sku && <p className="text-[12px] text-on-surface-variant">{item.material_id.sku}</p>}
                     </td>
                     <td className="px-4 py-3 text-[14px] text-right font-medium text-on-surface-variant">{item.system_stock} {item.material_id?.unit}</td>

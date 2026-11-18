@@ -127,7 +127,7 @@ export default function ShopLayout() {
         const orderList = response?.data?.data || [];
         const count = orderList.filter((order) => {
           const status = order.delivery_status || (order.source === 'website' ? 'pending' : 'delivered');
-          return !['delivered', 'cancelled', 'failed'].includes(status) && order.status !== 'returned';
+          return !['delivered', 'returning', 'returned', 'cancelled', 'failed'].includes(status) && order.status !== 'returned';
         }).length;
         setUnfinishedOrderCount(count);
       })

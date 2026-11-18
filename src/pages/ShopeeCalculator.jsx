@@ -59,7 +59,7 @@ export default function ShopeeCalculator() {
 
   // Fetch danh sách sản phẩm
   useEffect(() => {
-    productService.getProducts()
+    productService.getProducts({ type: 'sellable' })
       .then(res => setProducts(res.data.data || []))
       .catch(() => { });
   }, []);
@@ -157,7 +157,7 @@ export default function ShopeeCalculator() {
       const res = await productService.updateProduct(selectedProduct._id, dataToUpdate);
       if (res.data.success) {
         // Cập nhật lại state của sản phẩm trong hệ thống (fetch lại)
-        const updatedProductsRes = await productService.getProducts();
+        const updatedProductsRes = await productService.getProducts({ type: 'sellable' });
         setProducts(updatedProductsRes.data.data || []);
         setModalData({ message: 'Cập nhật giá thành công!', type: 'success' });
       }

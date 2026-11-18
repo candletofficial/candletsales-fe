@@ -7,6 +7,7 @@ import { fundService } from '../services/fundService';
 import SearchableSelect from '../components/SearchableSelect';
 import { formatPrice } from '../utils/formatPrice';
 import { useAuth } from '../hooks/useAuth';
+import { getMaterialAppearance, materialSelectOption } from '../utils/materialAppearance';
 
 function ImportModal({ materials, user, onClose, onSave, initialMaterialId, editTicket }) {
   const [items, setItems] = useState(
@@ -24,10 +25,10 @@ function ImportModal({ materials, user, onClose, onSave, initialMaterialId, edit
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const materialOptions = useMemo(() => materials.map(m => ({
-    value: m._id,
-    label: `${m.sku} - ${m.name} (${m.unit})`
-  })), [materials]);
+  const materialOptions = useMemo(() => materials.map(m => materialSelectOption(
+    m,
+    `${m.sku} - ${m.name} (${m.unit})`,
+  )), [materials]);
 
   const handleAddItem = () => {
     setItems([...items, { material_id: '', quantity: '', total_price: '' }]);
@@ -224,7 +225,7 @@ function TicketDetailsModal({ ticket, onClose }) {
             <tbody>
               {ticket.items.map((item, idx) => (
                 <tr key={idx} className="border-b border-outline-variant/20">
-                  <td className="px-4 py-3 text-[14px]">{item.material_id?.name} ({item.material_id?.unit})</td>
+                  <td style={{ color: getMaterialAppearance(item.material_id).textColor || undefined }} className="px-4 py-3 text-[14px] font-semibold">{item.material_id?.name} ({item.material_id?.unit}){getMaterialAppearance(item.material_id).concentrationLabel && <span className="ml-1.5 rounded border border-slate-300 px-1.5 py-0.5 text-[8px] font-bold text-slate-600">Đậm đặc</span>}</td>
                   <td className="px-4 py-3 text-[14px] text-center font-medium">{item.quantity}</td>
                   <td className="px-4 py-3 text-[14px] text-right">{formatPrice(item.unit_price)}</td>
                   <td className="px-4 py-3 text-[14px] text-right font-semibold">{formatPrice(item.total_price)}</td>
@@ -950,9 +951,9 @@ export default function ImportManagement() {
                       </div>
                     </td>
                     <td className="px-lg py-md text-[13px] text-on-surface max-w-[200px]">
-                      <div className="truncate" title={ticket.items?.map(i => i.material_id?.name || 'Nguyên liệu').join(', ')}>
-                        {ticket.items && ticket.items.length > 0 
-                          ? ticket.items.map(i => i.material_id?.name || 'Nguyên liệu').join(', ')
+                      <div className="flex max-w-full flex-wrap gap-x-1 truncate" title={ticket.items?.map(i => i.material_id?.name || 'Nguyên liệu').join(', ')}>
+                        {ticket.items && ticket.items.length > 0
+                          ? ticket.items.map((item, index) => <span key={item.material_id?._id || index} style={{ color: getMaterialAppearance(item.material_id).textColor || undefined }}>{item.material_id?.name || 'Nguyên liệu'}{index < ticket.items.length - 1 ? ',' : ''}</span>)
                           : '-'}
                       </div>
                     </td>

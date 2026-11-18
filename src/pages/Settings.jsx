@@ -10,6 +10,7 @@ import { locationService } from '../services/locationService';
 import { useWebsiteTheme } from '../hooks/useWebsiteTheme';
 import { THEME_PRESETS } from '../theme/themePresets';
 import { SHIPPING_CARRIERS, getCarrierFromFundAccount, getFundAccountLabel } from '../utils/shippingCarriers';
+import { materialSelectOption } from '../utils/materialAppearance';
 
 const AD_PLATFORM_LABELS = {
   facebook: 'Facebook',
@@ -47,8 +48,11 @@ const SearchableSelect = ({ value, options, onChange, placeholder = "-- Chọn -
         onClick={() => setIsOpen(!isOpen)}
         className="w-full border border-stone-200 rounded-lg px-3 py-2 text-[13px] bg-white cursor-pointer flex justify-between items-center hover:border-primary/60 transition-colors shadow-2xs"
       >
-        <span className={selectedOption ? "text-stone-900 font-medium truncate pr-2" : "text-stone-400"}>
-          {selectedOption ? selectedOption.label : placeholder}
+        <span className="flex min-w-0 items-center gap-1.5 pr-2">
+          <span style={selectedOption?.toneColor ? { color: selectedOption.toneColor } : undefined} className={selectedOption ? "truncate font-medium text-stone-900" : "truncate text-stone-400"}>
+            {selectedOption ? selectedOption.label : placeholder}
+          </span>
+          {selectedOption?.badge && <span className="shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-bold text-slate-700 ring-1 ring-inset ring-slate-400/50">{selectedOption.badge}</span>}
         </span>
         <span className="material-symbols-outlined text-[18px] text-stone-400 flex-shrink-0">
           expand_more
@@ -76,14 +80,16 @@ const SearchableSelect = ({ value, options, onChange, placeholder = "-- Chọn -
               filteredOptions.map((opt) => (
                 <div
                   key={opt.value}
-                  className={`px-3 py-2 text-[13px] cursor-pointer rounded-lg hover:bg-primary-container/30 transition-colors ${opt.value === value ? 'bg-primary-container/60 font-bold text-primary' : 'text-stone-700'}`}
+                  style={opt.toneColor ? { color: opt.toneColor } : undefined}
+                  className={`flex items-center gap-1.5 px-3 py-2 text-[13px] cursor-pointer rounded-lg hover:bg-primary-container/30 transition-colors ${opt.value === value ? 'bg-primary-container/60 font-bold text-primary' : 'text-stone-700'}`}
                   onClick={() => {
                     onChange(opt.value);
                     setIsOpen(false);
                     setSearch('');
                   }}
                 >
-                  {opt.label}
+                  <span className="min-w-0 flex-1 truncate">{opt.label}</span>
+                  {opt.badge && <span className="shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-bold text-slate-700 ring-1 ring-inset ring-slate-400/50">{opt.badge}</span>}
                 </div>
               ))
             )}
@@ -600,7 +606,7 @@ export default function Settings() {
                     value={item.material_id}
                     onChange={(val) => handleChangeMaterial(method, idx, 'material_id', val)}
                     placeholder="-- Chọn nguyên vật liệu đóng gói --"
-                    options={materialsList.map(m => ({ value: m._id, label: `${m.name} (${m.unit})` }))}
+                    options={materialsList.map(m => materialSelectOption(m, `${m.name} (${m.unit})`))}
                   />
                 </div>
                 <div className="w-24 shrink-0">

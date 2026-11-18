@@ -6,6 +6,7 @@ import { productService } from '../services/productService';
 import { formatPrice } from '../utils/formatPrice';
 import { getImageUrl } from '../utils/imageUtils';
 import { createEssentialOilLabelsPdf } from '../utils/essentialOilLabelsPdf';
+import { getMaterialAppearance, OIL_COLOR_OPTIONS } from '../utils/materialAppearance';
 
 const EMPTY_FORM = {
   name: '',
@@ -15,6 +16,8 @@ const EMPTY_FORM = {
   price: '',
   stock: '',
   minStock: '100',
+  isConcentratedOil: false,
+  oilColor: '#7c3aed',
 };
 
 const normalizeText = (value) => String(value || '')
@@ -201,6 +204,7 @@ const updateVariantOilQuantity = (product, variant, materialId, quantity) => {
 function EssentialOilDetailModal({ material, products, config, onClose, onEdit, onImport, onPrint, onUsageSaved }) {
   const stock = getActualStock(material);
   const statusInfo = STATUS[getStatus(material)];
+  const oilAppearance = getMaterialAppearance(material);
   const productUsage = useMemo(() => buildMaterialUsageDetails(material, products), [material, products]);
   const [editingUsage, setEditingUsage] = useState(null);
   const [usageValue, setUsageValue] = useState('');
@@ -295,10 +299,12 @@ function EssentialOilDetailModal({ material, products, config, onClose, onEdit, 
             </span>
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <h2 id="oil-detail-title" className="truncate text-lg font-bold text-slate-900 sm:text-xl">{material.name}</h2>
+                <h2 id="oil-detail-title" style={{ color: oilAppearance.textColor }} className="truncate text-lg font-bold sm:text-xl">{material.name}</h2>
                 <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold ring-1 ring-inset ${statusInfo.className}`}>
                   <span className="material-symbols-outlined text-sm">{statusInfo.icon}</span>{statusInfo.label}
                 </span>
+                <span style={{ color: oilAppearance.textColor }} className="text-[10px] font-bold">{oilAppearance.label}</span>
+                {oilAppearance.concentrationLabel && <span className="rounded border border-slate-300 px-1.5 py-0.5 text-[9px] font-bold text-slate-600">{oilAppearance.concentrationLabel}</span>}
               </div>
               <p className="mt-1 text-xs text-slate-500">{material.sku} · {material.supplier}</p>
             </div>
@@ -391,6 +397,7 @@ function EssentialOilDetailModal({ material, products, config, onClose, onEdit, 
 }
 
 function SpecializedMaterialModal({ material, config, onClose, onSaved, onRequestDelete }) {
+  const existingAppearance = getMaterialAppearance(material);
   const [form, setForm] = useState(() => material ? {
     name: material.name || '',
     sku: material.sku || '',
@@ -399,14 +406,16 @@ function SpecializedMaterialModal({ material, config, onClose, onSaved, onReques
     price: material.price ?? '',
     stock: material.stock ?? '',
     minStock: material.minStock ?? '100',
+    isConcentratedOil: Boolean(material.isConcentratedOil),
+    oilColor: existingAppearance.color || '#7c3aed',
   } : { ...EMPTY_FORM });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const isEdit = Boolean(material);
 
   const handleChange = (event) => {
-    const { name, value } = event.target;
-    setForm((current) => ({ ...current, [name]: value }));
+    const { name, value, type, checked } = event.target;
+    setForm((current) => ({ ...current, [name]: type === 'checkbox' ? checked : value }));
   };
 
   const handleSubmit = async (event) => {
@@ -501,6 +510,31 @@ function SpecializedMaterialModal({ material, config, onClose, onSaved, onReques
               <span className="mb-2 block text-sm font-semibold text-slate-700">Mức cảnh báo tồn <span className="text-red-500">*</span></span>
               <input name="minStock" type="number" min="0" step="any" value={form.minStock} onChange={handleChange} required placeholder="100" className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-100" />
             </label>
+
+            <label className={`sm:col-span-2 flex cursor-pointer items-center justify-between gap-4 rounded-2xl border p-4 transition ${form.isConcentratedOil ? 'border-violet-300 bg-violet-100' : 'border-violet-100 bg-violet-50/60 hover:bg-violet-50'}`}>
+              <span className="flex min-w-0 items-center gap-3">
+                <span className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${form.isConcentratedOil ? 'bg-violet-800 text-white' : 'bg-violet-100 text-violet-700'}`}><span className="material-symbols-outlined">opacity</span></span>
+                <span><strong className="block text-sm text-slate-800">Tinh dầu đậm đặc</strong><small className="mt-0.5 block text-xs text-slate-500">Thêm tag “Đậm đặc” cạnh tên tinh dầu.</small></span>
+              </span>
+              <input name="isConcentratedOil" type="checkbox" checked={form.isConcentratedOil} onChange={handleChange} className="size-5 shrink-0 cursor-pointer accent-violet-800" />
+            </label>
+
+            <fieldset className="sm:col-span-2">
+              <legend className="mb-2 text-sm font-semibold text-slate-700">Màu nhận diện tinh dầu</legend>
+              <div className="flex flex-wrap items-center gap-2">
+                {OIL_COLOR_OPTIONS.map((option, index) => {
+                  const selected = form.oilColor === option.color;
+                  return <label key={option.color} title={`Màu mẫu ${index + 1}`} className={`cursor-pointer rounded-xl border p-2 transition ${selected ? 'border-slate-800 ring-2 ring-slate-200' : 'border-slate-200 hover:bg-slate-50'}`}>
+                    <input type="radio" name="oilColor" value={option.color} checked={selected} onChange={handleChange} className="sr-only" />
+                    <span className={`block size-7 rounded-full shadow-sm ring-1 ring-black/10 ${option.swatch}`} />
+                  </label>;
+                })}
+                <label title="Chọn màu tùy thích" className="relative flex size-11 cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-dashed border-slate-400">
+                  <input type="color" name="oilColor" value={form.oilColor} onChange={handleChange} className="absolute inset-[-8px] size-16 cursor-pointer border-0 bg-transparent" />
+                  <span className="material-symbols-outlined pointer-events-none relative z-10 rounded-full bg-white/80 p-1 text-base">palette</span>
+                </label>
+              </div>
+            </fieldset>
           </div>
 
           <div className="mt-5 flex items-start gap-2 rounded-xl bg-violet-50 px-4 py-3 text-xs leading-relaxed text-violet-800">
@@ -830,12 +864,13 @@ export default function EssentialOilManagement() {
                       const status = getStatus(oil);
                       const statusInfo = STATUS[status];
                       const usage = usageMap.get(String(oil._id)) || [];
+                      const appearance = getMaterialAppearance(oil);
                       return (
-                        <tr key={oil._id} onClick={() => setModal({ type: 'detail', material: oil })} className="cursor-pointer transition hover:bg-violet-50/35">
+                        <tr key={oil._id} onClick={() => setModal({ type: 'detail', material: oil })} className="cursor-pointer transition hover:bg-slate-50/70">
                           <td className="px-5 py-4">
                             <div className="flex items-center gap-3">
                               <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-700"><span className="material-symbols-outlined">{config.icon}</span></span>
-                              <div className="min-w-0"><p className="max-w-64 truncate text-sm font-bold text-slate-900">{oil.name}</p><p className="mt-0.5 text-xs text-slate-400">{oil.sku}</p></div>
+                              <div className="min-w-0"><p style={{ color: appearance.textColor }} className="max-w-64 truncate text-sm font-bold">{oil.name}</p><p className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500"><span>{oil.sku}</span>{appearance.concentrationLabel && <span className="rounded border border-slate-300 px-1.5 py-0.5 text-[8px] font-bold text-slate-600">{appearance.concentrationLabel}</span>}</p></div>
                             </div>
                           </td>
                           <td className="px-5 py-4 text-sm text-slate-600">{oil.supplier}</td>
@@ -859,11 +894,12 @@ export default function EssentialOilManagement() {
                   const status = getStatus(oil);
                   const statusInfo = STATUS[status];
                   const usage = usageMap.get(String(oil._id)) || [];
+                  const appearance = getMaterialAppearance(oil);
                   return (
-                    <article key={oil._id} onClick={() => setModal({ type: 'detail', material: oil })} className="cursor-pointer p-4 active:bg-violet-50/50">
+                    <article key={oil._id} onClick={() => setModal({ type: 'detail', material: oil })} className="cursor-pointer p-4 active:bg-slate-50">
                       <div className="flex items-start gap-3">
                         <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-700"><span className="material-symbols-outlined">{config.icon}</span></span>
-                        <div className="min-w-0 flex-1"><div className="flex items-start justify-between gap-2"><div className="min-w-0"><h3 className="truncate text-sm font-bold text-slate-900">{oil.name}</h3><p className="mt-0.5 truncate text-xs text-slate-400">{oil.sku} · {oil.supplier}</p></div><span className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold ring-1 ring-inset ${statusInfo.className}`}>{statusInfo.label}</span></div>
+                        <div className="min-w-0 flex-1"><div className="flex items-start justify-between gap-2"><div className="min-w-0"><h3 style={{ color: appearance.textColor }} className="truncate text-sm font-bold">{oil.name}</h3><p className="mt-0.5 flex items-center gap-1.5 truncate text-xs text-slate-500"><span>{oil.sku} · {oil.supplier}</span>{appearance.concentrationLabel && <span className="rounded border border-slate-300 px-1.5 py-0.5 text-[8px] font-bold text-slate-600">{appearance.concentrationLabel}</span>}</p></div><span className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold ring-1 ring-inset ${statusInfo.className}`}>{statusInfo.label}</span></div>
                           <div className="mt-3 grid grid-cols-3 gap-2"><div><p className="text-[10px] uppercase tracking-wide text-slate-400">Tồn kho</p><p className={`mt-0.5 text-xs font-bold ${status === 'in_stock' ? 'text-slate-800' : 'text-red-600'}`}>{stock.toLocaleString('vi-VN')} {oil.unit}</p></div><div><p className="text-[10px] uppercase tracking-wide text-slate-400">Giá trị</p><p className="mt-0.5 truncate text-xs font-bold text-slate-800">{formatPrice(stock * oil.price)}</p></div><div><p className="text-[10px] uppercase tracking-wide text-slate-400">Công thức</p><p className="mt-0.5 text-xs font-bold text-slate-800">{usage.length} sản phẩm</p></div></div>
                           <div className="mt-3 flex justify-end"><button type="button" onClick={(event) => { event.stopPropagation(); openImport(oil); }} className="inline-flex cursor-pointer items-center gap-1 rounded-lg bg-violet-50 px-3 py-1.5 text-xs font-bold text-violet-700"><span className="material-symbols-outlined text-base">add_box</span>Nhập thêm</button></div>
                         </div>

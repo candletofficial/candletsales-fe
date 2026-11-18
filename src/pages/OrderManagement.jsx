@@ -402,7 +402,8 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
     handleSubmit(new Event('submit'));
   };
 
-  const isReturned = order?.status === 'returned';
+  const isReturned = order?.status === 'returned' || order?.delivery_status === 'returned';
+  const isReturning = order?.delivery_status === 'returning';
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-2 sm:p-4">
@@ -534,7 +535,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
               }
 
               // Đơn đã giao thành công hoặc đã huỷ thì khoá toàn bộ thao tác đổi
-              if (deliveryStatus === 'delivered' || deliveryStatus === 'cancelled' || isReturned) {
+              if (deliveryStatus === 'delivered' || deliveryStatus === 'cancelled' || deliveryStatus === 'returned' || isReturned) {
                 return { allowed: false, isCurrent: false, isCompleted: false, isNext: false, reason: 'Đơn hàng đã hoàn tất chu trình, không thể thay đổi' };
               }
 
@@ -647,6 +648,8 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                     ? 'bg-indigo-100/70 border-indigo-300 text-indigo-950'
                     : deliveryStatus === 'delivered'
                     ? 'bg-emerald-100/70 border-emerald-300 text-emerald-950'
+                    : deliveryStatus === 'returning'
+                    ? 'bg-orange-100/70 border-orange-300 text-orange-950'
                     : deliveryStatus === 'failed'
                     ? 'bg-rose-100/70 border-rose-300 text-rose-950'
                     : 'bg-stone-200/70 border-stone-300 text-stone-800'
@@ -657,6 +660,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                       deliveryStatus === 'confirmed' ? 'bg-blue-600' :
                       deliveryStatus === 'shipping' ? 'bg-indigo-600' :
                       deliveryStatus === 'delivered' ? 'bg-emerald-600' :
+                      deliveryStatus === 'returning' ? 'bg-orange-600' :
                       deliveryStatus === 'failed' ? 'bg-rose-600' : 'bg-stone-600'
                     }`}></span>
                     <span className="font-bold">Trạng thái hiện tại:</span>
@@ -665,6 +669,8 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                       {deliveryStatus === 'confirmed' && 'Đã duyệt đơn — Đang đóng gói sản phẩm và chuẩn bị gọi shipper'}
                       {deliveryStatus === 'shipping' && 'Đang giao hàng — Đơn vị vận chuyển đang giao tới tay khách hàng'}
                       {deliveryStatus === 'delivered' && 'Giao thành công — Khách đã nhận hàng & hoàn tất đơn'}
+                      {deliveryStatus === 'returning' && 'Đang hoàn hàng — Đơn vị vận chuyển đang chuyển hàng về shop'}
+                      {deliveryStatus === 'returned' && 'Đã hoàn hàng — Hàng đã về shop, kho và doanh thu đã được cập nhật'}
                       {deliveryStatus === 'failed' && 'Giao thất bại — Khách không nhận hoặc sự cố giao vận (chuẩn bị chuyển hoàn kho)'}
                       {deliveryStatus === 'cancelled' && 'Đã huỷ đơn — Đã hoàn trả lại số lượng nguyên liệu về kho'}
                     </span>
@@ -1258,7 +1264,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                             <button
                               type="button"
                               onClick={() => setMaterialsIndex(idx)}
-                              disabled={Boolean(statusSaving) || !isEdit || isReturned || order?.status === 'cancelled' || ['failed', 'cancelled'].includes(order?.delivery_status)
+                              disabled={Boolean(statusSaving) || !isEdit || isReturned || isReturning || order?.status === 'cancelled' || ['failed', 'cancelled'].includes(order?.delivery_status)
                                 || order?.items?.[idx]?.product_id !== item.product_id
                                 || order?.items?.[idx]?.sku_id !== item.sku_id
                                 || order?.items?.[idx]?.quantity !== item.quantity}
@@ -1509,7 +1515,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
           <div className="flex items-center gap-2">
             {isEdit && (
               <>
-                {order.status !== 'returned' && !isReplacementMode && !isSeedingMode && (
+                {order.status !== 'returned' && order.status !== 'cancelled' && !['returned', 'failed', 'cancelled'].includes(order.delivery_status) && !isReplacementMode && !isSeedingMode && (
                   <button
                     type="button"
                     onClick={onMarkReturn}
@@ -1517,7 +1523,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                     className="px-3.5 py-2 text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
                   >
                     <span className="material-symbols-outlined text-[17px]">assignment_return</span>
-                    Đánh dấu hoàn hàng
+                    {isReturning ? 'Xác nhận đã hoàn về' : 'Đánh dấu hoàn hàng'}
                   </button>
                 )}
                 
@@ -2076,7 +2082,7 @@ function AcceptOrderModal({
 
 // ── Modal Xác nhận xóa ────────────────────────────────────────────
 function DeleteModal({ order, onClose, onConfirm, loading }) {
-  const isReturned = ['returned', 'cancelled'].includes(order.status) || ['failed', 'cancelled'].includes(order.delivery_status);
+  const isReturned = ['returned', 'cancelled'].includes(order.status) || ['returned', 'failed', 'cancelled'].includes(order.delivery_status);
   const [restoreStock, setRestoreStock] = useState(!isReturned); // đơn hoàn: mặc định false vì kho đã hoàn rồi
 
   return (
@@ -2334,7 +2340,7 @@ export default function OrderManagement() {
     try {
       const [resOrders, resProducts, resReturnCost] = await Promise.all([
         orderService.getOrders(),
-        productService.getProducts(),
+        productService.getProducts({ type: 'sellable' }),
         systemConfigService.getConfig('return_cost_per_platform'),
       ]);
       setOrders(resOrders.data.data);
@@ -2458,7 +2464,7 @@ export default function OrderManagement() {
         return s === 'cancelled' || d === 'cancelled';
       }
       if (statusFilter === 'returned') {
-        return s === 'returned' || d === 'failed';
+        return s === 'returned' || ['returning', 'returned', 'failed'].includes(d);
       }
       return s === statusFilter;
     }
@@ -2473,9 +2479,9 @@ export default function OrderManagement() {
   ).length;
 
   // Stats — tính trên baseFilteredOrders (không bị ảnh hưởng bởi tab trạng thái)
-  const activeOrders = baseFilteredOrders.filter(o => o.status !== 'returned' && o.status !== 'cancelled' && o.delivery_status !== 'failed' && o.delivery_status !== 'cancelled');
+  const activeOrders = baseFilteredOrders.filter(o => o.status !== 'returned' && o.status !== 'cancelled' && !['returning', 'returned', 'failed', 'cancelled'].includes(o.delivery_status));
   const normalActiveOrders = activeOrders.filter(o => !o.is_replacement && !o.is_seeding);
-  const returnedOrders  = baseFilteredOrders.filter(o => o.status === 'returned' || o.delivery_status === 'failed');
+  const returnedOrders  = baseFilteredOrders.filter(o => o.status === 'returned' || ['returning', 'returned', 'failed'].includes(o.delivery_status));
   const totalRevenue = normalActiveOrders.reduce((s, o) => s + (o.total_price || 0), 0);
   const totalItems   = normalActiveOrders.reduce((s, o) => s + (o.items?.reduce((a, i) => a + i.quantity, 0) || 0), 0);
   const totalCost    = activeOrders.reduce((s, o) => s + (o.seeding_cost || 0) + (o.items?.reduce((a, i) => a + (i.unit_cost || 0) * i.quantity, 0) || 0) + (o.logistics_cost || 0) + (o.packaging_cost || 0), 0)
@@ -2484,7 +2490,7 @@ export default function OrderManagement() {
   const profitMargin = totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(1) : 0;
   const totalReturned = returnedOrders.length;
 
-  const ITEMS_PER_PAGE = 10;
+  const ITEMS_PER_PAGE = 20;
   const totalPages = Math.ceil(filteredOrders.length / ITEMS_PER_PAGE);
   const currentOrders = filteredOrders.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
@@ -2734,7 +2740,7 @@ export default function OrderManagement() {
               ].map(st => {
                 const isSelected = statusFilter === st.val;
                 let count = 0;
-                if (st.val === 'returned') count = baseFilteredOrders.filter(o => o.status === 'returned' || o.delivery_status === 'failed').length;
+                if (st.val === 'returned') count = baseFilteredOrders.filter(o => o.status === 'returned' || ['returning', 'returned', 'failed'].includes(o.delivery_status)).length;
                 if (st.val === 'pending') count = baseFilteredOrders.filter(o => o.status === 'pending').length;
                 if (st.val === 'cancelled') count = baseFilteredOrders.filter(o => o.status === 'cancelled' || o.delivery_status === 'cancelled').length;
 
@@ -2850,7 +2856,8 @@ export default function OrderManagement() {
                 ) : (
                   currentOrders.map(order => {
                     const isExpress = order.shippingMethod === 'express';
-                    const isReturned = order.status === 'returned';
+                    const isReturning = order.delivery_status === 'returning';
+                    const isReturned = order.status === 'returned' || order.delivery_status === 'returned';
                     const isCancelled = order.status === 'cancelled' || order.delivery_status === 'cancelled';
                     const isManualTransfer = order.payment_method === 'transfer' && order.source !== 'website';
                     const isTransferPaid = order.payment_status === 'paid' || isManualTransfer;
@@ -2862,6 +2869,8 @@ export default function OrderManagement() {
                         className={`transition-colors cursor-pointer group ${
                           isCancelled
                             ? 'bg-stone-50/80 opacity-[0.52] grayscale-[35%] hover:bg-stone-100/80 hover:opacity-75'
+                            : isReturning
+                            ? 'bg-orange-50/35 hover:bg-orange-50/70'
                             : isReturned
                             ? 'bg-amber-50/40 hover:bg-amber-50/80'
                             : isExpress
@@ -3029,6 +3038,18 @@ export default function OrderManagement() {
                                   <span className="inline-flex items-center gap-1 text-[10.5px] uppercase font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
                                     <span className="material-symbols-outlined text-[13px]">cancel</span>
                                     Giao thất bại
+                                  </span>
+                                )}
+                                {order.delivery_status === 'returning' && (
+                                  <span className="inline-flex items-center gap-1 text-[10.5px] uppercase font-bold px-2 py-0.5 rounded-full bg-orange-50 text-orange-800 border border-orange-300">
+                                    <span className="material-symbols-outlined text-[13px]">local_shipping</span>
+                                    Đang hoàn hàng
+                                  </span>
+                                )}
+                                {order.delivery_status === 'returned' && (
+                                  <span className="inline-flex items-center gap-1 text-[10.5px] uppercase font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-300">
+                                    <span className="material-symbols-outlined text-[13px]">assignment_return</span>
+                                    Đã hoàn hàng
                                   </span>
                                 )}
                                 {order.delivery_status === 'cancelled' && (
