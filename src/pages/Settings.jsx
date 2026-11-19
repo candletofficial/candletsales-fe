@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { shippingConfigService } from '../services/shippingConfigService';
 import { materialService } from '../services/materialService';
 import systemConfigService from '../services/systemConfigService';
 import { fundService } from '../services/fundService';
 import { adCostService } from '../services/adCostService';
+import { aiService } from '../services/aiService';
 import AddressSelector from '../components/shop/AddressSelector';
 import { locationService } from '../services/locationService';
 import { useWebsiteTheme } from '../hooks/useWebsiteTheme';
@@ -100,8 +102,18 @@ const SearchableSelect = ({ value, options, onChange, placeholder = "-- Chọn -
   );
 };
 
+const GPT_MODEL_OPTIONS = [
+  { value: 'gpt-5.4', label: 'GPT-5.4 — Model mới & tốt nhất (Khuyên dùng)' },
+  { value: 'gpt-5.4-pro', label: 'GPT-5.4 Pro — Phân tích chiến lược chuyên sâu cao cấp' },
+  { value: 'gpt-5.4-mini', label: 'GPT-5.4 Mini — Phản hồi siêu tốc, tiết kiệm chi phí' },
+  { value: 'gpt-4.1', label: 'GPT-4.1 — Ổn định, tương thích mọi cấp tài khoản' },
+  { value: 'o3', label: 'OpenAI o3 — Chuyên suy luận logic & số liệu phức tạp' },
+  { value: 'gpt-4o', label: 'GPT-4o — Đa năng tiêu chuẩn' },
+];
+
 export default function Settings() {
-  const [activeTab, setActiveTab] = useState('appearance');
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(() => searchParams.get('tab') || 'appearance');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState({ standard: false, express: false });
   const [materialsList, setMaterialsList] = useState([]);
@@ -157,6 +169,20 @@ export default function Settings() {
   const [goongKeyStatus, setGoongKeyStatus] = useState(null);
   const [showGoongKey, setShowGoongKey] = useState(false);
 
+  // AI Business Analyst (OpenAI GPT / Gemini Fallback) Settings
+  const [openaiApiKey, setOpenaiApiKey] = useState('');
+  const [openaiModel, setOpenaiModel] = useState('gpt-5.4');
+  const [showOpenaiKey, setShowOpenaiKey] = useState(false);
+  const [savingAiConfig, setSavingAiConfig] = useState(false);
+  const [testingAiConfig, setTestingAiConfig] = useState(false);
+  const [aiTestStatus, setAiTestStatus] = useState(null);
+  const [aiActiveInfo, setAiActiveInfo] = useState({
+    activeProvider: 'gemini',
+    activeModel: 'gemini-2.5-flash',
+    hasOpenaiKey: false,
+    hasGeminiFallback: true,
+  });
+
   // Packaging Configs
   const [configs, setConfigs] = useState({
     standard: [],
@@ -173,7 +199,7 @@ export default function Settings() {
     try {
       const [resMaterials, resConfigs, resAutoConfirm, resReturnCost, resFund, resAd,
              resExpressFee, resStandardThreshold, resStandardFeeBelow,
-             resShopAddress, resShopCoords, resMaxDist, resBaseFee, resPerKmFee, resGoongKey, resBankTransferInfo, resCarrierCodAccounts] = await Promise.all([
+             resShopAddress, resShopCoords, resMaxDist, resBaseFee, resPerKmFee, resGoongKey, resBankTransferInfo, resCarrierCodAccounts, resAiConfig] = await Promise.all([
         materialService.getMaterials(),
         shippingConfigService.getAllConfigs(),
         systemConfigService.getConfig('auto_confirm_out_of_stock_imports'),
@@ -191,6 +217,7 @@ export default function Settings() {
         systemConfigService.getConfig('goong_api_key'),
         systemConfigService.getConfig('bank_transfer_info'),
         systemConfigService.getConfig('carrier_cod_accounts'),
+        aiService.getConfig().catch(() => null),
       ]);
 
       if (resMaterials.data.success) {
@@ -288,6 +315,18 @@ export default function Settings() {
         resAd.data.data.forEach(p => initialAdSync[p.platform] = p.balance);
         setAdSyncValues(initialAdSync);
       }
+
+      if (resAiConfig?.data?.success && resAiConfig.data.data) {
+        const aiData = resAiConfig.data.data;
+        setOpenaiApiKey(aiData.openaiApiKey || '');
+        setOpenaiModel(aiData.openaiModel || 'gpt-5.4');
+        setAiActiveInfo({
+          activeProvider: aiData.activeProvider || 'gemini',
+          activeModel: aiData.activeModel || 'gemini-2.5-flash',
+          hasOpenaiKey: Boolean(aiData.hasOpenaiKey),
+          hasGeminiFallback: Boolean(aiData.hasGeminiFallback),
+        });
+      }
     } catch (err) {
       console.error(err);
       showToast('Lỗi khi tải dữ liệu cài đặt', 'error');
@@ -299,6 +338,67 @@ export default function Settings() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    const requestedTab = searchParams.get('tab');
+    if (requestedTab && ['appearance', 'website', 'packaging', 'finance', 'automation'].includes(requestedTab)) {
+      setActiveTab(requestedTab);
+    }
+  }, [searchParams]);
+
+  const handleSaveAiConfig = async (customKey = openaiApiKey, customModel = openaiModel) => {
+    setSavingAiConfig(true);
+    setAiTestStatus(null);
+    try {
+      const res = await aiService.updateConfig({
+        openaiApiKey: String(customKey || '').trim(),
+        openaiModel: customModel || 'gpt-5.4',
+      });
+      const aiData = res.data?.data;
+      if (aiData) {
+        setOpenaiApiKey(aiData.openaiApiKey || '');
+        setOpenaiModel(aiData.openaiModel || 'gpt-5.4');
+        const nextInfo = {
+          activeProvider: aiData.activeProvider || 'gemini',
+          activeModel: aiData.activeModel || 'gemini-2.5-flash',
+          hasOpenaiKey: Boolean(aiData.hasOpenaiKey),
+          hasGeminiFallback: Boolean(aiData.hasGeminiFallback),
+        };
+        setAiActiveInfo(nextInfo);
+        window.dispatchEvent(new CustomEvent('candlet:ai-config-updated', { detail: nextInfo }));
+      }
+      showToast(res.data?.message || 'Đã lưu cấu hình AI Business Analyst');
+    } catch (err) {
+      console.error(err);
+      showToast(err.response?.data?.message || 'Lỗi khi lưu cấu hình AI', 'error');
+    } finally {
+      setSavingAiConfig(false);
+    }
+  };
+
+  const handleTestAiConfig = async () => {
+    if (!openaiApiKey.trim()) {
+      showToast('Vui lòng nhập OpenAI API Key trước khi kiểm tra', 'error');
+      return;
+    }
+    setTestingAiConfig(true);
+    setAiTestStatus(null);
+    try {
+      const res = await aiService.testConfig({
+        openaiApiKey: openaiApiKey.trim(),
+        openaiModel,
+      });
+      const msg = res.data?.message || 'Kết nối OpenAI GPT thành công!';
+      setAiTestStatus({ success: true, message: msg, reply: res.data?.data?.reply });
+      showToast(msg);
+    } catch (err) {
+      const msg = err.response?.data?.message || err.message || 'Không thể kết nối OpenAI API';
+      setAiTestStatus({ success: false, message: msg });
+      showToast(msg, 'error');
+    } finally {
+      setTestingAiConfig(false);
+    }
+  };
 
   useEffect(() => {
     setThemePreset(themeScope === 'shop' ? themeConfig.shopPreset : themeConfig.adminPreset);
@@ -667,7 +767,7 @@ export default function Settings() {
     { id: 'website', label: 'Website & Giao Hàng', icon: 'language', badge: 'Khách hàng' },
     { id: 'packaging', label: 'Đóng Gói & Kho', icon: 'inventory_2', badge: 'Tự động trừ kho' },
     { id: 'finance', label: 'Tài Sản & Chi Phí', icon: 'account_balance', badge: 'Quỹ & Hoàn' },
-    { id: 'automation', label: 'Tự Động Hóa', icon: 'precision_manufacturing', badge: 'Quy trình' },
+    { id: 'automation', label: 'AI & Tự Động Hóa', icon: 'precision_manufacturing', badge: 'GPT-5.4 & Quy trình' },
   ];
 
   return (
@@ -1721,10 +1821,154 @@ export default function Settings() {
           )}
 
           {/* ========================================================================= */}
-          {/* TAB 4: TỰ ĐỘNG HÓA */}
+          {/* TAB 4: AI & TỰ ĐỘNG HÓA */}
           {/* ========================================================================= */}
           {activeTab === 'automation' && (
             <div className="space-y-6 animate-[fadeIn_0.2s_ease-out]">
+              {/* Card 1: Cấu hình AI Business Analyst (OpenAI GPT / Gemini Fallback) */}
+              <div className="bg-white rounded-2xl border border-stone-200/80 shadow-xs p-6 sm:p-7">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-5 border-b border-stone-100">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200/70 flex items-center justify-center shrink-0 shadow-xs">
+                      <span className="material-symbols-outlined text-2xl">psychology</span>
+                    </div>
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="text-base font-bold text-stone-900">AI Business Analyst (OpenAI GPT & Gemini)</h3>
+                        <span
+                          className={`text-[10.5px] font-bold px-2.5 py-0.5 rounded-full border ${
+                            aiActiveInfo.activeProvider === 'openai'
+                              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                              : 'bg-blue-50 text-blue-800 border-blue-200'
+                          }`}
+                        >
+                          {aiActiveInfo.activeProvider === 'openai'
+                            ? `ĐANG DÙNG: OPENAI (${(aiActiveInfo.activeModel || 'gpt-5.4').toUpperCase()})`
+                            : 'ĐANG DÙNG: GEMINI AI (MẶC ĐỊNH)'}
+                        </span>
+                      </div>
+                      <p className="text-xs sm:text-sm text-stone-500 mt-1 max-w-3xl leading-relaxed">
+                        Nhập OpenAI API Key để nâng cấp trợ lý phân tích dữ liệu kinh doanh sang model GPT mạnh nhất (<strong>GPT-5.4</strong>). Không cần cấu hình trong file <code>.env</code>. Nếu bỏ trống API Key GPT, hệ thống sẽ tự động chuyển về dùng API Gemini hiện tại.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-5">
+                  <div className="lg:col-span-7">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-2">
+                      OpenAI API Key (Tùy chọn · Để trống sẽ dùng Gemini mặc định)
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showOpenaiKey ? 'text' : 'password'}
+                        value={openaiApiKey}
+                        onChange={(e) => setOpenaiApiKey(e.target.value)}
+                        placeholder="sk-proj-..."
+                        className="w-full border border-stone-200 rounded-xl pl-3.5 pr-11 py-2.5 text-sm font-mono text-stone-800 bg-stone-50/60 focus:bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowOpenaiKey((v) => !v)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700"
+                        title={showOpenaiKey ? 'Ẩn API Key' : 'Hiện API Key'}
+                      >
+                        <span className="material-symbols-outlined text-[19px]">
+                          {showOpenaiKey ? 'visibility_off' : 'visibility'}
+                        </span>
+                      </button>
+                    </div>
+                    <p className="text-[11.5px] text-stone-400 mt-1.5">
+                      Lấy key tại <code>platform.openai.com/api-keys</code>. Key được lưu bảo mật trong cơ sở dữ liệu quản trị.
+                    </p>
+                  </div>
+
+                  <div className="lg:col-span-5">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-2">
+                      Model OpenAI GPT ưu tiên
+                    </label>
+                    <select
+                      value={openaiModel}
+                      onChange={(e) => setOpenaiModel(e.target.value)}
+                      className="w-full border border-stone-200 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-stone-800 bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+                    >
+                      {GPT_MODEL_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-[11.5px] text-stone-400 mt-1.5">
+                      Tự động fallback thông minh nếu cấp tài khoản OpenAI chưa mở model cao nhất.
+                    </p>
+                  </div>
+                </div>
+
+                {aiTestStatus && (
+                  <div
+                    className={`mt-4 rounded-xl border px-4 py-3 text-xs font-semibold flex items-start gap-2.5 ${
+                      aiTestStatus.success
+                        ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                        : 'bg-red-50 border-red-200 text-red-700'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-[18px] shrink-0">
+                      {aiTestStatus.success ? 'check_circle' : 'error'}
+                    </span>
+                    <div>
+                      <div>{aiTestStatus.message}</div>
+                      {aiTestStatus.reply && (
+                        <div className="mt-1 font-normal text-emerald-700">Phản hồi từ GPT: "{aiTestStatus.reply}"</div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                <div className="mt-6 pt-4 border-t border-stone-100 flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleTestAiConfig}
+                      disabled={testingAiConfig || !openaiApiKey.trim()}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-stone-700 bg-stone-100 hover:bg-stone-200 rounded-xl transition-colors disabled:opacity-50"
+                    >
+                      {testingAiConfig ? (
+                        <span className="w-3.5 h-3.5 border-2 border-stone-500 border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <span className="material-symbols-outlined text-[17px]">bolt</span>
+                      )}
+                      <span>Kiểm tra kết nối GPT</span>
+                    </button>
+
+                    {aiActiveInfo.hasOpenaiKey && (
+                      <button
+                        type="button"
+                        onClick={() => handleSaveAiConfig('', openaiModel)}
+                        disabled={savingAiConfig}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl transition-colors disabled:opacity-50"
+                      >
+                        <span className="material-symbols-outlined text-[17px]">restart_alt</span>
+                        <span>Xóa Key & Dùng Gemini mặc định</span>
+                      </button>
+                    )}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleSaveAiConfig(openaiApiKey, openaiModel)}
+                    disabled={savingAiConfig}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary/90 text-white text-xs font-bold rounded-xl shadow-xs disabled:opacity-60 transition-all"
+                  >
+                    {savingAiConfig ? (
+                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <span className="material-symbols-outlined text-[18px]">save</span>
+                    )}
+                    <span>Lưu cấu hình AI</span>
+                  </button>
+                </div>
+              </div>
+
               <div className="bg-white rounded-2xl border border-stone-200/80 shadow-xs p-6 sm:p-7">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
                   <div className="flex items-start gap-4">

@@ -46,6 +46,7 @@ import ShopGuide from './pages/shop/ShopGuide';
 import ShopStories from './pages/shop/ShopStories';
 import ShopStoryDetail from './pages/shop/ShopStoryDetail';
 import { WebsiteThemeProvider } from './hooks/useWebsiteTheme';
+import AIAssistant from './components/AIAssistant';
 
 export default function App() {
   return (
@@ -108,6 +109,7 @@ export default function App() {
 
           <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          <AIAssistant />
           </WishlistProvider>
         </CartProvider>
         </AuthProvider>

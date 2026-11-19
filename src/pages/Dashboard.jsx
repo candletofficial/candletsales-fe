@@ -11,7 +11,6 @@ import {
   PieChart, Pie, Cell
 } from 'recharts';
 import { exportDashboardToPDF } from '../utils/pdfExport';
-import AIAssistant from '../components/AIAssistant';
 
 // ─── Formatting helpers ───
 const formatCurrency = (n) => Math.round(n || 0).toLocaleString('vi-VN', { maximumFractionDigits: 0 }) + ' ₫';
@@ -126,6 +125,17 @@ export default function Dashboard() {
         params = { days: 1, endDate: customEndDate };
       }
     }
+
+    window.dispatchEvent(
+      new CustomEvent('candlet:ai-period-sync', {
+        detail: {
+          filterType,
+          periodLabel: getPeriodLabel(),
+          days: params.days,
+          endDate: params.endDate,
+        },
+      })
+    );
 
     adminService.getDashboardStats(params)
       .then(res => setData(res.data.data))
@@ -637,7 +647,6 @@ export default function Dashboard() {
           
         </div>
       </div>
-      <AIAssistant periodLabel={getPeriodLabel()} />
     </Layout>
   );
 }
