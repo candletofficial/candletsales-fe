@@ -20,6 +20,16 @@ const formatPrice = (n) =>
 const formatDate = (d) =>
   d ? new Date(d).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
 
+const currentItemUnitCost = (item, productMap) => {
+  if (Array.isArray(item?.material_overrides)) return Number(item.unit_cost) || 0;
+  const product = productMap.get(String(item?.product_id || ''))
+    || productMap.get(String(item?.productId || ''));
+  if (!product) return Number(item?.unit_cost) || 0;
+  if (!item?.sku_id) return Number(product.base_cost) || 0;
+  const sku = (product.skus || []).find(row => String(row.id) === String(item.sku_id));
+  return sku ? (Number(sku.cost) || 0) : (Number(item.unit_cost) || 0);
+};
+
 const today = () => {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -2128,6 +2138,158 @@ function DeleteModal({ order, onClose, onConfirm, loading }) {
 }
 
 // ── Modal Xác nhận đánh dấu đơn hoàn ────────────────────────────────
+function OrderCostModal({ order, productMap, onClose }) {
+  const isCancelled = order.status === 'cancelled' || order.delivery_status === 'cancelled';
+  const isReturned = order.status === 'returned'
+    || ['returning', 'returned', 'failed'].includes(order.delivery_status);
+  const itemRows = (order.items || []).map(item => {
+    const unitCost = currentItemUnitCost(item, productMap);
+    return { ...item, currentUnitCost: unitCost, lineCost: unitCost * (Number(item.quantity) || 0) };
+  });
+  const productCost = itemRows.reduce((sum, item) => sum + item.lineCost, 0);
+  const packagingCost = Number(order.packaging_cost) || 0;
+  const logisticsCost = Number(order.logistics_cost) || 0;
+  const returnCost = Number(order.return_cost) || 0;
+  const seedingCost = Number(order.seeding_cost) || 0;
+  let countedCost = productCost + packagingCost + logisticsCost;
+  let countedRevenue = order.is_replacement || order.is_seeding ? 0 : (Number(order.total_price) || 0);
+  let note = 'Giá vốn và các chi phí trực tiếp của đơn được trừ khỏi doanh thu.';
+
+  if (isCancelled) {
+    countedCost = 0;
+    countedRevenue = 0;
+    note = 'Đơn đã huỷ nên không được tính doanh thu hoặc chi phí vào báo cáo.';
+  } else if (isReturned) {
+    countedCost = returnCost;
+    countedRevenue = 0;
+    note = 'Đơn hoàn bị loại khỏi doanh thu và giá vốn; báo cáo chỉ trừ chi phí hoàn hàng.';
+  } else if (order.is_seeding) {
+    countedCost = productCost + packagingCost + logisticsCost + seedingCost - (Number(order.total_price) || 0);
+    note = 'Đơn seeding không ghi nhận doanh thu; giá trị đơn được bù trừ vào tổng chi phí seeding.';
+  } else if (order.is_replacement) {
+    note = 'Đơn giao bù không ghi nhận doanh thu; toàn bộ chi phí trực tiếp được tính là chi phí giao bù.';
+  }
+
+  const contribution = countedRevenue - countedCost;
+  const contributionMargin = countedRevenue > 0 ? (contribution / countedRevenue) * 100 : null;
+  const statusLabel = isCancelled ? 'Đã huỷ'
+    : isReturned ? 'Đơn hoàn'
+      : order.is_replacement ? 'Đơn giao bù'
+        : order.is_seeding ? 'Đơn seeding' : 'Đơn bán hàng';
+  const costRows = [
+    ['Giá vốn sản phẩm', productCost, 'inventory_2'],
+    ['Chi phí đóng gói', packagingCost, 'package_2'],
+    ['Chi phí vận chuyển', logisticsCost, 'local_shipping'],
+    ...(isReturned ? [['Chi phí hoàn hàng', returnCost, 'assignment_return']] : []),
+    ...(order.is_seeding ? [['Chi phí seeding bổ sung', seedingCost, 'featured_seasonal_and_gifts'], ['Giá trị đơn bù trừ', -(Number(order.total_price) || 0), 'remove_circle']] : []),
+  ];
+
+  return (
+    <div className="fixed inset-0 z-[100] bg-slate-950/50 backdrop-blur-[2px] flex items-center justify-center p-3 sm:p-4">
+      <div className="w-full max-w-4xl max-h-[94vh] rounded-[28px] bg-[#fbfcff] shadow-2xl overflow-hidden flex flex-col border border-white/80">
+        <div className="px-5 sm:px-6 py-4.5 bg-white border-b border-slate-200/80 flex items-center gap-3">
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-200 flex items-center justify-center shrink-0">
+            <span className="material-symbols-outlined">request_quote</span>
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="font-black text-lg text-slate-900">Chi phí đơn hàng</h3>
+              <span className="px-2 py-0.5 rounded-full bg-slate-100 text-[10px] uppercase tracking-wide font-black text-slate-600">{statusLabel}</span>
+            </div>
+            <p className="text-xs text-slate-500 truncate"><span className="font-mono font-bold text-slate-700">#{order.orderId}</span><span className="mx-1.5 text-slate-300">•</span>{order.source || 'Khác'}</p>
+          </div>
+          <button type="button" onClick={onClose} className="w-9 h-9 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-500 flex items-center justify-center cursor-pointer shadow-sm" aria-label="Đóng">
+            <span className="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <div className="overflow-y-auto p-4 sm:p-6 space-y-5">
+          <div className="grid sm:grid-cols-[1.35fr_1fr] gap-3">
+            <div className={`relative overflow-hidden rounded-3xl p-5 text-white ${contribution >= 0 ? 'bg-gradient-to-br from-emerald-600 to-teal-700' : 'bg-gradient-to-br from-rose-600 to-red-700'}`}>
+              <div className="absolute -right-8 -top-10 w-36 h-36 rounded-full bg-white/10" />
+              <div className="absolute right-12 -bottom-14 w-28 h-28 rounded-full bg-white/10" />
+              <div className="relative">
+                <p className="text-[11px] font-black uppercase tracking-[0.14em] text-white/75">Lợi nhuận đóng góp</p>
+                <p className="mt-2 font-mono text-2xl sm:text-3xl font-black tracking-tight">{formatPrice(contribution)}</p>
+                <div className="mt-3 flex items-center gap-2 text-xs font-bold">
+                  {contributionMargin !== null && <span className="rounded-full bg-white/15 border border-white/20 px-2.5 py-1">Biên {contributionMargin.toFixed(1)}%</span>}
+                  <span className="text-white/70">sau chi phí trực tiếp</span>
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-1 gap-3">
+              <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3.5 shadow-sm flex sm:items-center sm:justify-between gap-2">
+                <div><p className="text-[10px] font-black uppercase tracking-wide text-slate-400">Doanh thu ghi nhận</p><p className="mt-1 font-mono text-base font-black text-slate-900">{formatPrice(countedRevenue)}</p></div>
+                <span className="hidden sm:flex w-9 h-9 rounded-xl bg-blue-50 text-blue-600 items-center justify-center"><span className="material-symbols-outlined text-[19px]">trending_up</span></span>
+              </div>
+              <div className="rounded-2xl border border-rose-200 bg-white px-4 py-3.5 shadow-sm flex sm:items-center sm:justify-between gap-2">
+                <div><p className="text-[10px] font-black uppercase tracking-wide text-rose-500">Chi phí bị trừ</p><p className="mt-1 font-mono text-base font-black text-rose-700">{formatPrice(countedCost)}</p></div>
+                <span className="hidden sm:flex w-9 h-9 rounded-xl bg-rose-50 text-rose-600 items-center justify-center"><span className="material-symbols-outlined text-[19px]">trending_down</span></span>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-blue-100 bg-blue-50/70 px-4 py-3 flex gap-2.5 text-xs text-blue-900">
+            <span className="material-symbols-outlined text-[18px] text-blue-600 shrink-0">info</span>
+            <p className="leading-relaxed">{note}</p>
+          </div>
+
+          <div className="grid lg:grid-cols-[1.3fr_0.9fr] gap-4 items-start">
+          <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div>
+                <h4 className="text-sm font-black text-slate-900">Giá vốn sản phẩm</h4>
+                <p className="text-[11px] text-slate-400 mt-0.5">Theo công thức và giá nguyên liệu hiện tại</p>
+              </div>
+              <span className="font-mono text-sm font-black text-slate-900 bg-slate-100 px-2.5 py-1 rounded-lg">{formatPrice(productCost)}</span>
+            </div>
+            <div className="border border-slate-100 rounded-2xl overflow-hidden divide-y divide-slate-100 bg-slate-50/60">
+              {itemRows.length ? itemRows.map((item, index) => (
+                <div key={`${item.sku_id || item.product_id}-${index}`} className="p-3 flex items-center gap-3 hover:bg-white transition-colors">
+                  <span className="w-7 h-7 rounded-lg bg-white border border-slate-200 text-[11px] font-black text-slate-500 flex items-center justify-center shrink-0">{index + 1}</span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[13px] font-bold text-slate-900 truncate">{item.product_name}</p>
+                    <p className="text-[11px] text-slate-500 truncate">
+                      {item.sku_label || 'Mặc định'} · {formatPrice(item.currentUnitCost)} / sản phẩm
+                      {Array.isArray(item.material_overrides) && <span className="ml-1.5 text-violet-600 font-bold">Công thức riêng</span>}
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="font-mono text-sm font-black text-slate-800">{formatPrice(item.lineCost)}</p>
+                    <span className="text-[10px] font-bold text-slate-400">SL: {item.quantity}</span>
+                  </div>
+                </div>
+              )) : <p className="p-4 text-sm text-slate-400 text-center">Đơn không có sản phẩm</p>}
+            </div>
+          </section>
+
+          <section className="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div className="px-4 py-3.5 border-b border-slate-100">
+              <h4 className="text-sm font-black text-slate-900">Các khoản khấu trừ</h4>
+              <p className="text-[11px] text-slate-400 mt-0.5">Chi tiết cấu thành chi phí của đơn</p>
+            </div>
+            <div className="px-4 py-1">
+            {costRows.map(([label, value, icon]) => (
+              <div key={label} className="py-3 flex items-center justify-between gap-3 border-b border-slate-100 last:border-0 text-sm">
+                <span className="text-slate-600 flex items-center gap-2 min-w-0"><span className="w-7 h-7 rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center shrink-0"><span className="material-symbols-outlined text-[16px]">{icon}</span></span><span className="truncate">{label}</span></span>
+                <span className={`font-mono font-bold shrink-0 ${value < 0 ? 'text-emerald-600' : 'text-slate-900'}`}>{formatPrice(value)}</span>
+              </div>
+            ))}
+            </div>
+            <div className="px-4 py-4 flex items-center justify-between gap-4 bg-slate-900 text-white">
+              <span className="text-sm font-bold">Tổng được tính</span>
+              <span className="font-mono text-lg font-black">{formatPrice(countedCost)}</span>
+            </div>
+          </section>
+          </div>
+
+          <p className="text-[11px] leading-relaxed text-slate-400 text-center px-3">Chi phí quảng cáo và affiliate được tổng hợp theo kỳ trên Dashboard nên chưa phân bổ vào từng đơn hàng.</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function RefundModal({ order, onClose, onConfirm, loading }) {
   const [refundTransactionId, setRefundTransactionId] = useState('');
   const [error, setError] = useState('');
@@ -2310,6 +2472,14 @@ function DepositModal({ requiredAmount, onClose, onSuccess }) {
 export default function OrderManagement() {
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
+  const productCostMap = useMemo(() => {
+    const map = new Map();
+    products.forEach(product => {
+      map.set(String(product._id), product);
+      map.set(String(product.productId), product);
+    });
+    return map;
+  }, [products]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [modal, setModal] = useState(null); // null | { type: 'add'|'edit'|'delete'|'return', data? }
@@ -2484,7 +2654,7 @@ export default function OrderManagement() {
   const returnedOrders  = baseFilteredOrders.filter(o => o.status === 'returned' || ['returning', 'returned', 'failed'].includes(o.delivery_status));
   const totalRevenue = normalActiveOrders.reduce((s, o) => s + (o.total_price || 0), 0);
   const totalItems   = normalActiveOrders.reduce((s, o) => s + (o.items?.reduce((a, i) => a + i.quantity, 0) || 0), 0);
-  const totalCost    = activeOrders.reduce((s, o) => s + (o.seeding_cost || 0) + (o.items?.reduce((a, i) => a + (i.unit_cost || 0) * i.quantity, 0) || 0) + (o.logistics_cost || 0) + (o.packaging_cost || 0), 0)
+  const totalCost    = activeOrders.reduce((s, o) => s + (o.seeding_cost || 0) + (o.items?.reduce((a, i) => a + currentItemUnitCost(i, productCostMap) * i.quantity, 0) || 0) + (o.logistics_cost || 0) + (o.packaging_cost || 0), 0)
                      + returnedOrders.reduce((s, o) => s + (o.return_cost || 0), 0); // thêm chi phí hoàn
   const totalProfit  = totalRevenue - totalCost;
   const profitMargin = totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(1) : 0;
@@ -2544,6 +2714,9 @@ export default function OrderManagement() {
       )}
       {modal?.type === 'delete' && (
         <DeleteModal order={modal.data} onClose={() => setModal(null)} onConfirm={handleDelete} loading={actionLoading} />
+      )}
+      {modal?.type === 'cost' && (
+        <OrderCostModal order={modal.data} productMap={productCostMap} onClose={() => setModal(null)} />
       )}
       {modal?.type === 'return' && (
         <ReturnModal
@@ -3122,6 +3295,17 @@ export default function OrderManagement() {
                                 <span className="text-[10px] font-bold">Hoàn tiền</span>
                               </button>
                             )}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setModal({ type: 'cost', data: order });
+                              }}
+                              className="w-8 h-8 rounded-xl bg-rose-50 hover:bg-rose-600 hover:text-white text-rose-700 border border-rose-200 flex items-center justify-center transition-all shadow-2xs cursor-pointer"
+                              title="Xem chi phí bị trừ của đơn hàng"
+                            >
+                              <span className="material-symbols-outlined text-[18px]">request_quote</span>
+                            </button>
                             <button
                               type="button"
                               onClick={(e) => {
