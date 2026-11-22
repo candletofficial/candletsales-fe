@@ -73,12 +73,12 @@ const ChristmasTreeMark = ({ className = '' }) => (
 
 export default function ShopLayout() {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
   const [showDropdown, setShowDropdown] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [shopAddress, setShopAddress] = useState('');
   const [unfinishedOrderCount, setUnfinishedOrderCount] = useState(0);
   const dropdownRef = useRef(null);
+  const scrollProgressRef = useRef(null);
 
   const { cartItemCount } = useCart();
   const { wishlistCount } = useWishlist();
@@ -151,18 +151,41 @@ export default function ShopLayout() {
 
   // Xử lý sự kiện scroll và tính toán thanh tiến trình cuộn trang
   useEffect(() => {
-    const handleScroll = () => {
+    let rafId = null;
+    let previousScrolled = null;
+
+    const updateScrollUi = () => {
+      rafId = null;
       const scrollY = window.scrollY;
-      setIsScrolled(scrollY > 30);
+      const nextScrolled = scrollY > 30;
+
+      if (nextScrolled !== previousScrolled) {
+        previousScrolled = nextScrolled;
+        setIsScrolled(nextScrolled);
+      }
 
       const winHeight = document.documentElement.scrollHeight - window.innerHeight;
-      if (winHeight > 0) {
-        const progress = Math.min(100, Math.max(0, (scrollY / winHeight) * 100));
-        setScrollProgress(progress);
+      const progress = winHeight > 0
+        ? Math.min(1, Math.max(0, scrollY / winHeight))
+        : 0;
+
+      if (scrollProgressRef.current) {
+        scrollProgressRef.current.style.transform = `scaleX(${progress})`;
       }
     };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+
+    const scheduleUpdate = () => {
+      if (rafId === null) rafId = requestAnimationFrame(updateScrollUi);
+    };
+
+    updateScrollUi();
+    window.addEventListener('scroll', scheduleUpdate, { passive: true });
+    window.addEventListener('resize', scheduleUpdate, { passive: true });
+    return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      window.removeEventListener('scroll', scheduleUpdate);
+      window.removeEventListener('resize', scheduleUpdate);
+    };
   }, []);
 
   // Đóng mobile menu khi chuyển trang
@@ -300,11 +323,10 @@ export default function ShopLayout() {
               {/* Nút theo dõi đơn hàng */}
               <Link
                 to="/orders"
-                className={`relative rounded-full p-2 transition-all focus:outline-none sm:p-2.5 ${!user ? 'hidden lg:inline-flex' : ''} ${
-                  location.pathname === '/orders'
-                    ? 'bg-brand-burgundy/8 text-brand-terracotta'
-                    : 'text-brand-charcoal sm:hover:bg-brand-burgundy/5 sm:hover:text-brand-burgundy'
-                }`}
+                className={`relative rounded-full p-2 transition-all focus:outline-none sm:p-2.5 ${!user ? 'hidden lg:inline-flex' : ''} ${location.pathname === '/orders'
+                  ? 'bg-brand-burgundy/8 text-brand-terracotta'
+                  : 'text-brand-charcoal sm:hover:bg-brand-burgundy/5 sm:hover:text-brand-burgundy'
+                  }`}
                 title="Theo dõi đơn hàng"
                 aria-label="Theo dõi đơn hàng"
               >
@@ -447,8 +469,9 @@ export default function ShopLayout() {
             }`}
         >
           <div
-            className="h-full bg-gradient-to-r from-amber-500 via-brand-terracotta to-brand-burgundy transition-all duration-75 ease-out"
-            style={{ width: `${scrollProgress}%` }}
+            ref={scrollProgressRef}
+            className="h-full origin-left bg-gradient-to-r from-amber-500 via-brand-terracotta to-brand-burgundy will-change-transform"
+            style={{ transform: 'scaleX(0)' }}
           />
         </div>
 
@@ -532,8 +555,8 @@ export default function ShopLayout() {
           {/* Drawer Content */}
           <div className="relative w-full max-w-xs bg-white h-full shadow-2xl flex flex-col p-6 overflow-y-auto animate-[fadeIn_0.2s_ease-out]">
             <div className="flex items-center justify-between pb-5 border-b border-stone-100">
-              <Link 
-                to="/" 
+              <Link
+                to="/"
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center"
               >
@@ -586,11 +609,10 @@ export default function ShopLayout() {
               <Link
                 to={user ? "/profile" : "/login"}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${
-                  location.pathname === '/profile'
-                    ? 'bg-[#FAF5EE] text-brand-burgundy font-bold border border-amber-200/60'
-                    : 'text-stone-700 sm:hover:bg-stone-50'
-                }`}
+                className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${location.pathname === '/profile'
+                  ? 'bg-[#FAF5EE] text-brand-burgundy font-bold border border-amber-200/60'
+                  : 'text-stone-700 sm:hover:bg-stone-50'
+                  }`}
               >
                 <div className="flex items-center gap-2.5">
                   <i className="ph-bold ph-user-circle text-base text-brand-burgundy"></i>
@@ -679,11 +701,10 @@ export default function ShopLayout() {
       )}
 
       <main
-        className={`relative z-10 flex-1 isolate ${
-          isBottomNavHidden
-            ? 'pb-0'
-            : 'pb-[calc(3.75rem+env(safe-area-inset-bottom,0px))] lg:pb-0'
-        }`}
+        className={`relative z-10 flex-1 isolate ${isBottomNavHidden
+          ? 'pb-0'
+          : 'pb-[calc(3.75rem+env(safe-area-inset-bottom,0px))] lg:pb-0'
+          }`}
       >
         <div className="relative z-10 min-h-full" data-purpose="shop-page-content">
           <Outlet />
@@ -696,82 +717,82 @@ export default function ShopLayout() {
           className="hidden"
           data-purpose="mobile-footer"
         >
-        <div className="h-px bg-gradient-to-r from-transparent via-amber-300/60 to-transparent"></div>
+          <div className="h-px bg-gradient-to-r from-transparent via-amber-300/60 to-transparent"></div>
 
-        <div className="px-4 pb-4 pt-5">
-          <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-4">
-            <Link to="/" className="min-w-0">
-              <img
-                src="/logo.png"
-                alt="Candlet"
-                className="h-8 w-auto object-contain brightness-0 invert"
-              />
-              <p className="mt-1 truncate text-[10px] text-stone-400">
-                Nến thơm thủ công · Thắp hương thơm, giữ khoảnh khắc
-              </p>
-            </Link>
+          <div className="px-4 pb-4 pt-5">
+            <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-4">
+              <Link to="/" className="min-w-0">
+                <img
+                  src="/logo.png"
+                  alt="Candlet"
+                  className="h-8 w-auto object-contain brightness-0 invert"
+                />
+                <p className="mt-1 truncate text-[10px] text-stone-400">
+                  Nến thơm thủ công · Thắp hương thơm, giữ khoảnh khắc
+                </p>
+              </Link>
 
-            <button
-              type="button"
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/15 text-amber-200 transition-colors active:bg-white/10"
-              aria-label="Lên đầu trang"
-            >
-              <i className="ph-bold ph-arrow-up text-sm"></i>
-            </button>
+              <button
+                type="button"
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/15 text-amber-200 transition-colors active:bg-white/10"
+                aria-label="Lên đầu trang"
+              >
+                <i className="ph-bold ph-arrow-up text-sm"></i>
+              </button>
+            </div>
+
+            <nav className="grid grid-cols-2 gap-1.5 border-b border-white/10 py-3.5 text-[10.5px] font-semibold" aria-label="Liên kết cuối trang">
+              <Link to="/shop" className="flex min-h-9 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.06] px-2.5 py-2 text-stone-100 transition-colors active:bg-white/15">
+                <i className="ph-bold ph-storefront text-sm text-amber-300"></i>
+                <span>Cửa hàng</span>
+              </Link>
+              <Link to="/order-lookup" className="flex min-h-9 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.06] px-2.5 py-2 text-stone-100 transition-colors active:bg-white/15">
+                <i className="ph-bold ph-package text-sm text-amber-300"></i>
+                <span>Tra cứu đơn</span>
+              </Link>
+              <Link to="/guide" className="flex min-h-9 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.06] px-2.5 py-2 text-stone-100 transition-colors active:bg-white/15">
+                <i className="ph-bold ph-book-open text-sm text-amber-300"></i>
+                <span>Cẩm nang</span>
+              </Link>
+              <Link to="/stories" className="flex min-h-9 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.06] px-2.5 py-2 text-stone-100 transition-colors active:bg-white/15">
+                <i className="ph-bold ph-article text-sm text-amber-300"></i>
+                <span>Câu chuyện</span>
+              </Link>
+            </nav>
+
+            <address className="border-b border-white/10 py-3.5 text-[10.5px] not-italic text-stone-300">
+              <div className="grid grid-cols-2 gap-3">
+                <a href="tel:0328624761" className="flex items-center gap-2">
+                  <i className="ph-bold ph-phone text-sm text-amber-300"></i>
+                  <span>032.862.4761</span>
+                </a>
+                <a href="mailto:candlet.official@gmail.com" className="flex items-center justify-end gap-2">
+                  <i className="ph-bold ph-envelope-simple text-sm text-amber-300"></i>
+                  <span>Gửi email</span>
+                </a>
+              </div>
+              <div className="mt-2.5 flex min-w-0 items-center gap-2 text-stone-400">
+                <i className="ph-bold ph-map-pin shrink-0 text-sm text-amber-300"></i>
+                <span className="truncate">{shopAddress || 'Địa chỉ cửa hàng đang được cập nhật'}</span>
+              </div>
+            </address>
+
+            <div className="flex items-center justify-between gap-3 pt-3.5">
+              <p className="text-[10px] text-stone-400">© 2026 Candlet Vietnam</p>
+              <div className="flex items-center gap-3 text-lg text-amber-200">
+                <a href="https://facebook.com" target="_blank" rel="noreferrer" aria-label="Facebook">
+                  <i className="ph ph-facebook-logo"></i>
+                </a>
+                <a href="https://instagram.com" target="_blank" rel="noreferrer" aria-label="Instagram">
+                  <i className="ph ph-instagram-logo"></i>
+                </a>
+                <a href="https://tiktok.com" target="_blank" rel="noreferrer" aria-label="TikTok">
+                  <i className="ph ph-tiktok-logo"></i>
+                </a>
+              </div>
+            </div>
           </div>
-
-          <nav className="grid grid-cols-2 gap-1.5 border-b border-white/10 py-3.5 text-[10.5px] font-semibold" aria-label="Liên kết cuối trang">
-            <Link to="/shop" className="flex min-h-9 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.06] px-2.5 py-2 text-stone-100 transition-colors active:bg-white/15">
-              <i className="ph-bold ph-storefront text-sm text-amber-300"></i>
-              <span>Cửa hàng</span>
-            </Link>
-            <Link to="/order-lookup" className="flex min-h-9 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.06] px-2.5 py-2 text-stone-100 transition-colors active:bg-white/15">
-              <i className="ph-bold ph-package text-sm text-amber-300"></i>
-              <span>Tra cứu đơn</span>
-            </Link>
-            <Link to="/guide" className="flex min-h-9 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.06] px-2.5 py-2 text-stone-100 transition-colors active:bg-white/15">
-              <i className="ph-bold ph-book-open text-sm text-amber-300"></i>
-              <span>Cẩm nang</span>
-            </Link>
-            <Link to="/stories" className="flex min-h-9 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.06] px-2.5 py-2 text-stone-100 transition-colors active:bg-white/15">
-              <i className="ph-bold ph-article text-sm text-amber-300"></i>
-              <span>Câu chuyện</span>
-            </Link>
-          </nav>
-
-          <address className="border-b border-white/10 py-3.5 text-[10.5px] not-italic text-stone-300">
-            <div className="grid grid-cols-2 gap-3">
-              <a href="tel:0328624761" className="flex items-center gap-2">
-                <i className="ph-bold ph-phone text-sm text-amber-300"></i>
-                <span>032.862.4761</span>
-              </a>
-              <a href="mailto:candlet.official@gmail.com" className="flex items-center justify-end gap-2">
-                <i className="ph-bold ph-envelope-simple text-sm text-amber-300"></i>
-                <span>Gửi email</span>
-              </a>
-            </div>
-            <div className="mt-2.5 flex min-w-0 items-center gap-2 text-stone-400">
-              <i className="ph-bold ph-map-pin shrink-0 text-sm text-amber-300"></i>
-              <span className="truncate">{shopAddress || 'Địa chỉ cửa hàng đang được cập nhật'}</span>
-            </div>
-          </address>
-
-          <div className="flex items-center justify-between gap-3 pt-3.5">
-            <p className="text-[10px] text-stone-400">© 2026 Candlet Vietnam</p>
-            <div className="flex items-center gap-3 text-lg text-amber-200">
-              <a href="https://facebook.com" target="_blank" rel="noreferrer" aria-label="Facebook">
-                <i className="ph ph-facebook-logo"></i>
-              </a>
-              <a href="https://instagram.com" target="_blank" rel="noreferrer" aria-label="Instagram">
-                <i className="ph ph-instagram-logo"></i>
-              </a>
-              <a href="https://tiktok.com" target="_blank" rel="noreferrer" aria-label="TikTok">
-                <i className="ph ph-tiktok-logo"></i>
-              </a>
-            </div>
-          </div>
-        </div>
         </footer>
       )}
 
@@ -1069,77 +1090,72 @@ export default function ShopLayout() {
           style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
           aria-label="Điều hướng di động"
         >
-        <div className="grid grid-cols-5 h-15 max-w-lg mx-auto px-1 items-center">
-          {/* 1. Trang chủ */}
-          <Link
-            to="/"
-            className={`flex flex-col items-center justify-center py-1 transition-all duration-200 active:scale-95 ${
-              location.pathname === '/' ? 'text-brand-burgundy font-bold' : 'text-stone-500 sm:hover:text-stone-800'
-            }`}
-          >
-            <i className={`text-xl transition-transform ${location.pathname === '/' ? 'ph-fill ph-house scale-110 text-brand-burgundy' : 'ph ph-house'}`}></i>
-            <span className="text-[10px] mt-0.5 tracking-tight">Trang chủ</span>
-          </Link>
+          <div className="grid grid-cols-5 h-15 max-w-lg mx-auto px-1 items-center">
+            {/* 1. Trang chủ */}
+            <Link
+              to="/"
+              className={`flex flex-col items-center justify-center py-1 transition-all duration-200 active:scale-95 ${location.pathname === '/' ? 'text-brand-burgundy font-bold' : 'text-stone-500 sm:hover:text-stone-800'
+                }`}
+            >
+              <i className={`text-xl transition-transform ${location.pathname === '/' ? 'ph-fill ph-house scale-110 text-brand-burgundy' : 'ph ph-house'}`}></i>
+              <span className="text-[10px] mt-0.5 tracking-tight">Trang chủ</span>
+            </Link>
 
-          {/* 2. Cửa hàng */}
-          <Link
-            to="/shop"
-            className={`flex flex-col items-center justify-center py-1 transition-all duration-200 active:scale-95 ${
-              location.pathname.startsWith('/shop') ? 'text-brand-burgundy font-bold' : 'text-stone-500 sm:hover:text-stone-800'
-            }`}
-          >
-            <i className={`text-xl transition-transform ${location.pathname.startsWith('/shop') ? 'ph-fill ph-flame scale-110 text-amber-700' : 'ph ph-flame'}`}></i>
-            <span className="text-[10px] mt-0.5 tracking-tight">Cửa hàng</span>
-          </Link>
+            {/* 2. Cửa hàng */}
+            <Link
+              to="/shop"
+              className={`flex flex-col items-center justify-center py-1 transition-all duration-200 active:scale-95 ${location.pathname.startsWith('/shop') ? 'text-brand-burgundy font-bold' : 'text-stone-500 sm:hover:text-stone-800'
+                }`}
+            >
+              <i className={`text-xl transition-transform ${location.pathname.startsWith('/shop') ? 'ph-fill ph-flame scale-110 text-amber-700' : 'ph ph-flame'}`}></i>
+              <span className="text-[10px] mt-0.5 tracking-tight">Cửa hàng</span>
+            </Link>
 
-          {/* 3. Yêu thích */}
-          <Link
-            to="/wishlist"
-            className={`flex flex-col items-center justify-center py-1 transition-all duration-200 active:scale-95 ${
-              location.pathname === '/wishlist' ? 'text-rose-600 font-bold' : 'text-stone-500 sm:hover:text-stone-800'
-            }`}
-          >
-            <div className="relative">
-              <i className={`text-xl transition-transform ${location.pathname === '/wishlist' ? 'ph-fill ph-heart scale-110 text-rose-500' : 'ph ph-heart'}`}></i>
-              {wishlistCount > 0 && (
-                <span className="absolute -top-1 -right-2 min-w-[16px] h-[16px] bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center rounded-full border border-white shadow-xs px-0.5">
-                  {wishlistCount > 99 ? '99+' : wishlistCount}
-                </span>
-              )}
-            </div>
-            <span className="text-[10px] mt-0.5 tracking-tight">Yêu thích</span>
-          </Link>
+            {/* 3. Yêu thích */}
+            <Link
+              to="/wishlist"
+              className={`flex flex-col items-center justify-center py-1 transition-all duration-200 active:scale-95 ${location.pathname === '/wishlist' ? 'text-rose-600 font-bold' : 'text-stone-500 sm:hover:text-stone-800'
+                }`}
+            >
+              <div className="relative">
+                <i className={`text-xl transition-transform ${location.pathname === '/wishlist' ? 'ph-fill ph-heart scale-110 text-rose-500' : 'ph ph-heart'}`}></i>
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-1 -right-2 min-w-[16px] h-[16px] bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center rounded-full border border-white shadow-xs px-0.5">
+                    {wishlistCount > 99 ? '99+' : wishlistCount}
+                  </span>
+                )}
+              </div>
+              <span className="text-[10px] mt-0.5 tracking-tight">Yêu thích</span>
+            </Link>
 
-          {/* 4. Giỏ hàng */}
-          <Link
-            to="/cart"
-            className={`flex flex-col items-center justify-center py-1 transition-all duration-200 active:scale-95 ${
-              location.pathname === '/cart' ? 'text-brand-burgundy font-bold' : 'text-stone-500 sm:hover:text-stone-800'
-            }`}
-          >
-            <div className="relative">
-              <i className={`text-xl transition-transform ${location.pathname === '/cart' ? 'ph-fill ph-shopping-bag scale-110 text-brand-burgundy' : 'ph ph-shopping-bag-open'}`}></i>
-              {cartItemCount > 0 && (
-                <span className="absolute -top-1 -right-2 min-w-[16px] h-[16px] bg-gradient-to-tr from-brand-terracotta to-[#B45309] text-white text-[9px] font-bold flex items-center justify-center rounded-full border border-white shadow-xs px-0.5">
-                  {cartItemCount > 99 ? '99+' : cartItemCount}
-                </span>
-              )}
-            </div>
-            <span className="text-[10px] mt-0.5 tracking-tight">Giỏ hàng</span>
-          </Link>
+            {/* 4. Giỏ hàng */}
+            <Link
+              to="/cart"
+              className={`flex flex-col items-center justify-center py-1 transition-all duration-200 active:scale-95 ${location.pathname === '/cart' ? 'text-brand-burgundy font-bold' : 'text-stone-500 sm:hover:text-stone-800'
+                }`}
+            >
+              <div className="relative">
+                <i className={`text-xl transition-transform ${location.pathname === '/cart' ? 'ph-fill ph-shopping-bag scale-110 text-brand-burgundy' : 'ph ph-shopping-bag-open'}`}></i>
+                {cartItemCount > 0 && (
+                  <span className="absolute -top-1 -right-2 min-w-[16px] h-[16px] bg-gradient-to-tr from-brand-terracotta to-[#B45309] text-white text-[9px] font-bold flex items-center justify-center rounded-full border border-white shadow-xs px-0.5">
+                    {cartItemCount > 99 ? '99+' : cartItemCount}
+                  </span>
+                )}
+              </div>
+              <span className="text-[10px] mt-0.5 tracking-tight">Giỏ hàng</span>
+            </Link>
 
-          {/* 5. Tài khoản */}
-          <Link
-            to={user ? '/profile' : '/login'}
-            className={`flex flex-col items-center justify-center py-1 transition-all duration-200 active:scale-95 ${
-              location.pathname === '/profile' || location.pathname === '/login' ? 'text-brand-burgundy font-bold' : 'text-stone-500 sm:hover:text-stone-800'
-            }`}
-          >
-            <i className={`text-xl transition-transform ${location.pathname === '/profile' || location.pathname === '/login' ? 'ph-fill ph-user-circle scale-110 text-brand-burgundy' : 'ph ph-user'}`}></i>
-            <span className="text-[10px] mt-0.5 tracking-tight">{user ? 'Tài khoản' : 'Đăng nhập'}</span>
-          </Link>
-        </div>
-      </nav>
+            {/* 5. Tài khoản */}
+            <Link
+              to={user ? '/profile' : '/login'}
+              className={`flex flex-col items-center justify-center py-1 transition-all duration-200 active:scale-95 ${location.pathname === '/profile' || location.pathname === '/login' ? 'text-brand-burgundy font-bold' : 'text-stone-500 sm:hover:text-stone-800'
+                }`}
+            >
+              <i className={`text-xl transition-transform ${location.pathname === '/profile' || location.pathname === '/login' ? 'ph-fill ph-user-circle scale-110 text-brand-burgundy' : 'ph ph-user'}`}></i>
+              <span className="text-[10px] mt-0.5 tracking-tight">{user ? 'Tài khoản' : 'Đăng nhập'}</span>
+            </Link>
+          </div>
+        </nav>
       )}
     </div>
   );

@@ -630,93 +630,126 @@ export default function ShopPage() {
             </div>
           ) : viewMode === 'grid' ? (
             /* =================== CHẾ ĐỘ LƯỚI (GRID VIEW - 2 CỘT MOBILE, 3 CỘT DESKTOP) =================== */
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
               {filteredProducts.map((product) => {
                 const isOutOfStock = isProductOutOfStock(product);
+                const ratingValue = Math.round(Number(product.avgRating) || 5);
+                const hasDiscount = Number(product.original_price) > Number(product.base_price);
 
                 return (
                   <article
-                    key={product._id} 
-                    className={`group relative flex flex-col overflow-hidden rounded-[18px] border border-[#E9DED4] bg-[#FFFCF8] shadow-[0_4px_16px_rgba(55,38,33,0.06)] transition-all duration-300 sm:rounded-[22px] ${isOutOfStock ? 'opacity-65' : 'sm:hover:-translate-y-0.5 sm:hover:border-[#D7C4B5] sm:hover:shadow-[0_10px_24px_rgba(55,38,33,0.1)]'}`}
+                    key={product._id}
+                    className={`group relative flex h-full flex-col overflow-hidden rounded-[20px] border border-stone-100 bg-white shadow-[0_4px_20px_rgba(28,25,23,0.04)] transition-all duration-300 ease-out sm:rounded-[24px] ${
+                      isOutOfStock
+                        ? 'opacity-65'
+                        : 'sm:hover:-translate-y-1 sm:hover:border-stone-200 sm:hover:shadow-[0_16px_32px_-10px_rgba(28,25,23,0.11)]'
+                    }`}
                   >
-                    {/* Image Area with badges & wishlist button */}
-                    <div className="relative aspect-square overflow-hidden border-b border-[#E9DED4] bg-[#EEE8E0]">
+                    {/* Khung ảnh tối giản */}
+                    <div className="relative aspect-square overflow-hidden bg-[#F7F5F2]">
                       {isOutOfStock && (
                         <>
                           <div className="pointer-events-none absolute inset-0 z-30 bg-white/45 backdrop-grayscale-[35%]" />
                           <OutOfStockStamp />
                         </>
                       )}
-                      {/* Product Tag */}
-                      {product.tag && (
-                        <div 
-                          className="absolute left-2 top-2 z-20 px-2 py-1 text-[7px] font-bold uppercase tracking-[0.12em] text-white shadow-sm sm:left-3 sm:top-3 sm:text-[8px]"
-                          style={{ backgroundColor: resolveTagColor(product.tag, product.tag_color) }}
-                        >
-                          {product.tag}
-                        </div>
-                      )}
-                      
-                      {/* Nút Trái Tim Yêu Thích */}
-                      <button 
-                        type="button"
-                        aria-label="Yêu thích" 
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          toggleWishlist(product, navigate);
-                        }} 
-                        className="absolute right-2 top-2 z-20 flex size-7 items-center justify-center rounded-full border border-stone-200/80 bg-white/90 text-stone-500 shadow-sm backdrop-blur-md transition-all sm:right-3 sm:top-3 sm:size-8 sm:hover:text-rose-500 active:scale-90 cursor-pointer"
-                        title={isInWishlist(product._id) ? "Bỏ yêu thích" : "Lưu vào yêu thích"}
-                      >
-                        <i className={`text-sm sm:text-base transition-colors ${
-                          isInWishlist(product._id)
-                            ? 'ph-fill ph-heart text-rose-500'
-                            : 'ph-bold ph-heart text-stone-400 sm:hover:text-rose-500'
-                        }`}></i>
-                      </button>
-                      
-                      {/* Ảnh Sản Phẩm */}
-                      <Link to={`/product/${product._id}`} className="block w-full h-full">
+
+                      <Link to={`/product/${product._id}`} className="block size-full">
                         {product.image ? (
-                          <img 
-                            alt={product.name} 
-                            className="w-full h-full object-cover sm:group-hover:scale-105 transition-transform duration-500" 
+                          <img
+                            alt={product.name}
+                            className="size-full object-cover transition-transform duration-500 ease-out sm:group-hover:scale-[1.04]"
                             src={getImageUrl(product.image)}
                             loading="lazy"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-stone-400 text-xs">No Image</div>
+                          <div className="flex size-full items-center justify-center bg-stone-100 text-xs text-stone-400">
+                            Chưa có ảnh
+                          </div>
                         )}
                       </Link>
+
+                      {/* Nhãn tag có màu theo cấu hình sản phẩm */}
+                      {product.tag && (
+                        <span
+                          className="absolute left-2.5 top-2.5 z-20 rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em] text-white shadow-sm sm:left-3 sm:top-3 sm:text-[9.5px]"
+                          style={{ backgroundColor: resolveTagColor(product.tag, product.tag_color) }}
+                        >
+                          {product.tag}
+                        </span>
+                      )}
+
+                      {/* Nút yêu thích tròn trắng tinh tế */}
+                      <button
+                        type="button"
+                        aria-label="Yêu thích"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          toggleWishlist(product, navigate);
+                        }}
+                        className="absolute right-2.5 top-2.5 z-20 flex size-8 cursor-pointer items-center justify-center rounded-full bg-white text-stone-700 shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-colors duration-200 active:scale-90 sm:right-3 sm:top-3 sm:size-8.5 sm:hover:text-rose-500"
+                        title={isInWishlist(product._id) ? 'Bỏ yêu thích' : 'Lưu vào yêu thích'}
+                      >
+                        <i
+                          className={`${
+                            isInWishlist(product._id) ? 'ph-fill ph-heart text-rose-500' : 'ph ph-heart'
+                          } text-[16px] transition-colors`}
+                        />
+                      </button>
                     </div>
-                    
-                    {/* Info Area */}
-                    <div className="flex flex-1 flex-col px-3.5 pb-3.5 pt-3.5 sm:px-4 sm:pb-4 sm:pt-4">
-                      <Link to={`/product/${product._id}`} className="block transition-colors sm:group-hover:text-brand-burgundy">
-                        <h3 
-                          className="line-clamp-2 min-h-[38px] overflow-hidden font-serif-display text-[15px] font-bold leading-[1.28] text-[#302320] sm:min-h-[44px] sm:text-[17px]"
+
+                    {/* Nội dung tối giản 3 dòng: Tên đậm -> 5 sao vàng -> Giá & nút giỏ hàng */}
+                    <div className="flex flex-1 flex-col p-3 sm:p-3.5">
+                      <Link
+                        to={`/product/${product._id}`}
+                        className="block transition-colors duration-200 sm:group-hover:text-brand-burgundy"
+                      >
+                        <h3
+                          className="line-clamp-1 font-jakarta text-[13.5px] font-semibold leading-snug text-stone-900 transition-colors duration-200 sm:text-[15px] sm:group-hover:text-brand-burgundy"
                           title={product.name}
                         >
                           {product.name}
                         </h3>
                       </Link>
-                      <p className="mt-1 truncate text-[8px] font-semibold uppercase tracking-[0.12em] text-stone-400 sm:text-[9px]">{typeof product.category === 'string' ? product.category : product.category?.name || 'Candlet Scented Candle'}</p>
 
-                      <div className="mt-2 flex items-center gap-1.5 text-[9px] sm:text-[10px]">
-                        <i className="ph-fill ph-star text-[10px] text-amber-500 sm:text-xs" />
-                        <span className="font-bold text-stone-700">{product.avgRating || '5.0'}</span>
-                        <span className="text-stone-400">({product.reviewCount || 0} đánh giá)</span>
+                      {/* Hàng 5 sao vàng tươi + số lượt đánh giá */}
+                      <div className="mt-1.5 flex items-center gap-0.5">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <i
+                            key={star}
+                            className={`ph-fill ph-star text-[11px] sm:text-xs ${
+                              star <= ratingValue ? 'text-amber-400' : 'text-stone-200'
+                            }`}
+                          />
+                        ))}
+                        <span className="ml-1 text-[11px] text-stone-400">
+                          ({product.reviewCount || 0})
+                        </span>
                       </div>
 
-                      <div className="mt-3 flex items-end justify-between gap-2 border-t border-[#EEE5DD] pt-2.5 sm:mt-3.5 sm:pt-3">
-                        <span className="pb-0.5 text-[8px] font-semibold uppercase tracking-[0.12em] text-stone-400">Giá từ</span>
-                        <div className="text-right">
-                          {product.original_price > product.base_price && <span className="mr-1.5 text-[8px] text-stone-400 line-through sm:text-[9px]">{product.original_price?.toLocaleString('vi-VN')}đ</span>}
-                          <span className="font-jakarta text-[17px] font-extrabold leading-none tracking-[-0.035em] text-[#3D2925] sm:text-[19px]">{product.base_price?.toLocaleString('vi-VN')}<span className="ml-0.5 text-[11px] font-bold sm:text-xs">đ</span></span>
+                      {/* Hàng đáy: Giá & giá gốc cùng dòng + nút giỏ hàng tròn nhẹ */}
+                      <div className="mt-auto flex items-center justify-between gap-2 pt-2.5">
+                        <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
+                          <span className="font-jakarta text-[14.5px] font-bold leading-none tracking-[-0.015em] text-brand-burgundy sm:text-[16px]">
+                            {product.base_price?.toLocaleString('vi-VN')}
+                            <span className="text-[11px] font-semibold">đ</span>
+                          </span>
+                          {hasDiscount && (
+                            <span className="text-[11px] text-stone-400 line-through leading-none">
+                              {Number(product.original_price).toLocaleString('vi-VN')}đ
+                            </span>
+                          )}
                         </div>
-                      </div>
 
+                        <Link
+                          to={`/product/${product._id}`}
+                          aria-label={`Chọn mua ${product.name}`}
+                          className="flex size-8 shrink-0 items-center justify-center rounded-full border border-stone-200/90 bg-white text-stone-700 shadow-[0_1px_4px_rgba(0,0,0,0.04)] transition-colors duration-200 active:scale-90 sm:size-9 sm:group-hover:border-brand-charcoal sm:group-hover:bg-brand-charcoal sm:group-hover:text-white"
+                        >
+                          <i className="ph ph-shopping-cart text-[16px]" />
+                        </Link>
+                      </div>
                     </div>
                   </article>
                 );
@@ -821,7 +854,7 @@ export default function ShopPage() {
                       {/* Bottom Actions & Price */}
                       <div className="pt-2 border-t border-stone-200/70 flex items-center justify-between gap-2 mt-auto">
                         <div className="flex items-baseline gap-1.5">
-                          <span className="font-serif-display text-[18px] font-extrabold leading-none tracking-[-0.02em] text-brand-charcoal sm:text-xl">
+                          <span className="font-serif-display text-[18px] font-extrabold leading-none tracking-[-0.02em] text-brand-burgundy sm:text-xl">
                             {product.base_price?.toLocaleString('vi-VN')}đ
                           </span>
                           {product.original_price > product.base_price && (

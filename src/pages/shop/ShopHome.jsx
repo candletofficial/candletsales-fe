@@ -1,12 +1,22 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useWishlist } from '../../hooks/useWishlist';
 import { shopService } from '../../services/shopService';
 import NewsletterCanvas from '../../components/NewsletterCanvas';
+import CandleAtmosphereCanvas from '../../components/CandleAtmosphereCanvas';
 import { resolveTagColor } from '../../utils/productTagUtils';
 import { getImageUrl } from '../../utils/imageUtils';
 import { shippingDiscountLabel, shippingDiscountConditions } from '../../utils/couponUtils';
+
+const AROMA_MARQUEE_ITEMS = [
+  '100% Sáp Thực Vật Hữu Cơ',
+  'Rót Tay Thủ Công Tại Việt Nam',
+  'Thông Điệp Ẩn Sau Ngọn Nến',
+  '0% Muội Than & Paraffin',
+  'Tinh Dầu Trị Liệu Thuần Khiết',
+  'Quà Tặng Cảm Xúc Tinh Tế',
+];
 
 export default function ShopHome() {
   const navigate = useNavigate();
@@ -19,6 +29,22 @@ export default function ShopHome() {
   const [copiedCouponId, setCopiedCouponId] = useState(null);
   const [activeMobileCoupon, setActiveMobileCoupon] = useState(0);
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('all');
+  const couponTouchStartX = useRef(null);
+  const couponTouchDeltaX = useRef(0);
+  const isVoucherPausedRef = useRef(false);
+  const scrollBarRef = useRef(null);
+  const heroParallaxImgRef = useRef(null);
+  const storySectionRef = useRef(null);
+  const storyCardLeftRef = useRef(null);
+  const storyCardRightRef = useRef(null);
+
+  // Hiệu ứng quầng ánh nến ấm theo con trỏ chuột cho các thẻ editorial lớn trên desktop
+  const handleSpotlightMove = useCallback((e) => {
+    if (window.innerWidth < 1024) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.style.setProperty('--mx', `${e.clientX - rect.left}px`);
+    e.currentTarget.style.setProperty('--my', `${e.clientY - rect.top}px`);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -54,27 +80,89 @@ export default function ShopHome() {
     fetchData();
   }, [user?._id]);
 
-  // Observer để kích hoạt animation trượt mượt mà (scroll reveal) khi cuộn trang
+  // Reveal each block once, slightly before it enters the viewport.
   useEffect(() => {
-    const observerCallback = (entries, observer) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-revealed');
-          observer.unobserve(entry.target);
-        }
-      });
-    };
+    const selector =
+      '.reveal-on-scroll, .reveal-from-left, .reveal-from-right, .voucher-stage-reveal';
+    const elements = document.querySelectorAll(selector);
 
-    const observer = new IntersectionObserver(observerCallback, {
-      threshold: 0.08,
-      rootMargin: '0px 0px -20px 0px',
-    });
+    const observer = new IntersectionObserver(
+      (entries, obs) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-revealed');
+            obs.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        threshold: 0.01,
+        rootMargin: '0px 0px 12% 0px',
+      }
+    );
 
-    const elements = document.querySelectorAll('.reveal-on-scroll');
     elements.forEach((el) => observer.observe(el));
-
     return () => observer.disconnect();
   }, [products, coupons, loading]);
+
+  // Thanh tiến trình ánh nến & Scroll-Linked Parallax 60fps (không re-render React)
+  useEffect(() => {
+    let rafId = null;
+
+    const updateScrollEffects = () => {
+      rafId = null;
+      const scrollY = window.scrollY || 0;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? Math.min(1, Math.max(0, scrollY / docHeight)) : 0;
+      const isDesktop = window.innerWidth >= 1024;
+      let storyShift = null;
+
+      // Read layout before applying transforms to avoid a forced synchronous reflow.
+      if (isDesktop && storySectionRef.current && storyCardLeftRef.current && storyCardRightRef.current) {
+        const rect = storySectionRef.current.getBoundingClientRect();
+        const vh = window.innerHeight || 800;
+        if (rect.top < vh && rect.bottom > 0) {
+          const centerProgress = (vh - rect.top) / (vh + rect.height) - 0.5;
+          storyShift = Math.max(-22, Math.min(22, centerProgress * 44));
+        }
+      }
+
+      if (scrollBarRef.current) {
+        scrollBarRef.current.style.transform = `scaleX(${progress})`;
+      }
+
+      if (isDesktop) {
+        if (heroParallaxImgRef.current && scrollY < 900) {
+          const heroOffset = Math.min(36, scrollY * 0.06);
+          heroParallaxImgRef.current.style.transform = `translate3d(0, ${heroOffset}px, 0)`;
+        }
+
+        if (storyShift !== null) {
+          storyCardLeftRef.current.style.transform = `translate3d(0, ${-storyShift}px, 0)`;
+          storyCardRightRef.current.style.transform = `translate3d(0, ${32 + storyShift}px, 0)`;
+        }
+      } else {
+        if (storyCardLeftRef.current) storyCardLeftRef.current.style.transform = '';
+        if (storyCardRightRef.current) storyCardRightRef.current.style.transform = '';
+      }
+    };
+
+    const onScroll = () => {
+      if (!rafId) {
+        rafId = requestAnimationFrame(updateScrollEffects);
+      }
+    };
+
+    updateScrollEffects();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, []);
 
   const handleCopyCoupon = (code, id, e) => {
     if (e) {
@@ -85,8 +173,10 @@ export default function ShopHome() {
       navigator.clipboard.writeText(code);
     }
     setCopiedCouponId(id);
+    isVoucherPausedRef.current = true;
     setTimeout(() => {
       setCopiedCouponId((prev) => (prev === id ? null : prev));
+      isVoucherPausedRef.current = false;
     }, 2200);
   };
 
@@ -148,14 +238,65 @@ export default function ShopHome() {
   const primaryCoupon = displayCoupons[0];
   const secondaryCoupon = displayCoupons[1] || displayCoupons[0];
 
+  // Tự động chuyển mã ưu đãi trên mobile sau mỗi 4.5 giây (tạm dừng khi đang chạm hoặc vừa sao chép)
+  useEffect(() => {
+    if (displayCoupons.length < 2) return;
+    const timer = setInterval(() => {
+      if (isVoucherPausedRef.current) return;
+      setActiveMobileCoupon((prev) => (prev + 1) % displayCoupons.length);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, [displayCoupons.length]);
+
+  const handleVoucherTouchStart = (e) => {
+    if (displayCoupons.length < 2) return;
+    couponTouchStartX.current = e.touches[0].clientX;
+    couponTouchDeltaX.current = 0;
+    isVoucherPausedRef.current = true;
+  };
+
+  const handleVoucherTouchMove = (e) => {
+    if (couponTouchStartX.current === null) return;
+    couponTouchDeltaX.current = e.touches[0].clientX - couponTouchStartX.current;
+  };
+
+  const handleVoucherTouchEnd = () => {
+    if (couponTouchStartX.current === null) return;
+    const delta = couponTouchDeltaX.current;
+    const threshold = 40;
+    if (Math.abs(delta) >= threshold && displayCoupons.length >= 2) {
+      setActiveMobileCoupon((prev) =>
+        delta < 0
+          ? (prev + 1) % displayCoupons.length
+          : (prev - 1 + displayCoupons.length) % displayCoupons.length
+      );
+    }
+    couponTouchStartX.current = null;
+    couponTouchDeltaX.current = 0;
+    setTimeout(() => {
+      isVoucherPausedRef.current = false;
+    }, 1500);
+  };
+
   return (
     <>
+      {/* Thanh tiến trình ánh nến siêu mảnh trên cùng màn hình */}
+      <div
+        ref={scrollBarRef}
+        aria-hidden="true"
+        className="scroll-progress-bar"
+        style={{ transform: 'scaleX(0)' }}
+      />
+
       {/* BEGIN: HeroSection */}
-      <section className="dashed-grid-border border-b-8 border-stone-100 bg-white sm:border-b sm:border-dashed sm:bg-[#f9f9f9]" data-purpose="editorial-hero" id="home">
+      <section className="dashed-grid-border relative overflow-hidden border-b-8 border-stone-100 bg-white sm:border-b sm:border-dashed sm:bg-[#f9f9f9]" data-purpose="editorial-hero" id="home">
+        {/* Khí quyển hạt ánh sáng hổ phách tinh tế bay nhẹ */}
+        <CandleAtmosphereCanvas variant="hero" className="opacity-70" />
+
         {/* MOBILE HERO (Thiết kế tối ưu hóa riêng biệt cho màn hình nhỏ < 1024px) */}
-        <div className="flex flex-col gap-5 px-4 pb-10 pt-4 sm:p-6 lg:hidden">
+        <div className="relative z-10 flex flex-col gap-5 px-4 pb-10 pt-4 sm:p-6 lg:hidden">
           {/* Top Mini Pill & Rating */}
-          <div className="flex items-center justify-between gap-2">
+          <div className="hero-enter-1 flex items-center justify-between gap-2">
             <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-900 sm:rounded-full sm:border sm:border-amber-500/25 sm:bg-amber-500/10 sm:px-3 sm:py-1 sm:text-[10.5px]">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shrink-0"></span>
               Nến Thơm Thủ Công Cao Cấp
@@ -168,7 +309,8 @@ export default function ShopHome() {
           </div>
 
           {/* Mobile Main Visual Banner with rounded frame and glowing effect */}
-          <div className="group relative -mx-4 overflow-hidden border-y border-stone-200/80 bg-stone-100 sm:mx-0 sm:rounded-2xl sm:border sm:shadow-md">
+          <div className="hero-visual-reveal group relative -mx-4 overflow-hidden border-y border-stone-200/80 bg-stone-100 sm:mx-0 sm:rounded-2xl sm:border sm:shadow-md">
+            <div className="hero-sheen-overlay" aria-hidden="true" />
             <img
               alt="Bộ sưu tập nến thơm thủ công Candlet"
               className="w-full h-auto object-cover transition-transform duration-500 ease-out sm:group-hover:scale-102"
@@ -187,7 +329,7 @@ export default function ShopHome() {
           </div>
 
           {/* Mobile Narrative & Headline */}
-          <div className="text-center pt-1">
+          <div className="hero-enter-2 text-center pt-1">
             <h1 className="font-serif-display text-3xl sm:text-4xl text-brand-charcoal leading-[1.18] font-normal mb-2">
               Khoảnh khắc an yên<br />
               <span className="italic font-light text-brand-burgundy">trong từng nhịp thở</span>
@@ -198,7 +340,7 @@ export default function ShopHome() {
           </div>
 
           {/* Mobile Action Buttons */}
-          <div className="flex flex-col gap-2 pt-1">
+          <div className="hero-enter-3 flex flex-col gap-2 pt-1">
             <a
               href="#collection"
               className="w-full py-3.5 px-6 rounded-full bg-brand-charcoal text-white sm:hover:bg-black text-xs font-bold uppercase tracking-widest text-center transition-all shadow-md active:scale-98 flex items-center justify-center gap-2 btn-shimmer"
@@ -220,9 +362,9 @@ export default function ShopHome() {
           </div>
 
           {/* Mobile 3 Core Values (Compact Touch Cards) */}
-          <div className="grid grid-cols-3 divide-x divide-stone-200 border-y border-stone-200 py-3 text-center sm:gap-2 sm:divide-x-0 sm:border-y-0 sm:py-0 sm:pt-1">
+          <div className="hero-enter-4 grid grid-cols-3 divide-x divide-stone-200 border-y border-stone-200 py-3 text-center sm:gap-2 sm:divide-x-0 sm:border-y-0 sm:py-0 sm:pt-1">
             <div className="flex flex-col items-center px-1 sm:rounded-xl sm:border sm:border-stone-200/80 sm:bg-white/90 sm:p-2.5 sm:shadow-2xs">
-              <i className="ph-fill ph-flame text-xl text-amber-600 mb-1"></i>
+              <i className="ph-fill ph-flame text-xl text-amber-600 mb-1 animate-flame-flicker"></i>
               <span className="text-[11px] font-bold text-brand-charcoal leading-tight">Hương Cuốn Hút</span>
               <span className="text-[9.5px] text-stone-500 mt-0.5">Tinh dầu trị liệu</span>
             </div>
@@ -240,19 +382,19 @@ export default function ShopHome() {
         </div>
 
         {/* DESKTOP HERO (Giữ nguyên cấu trúc Editorial thanh lịch cho màn hình lớn) */}
-        <div className="hidden lg:grid max-w-7xl mx-auto grid-cols-12 min-h-[640px]">
+        <div className="relative z-10 hidden lg:grid max-w-7xl mx-auto grid-cols-12 min-h-[640px]">
           {/* Hero Left Column */}
           <div className="lg:col-span-4 border-r border-dashed dashed-grid-border flex flex-col p-10">
 
             {/* Top Mini Promo Card */}
-            <div className="pb-8 border-b border-dashed dashed-grid-border">
+            <div className="hero-enter-1 pb-8 border-b border-dashed dashed-grid-border">
               <div className="flex items-center space-x-4">
                 <div className="relative h-28 sm:h-32 flex-shrink-0 group flex items-center justify-center">
                   {/* Soft Background Glow with Breathing Animation */}
                   <div className="absolute inset-1 bg-amber-500/25 rounded-full blur-xl scale-125 animate-pulse-glow pointer-events-none"></div>
                   <img
                     alt="Mini Promo"
-                    className="relative w-auto h-full object-contain transition-transform duration-500 ease-out sm:group-hover:-translate-y-1.5 sm:group-hover:scale-105 z-10 drop-shadow-md"
+                    className="relative w-auto h-full object-contain transition-transform duration-500 ease-out sm:group-hover:-translate-y-1.5 sm:group-hover:scale-105 z-10 drop-shadow-md animate-float-gentle"
                     src="/banner-nho.png"
                   />
                 </div>
@@ -284,7 +426,7 @@ export default function ShopHome() {
             </div>
 
             {/* Middle Value Narrative */}
-            <div className="py-8 border-b border-dashed dashed-grid-border">
+            <div className="hero-enter-2 py-8 border-b border-dashed dashed-grid-border">
               <p className="text-stone-700 text-xs leading-relaxed font-mono font-medium">
                 Những thiết kế cuốn hút và tinh tế, kết hợp cùng nguyên liệu tự nhiên cao cấp an toàn tuyệt đối, là cách hoàn hảo để gợi mở không gian chánh niệm thư thái.
               </p>
@@ -300,7 +442,7 @@ export default function ShopHome() {
             </div>
 
             {/* Bottom 3 Pillars Icons */}
-            <div className="pt-8 grid grid-cols-3 gap-2 text-center mt-auto">
+            <div className="hero-enter-3 pt-8 grid grid-cols-3 gap-2 text-center mt-auto">
               <div className="flex flex-col items-center group cursor-default p-2 rounded-xl sm:hover:bg-white/80 transition-all duration-300 sm:hover:-translate-y-1">
                 <i className="ph-light ph-flame text-4xl text-brand-charcoal mb-3 transition-transform duration-300 sm:group-hover:scale-110 sm:group-hover:text-amber-600 animate-flame-flicker"></i>
                 <span className="text-xs font-mono font-semibold text-brand-charcoal sm:group-hover:text-amber-900 transition-colors">Hương Cuốn Hút</span>
@@ -317,15 +459,40 @@ export default function ShopHome() {
           </div>
 
           {/* Hero Right Column */}
-          <div className="lg:col-span-8 flex overflow-hidden group">
-            <img
-              alt="Banner Candlet"
-              className="w-full h-auto object-contain transition-transform duration-700 ease-out sm:group-hover:scale-[1.01]"
-              src="/hero-banner.png"
-            />
+          <div className="hero-visual-reveal relative lg:col-span-8 flex overflow-hidden group">
+            <div className="hero-sheen-overlay" aria-hidden="true" />
+            <div ref={heroParallaxImgRef} className="w-full will-change-transform">
+              <img
+                alt="Banner Candlet"
+                className="w-full h-auto object-contain transition-transform duration-700 ease-out sm:group-hover:scale-[1.015]"
+                src="/hero-banner.png"
+              />
+            </div>
           </div>
         </div>
       </section>
+
+      {/* Dải Ruy-Băng Hương Thơm Chuyển Động Thanh Lịch (Editorial Marquee Ribbon) */}
+      <div
+        aria-hidden="true"
+        className="aroma-marquee-wrapper dashed-grid-border relative overflow-hidden border-b border-dashed bg-brand-warmIvory/75 py-2.5 sm:py-3 select-none"
+      >
+        <div className="aroma-marquee-track items-center">
+          {[0, 1].map((dupIdx) => (
+            <div key={dupIdx} className="flex shrink-0 items-center">
+              {AROMA_MARQUEE_ITEMS.map((item, idx) => (
+                <span
+                  key={`${dupIdx}-${idx}`}
+                  className="inline-flex items-center gap-6 px-6 font-mono text-[10.5px] sm:text-[11px] font-semibold uppercase tracking-[0.22em] text-brand-burgundy/80"
+                >
+                  <span>{item}</span>
+                  <span className="text-amber-600/80 text-xs">✦</span>
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* BEGIN: MindfulnessFeaturesSection */}
       <section className="dashed-grid-border relative overflow-hidden border-b-8 border-stone-100 bg-white py-10 sm:border-b sm:border-dashed sm:bg-brand-cream sm:py-24" data-purpose="mindfulness-philosophy">
@@ -342,12 +509,16 @@ export default function ShopHome() {
                 Triết Lý Nến Thơm & Chánh Niệm
               </div>
               <h2 className="font-serif-display text-3xl sm:text-5xl lg:text-6xl text-brand-charcoal tracking-tight font-normal leading-[1.15]">
-                Khoảnh khắc chánh niệm<br />
-                <span className="italic font-light text-stone-600">trong từng nhịp thở</span>
+                <span className="reveal-mask">
+                  <span className="reveal-mask-inner">Khoảnh khắc chánh niệm</span>
+                </span>
+                <span className="reveal-mask">
+                  <span className="reveal-mask-inner reveal-delay-200 italic font-light text-stone-600">trong từng nhịp thở</span>
+                </span>
               </h2>
             </div>
 
-            <div className="lg:col-span-5 reveal-on-scroll reveal-delay-200 lg:pb-2">
+            <div className="lg:col-span-5 reveal-from-right reveal-delay-200 lg:pb-2">
               <p className="text-stone-600 text-xs sm:text-base leading-relaxed mb-4 sm:mb-6 font-normal">
                 Mỗi ngọn nến thủ công tại Candlet không đơn thuần chỉ để thắp sáng, mà còn tạo nên một khoảng lặng kéo bạn về với hiện tại — vỗ về tâm trí bằng hương thơm dịu dàng và ánh lửa ấm áp.
               </p>
@@ -366,7 +537,10 @@ export default function ShopHome() {
           {/* Asymmetric Bento Layout (1 Hero Feature Card + 2 Stacked Specialty Cards) */}
           <div className="grid grid-cols-1 items-stretch divide-y divide-stone-200 lg:grid-cols-12 lg:gap-8 lg:divide-y-0">
             {/* Card 01: Hero Feature Spotlight (Pure Botanical Wax & Aromatherapy) */}
-            <div className="card-hover-lift group reveal-on-scroll reveal-delay-100 relative flex flex-col justify-between overflow-hidden py-7 lg:col-span-7 lg:rounded-3xl lg:border lg:border-stone-200/80 lg:bg-white/85 lg:p-12 lg:pb-12 lg:shadow-xs lg:backdrop-blur-xs lg:hover:border-emerald-600/40">
+            <div
+              onMouseMove={handleSpotlightMove}
+              className="spotlight-card card-hover-lift group reveal-on-scroll reveal-delay-100 relative flex flex-col justify-between overflow-hidden py-7 lg:col-span-7 lg:rounded-3xl lg:border lg:border-stone-200/80 lg:bg-white/85 lg:p-12 lg:pb-12 lg:shadow-xs lg:backdrop-blur-xs lg:hover:border-emerald-600/40"
+            >
               {/* Background Artful Number Watermark */}
               <span className="absolute -top-3 right-3 font-serif-display text-6xl sm:text-9xl font-light text-stone-200/50 select-none sm:group-hover:text-emerald-950/10 transition-colors pointer-events-none">
                 01
@@ -414,7 +588,10 @@ export default function ShopHome() {
             {/* Right Column: 2 Stacked Cards */}
             <div className="flex flex-col divide-y divide-stone-200 lg:col-span-5 lg:gap-8 lg:divide-y-0">
               {/* Card 02: Multi-layer Scent Symphony */}
-              <div className="card-hover-lift group reveal-on-scroll reveal-delay-200 relative flex-1 overflow-hidden pb-10 pt-7 lg:rounded-3xl lg:border lg:border-stone-200/80 lg:bg-white/85 lg:p-8 lg:pb-9 lg:shadow-xs lg:backdrop-blur-xs lg:hover:border-amber-400/40">
+              <div
+                onMouseMove={handleSpotlightMove}
+                className="spotlight-card card-hover-lift group reveal-on-scroll reveal-delay-200 relative flex-1 overflow-hidden pb-10 pt-7 lg:rounded-3xl lg:border lg:border-stone-200/80 lg:bg-white/85 lg:p-8 lg:pb-9 lg:shadow-xs lg:backdrop-blur-xs lg:hover:border-amber-400/40"
+              >
                 {/* Background Watermark */}
                 <span className="absolute -top-3 right-3 font-serif-display text-5xl sm:text-8xl font-light text-stone-200/50 select-none sm:group-hover:text-amber-950/10 transition-colors pointer-events-none">
                   02
@@ -461,7 +638,10 @@ export default function ShopHome() {
               </div>
 
               {/* Card 03: Relaxation Ritual & Self-Care */}
-              <div className="card-hover-lift group reveal-on-scroll reveal-delay-300 relative flex-1 overflow-hidden pb-7 pt-10 lg:rounded-3xl lg:border lg:border-stone-200/80 lg:bg-white/85 lg:p-8 lg:pb-9 lg:shadow-xs lg:backdrop-blur-xs lg:hover:border-rose-400/40">
+              <div
+                onMouseMove={handleSpotlightMove}
+                className="spotlight-card card-hover-lift group reveal-on-scroll reveal-delay-300 relative flex-1 overflow-hidden pb-7 pt-10 lg:rounded-3xl lg:border lg:border-stone-200/80 lg:bg-white/85 lg:p-8 lg:pb-9 lg:shadow-xs lg:backdrop-blur-xs lg:hover:border-rose-400/40"
+              >
                 {/* Background Watermark */}
                 <span className="absolute -top-3 right-3 font-serif-display text-5xl sm:text-8xl font-light text-stone-200/50 select-none sm:group-hover:text-rose-950/10 transition-colors pointer-events-none">
                   03
@@ -499,65 +679,50 @@ export default function ShopHome() {
       </section>
 
       {/* BEGIN: TicketSpecialOfferSection */}
-      <section className="dashed-grid-border relative overflow-hidden border-b-8 border-stone-100 bg-brand-warmIvory py-10 sm:border-b sm:border-dashed sm:py-24" data-purpose="special-offer-ticket" id="special-offers">
-        <div className="max-w-6xl mx-auto px-4 sm:px-8 grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 items-center">
+      <section className="dashed-grid-border relative overflow-hidden border-b-8 border-stone-100 bg-brand-warmIvory py-8 sm:border-b sm:border-dashed sm:py-24" data-purpose="special-offer-ticket" id="special-offers">
+        <div className="max-w-6xl mx-auto px-4 sm:px-8 grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-12 items-center">
           {/* Cột trái: Tối đa 2 Thẻ Vé Xòe Bài Chân Thực Ngoài Đời */}
           <div className="lg:col-span-7 flex flex-col items-center">
-            {/* Tag tiêu đề nhỏ */}
-            <div className="flex items-center gap-2 mb-2">
+            {/* Tiêu đề Editorial gọn đẹp cho Mobile (thay cho khoảng trống phía trên vé) */}
+            <div className="w-full sm:hidden mb-3 flex items-end justify-between gap-3">
+              <div>
+                <h3 className="font-serif-display text-[28px] font-normal text-brand-charcoal leading-[1.12]">
+                  Ưu đãi đặc quyền{' '}
+                  <span className="italic font-light text-amber-800 block">Thắp Sáng Cảm Xúc</span>
+                </h3>
+              </div>
+              {displayCoupons.length >= 2 && (
+                <span className="inline-flex items-center gap-1 text-[10.5px] font-medium text-stone-500 pb-1 shrink-0">
+                  <span>Vuốt xem mã</span>
+                  <i className="ph ph-arrow-right text-xs"></i>
+                </span>
+              )}
+            </div>
+
+            {/* Tag tiêu đề nhỏ (Chỉ hiện từ sm trở lên) */}
+            <div className="hidden sm:flex items-center gap-2 mb-2">
               <span className="bg-[#EA580C] text-white text-[11px] font-bold px-3.5 py-1 rounded-full uppercase tracking-wider shadow-sm flex items-center gap-1.5">
                 <i className="ph-fill ph-ticket"></i>
                 Phiếu Quà Tặng Độc Quyền
               </span>
-              <span className="text-[11px] text-stone-500 font-serif italic hidden sm:inline-block">
+              <span className="text-[11px] text-stone-500 font-serif italic">
                 (Rê chuột vào thẻ để xem)
               </span>
             </div>
 
-            {/* Mobile Touch Switcher (Dành riêng cho màn hình cảm ứng điện thoại) */}
-            {displayCoupons.length >= 2 && (
-              <div className="flex sm:hidden items-center justify-center gap-2 mb-4 w-full max-w-[340px]">
-                <button
-                  type="button"
-                  onClick={() => setActiveMobileCoupon(0)}
-                  className={`flex-1 py-1.5 px-2.5 rounded-full text-[11px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1 shadow-2xs ${activeMobileCoupon === 0
-                    ? 'bg-brand-charcoal text-amber-300 font-bold border border-amber-400/40 scale-102 shadow-sm'
-                    : 'bg-white/80 text-stone-600 border border-stone-200/80 sm:hover:bg-white'
-                    }`}
-                >
-                  <span>🎟️</span>
-                  <span className="truncate">{primaryCoupon.name}</span>
-                  <span className="bg-amber-400 text-stone-950 text-[9px] px-1.5 py-0.2 rounded-full font-black shrink-0">
-                    {formatCouponValue(primaryCoupon)}
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveMobileCoupon(1)}
-                  className={`flex-1 py-1.5 px-2.5 rounded-full text-[11px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1 shadow-2xs ${activeMobileCoupon === 1
-                    ? 'bg-[#4A0E13] text-amber-200 font-bold border border-amber-400/40 scale-102 shadow-sm'
-                    : 'bg-white/80 text-stone-600 border border-stone-200/80 sm:hover:bg-white'
-                    }`}
-                >
-                  <span>✦</span>
-                  <span className="truncate">{secondaryCoupon.name}</span>
-                  <span className="bg-amber-400 text-stone-950 text-[9px] px-1.5 py-0.2 rounded-full font-black shrink-0">
-                    {formatCouponValue(secondaryCoupon)}
-                  </span>
-                </button>
-              </div>
-            )}
-
-            {/* Container Xòe Bài (Fanned Cards Spread) */}
+            {/* Container Xòe Bài (Desktop) & Vuốt Chuyển Mã Tự Động (Mobile) */}
             <div
-              className="relative w-full max-w-[480px] h-[210px] sm:h-[330px] flex items-center justify-center select-none"
+              className="voucher-stage-reveal relative w-full max-w-[480px] h-[200px] sm:h-[330px] flex items-center justify-center select-none touch-pan-y"
               onMouseLeave={() => setHoveredCardIdx(null)}
+              onTouchStart={handleVoucherTouchStart}
+              onTouchMove={handleVoucherTouchMove}
+              onTouchEnd={handleVoucherTouchEnd}
             >
               {/* Thẻ 0: Ivory & Amber Gold Foil Stub (primaryCoupon) */}
               <div
                 onMouseEnter={() => setHoveredCardIdx(0)}
                 className={`absolute w-[320px] xs:w-[340px] sm:w-[410px] h-[180px] sm:h-[195px] flex cursor-pointer transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] text-stone-900 ${activeMobileCoupon === 1
-                  ? 'max-sm:opacity-0 max-sm:pointer-events-none max-sm:scale-95'
+                  ? 'max-sm:opacity-0 max-sm:pointer-events-none max-sm:-translate-x-10 max-sm:scale-95'
                   : 'max-sm:z-20 max-sm:scale-100 max-sm:rotate-0 max-sm:translate-x-0 max-sm:translate-y-0 max-sm:drop-shadow-xl'
                   } ${displayCoupons.length === 1
                     ? 'sm:z-20 sm:scale-100 sm:drop-shadow-2xl sm:hover:scale-[1.03]'
@@ -568,6 +733,7 @@ export default function ShopHome() {
                         : 'sm:z-10 sm:-rotate-[7deg] sm:-translate-x-7 sm:translate-y-2 sm:scale-100 sm:drop-shadow-xl sm:opacity-95 sm:animate-float-gentle'
                   }`}
               >
+                <div className="voucher-foil-glint" aria-hidden="true" />
                 {/* SVG Die-Cut Background (Vết cắt trong suốt 100%, viền vàng uốn lượn tự nhiên, không rò rỉ góc) */}
                 <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 400 190" preserveAspectRatio="none">
                   <defs>
@@ -671,11 +837,14 @@ export default function ShopHome() {
                   <button
                     type="button"
                     onClick={(e) => handleCopyCoupon(primaryCoupon.code, primaryCoupon._id || 'primary', e)}
-                    className="w-full bg-amber-950/10 sm:hover:bg-amber-950/20 active:scale-95 border border-amber-900/25 py-1 px-1 rounded text-[11px] sm:text-xs font-mono font-bold tracking-widest text-amber-950 text-center transition-all cursor-pointer shadow-2xs"
+                    className={`w-full overflow-hidden bg-amber-950/10 sm:hover:bg-amber-950/20 active:scale-95 border border-amber-900/25 py-1.5 px-1 rounded font-mono font-bold text-amber-950 text-center transition-all cursor-pointer shadow-2xs leading-tight break-all ${(primaryCoupon.code || '').length >= 10
+                      ? 'text-[9px] sm:text-[10px] tracking-tight'
+                      : 'text-[10.5px] sm:text-xs tracking-wider'
+                      }`}
                     title="Bấm để sao chép mã ưu đãi"
                   >
                     {copiedCouponId === (primaryCoupon._id || 'primary') ? (
-                      <span className="text-emerald-800 font-bold flex items-center justify-center gap-1">
+                      <span className="text-emerald-800 font-bold flex items-center justify-center gap-0.5 text-[10px]">
                         <i className="ph-bold ph-check text-xs"></i> ĐÃ CHÉP!
                       </span>
                     ) : (
@@ -700,7 +869,7 @@ export default function ShopHome() {
                 <div
                   onMouseEnter={() => setHoveredCardIdx(1)}
                   className={`absolute w-[320px] xs:w-[340px] sm:w-[410px] h-[180px] sm:h-[195px] flex cursor-pointer transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] text-amber-50 ${activeMobileCoupon === 0
-                    ? 'max-sm:opacity-0 max-sm:pointer-events-none max-sm:scale-95'
+                    ? 'max-sm:opacity-0 max-sm:pointer-events-none max-sm:translate-x-10 max-sm:scale-95'
                     : 'max-sm:z-20 max-sm:scale-100 max-sm:rotate-0 max-sm:translate-x-0 max-sm:translate-y-0 max-sm:drop-shadow-xl'
                     } ${hoveredCardIdx === 1
                       ? 'sm:z-30 sm:rotate-0 sm:-translate-y-7 sm:translate-x-1 sm:scale-[1.05] sm:drop-shadow-[0_25px_30px_rgba(0,0,0,0.35)] sm:opacity-100'
@@ -709,6 +878,7 @@ export default function ShopHome() {
                         : 'sm:z-20 sm:rotate-[7deg] sm:translate-x-7 sm:translate-y-0 sm:scale-100 sm:drop-shadow-2xl sm:opacity-100 sm:animate-float-slow'
                     }`}
                 >
+                  <div className="voucher-foil-glint" style={{ animationDelay: '3.2s' }} aria-hidden="true" />
                   {/* SVG Die-Cut Background (Vết cắt trong suốt 100%, viền vàng uốn lượn tự nhiên, không rò rỉ góc) */}
                   <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 400 190" preserveAspectRatio="none">
                     <defs>
@@ -811,11 +981,14 @@ export default function ShopHome() {
                     <button
                       type="button"
                       onClick={(e) => handleCopyCoupon(secondaryCoupon.code, secondaryCoupon._id || 'secondary', e)}
-                      className="w-full bg-white/10 sm:hover:bg-white/20 active:scale-95 border border-amber-400/30 py-1 px-1 rounded text-[11px] sm:text-xs font-mono font-bold tracking-widest text-amber-300 text-center transition-all cursor-pointer shadow-2xs"
+                      className={`w-full overflow-hidden bg-white/10 sm:hover:bg-white/20 active:scale-95 border border-amber-400/30 py-1.5 px-1 rounded font-mono font-bold text-amber-300 text-center transition-all cursor-pointer shadow-2xs leading-tight break-all ${(secondaryCoupon.code || '').length >= 10
+                        ? 'text-[9px] sm:text-[10px] tracking-tight'
+                        : 'text-[10.5px] sm:text-xs tracking-wider'
+                        }`}
                       title="Bấm để sao chép mã ưu đãi"
                     >
                       {copiedCouponId === (secondaryCoupon._id || 'secondary') ? (
-                        <span className="text-amber-200 font-bold flex items-center justify-center gap-1">
+                        <span className="text-amber-200 font-bold flex items-center justify-center gap-0.5 text-[10px]">
                           <i className="ph-bold ph-check text-xs"></i> ĐÃ CHÉP!
                         </span>
                       ) : (
@@ -836,13 +1009,35 @@ export default function ShopHome() {
                 </div>
               )}
             </div>
+
+            {/* Chấm chỉ báo & gợi ý vuốt trên Mobile */}
+            {displayCoupons.length >= 2 && (
+              <div className="flex sm:hidden items-center justify-center gap-2 mt-2">
+                {displayCoupons.map((coupon, idx) => (
+                  <button
+                    key={coupon._id || idx}
+                    type="button"
+                    aria-label={`Xem mã ưu đãi ${idx + 1}`}
+                    onClick={() => setActiveMobileCoupon(idx)}
+                    className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${activeMobileCoupon === idx
+                      ? 'w-6 bg-brand-burgundy'
+                      : 'w-1.5 bg-stone-300'
+                      }`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Cột phải: Thông tin Ưu Đãi Đặc Quyền */}
-          <div className="lg:col-span-5 text-left reveal-on-scroll">
-            <h3 className="font-serif-display text-3xl sm:text-5xl font-normal text-brand-charcoal leading-tight mb-3 sm:mb-4">
-              Ưu đãi đặc quyền<br />
-              <span className="italic font-light text-amber-800">Thắp Sáng Cảm Xúc</span>
+          <div className="lg:col-span-5 text-left reveal-from-right">
+            <h3 className="hidden sm:block font-serif-display text-3xl sm:text-5xl font-normal text-brand-charcoal leading-tight mb-3 sm:mb-4">
+              <span className="reveal-mask">
+                <span className="reveal-mask-inner">Ưu đãi đặc quyền</span>
+              </span>
+              <span className="reveal-mask">
+                <span className="reveal-mask-inner reveal-delay-200 italic font-light text-amber-800">Thắp Sáng Cảm Xúc</span>
+              </span>
             </h3>
             <p className="text-xs sm:text-sm text-stone-700 leading-relaxed mb-6 sm:mb-8 font-normal">
               Candlet dành tặng bạn những nốt hương an yên cùng các mã ưu đãi độc quyền. Từng ly nến thơm thủ công được rót từ 100% sáp đậu nành thiên nhiên, bấc cotton hữu cơ và tinh dầu thuần khiết — hoàn hảo để chăm sóc bản thân hoặc trao gửi yêu thương.
@@ -883,8 +1078,12 @@ export default function ShopHome() {
                 Bộ Sưu Tập Thủ Công Mới Nhất
               </div>
               <h2 className="font-serif-display text-3xl sm:text-5xl lg:text-6xl text-brand-charcoal tracking-tight font-normal leading-[1.15]">
-                Khám phá bộ sưu tập<br />
-                <span className="italic font-light text-brand-burgundy">thắp sáng tâm hồn</span>
+                <span className="reveal-mask">
+                  <span className="reveal-mask-inner">Khám phá bộ sưu tập</span>
+                </span>
+                <span className="reveal-mask">
+                  <span className="reveal-mask-inner reveal-delay-200 italic font-light text-brand-burgundy">thắp sáng tâm hồn</span>
+                </span>
               </h2>
               <p className="text-stone-600 text-xs sm:text-base leading-relaxed mt-2 sm:mt-4 font-normal">
                 Chế tác từ sáp thực vật hòa quyện cùng những tầng hương được tuyển chọn kỹ lưỡng. Mỗi sản phẩm được rót tay để mang đến ánh sáng ấm áp và trải nghiệm hương thơm trọn vẹn.
@@ -963,34 +1162,105 @@ export default function ShopHome() {
                 })
                 .slice(0, 4)
                 .map((product, index) => {
+                  const ratingValue = Math.round(Number(product.avgRating) || 5);
+                  const hasDiscount = Number(product.original_price) > Number(product.base_price);
+
                   return (
                     <div
-                      key={product._id}
-                      className={`group relative flex h-full flex-col overflow-hidden rounded-[18px] border border-[#E9DED4] bg-[#FFFCF8] shadow-[0_4px_16px_rgba(55,38,33,0.06)] transition-all duration-300 sm:rounded-[22px] sm:hover:-translate-y-0.5 sm:hover:border-[#D7C4B5] sm:hover:shadow-[0_10px_24px_rgba(55,38,33,0.1)] reveal-on-scroll reveal-delay-${((index % 4) + 1) * 100}`}
+                      key={`${selectedCategoryFilter}-${product._id}`}
+                      style={{ animationDelay: `${index * 65}ms` }}
+                      className="product-filter-enter group relative flex h-full flex-col overflow-hidden rounded-[20px] border border-stone-100 bg-white shadow-[0_4px_20px_rgba(28,25,23,0.04)] transition-all duration-300 ease-out sm:rounded-[24px] sm:hover:-translate-y-1 sm:hover:border-stone-200 sm:hover:shadow-[0_16px_32px_-10px_rgba(28,25,23,0.11)]"
                     >
-                      <div className="relative aspect-square overflow-hidden border-b border-[#E9DED4] bg-[#EEE8E0]">
+                      {/* Khung ảnh tối giản */}
+                      <div className="relative aspect-square overflow-hidden bg-[#F7F5F2]">
                         <Link to={`/product/${product._id}`} className="block size-full">
-                          {product.image ? <img alt={product.name} className="size-full object-cover transition-transform duration-700 sm:group-hover:scale-[1.03]" src={getImageUrl(product.image)} /> : <div className="flex size-full items-center justify-center bg-stone-100 text-xs text-stone-400">Chưa có ảnh</div>}
+                          {product.image ? (
+                            <img
+                              alt={product.name}
+                              className="size-full object-cover transition-transform duration-500 ease-out sm:group-hover:scale-[1.04]"
+                              src={getImageUrl(product.image)}
+                            />
+                          ) : (
+                            <div className="flex size-full items-center justify-center bg-stone-100 text-xs text-stone-400">
+                              Chưa có ảnh
+                            </div>
+                          )}
                         </Link>
-                        {product.tag && <div className="absolute left-2 top-2 z-10 px-2 py-1 text-[7px] font-bold uppercase tracking-[0.12em] text-white shadow-sm sm:left-3 sm:top-3 sm:text-[8px]" style={{ backgroundColor: resolveTagColor(product.tag, product.tag_color) }}>{product.tag}</div>}
-                        <button aria-label="Thêm vào yêu thích" className="absolute right-2 top-2 z-10 flex size-7 cursor-pointer items-center justify-center rounded-full border border-stone-200/80 bg-white/90 text-stone-500 shadow-sm backdrop-blur-md transition-colors sm:right-3 sm:top-3 sm:size-8 sm:hover:text-rose-500" onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWishlist(product, navigate); }}>
-                          <i className={`${isInWishlist(product._id) ? 'ph-fill ph-heart text-rose-500' : 'ph-bold ph-heart'} text-sm`} />
+
+                        {/* Nhãn tag có màu theo cấu hình sản phẩm */}
+                        {product.tag && (
+                          <span
+                            className="absolute left-2.5 top-2.5 z-10 rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em] text-white shadow-sm sm:left-3 sm:top-3 sm:text-[9.5px]"
+                            style={{ backgroundColor: resolveTagColor(product.tag, product.tag_color) }}
+                          >
+                            {product.tag}
+                          </span>
+                        )}
+
+                        {/* Nút yêu thích tròn trắng tinh tế */}
+                        <button
+                          type="button"
+                          aria-label="Thêm vào yêu thích"
+                          className="absolute right-2.5 top-2.5 z-10 flex size-8 cursor-pointer items-center justify-center rounded-full bg-white text-stone-700 shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-colors duration-200 active:scale-90 sm:right-3 sm:top-3 sm:size-8.5 sm:hover:text-rose-500"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            toggleWishlist(product, navigate);
+                          }}
+                        >
+                          <i className={`${isInWishlist(product._id) ? 'ph-fill ph-heart text-rose-500' : 'ph ph-heart'} text-[16px]`} />
                         </button>
                       </div>
 
-                      <div className="flex flex-1 flex-col px-3.5 pb-3.5 pt-3.5 sm:px-4 sm:pb-4 sm:pt-4">
-                        <Link to={`/product/${product._id}`} className="block transition-colors sm:group-hover:text-brand-burgundy">
-                          <h3 className="line-clamp-2 min-h-[38px] overflow-hidden font-serif-display text-[15px] font-bold leading-[1.28] text-[#302320] sm:min-h-[44px] sm:text-[17px]" title={product.name}>{product.name}</h3>
+                      {/* Nội dung tối giản 3 dòng: Tên đậm -> 5 sao vàng -> Giá & nút giỏ hàng */}
+                      <div className="flex flex-1 flex-col p-3 sm:p-3.5">
+                        <Link
+                          to={`/product/${product._id}`}
+                          className="block transition-colors duration-200 sm:group-hover:text-brand-burgundy"
+                        >
+                          <h3
+                            className="line-clamp-1 font-jakarta text-[13.5px] font-semibold leading-snug text-stone-900 transition-colors duration-200 sm:text-[15px] sm:group-hover:text-brand-burgundy"
+                            title={product.name}
+                          >
+                            {product.name}
+                          </h3>
                         </Link>
-                        <p className="mt-1 truncate text-[8px] font-semibold uppercase tracking-[0.12em] text-stone-400 sm:text-[9px]">{product.category?.name || 'Candlet Scented Candle'}</p>
-                        <div className="mt-2 flex items-center gap-1.5 text-[9px] sm:text-[10px]">
-                          <i className="ph-fill ph-star text-[10px] text-amber-500 sm:text-xs" />
-                          <span className="font-bold text-stone-700">{product.avgRating || '5.0'}</span>
-                          <span className="text-stone-400">({product.reviewCount || 0} đánh giá)</span>
+
+                        {/* Hàng 5 sao vàng tươi + số lượt đánh giá */}
+                        <div className="mt-1.5 flex items-center gap-0.5">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <i
+                              key={star}
+                              className={`ph-fill ph-star text-[11px] sm:text-xs ${star <= ratingValue ? 'text-amber-400' : 'text-stone-200'
+                                }`}
+                            />
+                          ))}
+                          <span className="ml-1 text-[11px] text-stone-400">
+                            ({product.reviewCount || 0})
+                          </span>
                         </div>
-                        <div className="mt-3 flex items-end justify-between gap-2 border-t border-[#EEE5DD] pt-2.5 sm:mt-3.5 sm:pt-3">
-                          <span className="pb-0.5 text-[8px] font-semibold uppercase tracking-[0.12em] text-stone-400">Giá từ</span>
-                          <span className="font-jakarta text-[17px] font-extrabold leading-none tracking-[-0.035em] text-[#3D2925] sm:text-[19px]">{product.base_price?.toLocaleString('vi-VN')}<span className="ml-0.5 text-[11px] font-bold sm:text-xs">đ</span></span>
+
+                        {/* Hàng đáy: Giá & giá gốc cùng dòng + nút giỏ hàng tròn nhẹ */}
+                        <div className="mt-auto flex items-center justify-between gap-2 pt-2.5">
+                          <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
+                            <span className="font-jakarta text-[14.5px] font-bold leading-none tracking-[-0.015em] text-brand-burgundy sm:text-[16px]">
+                              {product.base_price?.toLocaleString('vi-VN')}
+                              <span className="text-[11px] font-semibold">đ</span>
+                            </span>
+                            {hasDiscount && (
+                              <span className="text-[11px] text-stone-400 line-through leading-none">
+                                {Number(product.original_price).toLocaleString('vi-VN')}đ
+                              </span>
+                            )}
+                          </div>
+
+                          <Link
+                            to={`/product/${product._id}`}
+                            aria-label={`Chọn mua ${product.name}`}
+                            className="flex size-8 shrink-0 items-center justify-center rounded-full border border-stone-200/90 bg-white text-stone-700 shadow-[0_1px_4px_rgba(0,0,0,0.04)] transition-colors duration-200 active:scale-90 sm:size-9 sm:group-hover:border-brand-charcoal sm:group-hover:bg-brand-charcoal sm:group-hover:text-white"
+                          >
+                            <i className="ph ph-shopping-cart text-[16px]" />
+                          </Link>
                         </div>
                       </div>
                     </div>
@@ -1013,11 +1283,19 @@ export default function ShopHome() {
       </section>
 
       {/* BEGIN: WhatMakesUsDifferentSection */}
-      <section className="relative overflow-hidden py-14 sm:py-28 bg-gradient-to-br from-[#2D1214] via-[#431A1E] to-[#240D10] text-[#f9f9f9]" data-purpose="brand-differentiation" id="story">
-        {/* Ambient atmospheric warm glows with slow floating animation */}
-        <div className="absolute -top-32 -left-32 w-96 h-96 bg-amber-500/15 rounded-full blur-[120px] pointer-events-none animate-ambient-drift-1"></div>
-        <div className="absolute top-1/2 right-0 w-[500px] h-[500px] bg-[#9A3412]/20 rounded-full blur-[140px] pointer-events-none animate-ambient-drift-2"></div>
-        <div className="absolute -bottom-24 left-1/3 w-80 h-80 bg-amber-400/15 rounded-full blur-[100px] pointer-events-none animate-pulse-glow"></div>
+      <section
+        ref={storySectionRef}
+        className="relative overflow-hidden py-14 sm:py-28 bg-gradient-to-br from-[#2D1214] via-[#431A1E] to-[#240D10] text-[#f9f9f9]"
+        data-purpose="brand-differentiation"
+        id="story"
+      >
+        {/* Hiệu ứng tàn lửa ánh nến vàng ấm bay lên lấp lánh (60fps, tự nghỉ khi khuất màn hình) */}
+        <CandleAtmosphereCanvas variant="ember" className="opacity-90" />
+
+        {/* Ambient atmospheric warm glows */}
+        <div className="absolute -top-32 -left-32 w-96 h-96 bg-amber-500/15 rounded-full blur-[100px] pointer-events-none"></div>
+        <div className="absolute top-1/2 right-0 w-[460px] h-[460px] bg-[#9A3412]/20 rounded-full blur-[110px] pointer-events-none"></div>
+        <div className="absolute -bottom-24 left-1/3 w-80 h-80 bg-amber-400/15 rounded-full blur-[90px] pointer-events-none"></div>
 
         {/* Subtle radial lighting layer */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white/[0.04] via-transparent to-transparent pointer-events-none"></div>
@@ -1026,15 +1304,19 @@ export default function ShopHome() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center">
 
             {/* Left Content Column */}
-            <div className="lg:col-span-5 space-y-5 sm:space-y-7 reveal-on-scroll">
+            <div className="lg:col-span-5 space-y-5 sm:space-y-7 reveal-from-left">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-400/10 border border-amber-400/25 text-amber-300 text-[10.5px] sm:text-[11px] font-bold uppercase tracking-widest shadow-inner">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
                 <span>Giá Trị Cốt Lõi</span>
               </div>
 
               <h2 className="font-serif-display text-3xl sm:text-5xl lg:text-6xl font-normal leading-[1.15] text-white tracking-tight">
-                Điều Tạo Nên Sự Khác Biệt<br />
-                <span className="italic font-light text-amber-200/90 font-serif">Của Candlet</span>
+                <span className="reveal-mask">
+                  <span className="reveal-mask-inner">Điều Tạo Nên Sự Khác Biệt</span>
+                </span>
+                <span className="reveal-mask">
+                  <span className="reveal-mask-inner reveal-delay-200 italic font-light text-amber-200/90 font-serif">Của Candlet</span>
+                </span>
               </h2>
 
               <p className="text-xs sm:text-base text-[#E5D2CD] leading-relaxed font-normal">
@@ -1087,64 +1369,74 @@ export default function ShopHome() {
             <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-7">
 
               {/* Card 1: Nguồn Thảo Dược & Chiết Xuất Bản Địa */}
-              <div className="card-hover-lift group reveal-on-scroll reveal-delay-100 relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/15 bg-white/[0.06] p-0 shadow-xl backdrop-blur-md transition-all duration-500 sm:hover:border-amber-400/50 sm:hover:bg-white/[0.1] sm:hover:shadow-2xl sm:hover:shadow-amber-950/50 sm:p-5">
-                <div className="relative mb-0 aspect-[16/10] overflow-hidden bg-stone-900 shadow-inner sm:mb-4 sm:aspect-[4/5] sm:rounded-xl">
-                  <img
-                    alt="Nguồn thảo mộc và sáp đậu nành thiên nhiên Candlet"
-                    className="w-full h-full object-cover sm:group-hover:scale-108 transition-transform duration-700 ease-out"
-                    src="/story-botanicals.jpg"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 opacity-80 sm:group-hover:opacity-60 transition-opacity"></div>
+              <div ref={storyCardLeftRef} className="will-change-transform">
+                <div
+                  onMouseMove={handleSpotlightMove}
+                  className="spotlight-card spotlight-card-dark card-hover-lift group reveal-on-scroll reveal-delay-100 relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/15 bg-white/[0.06] p-0 shadow-xl backdrop-blur-md transition-all duration-500 sm:hover:border-amber-400/50 sm:hover:bg-white/[0.1] sm:hover:shadow-2xl sm:hover:shadow-amber-950/50 sm:p-5"
+                >
+                  <div className="relative mb-0 aspect-[16/10] overflow-hidden bg-stone-900 shadow-inner sm:mb-4 sm:aspect-[4/5] sm:rounded-xl">
+                    <img
+                      alt="Nguồn thảo mộc và sáp đậu nành thiên nhiên Candlet"
+                      className="w-full h-full object-cover sm:group-hover:scale-108 transition-transform duration-700 ease-out"
+                      src="/story-botanicals.jpg"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 opacity-80 sm:group-hover:opacity-60 transition-opacity"></div>
 
-                  {/* Glass Tag Badge */}
-                  <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 bg-black/45 backdrop-blur-md border border-white/20 text-white text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full flex items-center gap-1.5 shadow-sm sm:group-hover:border-amber-400/40 transition-colors">
-                    <i className="ph-fill ph-leaf text-amber-300 text-xs"></i>
-                    <span>Nguồn An Toàn</span>
+                    {/* Glass Tag Badge */}
+                    <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 bg-black/45 backdrop-blur-md border border-white/20 text-white text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full flex items-center gap-1.5 shadow-sm sm:group-hover:border-amber-400/40 transition-colors">
+                      <i className="ph-fill ph-leaf text-amber-300 text-xs"></i>
+                      <span>Nguồn An Toàn</span>
+                    </div>
+
+                    <div className="absolute bottom-2.5 right-2.5 sm:bottom-3 sm:right-3 bg-amber-400/90 text-stone-950 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 sm:px-2.5 rounded-full shadow-md font-mono sm:group-hover:scale-105 transition-transform">
+                      100% Organic
+                    </div>
                   </div>
 
-                  <div className="absolute bottom-2.5 right-2.5 sm:bottom-3 sm:right-3 bg-amber-400/90 text-stone-950 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 sm:px-2.5 rounded-full shadow-md font-mono sm:group-hover:scale-105 transition-transform">
-                    100% Organic
+                  <div className="space-y-1.5 p-4 sm:p-0">
+                    <h4 className="font-serif-display text-xl sm:text-2xl font-semibold text-white sm:group-hover:text-amber-200 transition-colors">
+                      Chiết Xuất Bản Địa
+                    </h4>
+                    <p className="text-xs sm:text-[13px] text-[#D8C0B8] leading-relaxed font-normal">
+                      Sáp đậu nành thực vật kết hợp cùng hoa khô, vỏ quế và tinh dầu thơm organic thuần khiết, mang lại nốt hương sâu lắng và an lành.
+                    </p>
                   </div>
-                </div>
-
-                <div className="space-y-1.5 p-4 sm:p-0">
-                  <h4 className="font-serif-display text-xl sm:text-2xl font-semibold text-white sm:group-hover:text-amber-200 transition-colors">
-                    Chiết Xuất Bản Địa
-                  </h4>
-                  <p className="text-xs sm:text-[13px] text-[#D8C0B8] leading-relaxed font-normal">
-                    Sáp đậu nành thực vật kết hợp cùng hoa khô, vỏ quế và tinh dầu thơm organic thuần khiết, mang lại nốt hương sâu lắng và an lành.
-                  </p>
                 </div>
               </div>
 
-              {/* Card 2: Rót Nến Thủ Công & Bền Vững (Staggered offset) */}
-              <div className="card-hover-lift group reveal-on-scroll reveal-delay-200 relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/15 bg-white/[0.06] p-0 shadow-xl backdrop-blur-md transition-all duration-500 sm:hover:border-amber-400/50 sm:hover:bg-white/[0.1] sm:hover:shadow-2xl sm:hover:shadow-amber-950/50 sm:translate-y-8 sm:p-5">
-                <div className="relative mb-0 aspect-[16/10] overflow-hidden bg-stone-900 shadow-inner sm:mb-4 sm:aspect-[4/5] sm:rounded-xl">
-                  <img
-                    alt="Nghệ nhân rót nến thủ công Candlet"
-                    className="w-full h-full object-cover sm:group-hover:scale-108 transition-transform duration-700 ease-out"
-                    src="/story-craft.jpg"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 opacity-80 sm:group-hover:opacity-60 transition-opacity"></div>
+              {/* Card 2: Rót Nến Thủ Công & Bền Vững (Staggered offset + Scroll Parallax) */}
+              <div ref={storyCardRightRef} className="will-change-transform sm:translate-y-8">
+                <div
+                  onMouseMove={handleSpotlightMove}
+                  className="spotlight-card spotlight-card-dark card-hover-lift group reveal-on-scroll reveal-delay-200 relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/15 bg-white/[0.06] p-0 shadow-xl backdrop-blur-md transition-all duration-500 sm:hover:border-amber-400/50 sm:hover:bg-white/[0.1] sm:hover:shadow-2xl sm:hover:shadow-amber-950/50 sm:p-5"
+                >
+                  <div className="relative mb-0 aspect-[16/10] overflow-hidden bg-stone-900 shadow-inner sm:mb-4 sm:aspect-[4/5] sm:rounded-xl">
+                    <img
+                      alt="Nghệ nhân rót nến thủ công Candlet"
+                      className="w-full h-full object-cover sm:group-hover:scale-108 transition-transform duration-700 ease-out"
+                      src="/story-craft.jpg"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 opacity-80 sm:group-hover:opacity-60 transition-opacity"></div>
 
-                  {/* Glass Tag Badge */}
-                  <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 bg-black/45 backdrop-blur-md border border-white/20 text-white text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full flex items-center gap-1.5 shadow-sm sm:group-hover:border-amber-400/40 transition-colors">
-                    <i className="ph-fill ph-hands-clapping text-amber-300 text-xs"></i>
-                    <span>Nghệ Thuật Thủ Công</span>
+                    {/* Glass Tag Badge */}
+                    <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 bg-black/45 backdrop-blur-md border border-white/20 text-white text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full flex items-center gap-1.5 shadow-sm sm:group-hover:border-amber-400/40 transition-colors">
+                      <i className="ph-fill ph-hands-clapping text-amber-300 text-xs"></i>
+                      <span>Nghệ Thuật Thủ Công</span>
+                    </div>
+
+                    <div className="absolute bottom-2.5 right-2.5 sm:bottom-3 sm:right-3 bg-amber-400/90 text-stone-950 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 sm:px-2.5 rounded-full shadow-md font-mono sm:group-hover:scale-105 transition-transform">
+                      Handmade in VN
+                    </div>
                   </div>
 
-                  <div className="absolute bottom-2.5 right-2.5 sm:bottom-3 sm:right-3 bg-amber-400/90 text-stone-950 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 sm:px-2.5 rounded-full shadow-md font-mono sm:group-hover:scale-105 transition-transform">
-                    Handmade in VN
+                  <div className="space-y-1.5 p-4 sm:p-0">
+                    <h4 className="font-serif-display text-xl sm:text-2xl font-semibold text-white sm:group-hover:text-amber-200 transition-colors">
+                      Rót Tay Tỉ Mỉ
+                    </h4>
+                    <p className="text-xs sm:text-[13px] text-[#D8C0B8] leading-relaxed font-normal">
+                      Từng mẻ sáp được nấu chảy và canh nhiệt độ rót thủ công chuẩn xác vào hũ thủ tinh chịu nhiệt, dễ dàng tái chế trọn đời.
+                    </p>
                   </div>
-                </div>
-
-                <div className="space-y-1.5 p-4 sm:p-0">
-                  <h4 className="font-serif-display text-xl sm:text-2xl font-semibold text-white sm:group-hover:text-amber-200 transition-colors">
-                    Rót Tay Tỉ Mỉ
-                  </h4>
-                  <p className="text-xs sm:text-[13px] text-[#D8C0B8] leading-relaxed font-normal">
-                    Từng mẻ sáp được nấu chảy và canh nhiệt độ rót thủ công chuẩn xác vào hũ thủ tinh chịu nhiệt, dễ dàng tái chế trọn đời.
-                  </p>
                 </div>
               </div>
 
@@ -1160,8 +1452,12 @@ export default function ShopHome() {
         <div className="max-w-4xl mx-auto px-4 text-center relative z-10 reveal-on-scroll">
           <span className="text-xs font-bold uppercase tracking-widest text-brand-gold mb-2 sm:mb-3 block">Thư Thông Báo Candlet</span>
           <h2 className="font-serif-display text-3xl sm:text-5xl lg:text-6xl text-brand-charcoal leading-tight font-normal mb-3 sm:mb-4">
-            Luôn là người đầu tiên biết đến —<br />
-            <span className="italic font-light">Đăng ký nhận bản tin</span>
+            <span className="reveal-mask">
+              <span className="reveal-mask-inner">Luôn là người đầu tiên biết đến —</span>
+            </span>
+            <span className="reveal-mask">
+              <span className="reveal-mask-inner reveal-delay-200 italic font-light">Đăng ký nhận bản tin</span>
+            </span>
           </h2>
           <p className="text-xs sm:text-sm text-stone-600 max-w-[512px] mx-auto mb-8 sm:mb-10 leading-relaxed font-normal">
             Đăng ký để nhận thông báo sớm nhất về các mùi hương độc bản theo mùa cùng mã giảm giá 15% cho đơn hàng tiếp theo.
