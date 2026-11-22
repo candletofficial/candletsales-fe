@@ -18,6 +18,7 @@ export default function ProductDetail() {
 
   // State cho variant, giỏ hàng, và gallery
   const [selectedOptions, setSelectedOptions] = useState({});
+  const [selectedSkuQuantities, setSelectedSkuQuantities] = useState({});
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
   const [activeImage, setActiveImage] = useState('');
@@ -56,7 +57,11 @@ export default function ProductDetail() {
   // Danh sách toàn bộ ảnh sản phẩm
   const allImages = useMemo(() => {
     if (!product) return [];
-    return [product.image, ...(product.images || [])].filter(Boolean);
+    return [...new Set([
+      product.image,
+      ...(product.images || []),
+      ...(product.skus || []).map(sku => sku.image),
+    ].filter(Boolean))];
   }, [product]);
 
   useEffect(() => {
@@ -162,13 +167,14 @@ export default function ProductDetail() {
         }
         const images = [res.data.image, ...(res.data.images || [])].filter(Boolean);
         if (images.length > 0) setActiveImage(images[0]);
+        const firstAvailableSku = res.data.skus?.find(
+          sku => sku.stock === null || sku.stock === undefined || Number(sku.stock) > 0
+        );
+        setSelectedSkuQuantities({});
 
         // Ưu tiên tổ hợp còn hàng để không mở trang với một phân loại đã hết.
         if (res.data.variant_groups && res.data.variant_groups.length > 0) {
           const defaults = {};
-          const firstAvailableSku = res.data.skus?.find(
-            sku => sku.stock === null || sku.stock === undefined || Number(sku.stock) > 0
-          );
           const availableCombination = new Set(
             (firstAvailableSku?.combination || []).map(optionId => String(optionId))
           );
@@ -195,10 +201,6 @@ export default function ProductDetail() {
 
   // Moved fetchProductDetail above
 
-  const handleOptionSelect = (groupId, optionId) => {
-    setSelectedOptions(prev => ({ ...prev, [groupId]: optionId }));
-  };
-
   const currentSku = () => {
     if (!product || !product.skus || product.skus.length === 0) return null;
     const selectedCombo = Object.values(selectedOptions).sort().join(',');
@@ -209,56 +211,118 @@ export default function ProductDetail() {
     });
   };
 
+  const handleOptionSelect = (groupId, optionId) => {
+    const nextOptions = { ...selectedOptions, [groupId]: optionId };
+    setSelectedOptions(nextOptions);
+
+    const selectedCombo = Object.values(nextOptions).map(String).sort().join(',');
+    const matchingSku = product?.skus?.find(sku => (
+      (sku.combination || []).map(String).sort().join(',') === selectedCombo
+    ));
+    if (matchingSku) {
+      const linkedImage = matchingSku.image || product?.image;
+      if (linkedImage) {
+        const imageIndex = allImages.indexOf(linkedImage);
+        scrollToImage(linkedImage, imageIndex >= 0 ? imageIndex : 0);
+      }
+    }
+  };
+
   const isOptionUnavailable = (groupId, optionId) => {
     if (!product?.skus?.length) return false;
-
     const requiredOptionIds = Object.entries(selectedOptions)
       .filter(([selectedGroupId]) => String(selectedGroupId) !== String(groupId))
       .map(([, selectedOptionId]) => String(selectedOptionId));
 
-    return !product.skus.some((sku) => {
-      const combination = new Set((sku.combination || []).map(id => String(id)));
+    return !product.skus.some(sku => {
+      const combination = new Set((sku.combination || []).map(String));
       const matchesOption = combination.has(String(optionId));
       const matchesOtherSelections = requiredOptionIds.every(id => combination.has(id));
       const hasStock = sku.stock === null || sku.stock === undefined || Number(sku.stock) > 0;
-
       return matchesOption && matchesOtherSelections && hasStock;
     });
   };
+
+  const getSkuLabel = (sku) => (sku?.combination || []).map(optionId => {
+    for (const group of product?.variant_groups || []) {
+      const option = (group.options || []).find(item => String(item.id) === String(optionId));
+      if (option) return option.label;
+    }
+    return null;
+  }).filter(Boolean).join(' · ') || sku?.id || 'Mặc định';
+
+  const focusSku = (sku) => {
+    const nextOptions = {};
+    (product?.variant_groups || []).forEach(group => {
+      const option = (group.options || []).find(item => (sku.combination || []).some(id => String(id) === String(item.id)));
+      if (option) nextOptions[group.id] = option.id;
+    });
+    setSelectedOptions(nextOptions);
+    const linkedImage = sku.image || product?.image;
+    if (linkedImage) {
+      const imageIndex = allImages.indexOf(linkedImage);
+      scrollToImage(linkedImage, imageIndex >= 0 ? imageIndex : 0);
+    }
+  };
+
+  const changeSkuQuantity = (sku, change) => {
+    const hasStock = sku.stock === null || sku.stock === undefined || Number(sku.stock) > 0;
+    if (!hasStock) return;
+    if (change > 0) focusSku(sku);
+    setSelectedSkuQuantities(current => {
+      const available = sku.stock !== null && sku.stock !== undefined && Number.isFinite(Number(sku.stock))
+        ? Number(sku.stock) : Number.POSITIVE_INFINITY;
+      const nextQuantity = Math.max(0, Math.min(available, (current[sku.id] || 0) + change));
+      const next = { ...current };
+      if (nextQuantity === 0) delete next[sku.id];
+      else next[sku.id] = nextQuantity;
+      return next;
+    });
+  };
+
+  const selectedSkuEntries = useMemo(() => (product?.skus || [])
+    .filter(sku => selectedSkuQuantities[sku.id] > 0)
+    .map(sku => ({ sku, quantity: selectedSkuQuantities[sku.id] })), [product, selectedSkuQuantities]);
 
   const { addToCart, cartItemCount } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
 
   const handleAddToCart = async () => {
     if (!product) return;
-
-    const selectedSku = currentSku();
-    // Nếu có biến thể (skus) nhưng chưa chọn
-    if (product.skus && product.skus.length > 0 && !selectedSku) {
-      alert('Vui lòng chọn loại sản phẩm');
-      return;
+    const hasVariants = Boolean(product.skus?.length);
+    if (hasVariants && selectedSkuEntries.length === 0) {
+      alert('Vui lòng chọn ít nhất một phân loại');
+      return false;
     }
-    const available = selectedSku?.stock ?? product.stock;
-    if (Number.isFinite(available) && (available <= 0 || quantity > available)) {
-      alert(available <= 0 ? 'Phân loại này hiện đã hết hàng' : 'Số lượng bạn chọn hiện không khả dụng');
-      return;
+    const invalidEntry = selectedSkuEntries.find(({ sku, quantity: skuQuantity }) => (
+      sku.stock !== null && sku.stock !== undefined
+      && Number.isFinite(Number(sku.stock)) && Number(sku.stock) >= 0 && skuQuantity > Number(sku.stock)
+    ));
+    if (invalidEntry) {
+      alert(`Số lượng ${getSkuLabel(invalidEntry.sku)} hiện không khả dụng`);
+      return false;
+    }
+    if (!hasVariants && product.stock !== null && product.stock !== undefined
+      && Number.isFinite(Number(product.stock)) && Number(product.stock) >= 0 && quantity > Number(product.stock)) {
+      alert('Số lượng bạn chọn hiện không khả dụng');
+      return false;
     }
 
     try {
       setIsAdding(true);
-      const payload = {
-        product_id: product._id,
-        quantity,
-        sku_id: selectedSku ? selectedSku.id : undefined
-      };
-
-      const res = await addToCart(payload);
-      if (res.success) {
-        alert('Đã thêm vào giỏ hàng thành công!');
+      if (hasVariants) {
+        for (const entry of selectedSkuEntries) {
+          await addToCart({ product_id: product._id, quantity: entry.quantity, sku_id: entry.sku.id });
+        }
+      } else {
+        await addToCart({ product_id: product._id, quantity });
       }
+      alert(`Đã thêm ${hasVariants ? selectedSkuEntries.length : 1} phân loại vào giỏ hàng!`);
+      return true;
     } catch (error) {
       console.error('Failed to add to cart', error);
       alert(error.response?.data?.message || 'Có lỗi xảy ra khi thêm vào giỏ hàng');
+      return false;
     } finally {
       setIsAdding(false);
     }
@@ -266,32 +330,101 @@ export default function ProductDetail() {
 
   const handleBuyNow = () => {
     if (!product) return;
-
-    const selectedSku = currentSku();
-    if (product.skus && product.skus.length > 0 && !selectedSku) {
-      alert('Vui lòng chọn loại sản phẩm');
+    if (product.skus?.length && selectedSkuEntries.length === 0) {
+      alert('Vui lòng chọn ít nhất một phân loại');
       return;
     }
-    const available = selectedSku?.stock ?? product.stock;
-    if (Number.isFinite(available) && (available <= 0 || quantity > available)) {
-      alert(available <= 0 ? 'Phân loại này hiện đã hết hàng' : 'Số lượng bạn chọn hiện không khả dụng');
-      return;
-    }
-
-    const buyItem = {
-      product_id: product,
-      sku_id: selectedSku ? selectedSku.id : undefined,
-      quantity: quantity
-    };
-
-    // Chuyển thẳng sang trang thanh toán luôn với sản phẩm này
-    navigate('/checkout', { state: { selectedItems: [buyItem] } });
+    const selectedItems = product.skus?.length
+      ? selectedSkuEntries.map(({ sku, quantity: skuQuantity }) => ({ product_id: product, sku_id: sku.id, quantity: skuQuantity }))
+      : [{ product_id: product, quantity }];
+    navigate('/checkout', { state: { selectedItems } });
   };
 
   const activeSku = currentSku();
   const availableStock = activeSku?.stock ?? product?.stock;
-  const isOutOfStock = Number.isFinite(availableStock) && availableStock <= 0;
+  const isOutOfStock = product?.skus?.length
+    ? !product.skus.some(sku => sku.stock === null || sku.stock === undefined || Number(sku.stock) > 0)
+    : Number.isFinite(availableStock) && availableStock <= 0;
   const basePrice = activeSku && activeSku.price > 0 ? activeSku.price : (product?.base_price || 0);
+  const selectedVariantTotal = selectedSkuEntries.reduce((sum, { sku, quantity: skuQuantity }) => (
+    sum + (Number(sku.price) > 0 ? Number(sku.price) : Number(product?.base_price) || 0) * skuQuantity
+  ), 0);
+  const selectedQuantityTotal = selectedSkuEntries.reduce((sum, entry) => sum + entry.quantity, 0);
+  const isVariantSelectionMissing = Boolean(product?.skus?.length && selectedSkuEntries.length === 0);
+  const activeSkuQuantity = activeSku ? (selectedSkuQuantities[activeSku.id] || 0) : 0;
+  const activeSkuAvailable = activeSku?.stock === null || activeSku?.stock === undefined ? null : Number(activeSku.stock);
+
+  const renderSkuMultiSelector = () => (
+    <div className="space-y-4">
+      {(product?.variant_groups || []).map(group => {
+        const selectedOption = (group.options || []).find(option => String(option.id) === String(selectedOptions[group.id]));
+        return (
+          <div key={group.id} className="space-y-2">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-stone-600">{group.name}</span>
+              <span className="truncate text-[10px] text-stone-500">
+                Đang chọn: <strong className="text-stone-700">{selectedOption?.label || 'Chưa chọn'}</strong>
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {(group.options || []).map(option => {
+                const selected = String(selectedOptions[group.id]) === String(option.id);
+                const unavailable = isOptionUnavailable(group.id, option.id);
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() => handleOptionSelect(group.id, option.id)}
+                    disabled={unavailable}
+                    aria-label={unavailable ? `${option.label} - Hết hàng` : option.label}
+                    className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition-all active:scale-95 cursor-pointer ${
+                      unavailable
+                        ? 'cursor-not-allowed border border-stone-200 bg-stone-100 text-stone-400 opacity-65'
+                        : selected
+                          ? 'border-2 border-brand-burgundy bg-brand-burgundy text-white shadow-xs'
+                          : 'border border-stone-200 bg-white text-stone-700 hover:border-stone-400'
+                    }`}
+                  >
+                    {unavailable ? <i className="ph-bold ph-prohibit text-xs" /> : selected ? <i className="ph-bold ph-check text-xs" /> : null}
+                    <span className={unavailable ? 'line-through decoration-stone-400' : ''}>{option.label}</span>
+                    {unavailable && <span className="text-[8px] font-bold uppercase tracking-wide">Hết</span>}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+
+      <div className="flex items-center justify-between border-t border-stone-100 pt-4">
+        <div>
+          <span className="text-[11px] font-bold uppercase tracking-wider text-stone-600">Số lượng</span>
+          {selectedSkuEntries.length > 0 && (
+            <p className="mt-0.5 text-[9px] text-stone-400">Đã chọn {selectedSkuEntries.length} loại · {selectedQuantityTotal} sản phẩm</p>
+          )}
+        </div>
+        <div className="flex items-center rounded-xl border border-stone-200 bg-white p-0.5 shadow-xs">
+          <button
+            type="button"
+            onClick={() => activeSku && changeSkuQuantity(activeSku, -1)}
+            disabled={!activeSku || activeSkuQuantity === 0}
+            className="flex size-8 items-center justify-center rounded-lg text-stone-500 transition-colors hover:bg-stone-100 cursor-pointer disabled:cursor-not-allowed disabled:opacity-30"
+          >
+            <i className="ph-bold ph-minus text-[10px]" />
+          </button>
+          <span className="min-w-10 text-center text-xs font-black text-stone-800">{activeSkuQuantity}</span>
+          <button
+            type="button"
+            onClick={() => activeSku && changeSkuQuantity(activeSku, 1)}
+            disabled={!activeSku || (activeSkuAvailable !== null && activeSkuQuantity >= activeSkuAvailable)}
+            className="flex size-8 items-center justify-center rounded-lg text-stone-500 transition-colors hover:bg-stone-100 cursor-pointer disabled:cursor-not-allowed disabled:opacity-30"
+          >
+            <i className="ph-bold ph-plus text-[10px]" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 
   // Tính toán voucher tốt nhất (Phải gọi trước các lệnh return)
   const bestCoupon = useMemo(() => {
@@ -666,7 +799,7 @@ export default function ProductDetail() {
             </div>
 
             {/* Mobile: Hàng chọn phân loại chuẩn Shopee (Bấm để mở Bottom Sheet) */}
-            {product.variant_groups && product.variant_groups.length > 0 && (
+            {product.skus?.length > 0 && (
               <div 
                 onClick={() => openVariantSheet('both')}
                 className="mb-4 flex cursor-pointer items-center justify-between border-b border-stone-100 px-0 pb-3 transition-colors active:bg-stone-50 md:hidden"
@@ -676,10 +809,9 @@ export default function ProductDetail() {
                     Phân loại
                   </span>
                   <span className="text-xs text-stone-800 font-medium truncate">
-                    {product.variant_groups.map(g => {
-                      const opt = g.options.find(o => o.id === selectedOptions[g.id]);
-                      return opt?.label;
-                    }).filter(Boolean).join(' • ') || 'Chọn Mùi hương, Đóng gói'}
+                    {selectedSkuEntries.length
+                      ? `${selectedSkuEntries.length} phân loại · ${selectedQuantityTotal} sản phẩm`
+                      : 'Chọn một hoặc nhiều phân loại'}
                   </span>
                 </div>
                 <div className="flex items-center gap-1 text-stone-400 shrink-0">
@@ -689,53 +821,7 @@ export default function ProductDetail() {
               </div>
             )}
 
-            {/* Desktop: Variant Groups (Mùi hương, Kích thước) */}
-            {product.variant_groups && product.variant_groups.length > 0 && (
-              <div className="hidden md:block space-y-4 mb-6">
-                {product.variant_groups.map((group) => (
-                  <div key={group.id} className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <label className="text-[11px] font-bold text-stone-600 uppercase tracking-wider block">
-                        {group.name}
-                      </label>
-                      <span className="text-xs text-stone-500 font-medium">
-                        Đang chọn: <span className="text-brand-burgundy font-bold">{group.options.find(o => o.id === selectedOptions[group.id])?.label || 'Chưa chọn'}</span>
-                      </span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {group.options.map((opt) => {
-                        const isSelected = selectedOptions[group.id] === opt.id;
-                        const isUnavailable = isOptionUnavailable(group.id, opt.id);
-                        return (
-                          <button
-                            key={opt.id}
-                            type="button"
-                            onClick={() => handleOptionSelect(group.id, opt.id)}
-                            disabled={isUnavailable}
-                            aria-label={isUnavailable ? `${opt.label} - Hết hàng` : opt.label}
-                            className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 cursor-pointer active:scale-95 ${
-                              isUnavailable
-                                ? 'cursor-not-allowed border border-stone-200 bg-stone-100 text-stone-400 opacity-65'
-                                : isSelected
-                                ? 'bg-brand-burgundy text-white border-2 border-brand-burgundy shadow-xs'
-                                : 'bg-white text-stone-700 border border-stone-200 sm:hover:border-stone-400'
-                            }`}
-                          >
-                            {isUnavailable ? (
-                              <i className="ph-bold ph-prohibit text-xs" />
-                            ) : isSelected ? (
-                              <i className="ph-bold ph-check text-xs" />
-                            ) : null}
-                            <span className={isUnavailable ? 'line-through decoration-stone-400' : ''}>{opt.label}</span>
-                            {isUnavailable && <span className="text-[8px] font-bold uppercase tracking-wide">Hết</span>}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            {product.skus?.length > 0 && <div className="mb-6 hidden md:block">{renderSkuMultiSelector()}</div>}
 
             {/* Best Voucher Banner */}
             {bestCoupon && (
@@ -763,7 +849,7 @@ export default function ProductDetail() {
 
             {/* Action Box: Số lượng, Thêm vào giỏ & Mua ngay (Chỉ hiển thị trên Desktop; Mobile dùng Sticky Bar & Bottom Sheet chuẩn Shopee) */}
             <div className="hidden md:flex flex-col gap-4 pt-5 border-t border-stone-200">
-              <div className="flex items-center justify-between sm:justify-start gap-4">
+              {!product.skus?.length && <div className="flex items-center justify-between sm:justify-start gap-4">
                 <span className="text-xs font-bold text-stone-600 uppercase tracking-wider">Số lượng:</span>
                 <div className="flex items-center bg-white border border-stone-200 rounded-xl p-0.5 shadow-2xs">
                   <button
@@ -780,12 +866,12 @@ export default function ProductDetail() {
                     <i className="ph-bold ph-plus text-sm"></i>
                   </button>
                 </div>
-              </div>
+              </div>}
 
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={handleAddToCart}
-                  disabled={isAdding || isOutOfStock}
+                  disabled={isAdding || isOutOfStock || isVariantSelectionMissing}
                   className="flex-1 border-2 border-brand-burgundy text-brand-burgundy bg-white sm:hover:bg-brand-burgundy/5 active:bg-brand-burgundy/10 text-xs sm:text-sm font-bold uppercase tracking-wider rounded-xl py-3.5 px-4 flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed shadow-xs cursor-pointer"
                 >
                   {isAdding ? (
@@ -799,7 +885,7 @@ export default function ProductDetail() {
                 </button>
                 <button
                   onClick={handleBuyNow}
-                  disabled={isAdding || isOutOfStock}
+                  disabled={isAdding || isOutOfStock || isVariantSelectionMissing}
                   className="flex-1 bg-brand-burgundy sm:hover:bg-[#3A2221] active:bg-[#2A1817] text-white text-xs sm:text-sm font-bold uppercase tracking-wider rounded-xl py-3.5 px-4 flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed shadow-md cursor-pointer"
                 >
                   <i className="ph-bold ph-tote text-base"></i>
@@ -981,7 +1067,7 @@ export default function ProductDetail() {
 
         {/* 3. Nút "Thêm vào giỏ" phong cách Shopee (Mở Bottom Sheet chọn phân loại) */}
         <button
-          onClick={() => openVariantSheet('cart')}
+          onClick={() => product.skus?.length ? openVariantSheet('cart') : handleAddToCart()}
           disabled={isAdding || isOutOfStock}
           className="flex-1 bg-[#FFF5EC] active:bg-[#FFEAD6] text-[#B45309] flex flex-col items-center justify-center transition-colors disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-400 cursor-pointer px-1 text-center"
         >
@@ -997,14 +1083,14 @@ export default function ProductDetail() {
 
         {/* 4. Nút "Mua Ngay" phong cách Shopee (Mở Bottom Sheet chọn phân loại) */}
         <button
-          onClick={() => openVariantSheet('buy')}
+          onClick={() => product.skus?.length ? openVariantSheet('buy') : handleBuyNow()}
           disabled={isAdding || isOutOfStock}
           className="flex-1 bg-gradient-to-r from-[#94432C] to-brand-burgundy active:from-[#7D3824] active:to-[#38201F] text-white flex flex-col items-center justify-center transition-all disabled:cursor-not-allowed disabled:from-stone-300 disabled:to-stone-400 cursor-pointer px-1 text-center shadow-inner"
         >
           <span className="text-xs font-bold uppercase tracking-wider">{isOutOfStock ? 'Tạm Hết Hàng' : 'Mua Ngay'}</span>
           {!isOutOfStock && (
             <span className="text-[10px] text-amber-200/90 font-medium leading-none mt-0.5">
-              {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(displayPrice)}
+              {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(selectedVariantTotal || (displayPrice * quantity))}
             </span>
           )}
         </button>
@@ -1040,7 +1126,7 @@ export default function ProductDetail() {
               <div className="flex-1 min-w-0 pr-8">
                 <div className="flex items-baseline gap-2 flex-wrap">
                   <span className="text-xl font-extrabold text-[#B45309]">
-                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(displayPrice)}
+                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(selectedVariantTotal || displayPrice)}
                   </span>
                   {bestCoupon && (
                     <span className="text-xs text-stone-400 line-through">
@@ -1051,10 +1137,7 @@ export default function ProductDetail() {
                 
                 <p className="text-[11px] text-stone-600 font-medium truncate mt-0.5">
                   Đã chọn: <span className="text-brand-burgundy font-bold">
-                    {product.variant_groups?.map(g => {
-                      const opt = g.options.find(o => o.id === selectedOptions[g.id]);
-                      return opt?.label;
-                    }).filter(Boolean).join(', ') || 'Tiêu chuẩn'}
+                    {selectedSkuEntries.length ? `${selectedSkuEntries.length} phân loại · ${selectedQuantityTotal} sản phẩm` : 'Chưa chọn phân loại'}
                   </span>
                 </p>
               </div>
@@ -1069,77 +1152,8 @@ export default function ProductDetail() {
               </button>
             </div>
 
-            {/* 2. Scrollable Body: Danh sách phân loại (Mùi hương, Đóng gói) & Bộ chọn số lượng */}
-            <div className="p-4 overflow-y-auto space-y-4.5 custom-scrollbar flex-1 max-h-[50vh]">
-              {product.variant_groups && product.variant_groups.map((group) => (
-                <div key={`sheet-${group.id}`} className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-stone-700 uppercase tracking-wider">
-                      {group.name}
-                    </span>
-                    <span className="text-[11px] text-stone-500 font-medium">
-                      Đang chọn: <strong className="text-brand-burgundy">{group.options.find(o => o.id === selectedOptions[group.id])?.label || 'Chưa chọn'}</strong>
-                    </span>
-                  </div>
-                  
-                  <div className="flex flex-wrap gap-2">
-                    {group.options.map((opt) => {
-                      const isSelected = selectedOptions[group.id] === opt.id;
-                      const isUnavailable = isOptionUnavailable(group.id, opt.id);
-                      return (
-                        <button
-                          key={`sheet-opt-${opt.id}`}
-                          type="button"
-                          onClick={() => handleOptionSelect(group.id, opt.id)}
-                          disabled={isUnavailable}
-                          aria-label={isUnavailable ? `${opt.label} - Hết hàng` : opt.label}
-                          className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 ${
-                            isUnavailable
-                              ? 'cursor-not-allowed border border-stone-200 bg-stone-100 text-stone-400 opacity-65'
-                              : isSelected
-                              ? 'bg-brand-burgundy text-white border-2 border-brand-burgundy shadow-2xs'
-                              : 'bg-stone-50 text-stone-700 border border-stone-200/90 sm:hover:border-stone-400'
-                          }`}
-                        >
-                          {isUnavailable ? (
-                            <i className="ph-bold ph-prohibit text-xs" />
-                          ) : isSelected ? (
-                            <i className="ph-bold ph-check text-xs" />
-                          ) : null}
-                          <span className={isUnavailable ? 'line-through decoration-stone-400' : ''}>{opt.label}</span>
-                          {isUnavailable && <span className="text-[8px] font-bold uppercase tracking-wide">Hết</span>}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-
-              {/* Bộ chọn số lượng */}
-              <div className="pt-3 border-t border-stone-100 flex items-center justify-between">
-                <span className="text-xs font-bold text-stone-700 uppercase tracking-wider block">
-                  Số lượng
-                </span>
-
-                <div className="flex items-center bg-stone-50 border border-stone-200 rounded-xl p-0.5">
-                  <button
-                    type="button"
-                    onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                    className="w-8 h-8 flex items-center justify-center text-stone-500 sm:hover:text-stone-800 rounded-lg active:bg-stone-200 transition-colors cursor-pointer"
-                  >
-                    <i className="ph-bold ph-minus text-xs"></i>
-                  </button>
-                  <span className="w-10 text-center text-xs font-bold text-stone-800">{quantity}</span>
-                  <button
-                    type="button"
-                    onClick={() => setQuantity(q => Number.isFinite(availableStock) ? Math.min(Math.max(1, availableStock), q + 1) : q + 1)}
-                    disabled={availableStock === 0 || (Number.isFinite(availableStock) && quantity >= availableStock)}
-                    className="w-8 h-8 flex items-center justify-center text-stone-500 sm:hover:text-stone-800 rounded-lg active:bg-stone-200 transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-35"
-                  >
-                    <i className="ph-bold ph-plus text-xs"></i>
-                  </button>
-                </div>
-              </div>
+            <div className="p-4 overflow-y-auto custom-scrollbar flex-1 max-h-[55vh]">
+              {renderSkuMultiSelector(true)}
             </div>
 
             {/* 3. Nút hành động ở chân Bottom Sheet */}
@@ -1148,10 +1162,9 @@ export default function ProductDetail() {
                 <button
                   type="button"
                   onClick={async () => {
-                    await handleAddToCart();
-                    closeVariantSheet();
+                    if (await handleAddToCart()) closeVariantSheet();
                   }}
-                  disabled={isAdding || isOutOfStock}
+                  disabled={isAdding || isOutOfStock || isVariantSelectionMissing}
                   className="w-full bg-brand-burgundy active:bg-[#341F1D] text-white text-xs font-bold uppercase tracking-wider rounded-xl py-3.5 px-4 flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer disabled:opacity-60"
                 >
                   {isAdding ? (
@@ -1170,21 +1183,20 @@ export default function ProductDetail() {
                     closeVariantSheet();
                     handleBuyNow();
                   }}
-                  disabled={isOutOfStock}
+                  disabled={isOutOfStock || isVariantSelectionMissing}
                   className="w-full bg-gradient-to-r from-[#94432C] to-brand-burgundy active:from-[#7D3824] active:to-[#38201F] text-white text-xs font-bold uppercase tracking-wider rounded-xl py-3.5 px-4 flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer disabled:cursor-not-allowed disabled:from-stone-300 disabled:to-stone-400"
                 >
                   <i className="ph-bold ph-tote text-base"></i>
-                  <span>{isOutOfStock ? 'Tạm Hết Hàng' : `Mua Ngay (${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(displayPrice * quantity)})`}</span>
+                  <span>{isOutOfStock ? 'Tạm Hết Hàng' : `Mua Ngay (${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(selectedVariantTotal)})`}</span>
                 </button>
               ) : (
                 <div className="flex gap-2.5">
                   <button
                     type="button"
                     onClick={async () => {
-                      await handleAddToCart();
-                      closeVariantSheet();
+                      if (await handleAddToCart()) closeVariantSheet();
                     }}
-                    disabled={isAdding || isOutOfStock}
+                    disabled={isAdding || isOutOfStock || isVariantSelectionMissing}
                     className="flex-1 bg-[#FFF5EC] active:bg-[#FFEAD6] text-[#B45309] text-xs font-bold uppercase tracking-wider rounded-xl py-3.5 px-2 flex items-center justify-center gap-1.5 transition-colors cursor-pointer border border-[#B45309]/20"
                   >
                     <i className="ph-bold ph-shopping-cart-simple text-sm"></i>
@@ -1196,7 +1208,7 @@ export default function ProductDetail() {
                       closeVariantSheet();
                       handleBuyNow();
                     }}
-                    disabled={isOutOfStock}
+                    disabled={isOutOfStock || isVariantSelectionMissing}
                     className="flex-1 bg-gradient-to-r from-[#94432C] to-brand-burgundy active:from-[#7D3824] active:to-[#38201F] text-white text-xs font-bold uppercase tracking-wider rounded-xl py-3.5 px-2 flex items-center justify-center gap-1.5 transition-all shadow-md cursor-pointer disabled:cursor-not-allowed disabled:from-stone-300 disabled:to-stone-400"
                   >
                     <i className="ph-bold ph-tote text-sm"></i>

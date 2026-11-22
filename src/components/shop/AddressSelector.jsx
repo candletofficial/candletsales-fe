@@ -214,15 +214,18 @@ function AddressHierarchyPanel({
   // === CHẾD ĐỘ THU GỌN ===
   if (isCollapsed) {
     return (
-      <div className="border border-emerald-200 rounded-xl bg-emerald-50/60 px-3.5 py-2.5 flex items-center gap-3">
-        <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+      <div className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50/70 px-3.5 py-3">
+        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white">
           <i className="ph-bold ph-check text-xs" />
         </div>
-        <p className="flex-1 text-xs font-semibold text-stone-800 truncate">{summaryText}</p>
+        <div className="min-w-0 flex-1">
+          <p className="text-[10px] font-bold uppercase tracking-wide text-emerald-700">Khu vực đã chọn</p>
+          <p className="truncate text-xs font-semibold text-stone-800">{summaryText}</p>
+        </div>
         <button
           type="button"
           onClick={() => { setIsCollapsed(false); setTimeout(() => searchRef.current?.focus(), 80); }}
-          className="shrink-0 text-[11px] font-bold text-[#EE4D2D] sm:hover:underline cursor-pointer"
+          className="shrink-0 rounded-lg bg-white px-2.5 py-1.5 text-[11px] font-bold text-[#EE4D2D] shadow-xs ring-1 ring-stone-200 transition-colors hover:bg-orange-50 cursor-pointer"
         >
           Thay đổi
         </button>
@@ -231,15 +234,15 @@ function AddressHierarchyPanel({
   }
 
   return (
-    <div className="border border-stone-200 rounded-xl overflow-hidden bg-white">
+    <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white">
       {/* Toggle chế độ hành chính */}
-      <div className="bg-stone-50 px-3 py-2 border-b border-stone-100 flex items-center justify-between gap-2">
-        <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">Dữ liệu hành chính:</span>
-        <div className="inline-flex rounded-lg p-0.5 bg-stone-200/80 text-[10px] font-bold">
-          {[{ label: 'Mới nhất (Sáp nhập)', val: true }, { label: 'Truyền thống (3 cấp)', val: false }].map(opt => (
+      <div className="border-b border-stone-100 bg-stone-50/80 px-3 py-2.5 sm:flex sm:items-center sm:justify-between sm:gap-3">
+        <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-stone-500 sm:mb-0">Kiểu địa chỉ</span>
+        <div className="grid grid-cols-2 rounded-xl bg-stone-200/70 p-0.5 text-[10px] font-bold sm:inline-grid">
+          {[{ label: 'Mới (2 cấp)', val: true }, { label: 'Cũ (3 cấp)', val: false }].map(opt => (
             <button key={String(opt.val)} type="button"
               onClick={() => { if (isMergedMode !== opt.val) { setIsMergedMode(opt.val); setActiveStep('province'); } }}
-              className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${isMergedMode === opt.val ? 'bg-white text-[#EE4D2D] shadow-2xs' : 'text-stone-600 sm:hover:text-stone-900'}`}>
+              className={`rounded-[10px] px-3 py-1.5 transition-all cursor-pointer ${isMergedMode === opt.val ? 'bg-white text-[#EE4D2D] shadow-sm' : 'text-stone-500 hover:text-stone-800'}`}>
               {opt.label}
             </button>
           ))}
@@ -247,44 +250,44 @@ function AddressHierarchyPanel({
       </div>
 
       {/* Tabs bước */}
-      <div className="flex border-b border-stone-100 bg-white text-[11px] font-bold overflow-x-auto">
+      <div className="flex overflow-x-auto border-b border-stone-100 bg-white px-2 pt-2 text-[11px] font-bold">
         {/* Bước 1: Tỉnh */}
         <button type="button" onClick={() => handleStepClick('province')}
-          className={`flex-1 py-2.5 px-2 border-b-2 text-center transition-all truncate cursor-pointer ${activeStep === 'province' ? 'border-[#EE4D2D] text-[#EE4D2D] bg-orange-50/50' : selectedProvinceCode ? 'border-transparent text-stone-700 sm:hover:text-stone-900' : 'border-transparent text-stone-400'}`}>
-          <span className="block text-[9px] uppercase text-stone-400 font-semibold">B1</span>
+          className={`min-w-0 flex-1 rounded-t-xl border-b-2 px-2 py-2 text-center transition-all truncate cursor-pointer ${activeStep === 'province' ? 'border-[#EE4D2D] text-[#EE4D2D] bg-orange-50/70' : selectedProvinceCode ? 'border-transparent text-stone-700 hover:text-stone-900' : 'border-transparent text-stone-400'}`}>
+          <span className="block text-[9px] uppercase text-stone-400 font-semibold">Bước 1</span>
           <span className="truncate block">{currentProvince?.name || 'Tỉnh / Thành'}</span>
         </button>
 
         {/* Bước 2: Quận/Huyện (chỉ trong chế độ 3 cấp) */}
         {!isMergedMode && (
           <button type="button" onClick={() => handleStepClick('district')} disabled={!canGoDistrict}
-            className={`flex-1 py-2.5 px-2 border-b-2 text-center transition-all truncate ${!canGoDistrict ? 'border-transparent text-stone-300 cursor-not-allowed' : activeStep === 'district' ? 'border-[#EE4D2D] text-[#EE4D2D] bg-orange-50/50 cursor-pointer' : selectedDistrictCode ? 'border-transparent text-stone-700 sm:hover:text-stone-900 cursor-pointer' : 'border-transparent text-stone-500 cursor-pointer'}`}>
-            <span className="block text-[9px] uppercase text-stone-400 font-semibold">B2</span>
+            className={`min-w-0 flex-1 rounded-t-xl border-b-2 px-2 py-2 text-center transition-all truncate ${!canGoDistrict ? 'border-transparent text-stone-300 cursor-not-allowed' : activeStep === 'district' ? 'border-[#EE4D2D] text-[#EE4D2D] bg-orange-50/70 cursor-pointer' : selectedDistrictCode ? 'border-transparent text-stone-700 hover:text-stone-900 cursor-pointer' : 'border-transparent text-stone-500 cursor-pointer'}`}>
+            <span className="block text-[9px] uppercase text-stone-400 font-semibold">Bước 2</span>
             <span className="truncate block">{currentDistrict?.name || 'Quận / Huyện'}</span>
           </button>
         )}
 
         {/* Bước cuối: Phường/Xã */}
         <button type="button" onClick={() => handleStepClick('ward')} disabled={!canGoWard}
-          className={`flex-1 py-2.5 px-2 border-b-2 text-center transition-all truncate ${!canGoWard ? 'border-transparent text-stone-300 cursor-not-allowed' : activeStep === 'ward' ? 'border-[#EE4D2D] text-[#EE4D2D] bg-orange-50/50 cursor-pointer' : selectedWardCode ? 'border-transparent text-stone-700 sm:hover:text-stone-900 cursor-pointer' : 'border-transparent text-stone-500 cursor-pointer'}`}>
-          <span className="block text-[9px] uppercase text-stone-400 font-semibold">{isMergedMode ? 'B2' : 'B3'}</span>
+          className={`min-w-0 flex-1 rounded-t-xl border-b-2 px-2 py-2 text-center transition-all truncate ${!canGoWard ? 'border-transparent text-stone-300 cursor-not-allowed' : activeStep === 'ward' ? 'border-[#EE4D2D] text-[#EE4D2D] bg-orange-50/70 cursor-pointer' : selectedWardCode ? 'border-transparent text-stone-700 hover:text-stone-900 cursor-pointer' : 'border-transparent text-stone-500 cursor-pointer'}`}>
+          <span className="block text-[9px] uppercase text-stone-400 font-semibold">Bước {isMergedMode ? '2' : '3'}</span>
           <span className="truncate block">{currentWard?.name || 'Phường / Xã'}</span>
         </button>
       </div>
 
       {/* Tìm kiếm */}
-      <div className="p-2.5 border-b border-stone-100 bg-stone-50/60">
+      <div className="border-b border-stone-100 bg-stone-50/60 p-2.5">
         <div className="relative">
           <i className="ph-bold ph-magnifying-glass absolute left-2.5 top-1/2 -translate-y-1/2 text-stone-400 text-xs" />
           <input ref={searchRef} type="text" value={search} onChange={e => setSearch(e.target.value)}
             placeholder={activeStep === 'province' ? 'Tìm Tỉnh / Thành...' : activeStep === 'district' ? 'Tìm Quận / Huyện...' : 'Tìm Phường / Xã...'}
-            className="w-full bg-white border border-stone-200 rounded-lg pl-7 pr-7 py-1.5 text-xs text-stone-800 placeholder:text-stone-400 focus:outline-none focus:border-[#EE4D2D]" />
+            className="w-full rounded-xl border border-stone-200 bg-white py-2 pl-8 pr-8 text-xs text-stone-800 placeholder:text-stone-400 focus:border-[#EE4D2D] focus:outline-none focus:ring-2 focus:ring-orange-100" />
           {search && <button type="button" onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-stone-400 sm:hover:text-stone-600"><i className="ph-bold ph-x text-xs" /></button>}
         </div>
       </div>
 
       {/* Danh sách */}
-      <div className="overflow-y-auto max-h-[220px] p-1.5 space-y-0.5 custom-scrollbar">
+      <div className="custom-scrollbar max-h-[190px] overflow-y-auto p-1.5 space-y-0.5 sm:max-h-[220px]">
         {isLoading ? (
           <div className="flex items-center justify-center py-8 text-stone-400 text-xs gap-2">
             <i className="ph-bold ph-spinner animate-spin text-lg text-[#EE4D2D]" /> Đang tải...
@@ -306,7 +309,7 @@ function AddressHierarchyPanel({
                 else if (activeStep === 'district') { onSelectDistrict(item.code); }
                 else { onSelectWard(item.code); }
               }}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs text-left transition-colors cursor-pointer ${isSelected ? 'bg-orange-50 text-[#EE4D2D] font-bold' : 'text-stone-700 sm:hover:bg-stone-50'}`}>
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs text-left transition-colors cursor-pointer ${isSelected ? 'bg-orange-50 text-[#EE4D2D] font-bold' : 'text-stone-700 hover:bg-stone-50'}`}>
               <div className="flex items-center gap-1.5 min-w-0">
                 <span className="truncate">{item.name}</span>
                 {item.division_type && <span className="text-[9px] uppercase font-bold text-stone-400 bg-stone-100 px-1 py-0.5 rounded shrink-0">{item.division_type}</span>}
@@ -343,6 +346,7 @@ function AddressEditModal({ isOpen, onClose, onSave, initialData, isMergedMode: 
   const [searchingStreet, setSearchingStreet] = useState(false);
   const [showStreetDropdown, setShowStreetDropdown] = useState(false);
   const [isAutoGeocoding, setIsAutoGeocoding] = useState(false);
+  const [isMapExpanded, setIsMapExpanded] = useState(false);
   const streetDropdownRef = useRef(null);
   const streetInputRef = useRef(null);
   const isUserTyping = useRef(false);
@@ -406,6 +410,7 @@ function AddressEditModal({ isOpen, onClose, onSave, initialData, isMergedMode: 
       setStreet(initialData.street || '');
       setAddressNote(initialData.addressNote || '');
       setCoords(initialData.coords || null);
+      setIsMapExpanded(false);
       setDistricts(initialData.districts || []);
       setWards(initialData.wards || []);
       isInitialized.current = true;
@@ -416,6 +421,7 @@ function AddressEditModal({ isOpen, onClose, onSave, initialData, isMergedMode: 
       setStreet('');
       setAddressNote('');
       setCoords(null);
+      setIsMapExpanded(false);
       setDistricts([]);
       setWards([]);
       isInitialized.current = true;
@@ -617,38 +623,38 @@ function AddressEditModal({ isOpen, onClose, onSave, initialData, isMergedMode: 
       }}
     >
       <div
-        className="flex h-full max-h-none w-full flex-col overflow-hidden border-0 bg-white shadow-2xl animate-[scaleUp_0.2s_ease-out] sm:h-auto sm:max-h-[90%] sm:max-w-xl sm:rounded-3xl sm:border sm:border-stone-200"
+        className="flex h-full max-h-none w-full flex-col overflow-hidden border-0 bg-[#F8F8F7] shadow-2xl animate-[scaleUp_0.2s_ease-out] sm:h-auto sm:max-h-[92%] sm:max-w-xl sm:rounded-3xl sm:border sm:border-stone-200"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex shrink-0 items-center justify-between border-b border-stone-100 bg-[#FAF5EE] px-5 pb-4 pt-[calc(1rem+env(safe-area-inset-top,0px))] sm:py-4">
+        <div className="flex shrink-0 items-center justify-between border-b border-stone-200 bg-white px-4 pb-3 pt-[calc(.75rem+env(safe-area-inset-top,0px))] sm:px-5 sm:py-4">
           <div className="flex items-center gap-2.5">
-            <span className="w-8 h-8 rounded-xl bg-[#EE4D2D] text-white flex items-center justify-center shadow-xs">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50 text-[#EE4D2D]">
               <i className="ph-fill ph-map-pin text-sm" />
             </span>
             <div>
-              <h3 className="text-sm font-bold text-stone-900 leading-tight">Địa chỉ nhận hàng</h3>
-              <p className="text-[11px] text-stone-500">
-                {adminText || 'Chọn địa chỉ giao hàng của bạn'}
-              </p>
+              <h3 className="text-[15px] font-bold leading-tight text-stone-900">Địa chỉ nhận hàng</h3>
+              <p className="mt-0.5 max-w-[260px] truncate text-[11px] text-stone-500">{adminText || 'Điền khu vực và địa chỉ cụ thể'}</p>
             </div>
           </div>
           <button type="button" onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white text-stone-400 sm:hover:text-stone-700 sm:hover:bg-stone-100 flex items-center justify-center transition-colors cursor-pointer">
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-stone-100 text-stone-500 transition-colors hover:bg-stone-200 hover:text-stone-800 cursor-pointer">
             <i className="ph-bold ph-x text-sm" />
           </button>
         </div>
 
         {/* Nội dung scroll */}
-        <div className="custom-scrollbar flex-1 overscroll-contain overflow-y-auto p-4 space-y-4">
+        <div className="custom-scrollbar flex-1 space-y-3 overflow-y-auto overscroll-contain p-3 sm:space-y-4 sm:p-5">
 
           {/* Phần 1: Địa giới hành chính */}
-          <div>
-            <label className="block text-xs font-bold text-stone-700 mb-2 flex items-center gap-1.5">
-              <i className="ph-bold ph-buildings text-stone-500" />
-              Tỉnh / Thành phố, Phường / Xã
-              <span className="text-rose-500">*</span>
-            </label>
+          <section className="rounded-2xl border border-stone-200 bg-white p-3 shadow-xs sm:p-4">
+            <div className="mb-3 flex items-center gap-2.5">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#EE4D2D] text-[11px] font-bold text-white">1</span>
+              <div>
+                <h4 className="text-xs font-bold text-stone-800">Chọn khu vực <span className="text-rose-500">*</span></h4>
+                <p className="text-[10px] text-stone-400">Tỉnh, thành phố và phường, xã</p>
+              </div>
+            </div>
             <AddressHierarchyPanel
               isMergedMode={isMergedMode}
               setIsMergedMode={handleSetMergedMode}
@@ -665,16 +671,17 @@ function AddressEditModal({ isOpen, onClose, onSave, initialData, isMergedMode: 
               loadingDistricts={loadingDistricts}
               loadingWards={loadingWards}
             />
-          </div>
+          </section>
 
           {/* Phần 2: Địa chỉ cụ thể + Goong autocomplete */}
-          <div>
-            <label className="block text-xs font-bold text-stone-700 mb-2 flex items-center gap-1.5">
-              <i className="ph-bold ph-house-line text-stone-500" />
-              Địa chỉ cụ thể
-              <span className="text-rose-500">*</span>
-              {adminText && <span className="text-[10px] font-normal text-stone-400 ml-1">— trong {adminText}</span>}
-            </label>
+          <section className="rounded-2xl border border-stone-200 bg-white p-3 shadow-xs sm:p-4">
+            <div className="mb-3 flex items-center gap-2.5">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#EE4D2D] text-[11px] font-bold text-white">2</span>
+              <div className="min-w-0">
+                <h4 className="text-xs font-bold text-stone-800">Địa chỉ chi tiết <span className="text-rose-500">*</span></h4>
+                <p className="truncate text-[10px] text-stone-400">{adminText || 'Chọn khu vực ở bước trên trước'}</p>
+              </div>
+            </div>
             <div className="relative" ref={streetDropdownRef}>
               <div className="relative">
                 <input
@@ -684,7 +691,7 @@ function AddressEditModal({ isOpen, onClose, onSave, initialData, isMergedMode: 
                   onChange={e => { isUserTyping.current = true; setStreet(e.target.value); }}
                   placeholder="Số nhà, tên đường, toà nhà..."
                   disabled={!selectedProvinceCode}
-                  className="w-full border border-stone-300 rounded-xl px-3.5 py-2.5 pr-9 text-sm text-stone-900 bg-white focus:outline-none focus:border-[#EE4D2D] focus:ring-1 focus:ring-[#EE4D2D]/30 transition-all placeholder:text-stone-400 disabled:bg-stone-100 disabled:text-stone-400"
+                  className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-3 pr-9 text-sm text-stone-900 transition-all placeholder:text-stone-400 focus:border-[#EE4D2D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-100 disabled:bg-stone-100 disabled:text-stone-400"
                 />
                 {searchingStreet ? (
                   <div className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400">
@@ -698,7 +705,7 @@ function AddressEditModal({ isOpen, onClose, onSave, initialData, isMergedMode: 
                 ) : null}
               </div>
               {!selectedProvinceCode && (
-                <p className="text-[10px] text-amber-600 mt-1 flex items-center gap-1">
+                <p className="mt-1.5 flex items-center gap-1 text-[10px] text-amber-600">
                   <i className="ph-bold ph-warning-circle" /> Chọn Tỉnh/Thành trước để được gợi ý địa chỉ chính xác
                 </p>
               )}
@@ -730,53 +737,64 @@ function AddressEditModal({ isOpen, onClose, onSave, initialData, isMergedMode: 
                 </div>
               )}
             </div>
-          </div>
 
           {/* Ô nhập tay: Ghi chú địa chỉ (tuỳ chọn) - chỉ hiển thị cho Shop */}
           {showAddressNote && (
-            <div>
-              <label className="block text-xs font-bold text-stone-700 mb-1.5 flex items-center gap-1.5">
-                <i className="ph-bold ph-note-pencil text-stone-500" />
-                Ghi chú địa chỉ <span className="text-[10px] font-normal text-stone-400">(Tuỳ chọn)</span>
+            <div className="mt-3 border-t border-stone-100 pt-3">
+              <label className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold text-stone-600">
+                Ghi chú giao hàng <span className="font-normal text-stone-400">(không bắt buộc)</span>
               </label>
               <input
                 type="text"
                 value={addressNote}
                 onChange={e => setAddressNote(e.target.value)}
                 placeholder="Ví dụ: Gần cổng làng, toà nhà A, gọi trước khi giao..."
-                className="w-full border border-stone-300 rounded-xl px-3.5 py-2.5 text-sm text-stone-900 bg-white focus:outline-none focus:border-[#EE4D2D] focus:ring-1 focus:ring-[#EE4D2D]/30 transition-all placeholder:text-stone-400"
+                className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-3 text-sm text-stone-900 transition-all placeholder:text-stone-400 focus:border-[#EE4D2D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-100"
               />
             </div>
           )}
+          </section>
 
-          {/* Phần 3: Bản đồ định vị — hiển thị mặc định */}
-          <div>
-            <label className="block text-xs font-bold text-stone-700 mb-2 flex items-center gap-1.5">
-              <i className="ph-bold ph-map-trifold text-stone-500" />
-              Vị trí trên bản đồ
-              {!coords && (
-                <span className="text-[10px] font-normal text-stone-400">(sẽ hiển thị sau khi chọn khu vực)</span>
-              )}
-            </label>
-            <RealMapPicker
-              coords={coords}
-              onCoordsChange={setCoords}
-              disabled={false}
-              onRequestAddLocation={handleRequestMap}
-              isGeocoding={isAutoGeocoding && !coords}
-              hasArea={Boolean(selectedProvinceCode)}
-            />
-          </div>
+          {/* Bản đồ là phần hỗ trợ, chỉ mở khi người dùng cần chỉnh ghim. */}
+          <section className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-xs">
+            <button
+              type="button"
+              onClick={() => setIsMapExpanded(value => !value)}
+              className="flex w-full items-center gap-3 p-3 text-left transition-colors hover:bg-stone-50 sm:p-4 cursor-pointer"
+            >
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                <i className="ph-bold ph-map-trifold text-base" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-xs font-bold text-stone-800">Vị trí trên bản đồ</span>
+                <span className="block truncate text-[10px] text-stone-400">Tùy chọn · mở để kiểm tra hoặc chỉnh ghim giao hàng</span>
+              </span>
+              {coords && <span className="hidden rounded-full bg-emerald-50 px-2 py-1 text-[9px] font-bold text-emerald-600 min-[380px]:inline">Đã định vị</span>}
+              <i className={`ph-bold ph-caret-down text-sm text-stone-400 transition-transform ${isMapExpanded ? 'rotate-180' : ''}`} />
+            </button>
+            {isMapExpanded && (
+              <div className="border-t border-stone-100 p-3 sm:p-4">
+                <RealMapPicker
+                  coords={coords}
+                  onCoordsChange={setCoords}
+                  disabled={false}
+                  onRequestAddLocation={handleRequestMap}
+                  isGeocoding={isAutoGeocoding && !coords}
+                  hasArea={Boolean(selectedProvinceCode)}
+                />
+              </div>
+            )}
+          </section>
         </div>
 
         {/* Footer */}
-        <div className="flex shrink-0 items-center gap-3 border-t border-stone-100 bg-stone-50 px-4 pb-[calc(.75rem+env(safe-area-inset-bottom,0px))] pt-3 sm:py-3">
+        <div className="flex shrink-0 items-center gap-2.5 border-t border-stone-200 bg-white px-3 pb-[calc(.75rem+env(safe-area-inset-bottom,0px))] pt-3 sm:px-5 sm:py-4">
           <button type="button" onClick={onClose}
-            className="flex-1 py-2.5 rounded-xl border border-stone-200 text-xs font-bold text-stone-600 sm:hover:bg-stone-100 transition-colors cursor-pointer">
+            className="w-[34%] rounded-xl border border-stone-200 py-3 text-xs font-bold text-stone-600 transition-colors hover:bg-stone-100 cursor-pointer">
             Huỷ
           </button>
           <button type="button" onClick={handleSave} disabled={!canSave}
-            className="flex-1 py-2.5 rounded-xl bg-[#EE4D2D] sm:hover:bg-[#d43d20] text-white text-xs font-bold transition-colors shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#EE4D2D] py-3 text-xs font-bold text-white shadow-sm transition-colors hover:bg-[#d43d20] cursor-pointer disabled:cursor-not-allowed disabled:bg-stone-200 disabled:text-stone-400 disabled:shadow-none">
             <i className="ph-bold ph-check text-sm" />
             Xác nhận địa chỉ
           </button>

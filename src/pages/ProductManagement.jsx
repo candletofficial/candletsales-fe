@@ -238,6 +238,7 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
   const [saveError, setSaveError] = useState('');
   const [newGalleryUrl, setNewGalleryUrl] = useState('');
   const [showBatchUrlInput, setShowBatchUrlInput] = useState(false);
+  const [editingSkuImageIndex, setEditingSkuImageIndex] = useState(null);
 
   // States hỗ trợ tải file ảnh lên máy chủ
   const [uploadingMain, setUploadingMain] = useState(false);
@@ -323,6 +324,7 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
       return {
         id: `V${Math.floor(1000 + Math.random() * 9000)}`,
         price: form.base_price || 0,
+        image: '',
         combination: combo,
         extra_ingredients: []
       };
@@ -373,7 +375,11 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
         if (oldImg && isManagedUploadedImage(oldImg) && oldImg !== res.data.data.path) {
           uploadService.deleteUploadedFile(oldImg).catch(err => console.warn('Lỗi dọn ảnh cũ:', err));
         }
-        setForm(prev => ({ ...prev, image: res.data.data.path }));
+        setForm(prev => ({
+          ...prev,
+          image: res.data.data.path,
+          skus: (prev.skus || []).map(sku => sku.image === oldImg ? { ...sku, image: res.data.data.path } : sku),
+        }));
       }
     } catch (err) {
       alert(err.response?.data?.message || 'Tải ảnh lên máy chủ thất bại!');
@@ -387,7 +393,11 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
   const handleRemoveMainImage = async () => {
     if (!form.image) return;
     const currentImg = form.image;
-    setForm(prev => ({ ...prev, image: '' }));
+    setForm(prev => ({
+      ...prev,
+      image: '',
+      skus: (prev.skus || []).map(sku => sku.image === currentImg ? { ...sku, image: '' } : sku),
+    }));
 
     // Nếu ảnh là file lưu trữ nội bộ trên máy chủ, xóa file vật lý ngay
     if (isManagedUploadedImage(currentImg)) {
@@ -441,7 +451,8 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
     const imgToRemove = (form.images || [])[idxToRemove];
     setForm(prev => ({
       ...prev,
-      images: (prev.images || []).filter((_, idx) => idx !== idxToRemove)
+      images: (prev.images || []).filter((_, idx) => idx !== idxToRemove),
+      skus: (prev.skus || []).map(sku => sku.image === imgToRemove ? { ...sku, image: '' } : sku),
     }));
 
     if (imgToRemove && isManagedUploadedImage(imgToRemove)) {
@@ -1410,6 +1421,7 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
                   const skuCost = calculateSkuCost(sku);
                   const skuProfit = (sku.price || 0) - skuCost;
                   const skuMargin = (sku.price || 0) > 0 ? Math.round((skuProfit / sku.price) * 100) : 0;
+                  const linkableImages = [...new Set([form.image, ...(form.images || [])].filter(Boolean))];
 
                   return (
                     <div key={sIdx} className="relative rounded-xl border border-stone-200 bg-white shadow-xs focus-within:z-20">
@@ -1477,6 +1489,90 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
                             Xoá
                           </button>
                         </div>
+                      </div>
+
+                      <div className="border-b border-stone-100 bg-white px-3.5 py-3">
+                        {sku.image && editingSkuImageIndex !== sIdx ? (
+                          <div className="flex items-center gap-3 rounded-xl border border-emerald-100 bg-emerald-50/40 p-2.5">
+                            <button
+                              type="button"
+                              onClick={() => setEditingSkuImageIndex(sIdx)}
+                              className="relative size-12 shrink-0 overflow-hidden rounded-lg border border-stone-200 bg-white shadow-xs cursor-pointer"
+                              title="Sửa ảnh liên kết"
+                            >
+                              <img src={getImageUrl(sku.image)} alt="" className="size-full object-cover" />
+                              <span className="absolute bottom-0 right-0 flex size-4 items-center justify-center rounded-tl-md bg-emerald-500 text-white">
+                                <span className="material-symbols-outlined text-[11px]">check</span>
+                              </span>
+                            </button>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-1.5">
+                                <p className="text-[11px] font-bold uppercase tracking-wide text-stone-500">Ảnh đại diện phân loại</p>
+                                <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-bold text-emerald-700">Đã liên kết</span>
+                              </div>
+                              <p className="mt-1 truncate text-[10px] text-stone-400">{sku.image}</p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setEditingSkuImageIndex(sIdx)}
+                              className="flex shrink-0 items-center gap-1 rounded-lg border border-stone-200 bg-white px-2.5 py-1.5 text-[11px] font-bold text-stone-600 transition-colors hover:border-primary hover:text-primary cursor-pointer"
+                            >
+                              <span className="material-symbols-outlined text-sm">edit</span>
+                              Sửa
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                              <div>
+                                <p className="text-[11px] font-bold uppercase tracking-wide text-stone-500">Ảnh đại diện phân loại</p>
+                                <p className="mt-0.5 text-[11px] text-stone-400">Chọn từ ảnh sản phẩm hoặc nhập một đường dẫn riêng.</p>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                {sku.image && (
+                                  <button
+                                    type="button"
+                                    onClick={() => { const newSkus = [...form.skus]; newSkus[sIdx].image = ''; setForm({ ...form, skus: newSkus }); }}
+                                    className="text-[11px] font-bold text-red-500 hover:text-red-700 cursor-pointer"
+                                  >
+                                    Bỏ liên kết
+                                  </button>
+                                )}
+                                {sku.image && (
+                                  <button type="button" onClick={() => setEditingSkuImageIndex(null)} className="text-[11px] font-bold text-primary hover:underline cursor-pointer">Xong</button>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                              <div className="flex max-w-full gap-2 overflow-x-auto pb-1">
+                                {linkableImages.map((imageUrl, imageIndex) => (
+                                  <button
+                                    key={`${imageUrl}-${imageIndex}`}
+                                    type="button"
+                                    onClick={() => {
+                                      const newSkus = [...form.skus];
+                                      newSkus[sIdx].image = imageUrl;
+                                      setForm({ ...form, skus: newSkus });
+                                      setEditingSkuImageIndex(null);
+                                    }}
+                                    className={`relative size-12 shrink-0 overflow-hidden rounded-lg border-2 bg-stone-50 transition cursor-pointer ${sku.image === imageUrl ? 'border-primary ring-2 ring-primary/15' : 'border-stone-200 hover:border-stone-400'}`}
+                                    title={imageIndex === 0 ? 'Ảnh bìa' : `Ảnh bộ sưu tập ${imageIndex}`}
+                                  >
+                                    <img src={getImageUrl(imageUrl)} alt="" className="size-full object-cover" />
+                                    {sku.image === imageUrl && <span className="absolute bottom-0 right-0 flex size-4 items-center justify-center rounded-tl-md bg-primary text-white"><span className="material-symbols-outlined text-[11px]">check</span></span>}
+                                  </button>
+                                ))}
+                              </div>
+                              <input
+                                type="text"
+                                value={sku.image || ''}
+                                onChange={event => { const newSkus = [...form.skus]; newSkus[sIdx].image = event.target.value; setForm({ ...form, skus: newSkus }); }}
+                                placeholder="URL ảnh riêng cho SKU"
+                                className="min-w-0 flex-1 rounded-lg border border-stone-200 px-3 py-2 text-xs outline-none focus:border-primary"
+                              />
+                            </div>
+                          </>
+                        )}
                       </div>
 
                       {/* Extra Ingredients for SKU */}

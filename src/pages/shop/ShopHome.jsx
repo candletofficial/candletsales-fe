@@ -7,7 +7,6 @@ import NewsletterCanvas from '../../components/NewsletterCanvas';
 import { resolveTagColor } from '../../utils/productTagUtils';
 import { getImageUrl } from '../../utils/imageUtils';
 import { shippingDiscountLabel, shippingDiscountConditions } from '../../utils/couponUtils';
-import { richTextToPlainText } from '../../utils/richText';
 
 export default function ShopHome() {
   const navigate = useNavigate();
@@ -91,26 +90,6 @@ export default function ShopHome() {
     }, 2200);
   };
 
-  const handleBuyNow = (e, product) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (product.stock === 0) {
-      alert('Sản phẩm hiện đã hết hàng');
-      return;
-    }
-
-    const defaultSku = product.skus?.find((sku) => sku.stock === null || sku.stock === undefined || sku.stock > 0);
-    const defaultSkuId = defaultSku?.id;
-
-    const buyItem = {
-      product_id: product,
-      sku_id: defaultSkuId,
-      quantity: 1
-    };
-
-    navigate('/checkout', { state: { selectedItems: [buyItem] } });
-  };
   const submitNewsletter = (e) => {
     e.preventDefault();
     alert('Cảm ơn bạn đã đăng ký! Mã giảm giá 15% đã được gửi đến email của bạn.');
@@ -435,7 +414,7 @@ export default function ShopHome() {
             {/* Right Column: 2 Stacked Cards */}
             <div className="flex flex-col divide-y divide-stone-200 lg:col-span-5 lg:gap-8 lg:divide-y-0">
               {/* Card 02: Multi-layer Scent Symphony */}
-              <div className="card-hover-lift group reveal-on-scroll reveal-delay-200 relative flex-1 overflow-hidden py-7 lg:rounded-3xl lg:border lg:border-stone-200/80 lg:bg-white/85 lg:p-8 lg:pb-9 lg:shadow-xs lg:backdrop-blur-xs lg:hover:border-amber-400/40">
+              <div className="card-hover-lift group reveal-on-scroll reveal-delay-200 relative flex-1 overflow-hidden pb-10 pt-7 lg:rounded-3xl lg:border lg:border-stone-200/80 lg:bg-white/85 lg:p-8 lg:pb-9 lg:shadow-xs lg:backdrop-blur-xs lg:hover:border-amber-400/40">
                 {/* Background Watermark */}
                 <span className="absolute -top-3 right-3 font-serif-display text-5xl sm:text-8xl font-light text-stone-200/50 select-none sm:group-hover:text-amber-950/10 transition-colors pointer-events-none">
                   02
@@ -482,7 +461,7 @@ export default function ShopHome() {
               </div>
 
               {/* Card 03: Relaxation Ritual & Self-Care */}
-              <div className="card-hover-lift group reveal-on-scroll reveal-delay-300 relative flex-1 overflow-hidden py-7 lg:rounded-3xl lg:border lg:border-stone-200/80 lg:bg-white/85 lg:p-8 lg:pb-9 lg:shadow-xs lg:backdrop-blur-xs lg:hover:border-rose-400/40">
+              <div className="card-hover-lift group reveal-on-scroll reveal-delay-300 relative flex-1 overflow-hidden pb-7 pt-10 lg:rounded-3xl lg:border lg:border-stone-200/80 lg:bg-white/85 lg:p-8 lg:pb-9 lg:shadow-xs lg:backdrop-blur-xs lg:hover:border-rose-400/40">
                 {/* Background Watermark */}
                 <span className="absolute -top-3 right-3 font-serif-display text-5xl sm:text-8xl font-light text-stone-200/50 select-none sm:group-hover:text-rose-950/10 transition-colors pointer-events-none">
                   03
@@ -987,104 +966,32 @@ export default function ShopHome() {
                   return (
                     <div
                       key={product._id}
-                      className={`card-hover-lift group relative flex h-full flex-col justify-between overflow-hidden rounded-[18px] border border-[#E8DED5] bg-[#FFFCF8] p-2.5 shadow-[0_5px_18px_rgba(74,44,42,0.06)] transition-all duration-500 sm:hover:border-[#CFAF99] sm:hover:shadow-[0_16px_30px_-10px_rgba(74,44,42,0.2)] sm:rounded-3xl sm:bg-white/90 sm:p-5 sm:backdrop-blur-xs reveal-on-scroll reveal-delay-${((index % 4) + 1) * 100}`}
+                      className={`group relative flex h-full flex-col overflow-hidden rounded-[18px] border border-[#E9DED4] bg-[#FFFCF8] shadow-[0_4px_16px_rgba(55,38,33,0.06)] transition-all duration-300 sm:rounded-[22px] sm:hover:-translate-y-0.5 sm:hover:border-[#D7C4B5] sm:hover:shadow-[0_10px_24px_rgba(55,38,33,0.1)] reveal-on-scroll reveal-delay-${((index % 4) + 1) * 100}`}
                     >
-                      <div>
-                        {/* Image Frame with Badges */}
-                        <div className="relative -mx-2.5 -mt-2.5 mb-3 aspect-[1/1.02] w-[calc(100%+1.25rem)] overflow-hidden bg-[#F4EEE7] sm:mx-0 sm:mt-0 sm:mb-4 sm:aspect-[4/4.2] sm:w-full sm:rounded-2xl">
-                          <Link to={`/product/${product._id}`} className="block w-full h-full">
-                            {product.image ? (
-                              <img
-                                alt={product.name}
-                                className="h-full w-full object-cover transition-transform duration-700 ease-out sm:group-hover:scale-105"
-                                src={getImageUrl(product.image)}
-                              />
-                            ) : (
-                              <div className="w-full h-full bg-stone-100 flex items-center justify-center text-stone-400 text-xs">
-                                Chưa có ảnh
-                              </div>
-                            )}
-                          </Link>
-
-                          {/* Top Left Tag */}
-                          {product.tag && (
-                            <div
-                              className="absolute left-1.5 top-1.5 z-10 rounded-md px-2 py-1 font-mono text-[7px] font-bold uppercase tracking-wider text-white shadow-sm backdrop-blur-xs sm:left-3 sm:top-3 sm:rounded-full sm:px-2.5 sm:text-[9px] sm:tracking-widest"
-                              style={{ backgroundColor: resolveTagColor(product.tag, product.tag_color) }}
-                            >
-                              {product.tag}
-                            </div>
-                          )}
-
-                          {/* Top Right Floating Wishlist Button */}
-                          <button
-                            aria-label="Thêm vào yêu thích"
-                            className="absolute right-1.5 top-1.5 z-10 flex size-8 cursor-pointer items-center justify-center rounded-full border border-white/80 bg-white/90 text-stone-500 shadow-sm backdrop-blur-md transition-all duration-300 sm:hover:scale-110 sm:hover:bg-white sm:hover:text-rose-500 active:scale-90 sm:right-3 sm:top-3"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              toggleWishlist(product, navigate);
-                            }}
-                            title={isInWishlist(product._id) ? "Bỏ yêu thích" : "Thêm vào yêu thích"}
-                          >
-                            <i className={`text-sm sm:text-base transition-transform duration-300 ${isInWishlist(product._id)
-                              ? 'ph-fill ph-heart text-rose-500 scale-110'
-                              : 'ph-bold ph-heart text-stone-600 sm:hover:text-rose-500'
-                              }`}></i>
-                          </button>
-                        </div>
-
-                        {/* Header Info: Category & Rating */}
-                        <div className="mb-1.5 flex items-center justify-between gap-1 sm:mb-2">
-                          <span className="truncate font-mono text-[8px] uppercase tracking-[0.12em] text-stone-500 sm:text-[10px] sm:tracking-wider">
-                            {product.category?.name || 'CANDLET'}
-                          </span>
-                          <div className="flex shrink-0 items-center gap-0.5 rounded-full bg-amber-50 px-1.5 py-0.5 sm:bg-transparent sm:px-0 sm:py-0">
-                            <i className="ph-fill ph-star text-[9px] text-amber-500 sm:text-[11px]"></i>
-                            <span className="font-mono text-[9px] font-bold text-stone-700 sm:text-xs sm:font-semibold">
-                              {product.avgRating || '5.0'}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Product Name */}
-                        <Link to={`/product/${product._id}`} className="block sm:group-hover:text-amber-950 transition-colors">
-                          <h3
-                            className="mb-1.5 line-clamp-2 min-h-[38px] overflow-hidden font-serif-display text-[13px] font-bold leading-[1.45] text-brand-charcoal sm:mb-2 sm:h-[48px] sm:min-h-0 sm:text-lg sm:leading-snug"
-                            title={product.name}
-                          >
-                            {product.name}
-                          </h3>
+                      <div className="relative aspect-square overflow-hidden border-b border-[#E9DED4] bg-[#EEE8E0]">
+                        <Link to={`/product/${product._id}`} className="block size-full">
+                          {product.image ? <img alt={product.name} className="size-full object-cover transition-transform duration-700 sm:group-hover:scale-[1.03]" src={getImageUrl(product.image)} /> : <div className="flex size-full items-center justify-center bg-stone-100 text-xs text-stone-400">Chưa có ảnh</div>}
                         </Link>
-
-                        {/* Product Description (Giới hạn đúng 2 dòng, chiều cao cố định để các thẻ đều nhau tuyệt đối) */}
-                        <p
-                          className="mb-3 line-clamp-2 min-h-[32px] overflow-hidden text-[10px] font-normal leading-4 text-stone-500 sm:mb-4 sm:h-[36px] sm:text-xs sm:leading-relaxed"
-                          title={richTextToPlainText(product.description)}
-                        >
-                          {richTextToPlainText(product.description) || 'Hương thơm êm dịu, thanh lọc không gian và mang lại cảm giác thư thái sâu lắng.'}
-                        </p>
+                        {product.tag && <div className="absolute left-2 top-2 z-10 px-2 py-1 text-[7px] font-bold uppercase tracking-[0.12em] text-white shadow-sm sm:left-3 sm:top-3 sm:text-[8px]" style={{ backgroundColor: resolveTagColor(product.tag, product.tag_color) }}>{product.tag}</div>}
+                        <button aria-label="Thêm vào yêu thích" className="absolute right-2 top-2 z-10 flex size-7 cursor-pointer items-center justify-center rounded-full border border-stone-200/80 bg-white/90 text-stone-500 shadow-sm backdrop-blur-md transition-colors sm:right-3 sm:top-3 sm:size-8 sm:hover:text-rose-500" onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWishlist(product, navigate); }}>
+                          <i className={`${isInWishlist(product._id) ? 'ph-fill ph-heart text-rose-500' : 'ph-bold ph-heart'} text-sm`} />
+                        </button>
                       </div>
 
-                      {/* Footer: Price & Buy Action */}
-                      <div className="flex flex-col gap-2 border-t border-[#E9DED5] pt-2.5 sm:pt-3.5">
-                        <div className="flex items-end justify-between gap-1">
-                          <span className="pb-0.5 font-mono text-[8px] font-semibold uppercase tracking-wider text-stone-400 sm:text-[11px]">
-                            Từ
-                          </span>
-                          <span className="font-serif-display text-[20px] font-extrabold leading-none tracking-[-0.02em] text-brand-terracotta transition-colors sm:group-hover:text-brand-burgundy sm:text-xl">
-                            {product.base_price?.toLocaleString('vi-VN')}đ
-                          </span>
+                      <div className="flex flex-1 flex-col px-3.5 pb-3.5 pt-3.5 sm:px-4 sm:pb-4 sm:pt-4">
+                        <Link to={`/product/${product._id}`} className="block transition-colors sm:group-hover:text-brand-burgundy">
+                          <h3 className="line-clamp-2 min-h-[38px] overflow-hidden font-serif-display text-[15px] font-bold leading-[1.28] text-[#302320] sm:min-h-[44px] sm:text-[17px]" title={product.name}>{product.name}</h3>
+                        </Link>
+                        <p className="mt-1 truncate text-[8px] font-semibold uppercase tracking-[0.12em] text-stone-400 sm:text-[9px]">{product.category?.name || 'Candlet Scented Candle'}</p>
+                        <div className="mt-2 flex items-center gap-1.5 text-[9px] sm:text-[10px]">
+                          <i className="ph-fill ph-star text-[10px] text-amber-500 sm:text-xs" />
+                          <span className="font-bold text-stone-700">{product.avgRating || '5.0'}</span>
+                          <span className="text-stone-400">({product.reviewCount || 0} đánh giá)</span>
                         </div>
-
-                        <button
-                          onClick={(e) => handleBuyNow(e, product)}
-                          className="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#6B3530] to-brand-burgundy px-2 py-2.5 text-[9px] font-bold uppercase tracking-[0.12em] text-white shadow-sm transition-all duration-300 sm:hover:from-[#7C4038] sm:hover:to-brand-burgundy sm:hover:shadow-md active:scale-[0.98] sm:rounded-full sm:px-3 sm:text-[11px] sm:tracking-wider"
-                        >
-                          <i className="ph-bold ph-shopping-bag-open text-xs"></i>
-                          <span>Mua Ngay</span>
-                        </button>
-
+                        <div className="mt-3 flex items-end justify-between gap-2 border-t border-[#EEE5DD] pt-2.5 sm:mt-3.5 sm:pt-3">
+                          <span className="pb-0.5 text-[8px] font-semibold uppercase tracking-[0.12em] text-stone-400">Giá từ</span>
+                          <span className="font-jakarta text-[17px] font-extrabold leading-none tracking-[-0.035em] text-[#3D2925] sm:text-[19px]">{product.base_price?.toLocaleString('vi-VN')}<span className="ml-0.5 text-[11px] font-bold sm:text-xs">đ</span></span>
+                        </div>
                       </div>
                     </div>
                   );

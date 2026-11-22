@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../../hooks/useCart';
-import { resolveTagColor } from '../../utils/productTagUtils';
+import { useWishlist } from '../../hooks/useWishlist';
 import { getImageUrl } from '../../utils/imageUtils';
 
 export default function Cart() {
@@ -9,13 +9,21 @@ export default function Cart() {
     cart,
     loading,
     updateQuantity,
+    changeItemSku,
     removeItem,
     removeMultipleItems,
     calculateItemPrice
   } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
   const navigate = useNavigate();
   const [selectedItems, setSelectedItems] = useState([]);
   const [isDeletingMultiple, setIsDeletingMultiple] = useState(false);
+  const [editingVariantKey, setEditingVariantKey] = useState('');
+  const [variantDraft, setVariantDraft] = useState({});
+  const [changingVariant, setChangingVariant] = useState(false);
+  const [variantError, setVariantError] = useState('');
+  const [swipeOffsets, setSwipeOffsets] = useState({});
+  const swipeGesture = useRef(null);
 
   // Ngưỡng miễn phí vận chuyển: 100.000đ
   const FREESHIP_THRESHOLD = 100000;
@@ -40,6 +48,26 @@ export default function Cart() {
     } else {
       setSelectedItems(cart.items.map(item => ({ product_id: item.product_id._id, sku_id: item.sku_id })));
     }
+  };
+
+  const toggleProductGroup = (items) => {
+    const allSelected = items.every(item => isSelected(item));
+    if (allSelected) {
+      setSelectedItems(prev => prev.filter(selected => !items.some(item => (
+        selected.product_id === item.product_id._id && selected.sku_id === item.sku_id
+      ))));
+      return;
+    }
+
+    setSelectedItems(prev => {
+      const next = [...prev];
+      items.forEach(item => {
+        if (!next.some(selected => selected.product_id === item.product_id._id && selected.sku_id === item.sku_id)) {
+          next.push({ product_id: item.product_id._id, sku_id: item.sku_id });
+        }
+      });
+      return next;
+    });
   };
 
   // Tính tổng tiền dựa trên các sản phẩm được chọn
@@ -89,18 +117,138 @@ export default function Cart() {
   const getVariantLabel = (product, skuId) => {
     if (!product || !skuId || !product.skus || !product.variant_groups) return skuId;
 
-    const sku = product.skus.find(s => s.id === skuId);
+    const sku = product.skus.find(s => String(s.id) === String(skuId));
     if (!sku || !sku.combination) return skuId;
 
     const labels = [];
     sku.combination.forEach(optId => {
       product.variant_groups.forEach(group => {
-        const option = group.options.find(o => o.id === optId);
+        const option = group.options.find(o => String(o.id) === String(optId));
         if (option) labels.push(option.label);
       });
     });
 
     return labels.length > 0 ? labels.join(' • ') : skuId;
+  };
+
+  const getItemKey = (item) => `${item.product_id?._id || item.product_id}:${item.sku_id || 'default'}`;
+
+  const openVariantEditor = (item) => {
+    const product = item.product_id;
+    const sku = product?.skus?.find(entry => String(entry.id) === String(item.sku_id));
+    if (!sku) return;
+    const nextDraft = {};
+    (product.variant_groups || []).forEach(group => {
+      const option = (group.options || []).find(entry => (
+        (sku.combination || []).some(optionId => String(optionId) === String(entry.id))
+      ));
+      if (option) nextDraft[group.id] = option.id;
+    });
+    setVariantDraft(nextDraft);
+    setVariantError('');
+    setEditingVariantKey(getItemKey(item));
+  };
+
+  const isDraftOptionUnavailable = (product, groupId, optionId) => {
+    const requiredOptions = Object.entries(variantDraft)
+      .filter(([draftGroupId]) => String(draftGroupId) !== String(groupId))
+      .map(([, value]) => String(value));
+    return !(product.skus || []).some(sku => {
+      const combination = new Set((sku.combination || []).map(String));
+      const hasStock = sku.stock === null || sku.stock === undefined || Number(sku.stock) > 0;
+      return hasStock && combination.has(String(optionId)) && requiredOptions.every(value => combination.has(value));
+    });
+  };
+
+  const findDraftSku = (product) => {
+    const combination = Object.values(variantDraft).map(String).sort().join(',');
+    return (product.skus || []).find(sku => (sku.combination || []).map(String).sort().join(',') === combination);
+  };
+
+  const saveVariantChange = async (item) => {
+    const nextSku = findDraftSku(item.product_id);
+    if (!nextSku) {
+      setVariantError('Tổ hợp phân loại này không khả dụng.');
+      return;
+    }
+    if (String(nextSku.id) === String(item.sku_id)) {
+      setEditingVariantKey('');
+      return;
+    }
+
+    try {
+      setChangingVariant(true);
+      setVariantError('');
+      await changeItemSku(item, nextSku.id);
+      setSelectedItems(prev => {
+        const mapped = prev.map(selected => (
+          selected.product_id === item.product_id._id && selected.sku_id === item.sku_id
+            ? { ...selected, sku_id: nextSku.id }
+            : selected
+        ));
+        return mapped.filter((selected, index) => mapped.findIndex(entry => (
+          entry.product_id === selected.product_id && entry.sku_id === selected.sku_id
+        )) === index);
+      });
+      setEditingVariantKey('');
+    } catch (error) {
+      setVariantError(error.response?.data?.message || 'Không thể đổi phân loại. Vui lòng thử lại.');
+    } finally {
+      setChangingVariant(false);
+    }
+  };
+
+  const setSwipeOffset = (key, offset) => {
+    setSwipeOffsets(current => {
+      const next = {};
+      Object.keys(current).forEach(itemKey => { next[itemKey] = itemKey === key ? offset : 0; });
+      next[key] = offset;
+      return next;
+    });
+  };
+
+  const handleSwipeStart = (event, key) => {
+    const touch = event.touches[0];
+    swipeGesture.current = {
+      key,
+      startX: touch.clientX,
+      startY: touch.clientY,
+      initialOffset: swipeOffsets[key] || 0,
+      latestOffset: swipeOffsets[key] || 0,
+      horizontal: false,
+    };
+  };
+
+  const handleSwipeMove = (event) => {
+    const gesture = swipeGesture.current;
+    if (!gesture) return;
+    const touch = event.touches[0];
+    const deltaX = touch.clientX - gesture.startX;
+    const deltaY = touch.clientY - gesture.startY;
+    if (!gesture.horizontal && Math.abs(deltaX) > Math.abs(deltaY) + 6) gesture.horizontal = true;
+    if (!gesture.horizontal) return;
+    const nextOffset = Math.max(-152, Math.min(0, gesture.initialOffset + deltaX));
+    gesture.latestOffset = nextOffset;
+    setSwipeOffset(gesture.key, nextOffset);
+  };
+
+  const handleSwipeEnd = () => {
+    const gesture = swipeGesture.current;
+    if (!gesture) return;
+    setSwipeOffset(gesture.key, gesture.latestOffset < -55 ? -152 : 0);
+    swipeGesture.current = null;
+  };
+
+  const closeSwipeActions = (item) => setSwipeOffset(getItemKey(item), 0);
+
+  const handleWishlistAction = (item) => {
+    toggleWishlist(item.product_id, navigate);
+    closeSwipeActions(item);
+  };
+
+  const handleRemoveAction = async (item) => {
+    closeSwipeActions(item);
+    await removeItem(item);
   };
 
   if (loading) {
@@ -113,9 +261,24 @@ export default function Cart() {
   }
 
   const hasItems = cart && cart.items && cart.items.length > 0;
+  const productGroups = hasItems
+    ? Object.values(cart.items.reduce((groups, item) => {
+      const productId = item.product_id?._id || item.product_id;
+      if (!groups[productId]) groups[productId] = { product: item.product_id, items: [] };
+      groups[productId].items.push(item);
+      return groups;
+    }, {}))
+    : [];
+  const editingVariantItem = cart?.items?.find(item => getItemKey(item) === editingVariantKey) || null;
+  const editingVariantProduct = editingVariantItem?.product_id || null;
+  const draftSku = editingVariantProduct ? findDraftSku(editingVariantProduct) : null;
+  const draftSkuImage = draftSku?.image || editingVariantProduct?.image;
+  const draftSkuPrice = Number(draftSku?.price) > 0
+    ? Number(draftSku.price)
+    : Number(editingVariantProduct?.base_price) || 0;
 
   return (
-    <main className="min-h-screen bg-white pb-24 sm:bg-[#fbf9f6] sm:py-10 lg:pb-16">
+    <main className="min-h-screen bg-white pb-24 font-jakarta sm:bg-[#fbf9f6] sm:py-10 lg:pb-16">
       <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
 
         {/* Breadcrumb Navigation */}
@@ -251,146 +414,145 @@ export default function Cart() {
 
               {/* Items List Cards */}
               <section className="divide-y divide-stone-200 bg-white sm:space-y-4 sm:divide-y-0 sm:bg-transparent">
-                {cart.items.map((item, index) => {
-                  const product = item.product_id;
+                {productGroups.map(({ product, items }) => {
                   if (!product) return null;
-
-                  const price = calculateItemPrice(item);
-                  const isItemActive = isSelected(item);
-                  const originalPrice = product.original_price > price ? product.original_price : 0;
-                  const discountPct = originalPrice > 0
-                    ? Math.round(((originalPrice - price) / originalPrice) * 100)
-                    : 0;
+                  const isGroupSelected = items.every(item => isSelected(item));
+                  const hasSelectedItem = items.some(item => isSelected(item));
 
                   return (
                     <article
-                      key={`${item.product_id._id || item.product_id}-${item.sku_id || 'default'}-${index}`}
-                      className={`bg-white px-4 py-4 transition-colors sm:rounded-2xl sm:border sm:p-5 sm:shadow-2xs ${isItemActive
-                        ? 'bg-amber-50/30 sm:border-stone-400 sm:ring-1 sm:ring-stone-300/60'
+                      key={product._id}
+                      className={`bg-white transition-colors sm:overflow-hidden sm:rounded-2xl sm:border sm:shadow-2xs ${hasSelectedItem
+                        ? 'bg-amber-50/20 sm:border-stone-400 sm:ring-1 sm:ring-stone-300/60'
                         : 'sm:border-stone-200/90'
-                        }`}
+                      }`}
                     >
-                      <div className="flex items-start gap-2.5 sm:gap-4">
-
-                        {/* Checkbox (Căn chuẩn vị trí trên mobile) */}
-                        <div className="shrink-0 pt-7 sm:pt-10">
-                          <input
-                            type="checkbox"
-                            className="w-4 h-4 rounded border-stone-300 text-brand-burgundy focus:ring-brand-burgundy cursor-pointer accent-brand-burgundy"
-                            checked={isItemActive}
-                            onChange={() => toggleSelect(item)}
-                          />
-                        </div>
-
-                        {/* Product Image */}
-                        <Link
-                          to={`/product/${product._id}`}
-                          className="group relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-stone-200 bg-stone-100 sm:h-28 sm:w-28 sm:rounded-xl"
-                        >
-                          {product.image ? (
-                            <img
-                              src={getImageUrl(product.image)}
-                              alt={product.name}
-                              className="w-full h-full object-cover sm:group-hover:scale-105 transition-transform duration-300"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-stone-300">
-                              <i className="ph ph-image text-2xl"></i>
-                            </div>
-                          )}
-                          {product.tag && (
-                            <span
-                              className="absolute top-1 left-1 text-white text-[7px] sm:text-[8px] font-bold tracking-widest px-1 sm:px-1.5 py-0.2 sm:py-0.5 uppercase rounded-xs shadow-xs"
-                              style={{ backgroundColor: resolveTagColor(product.tag, product.tag_color) }}
-                            >
-                              {product.tag}
-                            </span>
-                          )}
+                      <div className="flex items-center gap-2.5 border-b border-stone-100 px-4 py-3 sm:px-5">
+                        <input
+                          type="checkbox"
+                          className="size-4 shrink-0 rounded border-stone-300 text-brand-burgundy focus:ring-brand-burgundy cursor-pointer accent-brand-burgundy"
+                          checked={isGroupSelected}
+                          onChange={() => toggleProductGroup(items)}
+                        />
+                        <Link to={`/product/${product._id}`} className="min-w-0 flex-1 truncate font-serif-display text-base font-bold tracking-[0.01em] text-stone-900 transition-colors hover:text-brand-terracotta sm:text-lg">
+                          {product.name}
                         </Link>
+                        <span className="shrink-0 text-[10px] font-medium text-stone-400">{items.length} phân loại</span>
+                      </div>
 
-                        {/* Product Info & Controls */}
-                        <div className="flex-1 min-w-0 flex flex-col justify-between self-stretch">
-                          <div>
-                            <div className="flex items-start justify-between gap-1.5">
-                              <h3 className="text-xs sm:text-lg font-serif-display font-bold text-stone-900 leading-snug sm:hover:text-brand-terracotta transition-colors line-clamp-2">
-                                <Link to={`/product/${product._id}`}>{product.name}</Link>
-                              </h3>
+                      <div className="divide-y divide-stone-100">
+                        {items.map((item, index) => {
+                          const price = calculateItemPrice(item);
+                          const selectedSku = product.skus?.find(sku => String(sku.id) === String(item.sku_id));
+                          const itemImage = selectedSku?.image || product.image;
+                          const isItemActive = isSelected(item);
+                          const originalPrice = product.original_price > price ? product.original_price : 0;
 
-                              {/* Remove Button */}
-                              <button
-                                onClick={() => removeItem(item)}
-                                className="text-stone-400 sm:hover:text-red-500 p-1 rounded-lg sm:hover:bg-red-50 transition-colors shrink-0 cursor-pointer"
-                                title="Xóa sản phẩm này"
+                          return (
+                            <div
+                              key={`${product._id}-${item.sku_id || 'default'}-${index}`}
+                              className="relative overflow-hidden bg-stone-100"
+                            >
+                              <div
+                                aria-hidden={(swipeOffsets[getItemKey(item)] || 0) >= -4}
+                                className={`absolute inset-y-0 right-0 flex w-[152px] transition-opacity duration-100 ${
+                                  (swipeOffsets[getItemKey(item)] || 0) < -4 ? 'opacity-100' : 'pointer-events-none opacity-0'
+                                }`}
                               >
-                                <i className="ph-bold ph-trash text-base"></i>
-                              </button>
-                            </div>
-
-                            {/* Scent / Variant Label */}
-                            {item.sku_id && (
-                              <div className="mt-1 flex items-center gap-1">
-                                <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-medium bg-[#FAF5EE] text-brand-terracotta border border-amber-200/60 px-2 py-0.5 rounded-full truncate max-w-full">
-                                  <i className="ph-fill ph-drop text-xs shrink-0"></i>
-                                  <span className="truncate">{getVariantLabel(product, item.sku_id)}</span>
-                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleWishlistAction(item)}
+                                  className="flex w-[76px] flex-col items-center justify-center gap-1 bg-rose-50 text-rose-600 transition-colors hover:bg-rose-100 cursor-pointer"
+                                >
+                                  <i className={`${isInWishlist(product._id) ? 'ph-fill' : 'ph-bold'} ph-heart text-lg`} />
+                                  <span className="text-[9px] font-bold">Yêu thích</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveAction(item)}
+                                  className="flex w-[76px] flex-col items-center justify-center gap-1 bg-red-500 text-white transition-colors hover:bg-red-600 cursor-pointer"
+                                >
+                                  <i className="ph-bold ph-trash text-lg" />
+                                  <span className="text-[9px] font-bold">Xóa</span>
+                                </button>
                               </div>
-                            )}
 
-                            {/* Price Block */}
-                            <div className="mt-1.5 sm:mt-2 flex items-baseline gap-1.5">
-                              <span className="text-xs sm:text-lg font-bold text-brand-burgundy">
-                                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price)}
-                              </span>
-                              {originalPrice > 0 && (
-                                <>
-                                  <span className="text-[10px] sm:text-xs text-stone-400 line-through">
-                                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(originalPrice)}
-                                  </span>
-                                  <span className="text-[9px] font-bold text-red-600 bg-red-50 border border-red-200 px-1 rounded">
-                                    -{discountPct}%
-                                  </span>
-                                </>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Bottom Row: Stepper & Subtotal */}
-                          <div className="mt-3 flex flex-wrap items-end justify-between gap-2 sm:mt-4 sm:border-t sm:border-stone-100 sm:pt-3">
-
-                            {/* Quantity Stepper (Nút to dễ chạm trên mobile) */}
-                            <div className="flex items-center border border-stone-200 bg-white p-0.5 sm:rounded-xl sm:bg-stone-50/80 sm:shadow-2xs">
-                              <button
-                                type="button"
-                                onClick={() => updateQuantity(item, item.quantity - 1)}
-                                disabled={item.quantity <= 1}
-                                className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-stone-600 sm:hover:text-stone-900 sm:hover:bg-white rounded-lg transition-colors disabled:opacity-30 cursor-pointer active:scale-90"
-                                title="Giảm 1"
+                              <div
+                                onTouchStart={event => handleSwipeStart(event, getItemKey(item))}
+                                onTouchMove={handleSwipeMove}
+                                onTouchEnd={handleSwipeEnd}
+                                onTouchCancel={handleSwipeEnd}
+                                style={{
+                                  transform: `translateX(${swipeOffsets[getItemKey(item)] || 0}px)`,
+                                  touchAction: 'pan-y',
+                                }}
+                                className={`relative z-10 flex w-full items-start gap-2.5 px-4 py-3 transition-transform duration-200 sm:gap-4 sm:px-5 sm:py-4 ${isItemActive ? 'bg-amber-50' : 'bg-white'}`}
                               >
-                                <i className="ph-bold ph-minus text-xs"></i>
-                              </button>
-                              <span className="w-8 sm:w-10 text-center text-xs sm:text-sm font-bold text-stone-800 font-mono">
-                                {item.quantity}
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => updateQuantity(item, item.quantity + 1)}
-                                className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-stone-600 sm:hover:text-stone-900 sm:hover:bg-white rounded-lg transition-colors cursor-pointer active:scale-90"
-                                title="Tăng 1"
-                              >
-                                <i className="ph-bold ph-plus text-xs"></i>
-                              </button>
-                            </div>
+                              <input
+                                type="checkbox"
+                                className="mt-6 size-4 shrink-0 rounded border-stone-300 text-brand-burgundy focus:ring-brand-burgundy cursor-pointer accent-brand-burgundy sm:mt-7"
+                                checked={isItemActive}
+                                onChange={() => toggleSelect(item)}
+                              />
 
-                            {/* Item Subtotal */}
-                            <div className="text-right">
-                              <span className="text-[9px] uppercase tracking-wider text-stone-400 block font-bold">Thành tiền</span>
-                              <span className="text-xs sm:text-base font-bold text-brand-terracotta">
-                                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price * item.quantity)}
-                              </span>
-                            </div>
+                              <Link to={`/product/${product._id}`} className="group size-[68px] shrink-0 overflow-hidden rounded-xl border border-stone-200 bg-stone-100 sm:size-20">
+                                {itemImage ? (
+                                  <img src={getImageUrl(itemImage)} alt={getVariantLabel(product, item.sku_id)} className="size-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                                ) : (
+                                  <span className="flex size-full items-center justify-center text-stone-300"><i className="ph ph-image text-2xl" /></span>
+                                )}
+                              </Link>
 
-                          </div>
-                        </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="min-w-0">
+                                    {item.sku_id && (
+                                      <button
+                                        type="button"
+                                        onClick={() => editingVariantKey === getItemKey(item) ? setEditingVariantKey('') : openVariantEditor(item)}
+                                        className="inline-flex max-w-full items-center gap-1.5 rounded-lg bg-[#FAF5EE] px-2 py-1 text-left text-[10px] font-semibold text-brand-terracotta transition-colors hover:bg-[#F3E9DD] cursor-pointer sm:text-[11px]"
+                                        title="Đổi phân loại"
+                                      >
+                                        <span className="truncate">{getVariantLabel(product, item.sku_id)}</span>
+                                        <i className={`ph-bold ph-caret-down shrink-0 text-[9px] transition-transform ${editingVariantKey === getItemKey(item) ? 'rotate-180' : ''}`} />
+                                      </button>
+                                    )}
+                                    <div className="mt-1 flex items-baseline gap-1.5">
+                                      <span className="text-xs font-bold text-brand-burgundy sm:text-sm">
+                                        {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price)}
+                                      </span>
+                                      {originalPrice > 0 && (
+                                        <span className="text-[10px] text-stone-400 line-through">
+                                          {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(originalPrice)}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => setSwipeOffset(getItemKey(item), swipeOffsets[getItemKey(item)] ? 0 : -152)}
+                                    className="hidden shrink-0 items-center gap-1 rounded-lg border border-stone-200 px-2 py-1 text-[9px] font-semibold text-stone-500 transition-colors hover:bg-stone-50 sm:flex cursor-pointer"
+                                  >
+                                    Thao tác <i className="ph-bold ph-caret-left text-[9px]" />
+                                  </button>
+                                </div>
+
+                                <div className="mt-3 flex flex-wrap items-end justify-between gap-2">
+                                  <div className="flex items-center rounded-lg border border-stone-200 bg-white p-0.5 shadow-xs">
+                                    <button type="button" onClick={() => updateQuantity(item, item.quantity - 1)} disabled={item.quantity <= 1} className="flex size-7 items-center justify-center rounded-md text-stone-600 transition-colors hover:bg-stone-100 disabled:opacity-30 cursor-pointer"><i className="ph-bold ph-minus text-[10px]" /></button>
+                                    <span className="w-8 text-center font-mono text-xs font-bold text-stone-800">{item.quantity}</span>
+                                    <button type="button" onClick={() => updateQuantity(item, item.quantity + 1)} className="flex size-7 items-center justify-center rounded-md text-stone-600 transition-colors hover:bg-stone-100 cursor-pointer"><i className="ph-bold ph-plus text-[10px]" /></button>
+                                  </div>
+                                  <div className="text-right">
+                                    <span className="block text-[8px] font-bold uppercase tracking-wider text-stone-400">Thành tiền</span>
+                                    <span className="text-xs font-bold text-brand-terracotta sm:text-sm">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price * item.quantity)}</span>
+                                  </div>
+                                </div>
+                              </div>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </article>
                   );
@@ -502,6 +664,69 @@ export default function Cart() {
         )}
 
       </div>
+
+      {editingVariantItem && editingVariantProduct && (
+        <div className="fixed inset-0 z-[70] flex items-end justify-center sm:items-center sm:p-5">
+          <button type="button" aria-label="Đóng bảng chọn phân loại" onClick={() => setEditingVariantKey('')} className="absolute inset-0 bg-stone-950/45 backdrop-blur-xs cursor-default" />
+          <div className="relative z-10 flex max-h-[85dvh] w-full flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl sm:max-w-md sm:rounded-3xl">
+            <div className="flex items-start gap-3 border-b border-stone-100 p-4">
+              <div className="size-16 shrink-0 overflow-hidden rounded-2xl border border-stone-200 bg-stone-100">
+                {draftSkuImage ? <img src={getImageUrl(draftSkuImage)} alt="" className="size-full object-cover" /> : <span className="flex size-full items-center justify-center text-stone-300"><i className="ph ph-image text-2xl" /></span>}
+              </div>
+              <div className="min-w-0 flex-1 pt-0.5">
+                <p className="truncate font-serif-display text-base font-bold text-stone-900">{editingVariantProduct.name}</p>
+                <p className="mt-1 text-lg font-extrabold text-brand-terracotta">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(draftSkuPrice)}</p>
+                <p className="mt-0.5 truncate text-[10px] text-stone-500">Đã chọn: <strong className="text-stone-700">{draftSku ? getVariantLabel(editingVariantProduct, draftSku.id) : 'Chưa đủ phân loại'}</strong></p>
+              </div>
+              <button type="button" onClick={() => setEditingVariantKey('')} className="flex size-8 shrink-0 items-center justify-center rounded-full bg-stone-100 text-stone-500 hover:bg-stone-200 cursor-pointer"><i className="ph-bold ph-x text-sm" /></button>
+            </div>
+
+            <div className="custom-scrollbar flex-1 space-y-5 overflow-y-auto p-4">
+              {(editingVariantProduct.variant_groups || []).map(group => (
+                <div key={group.id} className="space-y-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-stone-600">{group.name}</span>
+                    <span className="truncate text-[10px] text-stone-400">Đang chọn: <strong className="text-stone-600">{(group.options || []).find(option => String(option.id) === String(variantDraft[group.id]))?.label || 'Chưa chọn'}</strong></span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {(group.options || []).map(option => {
+                      const selected = String(variantDraft[group.id]) === String(option.id);
+                      const unavailable = isDraftOptionUnavailable(editingVariantProduct, group.id, option.id);
+                      return (
+                        <button
+                          key={option.id}
+                          type="button"
+                          onClick={() => setVariantDraft(prev => ({ ...prev, [group.id]: option.id }))}
+                          disabled={unavailable}
+                          className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition-all cursor-pointer ${unavailable
+                            ? 'cursor-not-allowed border border-stone-200 bg-stone-100 text-stone-300 line-through opacity-70'
+                            : selected
+                              ? 'border-2 border-brand-burgundy bg-brand-burgundy text-white shadow-xs'
+                              : 'border border-stone-200 bg-white text-stone-700 hover:border-stone-400'
+                          }`}
+                        >
+                          {unavailable ? <i className="ph-bold ph-prohibit text-xs" /> : selected ? <i className="ph-bold ph-check text-xs" /> : null}
+                          {option.label}
+                          {unavailable && <span className="text-[8px] font-bold uppercase">Hết</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+              {variantError && <p className="rounded-xl bg-red-50 px-3 py-2 text-[11px] font-medium text-red-600">{variantError}</p>}
+            </div>
+
+            <div className="flex gap-2.5 border-t border-stone-100 bg-white p-3.5 pb-[calc(.875rem+env(safe-area-inset-bottom,0px))] sm:p-4">
+              <button type="button" onClick={() => setEditingVariantKey('')} className="w-[32%] rounded-xl border border-stone-200 py-3 text-xs font-bold text-stone-600 hover:bg-stone-50 cursor-pointer">Hủy</button>
+              <button type="button" onClick={() => saveVariantChange(editingVariantItem)} disabled={changingVariant || !draftSku} className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-brand-burgundy py-3 text-xs font-bold uppercase tracking-wide text-white transition-colors hover:bg-brand-deepWine disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer">
+                {changingVariant && <i className="ph-bold ph-spinner animate-spin" />}
+                Cập nhật phân loại
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ======================================================== */}
       {/* SHOPEE-STYLE MOBILE STICKY BOTTOM CHECKOUT BAR            */}

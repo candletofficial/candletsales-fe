@@ -168,22 +168,7 @@ export default function ShopPage() {
   const handleBuyNow = (e, product) => {
     e.preventDefault();
     e.stopPropagation();
-
-    if (product.stock === 0) {
-      alert('Sản phẩm hiện đã hết hàng');
-      return;
-    }
-
-    const defaultSku = product.skus?.find((sku) => sku.stock === null || sku.stock === undefined || sku.stock > 0);
-    const defaultSkuId = defaultSku?.id;
-
-    const buyItem = {
-      product_id: product,
-      sku_id: defaultSkuId,
-      quantity: 1
-    };
-
-    navigate('/checkout', { state: { selectedItems: [buyItem] } });
+    navigate(`/product/${product._id}`);
   };
 
   const handleCopyCoupon = (code, id) => {
@@ -652,10 +637,10 @@ export default function ShopPage() {
                 return (
                   <article
                     key={product._id} 
-                    className={`group relative flex flex-col justify-between overflow-hidden rounded-[18px] border border-[#E8DED5] bg-white shadow-[0_3px_14px_rgba(74,44,42,0.06)] transition-all sm:p-4 ${isOutOfStock ? 'border-stone-200' : 'sm:hover:-translate-y-0.5 sm:hover:shadow-md'}`}
+                    className={`group relative flex flex-col overflow-hidden rounded-[18px] border border-[#E9DED4] bg-[#FFFCF8] shadow-[0_4px_16px_rgba(55,38,33,0.06)] transition-all duration-300 sm:rounded-[22px] ${isOutOfStock ? 'opacity-65' : 'sm:hover:-translate-y-0.5 sm:hover:border-[#D7C4B5] sm:hover:shadow-[0_10px_24px_rgba(55,38,33,0.1)]'}`}
                   >
                     {/* Image Area with badges & wishlist button */}
-                    <div className="relative mb-2.5 aspect-square overflow-hidden bg-brand-warmIvory sm:mb-3.5 sm:rounded-xl">
+                    <div className="relative aspect-square overflow-hidden border-b border-[#E9DED4] bg-[#EEE8E0]">
                       {isOutOfStock && (
                         <>
                           <div className="pointer-events-none absolute inset-0 z-30 bg-white/45 backdrop-grayscale-[35%]" />
@@ -665,7 +650,7 @@ export default function ShopPage() {
                       {/* Product Tag */}
                       {product.tag && (
                         <div 
-                          className="absolute top-2 left-2 text-white text-[8px] sm:text-[9px] font-bold tracking-widest px-1.5 sm:px-2 py-0.5 sm:py-1 uppercase z-20 rounded shadow-xs"
+                          className="absolute left-2 top-2 z-20 px-2 py-1 text-[7px] font-bold uppercase tracking-[0.12em] text-white shadow-sm sm:left-3 sm:top-3 sm:text-[8px]"
                           style={{ backgroundColor: resolveTagColor(product.tag, product.tag_color) }}
                         >
                           {product.tag}
@@ -681,7 +666,7 @@ export default function ShopPage() {
                           e.stopPropagation();
                           toggleWishlist(product, navigate);
                         }} 
-                        className="absolute top-2 right-2 w-7 h-7 sm:w-8 sm:h-8 bg-white/95 backdrop-blur-xs rounded-full flex items-center justify-center shadow-xs z-20 sm:hover:scale-110 active:scale-90 transition-all cursor-pointer"
+                        className="absolute right-2 top-2 z-20 flex size-7 items-center justify-center rounded-full border border-stone-200/80 bg-white/90 text-stone-500 shadow-sm backdrop-blur-md transition-all sm:right-3 sm:top-3 sm:size-8 sm:hover:text-rose-500 active:scale-90 cursor-pointer"
                         title={isInWishlist(product._id) ? "Bỏ yêu thích" : "Lưu vào yêu thích"}
                       >
                         <i className={`text-sm sm:text-base transition-colors ${
@@ -707,57 +692,31 @@ export default function ShopPage() {
                     </div>
                     
                     {/* Info Area */}
-                    <div className={`flex flex-1 flex-col px-3 pb-3 transition-opacity sm:p-0 ${isOutOfStock ? 'opacity-55' : ''}`}>
-                      {/* Category & Star Rating */}
-                      <div className="flex items-center justify-between gap-1 mb-1 sm:mb-1.5">
-                        <span className="text-[8.5px] sm:text-[9.5px] font-mono uppercase tracking-wider text-stone-500 truncate">
-                          {product.category || 'Nến Hũ Đơn'}
-                        </span>
-                        <div className="flex items-center gap-0.5 shrink-0 text-[9.5px] sm:text-[10.5px] text-stone-700 font-semibold font-mono">
-                          <i className="ph-fill ph-star text-amber-500 text-[10px] sm:text-xs"></i> 
-                          <span>{product.avgRating || '5.0'}</span>
-                        </div>
-                      </div>
-                      
-                      {/* Tên Sản Phẩm (Line clamp 2 dòng cố định chiều cao) */}
-                      <Link to={`/product/${product._id}`} className="block mb-1 sm:mb-2 sm:group-hover:text-brand-burgundy transition-colors">
+                    <div className="flex flex-1 flex-col px-3.5 pb-3.5 pt-3.5 sm:px-4 sm:pb-4 sm:pt-4">
+                      <Link to={`/product/${product._id}`} className="block transition-colors sm:group-hover:text-brand-burgundy">
                         <h3 
-                          className="font-serif-display text-xs sm:text-base font-bold text-brand-charcoal leading-snug line-clamp-2 h-[32px] sm:h-[44px] overflow-hidden" 
+                          className="line-clamp-2 min-h-[38px] overflow-hidden font-serif-display text-[15px] font-bold leading-[1.28] text-[#302320] sm:min-h-[44px] sm:text-[17px]"
                           title={product.name}
                         >
                           {product.name}
                         </h3>
                       </Link>
-                      
-                      {/* Footer: Giá & Nút Mua Ngay */}
-                      <div className="mt-auto pt-2 sm:pt-3 border-t border-stone-200/80 flex flex-col gap-1.5 sm:gap-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[9px] sm:text-[10px] font-mono uppercase tracking-wider text-stone-500 font-semibold">
-                            Giá
-                          </span>
-                          <div className="flex items-baseline gap-1">
-                            <span className="font-serif-display text-[17px] font-extrabold leading-none tracking-[-0.02em] text-brand-charcoal transition-colors sm:text-lg sm:group-hover:text-brand-burgundy">
-                              {product.base_price?.toLocaleString('vi-VN')}đ
-                            </span>
-                            {product.original_price > product.base_price && (
-                              <span className="text-[9px] text-stone-400 line-through hidden xs:inline">
-                                {product.original_price?.toLocaleString('vi-VN')}đ
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        
-                        {/* Nút Mua Ngay Full Width Thumb-friendly */}
-                        <button 
-                          type="button"
-                          onClick={(e) => handleBuyNow(e, product)}
-                          disabled={isOutOfStock}
-                          className="w-full py-2 px-2.5 rounded-full bg-brand-charcoal sm:hover:bg-brand-burgundy text-white text-[9.5px] sm:text-[11px] font-semibold tracking-wider uppercase transition-all duration-200 shadow-2xs sm:hover:shadow-md active:scale-95 cursor-pointer flex items-center justify-center gap-1 disabled:cursor-not-allowed"
-                        >
-                          <i className="ph-bold ph-shopping-bag-open text-xs"></i>
-                          <span>Mua Ngay</span>
-                        </button>
+                      <p className="mt-1 truncate text-[8px] font-semibold uppercase tracking-[0.12em] text-stone-400 sm:text-[9px]">{typeof product.category === 'string' ? product.category : product.category?.name || 'Candlet Scented Candle'}</p>
+
+                      <div className="mt-2 flex items-center gap-1.5 text-[9px] sm:text-[10px]">
+                        <i className="ph-fill ph-star text-[10px] text-amber-500 sm:text-xs" />
+                        <span className="font-bold text-stone-700">{product.avgRating || '5.0'}</span>
+                        <span className="text-stone-400">({product.reviewCount || 0} đánh giá)</span>
                       </div>
+
+                      <div className="mt-3 flex items-end justify-between gap-2 border-t border-[#EEE5DD] pt-2.5 sm:mt-3.5 sm:pt-3">
+                        <span className="pb-0.5 text-[8px] font-semibold uppercase tracking-[0.12em] text-stone-400">Giá từ</span>
+                        <div className="text-right">
+                          {product.original_price > product.base_price && <span className="mr-1.5 text-[8px] text-stone-400 line-through sm:text-[9px]">{product.original_price?.toLocaleString('vi-VN')}đ</span>}
+                          <span className="font-jakarta text-[17px] font-extrabold leading-none tracking-[-0.035em] text-[#3D2925] sm:text-[19px]">{product.base_price?.toLocaleString('vi-VN')}<span className="ml-0.5 text-[11px] font-bold sm:text-xs">đ</span></span>
+                        </div>
+                      </div>
+
                     </div>
                   </article>
                 );

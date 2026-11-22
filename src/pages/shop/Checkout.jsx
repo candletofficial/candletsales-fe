@@ -451,7 +451,7 @@ export default function Checkout() {
           product_id: product._id,
           productId: product.productId,
           product_name: product.name,
-          product_image: product.image,
+          product_image: sku?.image || product.image,
           sku_id: item.sku_id,
           sku_label: skuLabel,
           unit_price: calculateItemPrice(item),
@@ -1106,7 +1106,7 @@ export default function Checkout() {
                     <div key={idx} className="flex gap-3 items-center pt-2.5 first:pt-0">
                       <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-stone-100 border border-stone-200 overflow-hidden shrink-0 relative">
                         {item.product_id?.image ? (
-                          <img src={getImageUrl(item.product_id.image)} alt={item.product_id.name} className="w-full h-full object-cover" />
+                          <img src={getImageUrl(item.product_id.skus?.find(sku => sku.id === item.sku_id)?.image || item.product_id.image)} alt={item.product_id.name} className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-stone-300">
                             <i className="ph ph-image text-xl"></i>
@@ -1278,40 +1278,45 @@ export default function Checkout() {
       {/* Cố định sát mép đáy trên mobile chuẩn Shopee             */}
       {/* ======================================================== */}
       <div 
-        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-stone-200/90 shadow-[0_-4px_25px_rgba(0,0,0,0.12)] flex items-stretch h-14"
-        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+        className="fixed inset-x-0 bottom-0 z-50 bg-white shadow-[0_-4px_25px_rgba(0,0,0,0.12)] lg:hidden"
+        style={{
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+          transform: 'translateZ(0)',
+        }}
       >
-        {/* Cột trái: Tổng thanh toán & Tiết kiệm */}
-        <div className="flex-1 flex flex-col justify-center items-end pr-3.5 min-w-0">
-          <div className="flex items-baseline gap-1">
-            <span className="text-[11px] text-stone-600 font-medium">Tổng thanh toán:</span>
-            <span className="font-bold text-base sm:text-lg text-[#B45309] truncate">
-              {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(finalTotal)}
-            </span>
+        <div className="flex h-14 items-stretch border-t border-stone-200/90 bg-white">
+          {/* Cột trái: Tổng thanh toán & Tiết kiệm */}
+          <div className="flex min-w-0 flex-1 flex-col items-end justify-center pr-3.5">
+            <div className="flex items-baseline gap-1">
+              <span className="text-[11px] font-medium text-stone-600">Tổng thanh toán:</span>
+              <span className="truncate text-base font-bold text-[#B45309] sm:text-lg">
+                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(finalTotal)}
+              </span>
+            </div>
+            {discountAmount > 0 && (
+              <span className="block truncate text-[10px] font-medium leading-none text-emerald-600">
+                Tiết kiệm {new Intl.NumberFormat('vi-VN').format(discountAmount)}đ
+              </span>
+            )}
           </div>
-          {discountAmount > 0 && (
-            <span className="text-[10px] text-emerald-600 font-medium block truncate leading-none">
-              Tiết kiệm {new Intl.NumberFormat('vi-VN').format(discountAmount)}đ
-            </span>
-          )}
-        </div>
 
-        {/* Cột phải: Nút Đặt Hàng chuẩn Shopee */}
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={submitting}
-          className="w-36 sm:w-40 bg-gradient-to-r from-[#94432C] to-brand-burgundy active:from-[#7D3824] active:to-[#38201F] text-white text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all disabled:opacity-60 cursor-pointer shrink-0 shadow-inner px-2"
-        >
-          {submitting ? (
-            <>
-              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-              <span>Đang đặt...</span>
-            </>
-          ) : (
-            <span>Đặt Hàng</span>
-          )}
-        </button>
+          {/* Cột phải: Nút Đặt Hàng chuẩn Shopee */}
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={submitting}
+            className="flex w-36 shrink-0 cursor-pointer items-center justify-center gap-1.5 bg-gradient-to-r from-[#94432C] to-brand-burgundy px-2 text-xs font-bold uppercase tracking-wider text-white shadow-inner transition-all active:from-[#7D3824] active:to-[#38201F] disabled:opacity-60 sm:w-40 sm:text-sm"
+          >
+            {submitting ? (
+              <>
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"></div>
+                <span>Đang đặt...</span>
+              </>
+            ) : (
+              <span>Đặt Hàng</span>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* VOUCHER SELECTION MODAL (Bottom Sheet trên Mobile) */}

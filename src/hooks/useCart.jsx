@@ -50,6 +50,22 @@ export function CartProvider({ children }) {
     }
   };
 
+  const changeItemSku = async (item, newSkuId) => {
+    try {
+      const res = await cartService.updateCartItem({
+        product_id: item.product_id._id,
+        sku_id: item.sku_id,
+        new_sku_id: newSkuId,
+        quantity: item.quantity
+      });
+      if (res.success) setCart(res.data);
+      return res;
+    } catch (error) {
+      console.error('Failed to change cart item variant', error);
+      throw error;
+    }
+  };
+
   const removeItem = async (item) => {
     try {
       const res = await cartService.removeFromCart({
@@ -121,6 +137,7 @@ export function CartProvider({ children }) {
       fetchCart, 
       addToCart, 
       updateQuantity, 
+      changeItemSku,
       removeItem, 
       removeMultipleItems,
       clearCart,
