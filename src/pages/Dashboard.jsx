@@ -4,6 +4,7 @@ import { adminService } from '../services/adminService';
 import { fundService } from '../services/fundService';
 import DetailedAnalysisModal from '../components/DetailedAnalysis';
 import OrderAnalysisModal from '../components/OrderAnalysis';
+import FundOverviewModal from '../components/FundOverviewModal';
 import { useAuth } from '../hooks/useAuth';
 import Layout from '../components/Layout';
 import {
@@ -63,16 +64,9 @@ export default function Dashboard() {
   const [isExporting, setIsExporting] = useState(false);
   const [showAnalysis, setShowAnalysis] = useState(false);
   const [showOrderAnalysis, setShowOrderAnalysis] = useState(false);
+  const [showFundDetails, setShowFundDetails] = useState(false);
   const [refreshingActivities, setRefreshingActivities] = useState(false);
   const [fundSummary, setFundSummary] = useState(null);
-
-  const expectedFund = useMemo(() => {
-    if (!fundSummary) return 0;
-    const currentFund = fundSummary.totalFundBalance || 0;
-    const platformBalances = (fundSummary.platformBalances || []).reduce((acc, p) => acc + (p.availableBalance || 0), 0);
-    const importDebt = fundSummary.totalImportDebt || 0;
-    return currentFund + platformBalances - importDebt;
-  }, [fundSummary]);
 
   const getPeriodLabel = () => {
     if (filterType === 'today') return 'Hôm nay';
@@ -276,6 +270,9 @@ export default function Dashboard() {
           data={data}
           periodLabel={getPeriodLabel()}
         />
+        {showFundDetails && fundSummary && (
+          <FundOverviewModal summary={fundSummary} onClose={() => setShowFundDetails(false)} />
+        )}
 
         {/* Stat Cards: 1 large left + 2x2 right */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-md mb-lg">
@@ -300,18 +297,18 @@ export default function Dashboard() {
               </h2>
               <p className="text-white/60 text-[12px] mt-1 mb-3">Số dư quỹ hiện tại</p>
               
-              <div className="flex flex-wrap gap-2 mt-2">
-                <p className="text-white/90 text-[12px] font-medium bg-white/10 inline-flex items-center gap-1 px-3 py-1 rounded-full backdrop-blur-sm border border-white/20">
-                  <span className="material-symbols-outlined text-[14px]">trending_up</span>
-                  Dự kiến: <strong className="text-white">{formatCompactCurrency(expectedFund)}</strong>
-                </p>
-                {(fundSummary?.totalImportDebt || 0) > 0 && (
-                  <p className="text-white/90 text-[12px] font-medium bg-red-500/30 inline-flex items-center gap-1 px-3 py-1 rounded-full backdrop-blur-sm border border-red-300/30">
-                    <span className="material-symbols-outlined text-[14px]">receipt_long</span>
-                    Nợ kho: <strong className="text-red-200">{formatCompactCurrency(fundSummary.totalImportDebt)}</strong>
-                  </p>
-                )}
-              </div>
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setShowFundDetails(true);
+                }}
+                className="mt-2 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/12 px-3.5 py-2 text-[12px] font-bold text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+              >
+                <span className="material-symbols-outlined text-[16px]">visibility</span>
+                Xem chi tiết tài sản
+                <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
+              </button>
             </div>
             <div className="relative z-10 mt-6 pt-4 border-t border-white/20">
               <p className="text-white/70 text-[12px] font-semibold mb-2">Doanh thu chưa rút</p>

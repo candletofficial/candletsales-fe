@@ -4,6 +4,7 @@ import { fundService } from '../services/fundService';
 import { formatPrice } from '../utils/formatPrice';
 import { useAuth } from '../hooks/useAuth';
 import { getCarrierFromFundAccount, getFundAccountLabel } from '../utils/shippingCarriers';
+import FundOverviewModal from '../components/FundOverviewModal';
 
 const FUND_ACCOUNT_VISUALS = {
   pos: { icon: 'point_of_sale', color: '#7c3aed', background: '#ede9fe' },
@@ -227,11 +228,6 @@ export default function FundManagement() {
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
   
-  // Dự kiến = Tài sản hiện tại + Doanh thu các sàn chưa rút - Nợ phiếu nhập chưa tất toán
-  const expectedFund = summary.totalFundBalance
-    + (summary.platformBalances || []).reduce((sum, p) => sum + p.availableBalance, 0)
-    - (summary.totalImportDebt || 0);
-  
   const [filterType, setFilterType] = useState('all');
   const [dateFilter, setDateFilter] = useState('this_month');
   const [customStartDate, setCustomStartDate] = useState('');
@@ -239,6 +235,7 @@ export default function FundManagement() {
   
   const [showDeposit, setShowDeposit] = useState(false);
   const [showWithdrawCapital, setShowWithdrawCapital] = useState(false);
+  const [showFundDetails, setShowFundDetails] = useState(false);
   const [withdrawPlatform, setWithdrawPlatform] = useState(null);
   const accountScrollerRef = useRef(null);
   const [accountScrollState, setAccountScrollState] = useState({ canBack: false, canForward: false });
@@ -367,6 +364,7 @@ export default function FundManagement() {
       {showDeposit && <DepositModal user={user} onClose={() => setShowDeposit(false)} onSuccess={() => handleSuccess('Góp vốn thành công')} />}
       {showWithdrawCapital && <WithdrawCapitalModal user={user} maxAmount={summary.totalFundBalance} onClose={() => setShowWithdrawCapital(false)} onSuccess={() => handleSuccess('Rút vốn thành công')} />}
       {withdrawPlatform && <WithdrawModal user={user} platform={withdrawPlatform.platform} maxAmount={withdrawPlatform.availableBalance} onClose={() => setWithdrawPlatform(null)} onSuccess={() => handleSuccess('Rút tiền thành công')} />}
+      {showFundDetails && <FundOverviewModal summary={summary} onClose={() => setShowFundDetails(false)} />}
 
       <div className="flex flex-col pb-8">
         <div className="flex justify-between items-center mb-6">
@@ -390,18 +388,15 @@ export default function FundManagement() {
               </div>
               <h2 className="text-[32px] font-black text-white mt-2 leading-tight">{formatPrice(summary.totalFundBalance)}</h2>
               <p className="text-white/60 text-[12px] mt-1 mb-3">Số dư quỹ hiện tại</p>
-              <div className="flex flex-wrap gap-2 mt-2">
-                <p className="text-white/90 text-[12px] font-medium bg-white/10 inline-flex items-center gap-1 px-3 py-1 rounded-full backdrop-blur-sm border border-white/20">
-                  <span className="material-symbols-outlined text-[14px]">trending_up</span>
-                  Dự kiến: <strong className="text-white">{formatPrice(expectedFund)}</strong>
-                </p>
-                {(summary.totalImportDebt || 0) > 0 && (
-                  <p className="text-white/90 text-[12px] font-medium bg-red-500/30 inline-flex items-center gap-1 px-3 py-1 rounded-full backdrop-blur-sm border border-red-300/30">
-                    <span className="material-symbols-outlined text-[14px]">receipt_long</span>
-                    Nợ kho: <strong className="text-red-200">{formatPrice(summary.totalImportDebt)}</strong>
-                  </p>
-                )}
-              </div>
+              <button
+                type="button"
+                onClick={() => setShowFundDetails(true)}
+                className="mt-2 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/12 px-3.5 py-2 text-[12px] font-bold text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+              >
+                <span className="material-symbols-outlined text-[16px]">visibility</span>
+                Xem chi tiết tài sản
+                <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
+              </button>
             </div>
             <div className="relative z-10 mt-6 flex gap-3 pt-4 border-t border-white/20">
               <button onClick={() => setShowDeposit(true)} className="flex-1 bg-white/20 hover:bg-white/30 transition-colors py-2.5 rounded-xl text-[13px] font-bold text-white flex items-center justify-center gap-2 backdrop-blur-sm">

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from '../components/Layout';
+import MaterialTrackingModal from '../components/MaterialTrackingModal';
 import { materialService } from '../services/materialService';
 import { productService } from '../services/productService';
 import { formatPrice } from '../utils/formatPrice';
@@ -201,10 +202,11 @@ const updateVariantOilQuantity = (product, variant, materialId, quantity) => {
   return nextProduct;
 };
 
-function EssentialOilDetailModal({ material, products, config, onClose, onEdit, onImport, onPrint, onUsageSaved }) {
+function EssentialOilDetailModal({ material, products, config, onClose, onEdit, onImport, onPrint, onTracking, onUsageSaved }) {
   const stock = getActualStock(material);
   const statusInfo = STATUS[getStatus(material)];
   const oilAppearance = getMaterialAppearance(material);
+  const trackingPaused = material.isTrackingEnabled === false;
   const productUsage = useMemo(() => buildMaterialUsageDetails(material, products), [material, products]);
   const [editingUsage, setEditingUsage] = useState(null);
   const [usageValue, setUsageValue] = useState('');
@@ -292,26 +294,32 @@ function EssentialOilDetailModal({ material, products, config, onClose, onEdit, 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-3 backdrop-blur-sm sm:p-6" role="dialog" aria-modal="true" aria-labelledby="oil-detail-title">
       <div className="flex max-h-[94vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
-        <header className="flex items-start justify-between border-b border-slate-100 px-5 py-4 sm:px-6 sm:py-5">
-          <div className="flex min-w-0 items-center gap-3">
-            <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-violet-100 text-violet-700">
-              <span className="material-symbols-outlined text-[26px]">{config.icon}</span>
-            </span>
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <h2 id="oil-detail-title" style={{ color: oilAppearance.textColor }} className="truncate text-lg font-bold sm:text-xl">{material.name}</h2>
-                <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold ring-1 ring-inset ${statusInfo.className}`}>
-                  <span className="material-symbols-outlined text-sm">{statusInfo.icon}</span>{statusInfo.label}
-                </span>
-                <span style={{ color: oilAppearance.textColor }} className="text-[10px] font-bold">{oilAppearance.label}</span>
-                {oilAppearance.concentrationLabel && <span className="rounded border border-slate-300 px-1.5 py-0.5 text-[9px] font-bold text-slate-600">{oilAppearance.concentrationLabel}</span>}
+        <header style={{ background: `linear-gradient(135deg, ${oilAppearance.color}12 0%, #ffffff 52%, #f8fafc 100%)` }} className="relative overflow-hidden border-b border-slate-100 px-5 py-4 sm:px-6">
+          <span style={{ backgroundColor: `${oilAppearance.color}0d` }} className="pointer-events-none absolute -right-8 -top-14 size-36 rounded-full" />
+          <div className="relative flex items-start justify-between gap-4">
+            <div className="flex min-w-0 items-start gap-3.5">
+              <span style={{ color: oilAppearance.textColor, boxShadow: `0 8px 22px ${oilAppearance.color}1f` }} className="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-white/80 bg-white sm:size-14">
+                <span className="material-symbols-outlined text-[27px]">{config.icon}</span>
+              </span>
+              <div className="min-w-0">
+                <p style={{ color: oilAppearance.textColor }} className="text-[9px] font-extrabold uppercase tracking-[0.18em] opacity-75">Hồ sơ tinh dầu</p>
+                <h2 id="oil-detail-title" className="mt-0.5 truncate text-xl font-extrabold tracking-tight text-slate-900 sm:text-[23px]">{material.name}</h2>
+                <div className="mt-2 flex flex-wrap items-center gap-2.5">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className={`inline-flex h-7 w-[104px] items-center justify-center gap-1 rounded-full px-2 text-[10px] font-bold ring-1 ring-inset ${trackingPaused ? 'bg-slate-100 text-slate-600 ring-slate-300' : statusInfo.className}`}><span className="material-symbols-outlined text-sm">{trackingPaused ? 'pause_circle' : statusInfo.icon}</span>{trackingPaused ? 'Tạm ngừng' : statusInfo.label}</span>
+                    <span style={{ color: oilAppearance.textColor, borderColor: `${oilAppearance.color}35`, backgroundColor: `${oilAppearance.color}0d` }} className="inline-flex h-7 w-[104px] items-center justify-center gap-1 rounded-full border px-2 text-[10px] font-bold"><span className="material-symbols-outlined text-[13px]">water_drop</span>{oilAppearance.label}</span>
+                    {oilAppearance.concentrationLabel && <span className="inline-flex h-7 w-[104px] items-center justify-center rounded-full border border-amber-200 bg-amber-50 px-2 text-[10px] font-bold text-amber-700">{oilAppearance.concentrationLabel}</span>}
+                  </div>
+                  <span className="hidden h-5 w-px bg-slate-200 sm:block" />
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-500">
+                  <span className="inline-flex items-center gap-1.5"><span className="material-symbols-outlined text-[15px]">barcode</span><strong className="font-semibold text-slate-700">{material.sku}</strong></span>
+                  <span className="inline-flex items-center gap-1.5"><span className="material-symbols-outlined text-[15px]">storefront</span>{material.supplier}</span>
+                  </div>
+                </div>
               </div>
-              <p className="mt-1 text-xs text-slate-500">{material.sku} · {material.supplier}</p>
             </div>
+            <button type="button" onClick={onClose} className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full border border-white/80 bg-white/80 text-slate-400 shadow-sm backdrop-blur transition hover:bg-white hover:text-slate-700" aria-label="Đóng"><span className="material-symbols-outlined text-[21px]">close</span></button>
           </div>
-          <button type="button" onClick={onClose} className="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-700" aria-label="Đóng">
-            <span className="material-symbols-outlined">close</span>
-          </button>
         </header>
 
         <div className="overflow-y-auto">
@@ -387,6 +395,7 @@ function EssentialOilDetailModal({ material, products, config, onClose, onEdit, 
         </div>
 
         <footer className="flex flex-wrap justify-end gap-2 border-t border-slate-100 bg-white px-5 py-4 sm:px-6">
+          <button type="button" onClick={onTracking} className={`inline-flex cursor-pointer items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-bold transition ${material.isTrackingEnabled === false ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100' : 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100'}`}><span className="material-symbols-outlined text-lg">{material.isTrackingEnabled === false ? 'play_circle' : 'pause_circle'}</span>{material.isTrackingEnabled === false ? 'Bật theo dõi' : 'Tạm ngừng'}</button>
           <button type="button" onClick={onPrint} className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50"><span className="material-symbols-outlined text-lg">print</span>In tem A7</button>
           <button type="button" onClick={onImport} className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-violet-200 bg-violet-50 px-4 py-2.5 text-sm font-bold text-violet-700 transition hover:bg-violet-100"><span className="material-symbols-outlined text-lg">add_box</span>Tạo phiếu nhập</button>
           <button type="button" onClick={onEdit} className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-violet-700 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-violet-800"><span className="material-symbols-outlined text-lg">edit</span>Chỉnh sửa</button>
@@ -597,6 +606,8 @@ export default function EssentialOilManagement() {
   const [modal, setModal] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState('');
+  const [trackingLoading, setTrackingLoading] = useState(false);
+  const [trackingError, setTrackingError] = useState('');
   const [toast, setToast] = useState(null);
   const search = searchParams.get('q') || '';
 
@@ -631,7 +642,9 @@ export default function EssentialOilManagement() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const oils = useMemo(() => materials.filter(config.matches), [materials, config.matches]);
+  const allOils = useMemo(() => materials.filter(config.matches), [materials, config.matches]);
+  const oils = useMemo(() => allOils.filter(oil => oil.isTrackingEnabled !== false), [allOils]);
+  const pausedOils = useMemo(() => allOils.filter(oil => oil.isTrackingEnabled === false), [allOils]);
 
   const usageMap = useMemo(() => {
     const map = new Map();
@@ -714,6 +727,44 @@ export default function EssentialOilManagement() {
     }
   };
 
+  const handleTrackingClick = async (oil) => {
+    setTrackingLoading(true);
+    setTrackingError('');
+    try {
+      if (oil.isTrackingEnabled === false) {
+        await materialService.setMaterialTracking(oil._id, { enabled: true });
+        showToast(`Đã bật lại theo dõi ${oil.name}`);
+        setModal(null);
+        await fetchData();
+      } else {
+        const response = await materialService.getMaterialUsage(oil._id);
+        setModal({ type: 'tracking', data: response.data.data });
+      }
+    } catch (error) {
+      showToast(error.response?.data?.message || 'Không thể thay đổi trạng thái theo dõi.', 'error');
+    } finally {
+      setTrackingLoading(false);
+    }
+  };
+
+  const confirmPauseTracking = async (formulaAction, replacementMaterialId) => {
+    setTrackingLoading(true);
+    setTrackingError('');
+    try {
+      const payload = { enabled: false };
+      if (formulaAction !== 'none') payload.formulaAction = formulaAction;
+      if (replacementMaterialId) payload.replacementMaterialId = replacementMaterialId;
+      await materialService.setMaterialTracking(modal.data.material._id, payload);
+      showToast(`Đã tạm ngừng theo dõi ${modal.data.material.name}`);
+      setModal(null);
+      await fetchData();
+    } catch (error) {
+      setTrackingError(error.response?.data?.message || 'Không thể tạm ngừng theo dõi.');
+    } finally {
+      setTrackingLoading(false);
+    }
+  };
+
   const openImport = (oil) => navigate('/admin/imports', {
     state: { autoOpenImport: true, materialId: oil?._id },
   });
@@ -754,6 +805,7 @@ export default function EssentialOilManagement() {
           onEdit={() => setModal({ type: 'form', material: modal.material })}
           onImport={() => openImport(modal.material)}
           onPrint={() => printLabels([modal.material])}
+          onTracking={() => handleTrackingClick(modal.material)}
           onUsageSaved={handleUsageSaved}
         />
       )}
@@ -762,6 +814,9 @@ export default function EssentialOilManagement() {
       )}
       {modal?.type === 'delete' && (
         <DeleteMaterialModal material={modal.material} config={config} loading={deleteLoading} error={deleteError} onClose={() => setModal(null)} onConfirm={handleDelete} />
+      )}
+      {modal?.type === 'tracking' && (
+        <MaterialTrackingModal data={modal.data} loading={trackingLoading} error={trackingError} onClose={() => { setModal(null); setTrackingError(''); }} onConfirm={confirmPauseTracking} />
       )}
 
       <div className="mx-auto max-w-[1600px]">
@@ -878,7 +933,7 @@ export default function EssentialOilManagement() {
                           <td className="px-5 py-4"><p className="text-sm font-semibold text-slate-800">{formatPrice(oil.price)}</p><p className="mt-0.5 text-xs text-slate-400">{formatPrice(stock * oil.price)} tồn kho</p></td>
                           <td className="px-5 py-4"><p className="text-sm font-semibold text-slate-700">{usage.length ? `${usage.length} sản phẩm` : 'Chưa sử dụng'}</p>{usage.length > 0 && <p className="mt-0.5 max-w-52 truncate text-xs text-slate-400" title={usage.map((item) => item.name).join(', ')}>{usage.map((item) => item.name).join(', ')}</p>}</td>
                           <td className="px-5 py-4"><span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold ring-1 ring-inset ${statusInfo.className}`}><span className="material-symbols-outlined text-sm">{statusInfo.icon}</span>{statusInfo.label}</span></td>
-                          <td className="px-5 py-4"><div className="flex justify-end gap-1"><button type="button" onClick={(event) => { event.stopPropagation(); openImport(oil); }} className="flex size-9 cursor-pointer items-center justify-center rounded-lg text-slate-400 transition hover:bg-violet-100 hover:text-violet-700" title="Tạo phiếu nhập" aria-label={`Nhập thêm ${oil.name}`}><span className="material-symbols-outlined text-xl">add_box</span></button><button type="button" onClick={(event) => { event.stopPropagation(); setModal({ type: 'form', material: oil }); }} className="flex size-9 cursor-pointer items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700" title="Chỉnh sửa" aria-label={`Chỉnh sửa ${oil.name}`}><span className="material-symbols-outlined text-xl">edit</span></button></div></td>
+                          <td className="px-5 py-4"><div className="flex justify-end gap-1"><button type="button" onClick={(event) => { event.stopPropagation(); handleTrackingClick(oil); }} disabled={trackingLoading} className="flex size-9 cursor-pointer items-center justify-center rounded-lg text-amber-600 transition hover:bg-amber-50 disabled:opacity-40" title="Tạm ngừng theo dõi" aria-label={`Tạm ngừng theo dõi ${oil.name}`}><span className="material-symbols-outlined text-xl">pause_circle</span></button><button type="button" onClick={(event) => { event.stopPropagation(); openImport(oil); }} className="flex size-9 cursor-pointer items-center justify-center rounded-lg text-slate-400 transition hover:bg-violet-100 hover:text-violet-700" title="Tạo phiếu nhập" aria-label={`Nhập thêm ${oil.name}`}><span className="material-symbols-outlined text-xl">add_box</span></button><button type="button" onClick={(event) => { event.stopPropagation(); setModal({ type: 'form', material: oil }); }} className="flex size-9 cursor-pointer items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700" title="Chỉnh sửa" aria-label={`Chỉnh sửa ${oil.name}`}><span className="material-symbols-outlined text-xl">edit</span></button></div></td>
                         </tr>
                       );
                     }) : (
@@ -901,7 +956,7 @@ export default function EssentialOilManagement() {
                         <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-700"><span className="material-symbols-outlined">{config.icon}</span></span>
                         <div className="min-w-0 flex-1"><div className="flex items-start justify-between gap-2"><div className="min-w-0"><h3 style={{ color: appearance.textColor }} className="truncate text-sm font-bold">{oil.name}</h3><p className="mt-0.5 flex items-center gap-1.5 truncate text-xs text-slate-500"><span>{oil.sku} · {oil.supplier}</span>{appearance.concentrationLabel && <span className="rounded border border-slate-300 px-1.5 py-0.5 text-[8px] font-bold text-slate-600">{appearance.concentrationLabel}</span>}</p></div><span className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold ring-1 ring-inset ${statusInfo.className}`}>{statusInfo.label}</span></div>
                           <div className="mt-3 grid grid-cols-3 gap-2"><div><p className="text-[10px] uppercase tracking-wide text-slate-400">Tồn kho</p><p className={`mt-0.5 text-xs font-bold ${status === 'in_stock' ? 'text-slate-800' : 'text-red-600'}`}>{stock.toLocaleString('vi-VN')} {oil.unit}</p></div><div><p className="text-[10px] uppercase tracking-wide text-slate-400">Giá trị</p><p className="mt-0.5 truncate text-xs font-bold text-slate-800">{formatPrice(stock * oil.price)}</p></div><div><p className="text-[10px] uppercase tracking-wide text-slate-400">Công thức</p><p className="mt-0.5 text-xs font-bold text-slate-800">{usage.length} sản phẩm</p></div></div>
-                          <div className="mt-3 flex justify-end"><button type="button" onClick={(event) => { event.stopPropagation(); openImport(oil); }} className="inline-flex cursor-pointer items-center gap-1 rounded-lg bg-violet-50 px-3 py-1.5 text-xs font-bold text-violet-700"><span className="material-symbols-outlined text-base">add_box</span>Nhập thêm</button></div>
+                          <div className="mt-3 flex justify-end gap-2"><button type="button" onClick={(event) => { event.stopPropagation(); handleTrackingClick(oil); }} disabled={trackingLoading} className="inline-flex cursor-pointer items-center gap-1 rounded-lg bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-700 disabled:opacity-40"><span className="material-symbols-outlined text-base">pause_circle</span>Tạm ngừng</button><button type="button" onClick={(event) => { event.stopPropagation(); openImport(oil); }} className="inline-flex cursor-pointer items-center gap-1 rounded-lg bg-violet-50 px-3 py-1.5 text-xs font-bold text-violet-700"><span className="material-symbols-outlined text-base">add_box</span>Nhập thêm</button></div>
                         </div>
                       </div>
                     </article>
@@ -911,6 +966,24 @@ export default function EssentialOilManagement() {
             </>
           )}
         </section>
+
+        {!loading && pausedOils.length > 0 && (
+          <section className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className="flex flex-col justify-between gap-3 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white px-5 py-4 sm:flex-row sm:items-center">
+              <div className="flex items-center gap-3"><span className="material-symbols-outlined flex size-10 items-center justify-center rounded-xl bg-slate-200 text-slate-600">pause_circle</span><div><h2 className="text-sm font-bold text-slate-800">Tinh dầu tạm ngừng theo dõi</h2><p className="mt-0.5 text-xs text-slate-500">Không cảnh báo tồn kho và không tham gia công thức đang hoạt động</p></div></div>
+              <span className="self-start rounded-full bg-slate-200 px-3 py-1 text-xs font-bold text-slate-600 sm:self-auto">{pausedOils.length} loại</span>
+            </div>
+            <div className="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-3">
+              {pausedOils.map(oil => {
+                const appearance = getMaterialAppearance(oil);
+                return <article key={oil._id} onClick={() => setModal({ type: 'detail', material: oil })} className="cursor-pointer rounded-xl border border-slate-200 bg-slate-50/60 p-4 transition hover:border-slate-300 hover:bg-slate-50">
+                  <div className="flex items-start gap-3"><span className="material-symbols-outlined flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-200 text-slate-500">water_drop</span><div className="min-w-0 flex-1"><h3 style={{ color: appearance.textColor }} className="truncate text-sm font-bold">{oil.name}</h3><p className="mt-0.5 truncate text-xs text-slate-500">{oil.sku} · {oil.supplier}</p><p className="mt-2 text-xs font-semibold text-slate-600">Tồn cuối: {getActualStock(oil).toLocaleString('vi-VN')} {oil.unit}</p></div></div>
+                  <button type="button" onClick={(event) => { event.stopPropagation(); handleTrackingClick(oil); }} disabled={trackingLoading} className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700 transition hover:bg-emerald-100 disabled:opacity-40"><span className="material-symbols-outlined text-[17px]">play_circle</span>Bật lại theo dõi</button>
+                </article>;
+              })}
+            </div>
+          </section>
+        )}
       </div>
     </Layout>
   );

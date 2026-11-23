@@ -135,6 +135,7 @@ function ImportModal({ materials, user, onClose, onSave, initialMaterialId, edit
                     onChange={val => handleItemChange(index, 'material_id', val)}
                     placeholder="Chọn nguyên liệu"
                     className="border border-outline-variant bg-white"
+                    portalMenu
                   />
                 </div>
                 <div className="col-span-2">

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Layout from '../components/Layout';
+import SearchableSelect from '../components/SearchableSelect';
 import { materialService } from '../services/materialService';
 import { inventoryCheckService } from '../services/inventoryCheckService';
 import { inventorySyncService } from '../services/inventorySyncService';
@@ -13,6 +14,7 @@ const STATUS_MAP = {
   low_stock: { label: 'Sắp hết', className: 'bg-error-container text-on-error-container' },
   out_of_stock: { label: 'Hết hàng', className: 'bg-surface-container-highest text-on-surface-variant' },
   negative_stock: { label: 'Âm kho', className: 'bg-error text-white font-bold' },
+  untracked: { label: 'Tạm ngừng theo dõi', className: 'bg-slate-100 text-slate-600' },
 };
 
 const UNIT_ICON_MAP = {
@@ -480,6 +482,63 @@ function InventoryHistoryModal({ onClose }) {
 }
 
 // ── Component chính ───────────────────────────────────────────────
+function PauseTrackingModal({ data, onClose, onConfirm, loading, error }) {
+  const [action, setAction] = useState(data.products.length ? 'suspend' : 'none');
+  const [replacementId, setReplacementId] = useState('');
+  const canSubmit = action !== 'replace' || replacementId;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-[620px] overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="flex items-start justify-between border-b border-outline-variant/30 px-6 py-5">
+          <div className="flex gap-3">
+            <span className="material-symbols-outlined flex size-11 items-center justify-center rounded-xl bg-amber-50 text-amber-700">pause_circle</span>
+            <div>
+              <h3 className="text-lg font-bold text-on-surface">Tạm ngừng theo dõi nguyên vật liệu</h3>
+              <p className="mt-1 text-sm text-on-surface-variant">{data.material.name} · {data.material.sku}</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="rounded-lg p-1.5 text-on-surface-variant hover:bg-surface-container"><span className="material-symbols-outlined">close</span></button>
+        </div>
+
+        <div className="max-h-[65vh] space-y-4 overflow-y-auto px-6 py-5">
+          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            Nguyên vật liệu sẽ không còn được tính vào trạng thái và cảnh báo tồn kho cho đến khi bạn bật theo dõi lại.
+          </div>
+
+          {data.products.length > 0 && (
+            <>
+              <div>
+                <p className="font-bold text-on-surface">Đang được dùng trong {data.products.length} công thức</p>
+                <p className="mt-1 text-sm text-on-surface-variant">{data.products.slice(0, 5).map(product => product.name).join(', ')}{data.products.length > 5 ? ` và ${data.products.length - 5} sản phẩm khác` : ''}</p>
+              </div>
+              <label className={`block cursor-pointer rounded-xl border p-4 transition-colors ${action === 'suspend' ? 'border-primary bg-primary-container/30' : 'border-outline-variant'}`}>
+                <span className="flex items-start gap-3">
+                  <input type="radio" className="mt-1 accent-primary" checked={action === 'suspend'} onChange={() => setAction('suspend')} />
+                  <span><strong className="block text-sm text-on-surface">Đình chỉ trong công thức</strong><span className="mt-1 block text-xs leading-5 text-on-surface-variant">Tạm bỏ nguyên vật liệu khỏi tính giá vốn, khả năng sản xuất và trừ kho. Khi bật theo dõi lại, nguyên vật liệu tự trở lại công thức.</span></span>
+                </span>
+              </label>
+              <label className={`block cursor-pointer rounded-xl border p-4 transition-colors ${action === 'replace' ? 'border-primary bg-primary-container/30' : 'border-outline-variant'}`}>
+                <span className="flex items-start gap-3">
+                  <input type="radio" className="mt-1 accent-primary" checked={action === 'replace'} onChange={() => setAction('replace')} />
+                  <span className="min-w-0 flex-1"><strong className="block text-sm text-on-surface">Thay thế tạm thời trong tất cả công thức</strong><span className="mt-1 block text-xs leading-5 text-on-surface-variant">Dùng nguyên vật liệu mới trong thời gian tạm dừng. Khi bật theo dõi lại, công thức tự trở về nguyên vật liệu cũ và giữ nguyên định lượng.</span></span>
+                </span>
+                {action === 'replace' && <div className="mt-3"><SearchableSelect value={replacementId} onChange={setReplacementId} options={data.replacements.map(material => ({ value: material._id, label: `${material.name} (${material.sku}) · ${material.unit}` }))} placeholder="Chọn nguyên vật liệu thay thế" searchPlaceholder="Tìm theo tên hoặc mã SKU..." className="min-h-11 rounded-xl border border-outline-variant bg-white px-3 shadow-sm hover:border-primary/40" portalMenu /></div>}
+              </label>
+            </>
+          )}
+          {error && <p className="rounded-lg bg-error-container px-3 py-2 text-sm text-error">{error}</p>}
+        </div>
+
+        <div className="flex justify-end gap-3 border-t border-outline-variant/30 px-6 py-4">
+          <button onClick={onClose} disabled={loading} className="rounded-lg border border-outline-variant px-4 py-2.5 text-sm font-semibold">Hủy</button>
+          <button onClick={() => onConfirm(action, replacementId)} disabled={loading || !canSubmit} className="rounded-lg bg-amber-700 px-4 py-2.5 text-sm font-bold text-white disabled:opacity-40">{loading ? 'Đang xử lý...' : 'Tạm ngừng theo dõi'}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function MaterialManagement() {
   const [materials, setMaterials] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -589,22 +648,69 @@ export default function MaterialManagement() {
     }
   };
 
+  const handleTrackingClick = async (material) => {
+    setActionError('');
+    setActionLoading(true);
+    try {
+      if (material.isTrackingEnabled === false) {
+        await materialService.setMaterialTracking(material._id, { enabled: true });
+        showToast(`Đã bật lại theo dõi ${material.name}`);
+        fetchMaterials();
+      } else {
+        const response = await materialService.getMaterialUsage(material._id);
+        setModal({ type: 'pauseTracking', data: response.data.data });
+      }
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Không thể thay đổi trạng thái theo dõi', 'error');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const confirmPauseTracking = async (formulaAction, replacementMaterialId) => {
+    setActionLoading(true);
+    setActionError('');
+    try {
+      const payload = { enabled: false };
+      if (formulaAction !== 'none') payload.formulaAction = formulaAction;
+      if (replacementMaterialId) payload.replacementMaterialId = replacementMaterialId;
+      await materialService.setMaterialTracking(modal.data.material._id, payload);
+      showToast(`Đã tạm ngừng theo dõi ${modal.data.material.name}`);
+      setModal(null);
+      fetchMaterials();
+    } catch (err) {
+      setActionError(err.response?.data?.message || 'Không thể tạm ngừng theo dõi');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   // Tính stats từ dữ liệu thực
   const stats = {
-    total: materials.length,
-    low_stock: materials.filter((m) => m.status === 'low_stock' || m.status === 'out_of_stock').length,
-    totalValue: materials.reduce((sum, m) => {
+    total: materials.filter((m) => m.isTrackingEnabled !== false).length,
+    low_stock: materials.filter((m) => m.isTrackingEnabled !== false && (m.status === 'low_stock' || m.status === 'out_of_stock')).length,
+    totalValue: materials.filter((m) => m.isTrackingEnabled !== false).reduce((sum, m) => {
       const activeStock = m.actualStock !== null && m.actualStock !== undefined ? m.actualStock : m.stock;
       return sum + (m.price * activeStock);
     }, 0),
-    discrepancyValue: materials.reduce((sum, m) => {
+    discrepancyValue: materials.filter((m) => m.isTrackingEnabled !== false).reduce((sum, m) => {
       const diff = (m.actualStock ?? m.stock) - m.stock;
       return sum + (m.price * diff);
     }, 0),
   };
 
+  const activeMaterials = materials.filter((m) => m.isTrackingEnabled !== false);
+  const allPausedMaterials = materials.filter((m) => m.isTrackingEnabled === false);
+  const pausedMaterials = allPausedMaterials.filter((m) => {
+    if (!searchTerm) return true;
+    const term = searchTerm.toLowerCase();
+    return m.name?.toLowerCase().includes(term)
+      || m.sku?.toLowerCase().includes(term)
+      || m.supplier?.toLowerCase().includes(term);
+  });
+
   // Filter theo tab & search
-  const filtered = materials.filter((m) => {
+  const filtered = activeMaterials.filter((m) => {
     if (activeTab === 'in_stock' && m.status !== 'in_stock') return false;
     if (activeTab === 'low_stock' && m.status !== 'low_stock' && m.status !== 'out_of_stock') return false;
 
@@ -612,7 +718,8 @@ export default function MaterialManagement() {
       const term = searchTerm.toLowerCase();
       const matchName = m.name?.toLowerCase().includes(term);
       const matchSku = m.sku?.toLowerCase().includes(term);
-      if (!matchName && !matchSku) return false;
+      const matchSupplier = m.supplier?.toLowerCase().includes(term);
+      if (!matchName && !matchSku && !matchSupplier) return false;
     }
 
     if (selectedCategory !== 'all' && m.category !== selectedCategory) {
@@ -623,9 +730,9 @@ export default function MaterialManagement() {
   });
 
   const TABS = [
-    { key: 'all', label: 'Tất cả' },
-    { key: 'in_stock', label: 'Còn hàng' },
-    { key: 'low_stock', label: 'Sắp hết' },
+    { key: 'all', label: 'Tất cả', count: activeMaterials.length },
+    { key: 'in_stock', label: 'Còn hàng', count: activeMaterials.filter(m => m.status === 'in_stock').length },
+    { key: 'low_stock', label: 'Cần nhập', count: activeMaterials.filter(m => m.status === 'low_stock' || m.status === 'out_of_stock').length },
   ];
 
   const uniqueCategories = [...new Set(materials.map(m => m.category).filter(Boolean))];
@@ -659,6 +766,9 @@ export default function MaterialManagement() {
       )}
       {modal?.type === 'sync' && (
         <SyncConfirmModal onClose={() => setModal(null)} onConfirm={confirmSyncInventory} loading={actionLoading} />
+      )}
+      {modal?.type === 'pauseTracking' && (
+        <PauseTrackingModal data={modal.data} onClose={() => { setModal(null); setActionError(''); }} onConfirm={confirmPauseTracking} loading={actionLoading} error={actionError} />
       )}
       {showHistoryModal && (
         <InventoryHistoryModal onClose={() => setShowHistoryModal(false)} />
@@ -777,45 +887,37 @@ export default function MaterialManagement() {
         {/* Table Card */}
         <div className="bg-white rounded-xl shadow-sm border border-outline-variant/30 overflow-hidden">
           {/* Toolbar */}
-          <div className="px-lg py-md border-b border-outline-variant/30 flex justify-between items-center bg-surface-container-low/50">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center border border-outline-variant rounded-lg overflow-hidden bg-white h-9">
-                {TABS.map((tab, i) => (
-                  <button
-                    key={tab.key}
-                    onClick={() => { setActiveTab(tab.key); setCurrentPage(1); }}
-                    className={`px-md h-full text-sm font-semibold transition-colors ${i < TABS.length - 1 ? 'border-r border-outline-variant' : ''
-                      } ${activeTab === tab.key
-                        ? 'bg-primary text-white'
-                        : 'hover:bg-surface-container-low text-on-surface-variant'}`}
-                  >
-                    {tab.label}
+          <div className="border-b border-outline-variant/30 bg-gradient-to-r from-surface-container-lowest to-surface-container-low/60 px-lg py-4">
+            <div className="mb-4 flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
+              <div>
+                <h3 className="flex items-center gap-2 text-[15px] font-bold text-on-surface"><span className="material-symbols-outlined text-[20px] text-primary">inventory_2</span>Nguyên vật liệu đang theo dõi</h3>
+                <p className="mt-0.5 text-xs text-on-surface-variant">Theo dõi tồn kho, cảnh báo và công thức sản xuất</p>
+              </div>
+              <p className="rounded-full bg-white px-3 py-1.5 text-xs text-on-surface-variant shadow-sm ring-1 ring-outline-variant/30">
+                <span className="font-bold text-on-surface">{filtered.length}</span> / {activeMaterials.length} nguyên liệu
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+              <div className="flex w-full flex-col gap-2 sm:flex-row xl:w-auto">
+                <label className="relative min-w-[190px]">
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 z-10 -translate-y-1/2 text-[18px] text-on-surface-variant">filter_list</span>
+                  <select value={selectedCategory} onChange={(e) => { setSelectedCategory(e.target.value); setCurrentPage(1); }} className="h-10 w-full appearance-none rounded-xl border border-outline-variant bg-white pl-10 pr-9 text-sm font-medium text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10">
+                    <option value="all">Tất cả phân loại</option>
+                    {uniqueCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                  </select>
+                  <span className="material-symbols-outlined pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant">expand_more</span>
+                </label>
+              </div>
+
+              <div className="flex items-center gap-1 rounded-xl border border-outline-variant/60 bg-white p-1 shadow-sm">
+                {TABS.map(tab => (
+                  <button key={tab.key} onClick={() => { setActiveTab(tab.key); setCurrentPage(1); }} className={`flex h-8 items-center gap-2 rounded-lg px-3 text-xs font-bold transition-all ${activeTab === tab.key ? 'bg-primary text-white shadow-sm' : 'text-on-surface-variant hover:bg-surface-container-low'}`}>
+                    {tab.label}<span className={`rounded-full px-1.5 py-0.5 text-[10px] ${activeTab === tab.key ? 'bg-white/20 text-white' : 'bg-surface-container text-on-surface-variant'}`}>{tab.count}</span>
                   </button>
                 ))}
               </div>
-
-              <div className="relative h-9">
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => { setSelectedCategory(e.target.value); setCurrentPage(1); }}
-                  className="appearance-none bg-white border border-outline-variant rounded-lg px-4 h-full pr-10 text-sm font-medium text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary min-w-[160px]"
-                >
-                  <option value="all">Tất cả phân loại</option>
-                  {uniqueCategories.map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                  </svg>
-                </div>
-              </div>
             </div>
-
-            <p className="text-[13px] text-on-surface-variant">
-              Hiển thị <span className="font-bold text-on-surface">{filtered.length}</span> trong <span className="font-bold text-on-surface">{materials.length}</span> nguyên liệu
-            </p>
           </div>
 
           {/* Table */}
@@ -854,11 +956,11 @@ export default function MaterialManagement() {
                 ) : (
                   currentMaterials.map((m) => {
                     const actualStock = m.actualStock !== null && m.actualStock !== undefined ? m.actualStock : m.stock;
-                    const mStatus = actualStock < 0 ? 'negative_stock' : m.status;
+                    const mStatus = m.isTrackingEnabled === false ? 'untracked' : actualStock < 0 ? 'negative_stock' : m.status;
                     const statusInfo = STATUS_MAP[mStatus] || STATUS_MAP.in_stock;
                     const appearance = getMaterialAppearance(m);
                     return (
-                      <tr key={m._id} onClick={() => setModal({ type: 'edit', data: m })} className="transition-colors group cursor-pointer hover:bg-surface-container-lowest">
+                      <tr key={m._id} onClick={() => setModal({ type: 'edit', data: m })} className={`transition-colors group cursor-pointer hover:bg-surface-container-lowest ${m.isTrackingEnabled === false ? 'bg-slate-50/70 opacity-75' : ''}`}>
                         <td className="px-lg py-md">
                           <div className="flex items-center gap-md">
                             <div className="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center flex-shrink-0">
@@ -877,7 +979,7 @@ export default function MaterialManagement() {
                         <td className="px-lg py-md text-sm text-on-surface-variant">{m.unit}</td>
                         <td className="px-lg py-md text-sm font-bold text-on-surface">{formatPrice(m.price)}</td>
                         <td className="px-lg py-md text-sm text-on-surface-variant">{m.supplier}</td>
-                        <td className={`px-lg py-md text-sm font-bold ${m.status !== 'in_stock' ? 'text-error' : 'text-on-surface'}`}>
+                        <td className={`px-lg py-md text-sm font-bold ${m.isTrackingEnabled === false ? 'text-on-surface-variant' : m.status !== 'in_stock' ? 'text-error' : 'text-on-surface'}`}>
                           <div className="flex items-center gap-1.5">
                             <span>{m.stock.toLocaleString('vi-VN')}</span>
                             {m.actualStock !== null && m.actualStock !== undefined && (m.actualStock - m.stock) !== 0 && (
@@ -894,6 +996,17 @@ export default function MaterialManagement() {
                           </span>
                         </td>
                         <td className="px-lg py-md">
+                          <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={(event) => { event.stopPropagation(); handleTrackingClick(m); }}
+                            disabled={actionLoading}
+                            className={`inline-flex size-9 items-center justify-center rounded-lg border transition-colors ${m.isTrackingEnabled === false ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100' : 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100'}`}
+                            title={m.isTrackingEnabled === false ? `Bật lại theo dõi ${m.name}` : `Tạm ngừng theo dõi ${m.name}`}
+                            aria-label={m.isTrackingEnabled === false ? `Bật lại theo dõi ${m.name}` : `Tạm ngừng theo dõi ${m.name}`}
+                          >
+                            <span className="material-symbols-outlined text-[19px]">{m.isTrackingEnabled === false ? 'play_circle' : 'pause_circle'}</span>
+                          </button>
                           <button
                             type="button"
                             onClick={(event) => { event.stopPropagation(); setModal({ type: 'duplicate', data: m }); }}
@@ -903,6 +1016,7 @@ export default function MaterialManagement() {
                           >
                             <span className="material-symbols-outlined text-[18px]">content_copy</span>
                           </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -943,6 +1057,57 @@ export default function MaterialManagement() {
             </div>
           )}
         </div>
+
+        {!loading && allPausedMaterials.length > 0 && (
+          <section className="mt-6 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+            <div className="flex flex-col justify-between gap-3 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white px-lg py-4 sm:flex-row sm:items-center">
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined flex size-10 items-center justify-center rounded-xl bg-slate-200/70 text-slate-600">pause_circle</span>
+                <div>
+                  <h3 className="text-[15px] font-bold text-slate-800">Nguyên vật liệu tạm ngừng theo dõi</h3>
+                  <p className="mt-0.5 text-xs text-slate-500">Không tính trạng thái tồn kho, cảnh báo và không tham gia công thức đang hoạt động</p>
+                </div>
+              </div>
+              <span className="self-start rounded-full bg-slate-200 px-3 py-1 text-xs font-bold text-slate-600 sm:self-auto">{searchTerm ? `${pausedMaterials.length} / ${allPausedMaterials.length}` : pausedMaterials.length} nguyên liệu</span>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[760px] text-left">
+                <thead>
+                  <tr className="border-b border-slate-200 bg-slate-50/70">
+                    {['Nguyên vật liệu', 'Phân loại', 'Đơn vị', 'Nhà cung cấp', 'Tồn kho cuối', 'Thao tác'].map(label => <th key={label} className="px-lg py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">{label}</th>)}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {pausedMaterials.map(material => {
+                    const appearance = getMaterialAppearance(material);
+                    const stock = material.actualStock ?? material.stock;
+                    return (
+                      <tr key={material._id} onClick={() => setModal({ type: 'edit', data: material })} className="cursor-pointer bg-slate-50/25 transition-colors hover:bg-slate-50">
+                        <td className="px-lg py-3.5">
+                          <div className="flex items-center gap-3">
+                            <span className="material-symbols-outlined flex size-9 items-center justify-center rounded-lg bg-slate-100 text-[18px] text-slate-500">{UNIT_ICON_MAP[material.unit] || 'category'}</span>
+                            <div><p style={{ color: appearance.textColor || undefined }} className="text-sm font-bold text-slate-700">{material.name}</p><p className="mt-0.5 text-[11px] text-slate-500">{material.sku}</p></div>
+                          </div>
+                        </td>
+                        <td className="px-lg py-3.5 text-sm text-slate-500">{material.category || '—'}</td>
+                        <td className="px-lg py-3.5 text-sm text-slate-500">{material.unit}</td>
+                        <td className="px-lg py-3.5 text-sm text-slate-500">{material.supplier}</td>
+                        <td className="px-lg py-3.5"><span className="font-bold text-slate-600">{Number(stock || 0).toLocaleString('vi-VN')}</span><span className="ml-1 text-xs text-slate-400">{material.unit}</span></td>
+                        <td className="px-lg py-3.5">
+                          <button type="button" onClick={(event) => { event.stopPropagation(); handleTrackingClick(material); }} disabled={actionLoading} className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 text-xs font-bold text-emerald-700 transition hover:bg-emerald-100 disabled:opacity-50">
+                            <span className="material-symbols-outlined text-[17px]">play_circle</span>Bật theo dõi
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {pausedMaterials.length === 0 && <tr><td colSpan={6} className="px-6 py-12 text-center"><span className="material-symbols-outlined text-4xl text-slate-300">search_off</span><p className="mt-2 text-sm font-semibold text-slate-600">Không có nguyên vật liệu tạm ngừng phù hợp</p><p className="mt-1 text-xs text-slate-400">Thử tìm bằng tên, mã SKU hoặc nhà cung cấp khác.</p></td></tr>}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
       </div>
     </Layout>
   );

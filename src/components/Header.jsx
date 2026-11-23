@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { materialService } from '../services/materialService';
+import { importService } from '../services/importService';
 
 export default function Header({ onMenuClick }) {
   const { user, logout } = useAuth();
@@ -20,8 +21,24 @@ export default function Header({ onMenuClick }) {
   useEffect(() => {
     const fetchLowStock = async () => {
       try {
-        const res = await materialService.getMaterials();
-        const lowStock = res.data.data.filter(m => m.status === 'low_stock' || m.status === 'out_of_stock' || m.actualStock <= m.minStock);
+        const [materialResponse, importResponse] = await Promise.all([
+          materialService.getMaterials(),
+          importService.getImportTickets(),
+        ]);
+        const pendingMaterialIds = new Set(
+          (importResponse.data?.data || [])
+            .filter(ticket => ticket.status === 'pending')
+            .flatMap(ticket => ticket.items || [])
+            .map(item => String(item.material_id?._id || item.material_id || ''))
+            .filter(Boolean)
+        );
+        const lowStock = (materialResponse.data?.data || [])
+          .filter(m => !pendingMaterialIds.has(String(m._id)))
+          .filter(m => m.isTrackingEnabled !== false && (m.status === 'low_stock' || m.status === 'out_of_stock' || Number(m.actualStock ?? m.stock ?? 0) <= Number(m.minStock || 0)))
+          .sort((a, b) => {
+            const stockDifference = Number(a.actualStock ?? a.stock ?? 0) - Number(b.actualStock ?? b.stock ?? 0);
+            return stockDifference || String(a.name || '').localeCompare(String(b.name || ''), 'vi');
+          });
         setLowStockMaterials(lowStock);
       } catch (err) {
         console.error('Lỗi khi tải thông báo nguyên liệu:', err);
@@ -101,7 +118,9 @@ export default function Header({ onMenuClick }) {
           >
             <span className="material-symbols-outlined text-[24px]">notifications</span>
             {lowStockMaterials.length > 0 && (
-              <span className="absolute top-0.5 right-0.5 w-2.5 h-2.5 bg-error rounded-full animate-pulse"></span>
+              <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full border border-white bg-error px-1 text-[8px] font-extrabold leading-none text-white shadow-sm">
+                {lowStockMaterials.length > 99 ? '99+' : lowStockMaterials.length}
+              </span>
             )}
           </button>
 
@@ -122,25 +141,27 @@ export default function Header({ onMenuClick }) {
                       Tất cả nguyên liệu đều đủ hàng
                     </div>
                   ) : (
-                    lowStockMaterials.map(m => (
-                      <div key={m._id} className="px-4 py-3 border-b border-outline-variant/20 hover:bg-surface-container-low transition-colors cursor-pointer" onClick={() => { setShowNotifications(false); navigate('/admin/imports', { state: { autoOpenImport: true, materialId: m._id } }); }}>
+                    lowStockMaterials.map(m => {
+                      const actualStock = Number(m.actualStock ?? m.stock ?? 0);
+                      const isOutOfStock = m.status === 'out_of_stock' || actualStock <= 0;
+                      return <button type="button" key={m._id} className="w-full px-4 py-3 border-b border-outline-variant/20 hover:bg-surface-container-low transition-colors cursor-pointer text-left" onClick={() => { setShowNotifications(false); navigate('/admin/imports', { state: { autoOpenImport: true, materialId: m._id } }); }}>
                         <div className="flex gap-3 items-start">
-                          <div className={`w-8 h-8 mt-0.5 rounded-full flex items-center justify-center flex-shrink-0 ${m.status === 'out_of_stock' || m.actualStock <= 0 ? 'bg-error-container text-error' : 'bg-[#fef3c7] text-[#d97706]'}`}>
+                          <div className={`w-8 h-8 mt-0.5 rounded-full flex items-center justify-center flex-shrink-0 ${isOutOfStock ? 'bg-error-container text-error' : 'bg-[#fef3c7] text-[#d97706]'}`}>
                             <span className="material-symbols-outlined text-[20px]">
-                              {m.status === 'out_of_stock' || m.actualStock <= 0 ? 'error' : 'warning'}
+                              {isOutOfStock ? 'error' : 'warning'}
                             </span>
                           </div>
                           <div>
                             <p className="text-[13px] font-semibold text-on-surface leading-tight mb-1">{m.name}</p>
                             <p className="text-[12px] text-on-surface-variant">
-                              Tồn kho: <span className={`font-bold ${m.status === 'out_of_stock' || m.actualStock <= 0 ? 'text-error' : 'text-[#d97706]'}`}>
-                                {m.actualStock < 0 ? `Âm kho (${m.actualStock} ${m.unit})` : `${m.actualStock} ${m.unit}`}
+                              Tồn kho: <span className={`font-bold ${isOutOfStock ? 'text-error' : 'text-[#d97706]'}`}>
+                                {actualStock < 0 ? `Âm kho (${actualStock} ${m.unit})` : `${actualStock} ${m.unit}`}
                               </span> (Tối thiểu: {m.minStock})
                             </p>
                           </div>
                         </div>
-                      </div>
-                    ))
+                      </button>;
+                    })
                   )}
                 </div>
               </div>

@@ -249,6 +249,7 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
   // Calculate dynamic costs
   const currentBaseCost = useMemo(() => {
     const directCost = (form.base_ingredients || []).reduce((total, item) => {
+      if (item.suspended === true) return total;
       const mat = materials.find(m => m._id === item.ingredient_id);
       return total + (mat ? mat.price * (Number(item.quantity) || 0) : 0);
     }, 0);
@@ -260,6 +261,7 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
 
   const calculateSkuCost = (sku) => {
     const extraCost = (sku.extra_ingredients || []).reduce((total, item) => {
+      if (item.suspended === true) return total;
       const mat = materials.find(m => m._id === item.ingredient_id);
       return total + (mat ? mat.price * (Number(item.quantity) || 0) : 0);
     }, 0);
@@ -273,6 +275,7 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
 
     const rows = skus.map((sku) => {
       const extraCost = (sku.extra_ingredients || []).reduce((total, item) => {
+        if (item.suspended === true) return total;
         const material = materials.find(entry => entry._id === item.ingredient_id);
         return total + (material ? material.price * (Number(item.quantity) || 0) : 0);
       }, 0);
@@ -1238,8 +1241,10 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
                   const lineTotal = selectedMat ? selectedMat.price * (Number(item.quantity) || 0) : 0;
                   
                   return (
-                    <div key={idx} className="flex flex-col sm:flex-row gap-3 items-start sm:items-center bg-white p-3.5 rounded-xl border border-stone-200/90 shadow-xs">
+                    <div key={idx} className={`flex flex-col sm:flex-row gap-3 items-start sm:items-center p-3.5 rounded-xl border shadow-xs ${item.suspended === true ? 'border-amber-200 bg-amber-50/70' : 'border-stone-200/90 bg-white'}`}>
                       <div className="flex-1 min-w-0 w-full">
+                        {item.suspended === true && <span className="mb-1.5 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800"><span className="material-symbols-outlined text-[13px]">pause</span>Đang đình chỉ</span>}
+                        {item.replacement_for && <span className="mb-1.5 inline-flex items-center gap-1 rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-bold text-sky-800"><span className="material-symbols-outlined text-[13px]">swap_horiz</span>Nguyên liệu thay thế tạm thời</span>}
                         <SearchableSelect
                           options={materialOptions.filter(m => m.value === item.ingredient_id || !form.base_ingredients.some(b => b.ingredient_id === m.value))}
                           value={item.ingredient_id}
@@ -1597,7 +1602,9 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
                         {sku.extra_ingredients && sku.extra_ingredients.length > 0 ? (
                           <div className="space-y-2">
                             {sku.extra_ingredients.map((item, idx) => (
-                              <div key={idx} className="relative flex items-center gap-2">
+                              <div key={idx} className={`relative flex items-center gap-2 rounded-lg ${item.suspended === true ? 'border border-amber-200 bg-amber-50 p-2' : ''}`}>
+                                {item.suspended === true && <span className="whitespace-nowrap rounded-full bg-amber-100 px-2 py-1 text-[9px] font-bold text-amber-800">Đình chỉ</span>}
+                                {item.replacement_for && <span className="whitespace-nowrap rounded-full bg-sky-100 px-2 py-1 text-[9px] font-bold text-sky-800">Thay thế tạm</span>}
                                 <div className="flex-1 min-w-[220px]">
                                   <SearchableSelect
                                     options={materialOptions.filter(m => m.value === item.ingredient_id || (!form.base_ingredients.some(b => b.ingredient_id === m.value) && !sku.extra_ingredients.some(e => e.ingredient_id === m.value)))}

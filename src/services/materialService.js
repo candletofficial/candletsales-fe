@@ -6,4 +6,6 @@ export const materialService = {
   updateMaterial: (id, data) => api.put(`/materials/${id}`, data),
   deleteMaterial: (id) => api.delete(`/materials/${id}`),
   deleteCategory: (categoryName) => api.delete(`/materials/category/${encodeURIComponent(categoryName)}`),
+  getMaterialUsage: (id) => api.get(`/materials/${id}/usage`),
+  setMaterialTracking: (id, data) => api.patch(`/materials/${id}/tracking`, data),
 };
