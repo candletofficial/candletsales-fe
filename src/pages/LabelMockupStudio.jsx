@@ -8,6 +8,7 @@ import { mockupService } from '../services/mockupService';
 
 const DIAMETER = 70;
 const HEIGHT = 84;
+const MOCKUP_PREVIEW_VERSION = 2;
 const finishOptions = [
   { id: 'frosted', name: 'Kính trắng mờ', color: '#e8e9e6' },
   { id: 'clear', name: 'Kính trong', color: '#dce7e8' },
@@ -47,6 +48,61 @@ function createSampleLabel() {
   ctx.font = '25px Arial';
   ctx.fillText('HAND POURED · 200G', 500, 555);
   return canvas;
+}
+
+function createMockupShareBanner(rendererCanvas, fileName, labelWidth, labelHeight) {
+  return new Promise((resolve, reject) => {
+    if (!rendererCanvas) {
+      reject(new Error('Không thể tạo ảnh xem trước mockup'));
+      return;
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = 1200;
+    canvas.height = 630;
+    const ctx = canvas.getContext('2d');
+    const background = ctx.createLinearGradient(0, 0, 1200, 630);
+    background.addColorStop(0, '#f7f1e8');
+    background.addColorStop(.58, '#e8e2da');
+    background.addColorStop(1, '#c9c7c2');
+    ctx.fillStyle = background;
+    ctx.fillRect(0, 0, 1200, 630);
+
+    ctx.fillStyle = 'rgba(255,255,255,.42)';
+    ctx.beginPath();
+    ctx.arc(960, 315, 340, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#38211f';
+    ctx.font = '700 30px Arial, sans-serif';
+    ctx.letterSpacing = '7px';
+    ctx.fillText('CANDLET', 72, 94);
+    ctx.fillStyle = '#9d6f57';
+    ctx.fillRect(72, 126, 64, 4);
+    ctx.fillStyle = '#372321';
+    ctx.font = '700 51px Georgia, serif';
+    ctx.fillText('Mockup tem', 72, 222);
+    ctx.fillText('cốc nến 3D', 72, 282);
+    ctx.fillStyle = '#6f625d';
+    ctx.font = '500 25px Arial, sans-serif';
+    const displayName = String(fileName || 'Tem custom');
+    ctx.fillText(displayName.length > 34 ? `${displayName.slice(0, 31)}…` : displayName, 72, 354);
+    ctx.fillStyle = '#8a7a73';
+    ctx.font = '600 21px Arial, sans-serif';
+    ctx.fillText(`Kích thước tem ${labelWidth} × ${labelHeight} mm`, 72, 398);
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.roundRect(72, 456, 250, 58, 29);
+    ctx.fill();
+    ctx.fillStyle = '#49302c';
+    ctx.font = '700 19px Arial, sans-serif';
+    ctx.fillText('XOAY & XEM TRỰC TIẾP', 94, 493);
+
+    ctx.drawImage(rendererCanvas, 570, 0, 630, 630);
+    canvas.toBlob(
+      result => (result ? resolve(result) : reject(new Error('Không thể xuất ảnh banner mockup'))),
+      'image/jpeg',
+      .92,
+    );
+  });
 }
 
 function createWoodTexture(width, height, side = false) {
@@ -171,6 +227,11 @@ export function MockupViewport({ labelSource, labelWidth, labelHeight, labelTop,
     renderer.toneMappingExposure = 1.12;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.domElement.style.display = 'block';
+    renderer.domElement.style.width = '100%';
+    renderer.domElement.style.height = '100%';
+    renderer.domElement.style.maxWidth = '100%';
+    renderer.domElement.style.maxHeight = '100%';
     host.appendChild(renderer.domElement);
     rendererRef.current = renderer;
 
@@ -547,11 +608,18 @@ export default function LabelMockupStudio() {
       canvas.getContext('2d').drawImage(labelSource, 0, 0, width, height);
       const blob = await new Promise((resolve, reject) => canvas.toBlob((result) => (result ? resolve(result) : reject(new Error('Không thể xử lý ảnh tem'))), 'image/png', .96));
       const safeName = String(fileName || 'tem-custom').replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9-_]+/g, '-').slice(0, 80) || 'tem-custom';
-      const upload = await uploadService.uploadProductImage(new File([blob], `${safeName}.png`, { type: 'image/png' }));
+      const previewBlob = await createMockupShareBanner(rendererRef.current?.domElement, fileName, labelWidth, labelHeight);
+      const [upload, previewUpload] = await Promise.all([
+        uploadService.uploadProductImage(new File([blob], `${safeName}.png`, { type: 'image/png' })),
+        uploadService.uploadProductImage(new File([previewBlob], `${safeName}-mockup.jpg`, { type: 'image/jpeg' })),
+      ]);
       const labelUrl = upload.data?.data?.url || upload.data?.data?.path;
+      const previewUrl = previewUpload.data?.data?.url || previewUpload.data?.data?.path;
       if (!labelUrl) throw new Error('Không nhận được đường dẫn ảnh tem');
+      if (!previewUrl) throw new Error('Không nhận được đường dẫn ảnh banner');
       const response = await mockupService.createShare({
         label_url: labelUrl,
+        preview_url: previewUrl,
         label_file_name: fileName,
         finish,
         lid,
@@ -562,7 +630,7 @@ export default function LabelMockupStudio() {
       });
       const token = response.data?.data?.token;
       if (!token) throw new Error('Không tạo được mã chia sẻ');
-      setShareUrl(`${window.location.origin}/mockup/${token}`);
+      setShareUrl(`${window.location.origin}/mockup/${token}?v=${MOCKUP_PREVIEW_VERSION}`);
       await loadShares();
     } catch (shareRequestError) {
       setShareError(shareRequestError.response?.data?.message || shareRequestError.message || 'Không thể tạo link chia sẻ');
@@ -582,7 +650,7 @@ export default function LabelMockupStudio() {
     setShareError('');
     try {
       await mockupService.deleteShare(share._id);
-      if (shareUrl.endsWith(`/mockup/${share.token}`)) setShareUrl('');
+      if (shareUrl.includes(`/mockup/${share.token}`)) setShareUrl('');
       await loadShares();
     } catch (deleteError) {
       setShareError(deleteError.response?.data?.message || 'Không thể xoá link chia sẻ');
@@ -665,10 +733,10 @@ export default function LabelMockupStudio() {
           ) : (
             <div className="divide-y divide-slate-100">
               {shareItems.map((share) => {
-                const url = `${window.location.origin}/mockup/${share.token}`;
+                const url = `${window.location.origin}/mockup/${share.token}?v=${MOCKUP_PREVIEW_VERSION}`;
                 return (
                   <div key={share._id} className="flex flex-col gap-3 px-5 py-4 transition hover:bg-slate-50/70 sm:flex-row sm:items-center">
-                    <img src={share.label_url} alt="" className="h-14 w-16 shrink-0 rounded-xl border border-slate-200 bg-white object-contain shadow-sm" />
+                    <img src={share.preview_url || share.label_url} alt="" className="h-14 w-24 shrink-0 rounded-xl border border-slate-200 bg-white object-cover shadow-sm" />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-bold text-slate-800">{share.label_file_name}</p>
                       <p className="mt-1 truncate text-xs text-slate-400">{url}</p>

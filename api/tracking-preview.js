@@ -1,5 +1,5 @@
 const PUBLIC_SITE_URL = "https://candlet.shop";
-const PREVIEW_VERSION = "8";
+const PREVIEW_VERSION = "10";
 const TRACKING_CODE_PATTERN = /^[A-Za-z0-9_-]{11}$/;
 
 function escapeHtml(value) {

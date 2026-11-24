@@ -76,7 +76,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
     ? btoa(String.fromCharCode(...(order.tracking_token.slice(0, 16).match(/.{2}/g) || []).map(value => parseInt(value, 16))))
       .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '')
     : '';
-  const trackingUrl = trackingCode ? `${window.location.origin}/s/${trackingCode}?v=8` : '';
+  const trackingUrl = trackingCode ? `${window.location.origin}/s/${trackingCode}?v=10` : '';
   const handleCreateTracking = async () => {
     setLinkLoading(true);
     setError('');
