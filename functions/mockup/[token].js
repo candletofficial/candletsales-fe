@@ -1,5 +1,6 @@
 const API_BASE_URL = 'https://candletshop-api.onrender.com/api';
 const TOKEN_PATTERN = /^[A-Za-z0-9_-]{16}$/;
+const PREVIEW_VERSION = '3';
 
 function escapeHtml(value) {
   return String(value || '')
@@ -16,6 +17,16 @@ function cloudinaryBanner(url, isPreview) {
     ? 'c_fill,g_center,w_1200,h_630,q_auto,f_jpg'
     : 'c_pad,b_rgb:f7f1e8,w_1200,h_630,q_auto,f_jpg';
   return url.replace('/upload/', `/upload/${transformation}/`);
+}
+
+function versionedUrl(url) {
+  try {
+    const result = new URL(url);
+    result.searchParams.set('preview', PREVIEW_VERSION);
+    return result.toString();
+  } catch {
+    return url;
+  }
 }
 
 function removeGenericMetadata(html) {
@@ -42,11 +53,11 @@ export async function onRequestGet(context) {
   if (!mockup?.label_url) return context.next();
 
   const requestUrl = new URL(context.request.url);
-  const canonicalUrl = `${requestUrl.origin}/mockup/${encodeURIComponent(token)}`;
+  const canonicalUrl = `${requestUrl.origin}/mockup/${encodeURIComponent(token)}?v=${PREVIEW_VERSION}`;
   const fileName = mockup.label_file_name || 'Tem custom';
   const title = `${fileName} · Mockup tem cốc 3D`;
   const description = `Xem trực tiếp mẫu tem ${mockup.label_width} × ${mockup.label_height} mm trên cốc nến 3D Candlet.`;
-  const imageUrl = cloudinaryBanner(mockup.preview_url || mockup.label_url, Boolean(mockup.preview_url));
+  const imageUrl = versionedUrl(cloudinaryBanner(mockup.preview_url || mockup.label_url, Boolean(mockup.preview_url)));
 
   const assetResponse = await context.env.ASSETS.fetch(new URL('/index.html', requestUrl.origin));
   if (!assetResponse.ok) return context.next();
@@ -62,6 +73,7 @@ export async function onRequestGet(context) {
     <meta property="og:description" content="${escapeHtml(description)}" />
     <meta property="og:url" content="${escapeHtml(canonicalUrl)}" />
     <meta property="og:image" content="${escapeHtml(imageUrl)}" />
+    <meta property="og:image:url" content="${escapeHtml(imageUrl)}" />
     <meta property="og:image:secure_url" content="${escapeHtml(imageUrl)}" />
     <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content="1200" />
@@ -74,6 +86,6 @@ export async function onRequestGet(context) {
   const html = appHtml.replace('</head>', `${metadata}\n  </head>`);
   const headers = new Headers(assetResponse.headers);
   headers.set('Content-Type', 'text/html; charset=utf-8');
-  headers.set('Cache-Control', 'public, max-age=0, s-maxage=60, stale-while-revalidate=300');
+  headers.set('Cache-Control', 'no-store, max-age=0');
   return new Response(html, { status: 200, headers });
 }

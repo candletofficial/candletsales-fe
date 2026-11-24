@@ -8,7 +8,7 @@ import { mockupService } from '../services/mockupService';
 
 const DIAMETER = 70;
 const HEIGHT = 84;
-const MOCKUP_PREVIEW_VERSION = 2;
+const MOCKUP_PREVIEW_VERSION = 3;
 const finishOptions = [
   { id: 'frosted', name: 'Kính trắng mờ', color: '#e8e9e6' },
   { id: 'clear', name: 'Kính trong', color: '#dce7e8' },
