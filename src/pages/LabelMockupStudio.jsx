@@ -50,6 +50,77 @@ function createSampleLabel() {
   return canvas;
 }
 
+function ellipsizeCanvasText(ctx, value, maxWidth) {
+  const text = String(value || '');
+  if (ctx.measureText(text).width <= maxWidth) return text;
+  const suffix = '…';
+  let low = 0;
+  let high = text.length;
+  while (low < high) {
+    const middle = Math.ceil((low + high) / 2);
+    if (ctx.measureText(`${text.slice(0, middle)}${suffix}`).width <= maxWidth) low = middle;
+    else high = middle - 1;
+  }
+  return `${text.slice(0, low).trimEnd()}${suffix}`;
+}
+
+function getVisibleCanvasBounds(source) {
+  const sample = document.createElement('canvas');
+  const scale = Math.min(1, 480 / Math.max(source.width, source.height));
+  sample.width = Math.max(1, Math.round(source.width * scale));
+  sample.height = Math.max(1, Math.round(source.height * scale));
+  const sampleContext = sample.getContext('2d', { willReadFrequently: true });
+  sampleContext.drawImage(source, 0, 0, sample.width, sample.height);
+  let pixels;
+  try {
+    pixels = sampleContext.getImageData(0, 0, sample.width, sample.height).data;
+  } catch {
+    return { x: 0, y: 0, width: source.width, height: source.height };
+  }
+  let left = sample.width;
+  let top = sample.height;
+  let right = -1;
+  let bottom = -1;
+  for (let y = 0; y < sample.height; y += 1) {
+    for (let x = 0; x < sample.width; x += 1) {
+      if (pixels[(y * sample.width + x) * 4 + 3] < 12) continue;
+      left = Math.min(left, x);
+      top = Math.min(top, y);
+      right = Math.max(right, x);
+      bottom = Math.max(bottom, y);
+    }
+  }
+  if (right < left || bottom < top) return { x: 0, y: 0, width: source.width, height: source.height };
+  const padding = Math.max(4, Math.round(Math.max(right - left, bottom - top) * .045));
+  left = Math.max(0, left - padding);
+  top = Math.max(0, top - padding);
+  right = Math.min(sample.width - 1, right + padding);
+  bottom = Math.min(sample.height - 1, bottom + padding);
+  return {
+    x: left / scale,
+    y: top / scale,
+    width: (right - left + 1) / scale,
+    height: (bottom - top + 1) / scale,
+  };
+}
+
+function drawCanvasImageContained(ctx, source, bounds, box) {
+  const scale = Math.min(box.width / bounds.width, box.height / bounds.height);
+  const width = bounds.width * scale;
+  const height = bounds.height * scale;
+  ctx.drawImage(
+    source,
+    bounds.x,
+    bounds.y,
+    bounds.width,
+    bounds.height,
+    box.x + (box.width - width) / 2,
+    box.y + (box.height - height) / 2,
+    width,
+    height,
+  );
+}
+
 function createMockupShareBanner(rendererCanvas, fileName, labelWidth, labelHeight) {
   return new Promise((resolve, reject) => {
     if (!rendererCanvas) {
@@ -71,32 +142,37 @@ function createMockupShareBanner(rendererCanvas, fileName, labelWidth, labelHeig
     ctx.beginPath();
     ctx.arc(960, 315, 340, 0, Math.PI * 2);
     ctx.fill();
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.save();
     ctx.fillStyle = '#38211f';
-    ctx.font = '700 30px Arial, sans-serif';
-    ctx.letterSpacing = '7px';
+    ctx.font = '800 27px "Segoe UI", Arial, sans-serif';
+    ctx.letterSpacing = '6px';
     ctx.fillText('CANDLET', 72, 94);
+    ctx.restore();
     ctx.fillStyle = '#9d6f57';
     ctx.fillRect(72, 126, 64, 4);
     ctx.fillStyle = '#372321';
-    ctx.font = '700 51px Georgia, serif';
-    ctx.fillText('Mockup tem', 72, 222);
+    ctx.font = '750 54px "Segoe UI", Arial, sans-serif';
+    ctx.fillText('Mockup tem', 72, 218);
     ctx.fillText('cốc nến 3D', 72, 282);
     ctx.fillStyle = '#6f625d';
-    ctx.font = '500 25px Arial, sans-serif';
+    ctx.font = '600 24px "Segoe UI", Arial, sans-serif';
     const displayName = String(fileName || 'Tem custom');
-    ctx.fillText(displayName.length > 34 ? `${displayName.slice(0, 31)}…` : displayName, 72, 354);
+    ctx.fillText(ellipsizeCanvasText(ctx, displayName, 420), 72, 352);
     ctx.fillStyle = '#8a7a73';
-    ctx.font = '600 21px Arial, sans-serif';
+    ctx.font = '650 21px "Segoe UI", Arial, sans-serif';
     ctx.fillText(`Kích thước tem ${labelWidth} × ${labelHeight} mm`, 72, 398);
     ctx.fillStyle = '#ffffff';
     ctx.beginPath();
-    ctx.roundRect(72, 456, 250, 58, 29);
+    ctx.roundRect(72, 456, 306, 58, 29);
     ctx.fill();
     ctx.fillStyle = '#49302c';
-    ctx.font = '700 19px Arial, sans-serif';
-    ctx.fillText('XOAY & XEM TRỰC TIẾP', 94, 493);
+    ctx.font = '800 17px "Segoe UI", Arial, sans-serif';
+    ctx.fillText('XOAY & XEM TRỰC TIẾP', 98, 493);
 
-    ctx.drawImage(rendererCanvas, 570, 0, 630, 630);
+    const visibleBounds = getVisibleCanvasBounds(rendererCanvas);
+    drawCanvasImageContained(ctx, rendererCanvas, visibleBounds, { x: 610, y: 38, width: 550, height: 554 });
     canvas.toBlob(
       result => (result ? resolve(result) : reject(new Error('Không thể xuất ảnh banner mockup'))),
       'image/jpeg',
