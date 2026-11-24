@@ -174,6 +174,13 @@ const NAV_ITEMS = [
     ],
   },
   {
+    to: '/admin/tools/label-mockup',
+    icon: (
+      <span className="material-symbols-outlined text-[20px]">view_in_ar</span>
+    ),
+    label: 'Mockup tem cốc',
+  },
+  {
     isSection: true,
     label: 'Hệ thống',
   },

@@ -13,6 +13,10 @@ function InventoryCheckModal({ materials, user, onClose, onSave }) {
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedCategories, setExpandedCategories] = useState({});
+  const pausedMaterialCount = useMemo(
+    () => materials.filter(material => material.isTrackingEnabled === false).length,
+    [materials]
+  );
 
   const toggleCategory = (category) => {
     setExpandedCategories(prev => ({
@@ -118,6 +122,16 @@ function InventoryCheckModal({ materials, user, onClose, onSave }) {
             </div>
           )}
 
+          {pausedMaterialCount > 0 && (
+            <div className="mb-5 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-900">
+              <span className="material-symbols-outlined mt-0.5 text-[20px] text-amber-600">pause_circle</span>
+              <div>
+                <p className="text-[13px] font-bold">Có {pausedMaterialCount} nguyên vật liệu đang tạm dừng theo dõi</p>
+                <p className="mt-0.5 text-[12px] leading-5 text-amber-800">Các nguyên vật liệu này được đánh dấu trong danh sách. Admin vẫn có thể nhập số lượng thực tế khi kiểm kho.</p>
+              </div>
+            </div>
+          )}
+
           <div className="space-y-4 mb-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <label className="block text-[14px] font-semibold text-on-surface">Danh sách nguyên liệu kiểm kê</label>
@@ -160,6 +174,7 @@ function InventoryCheckModal({ materials, user, onClose, onSave }) {
 
               return Object.entries(itemsByCategory).map(([category, groupItems]) => {
                 const isExpanded = searchTerm ? true : expandedCategories[category];
+                const pausedInCategory = groupItems.filter(({ material }) => material?.isTrackingEnabled === false).length;
                 return (
                   <div key={category} className="mb-6 last:mb-0 bg-white border border-outline-variant/40 rounded-2xl overflow-hidden shadow-sm">
                     <button 
@@ -173,7 +188,10 @@ function InventoryCheckModal({ materials, user, onClose, onSave }) {
                         </div>
                         <div className="text-left">
                           <h4 className="font-bold text-[15px] text-on-surface uppercase tracking-wide">{category}</h4>
-                          <p className="text-[12px] text-on-surface-variant font-medium mt-0.5">{groupItems.length} nguyên liệu</p>
+                          <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[12px] font-medium text-on-surface-variant">
+                            <span>{groupItems.length} nguyên liệu</span>
+                            {pausedInCategory > 0 && <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700">{pausedInCategory} tạm dừng</span>}
+                          </div>
                         </div>
                       </div>
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center bg-surface-container text-on-surface-variant transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
@@ -187,12 +205,19 @@ function InventoryCheckModal({ materials, user, onClose, onSave }) {
                           const diff = calculateDifference(item.system_stock, item.actual_stock);
                           const isChecked = item.actual_stock !== '';
                           const appearance = getMaterialAppearance(material);
+                          const trackingPaused = material?.isTrackingEnabled === false;
                           return (
-                            <div key={index} className={`flex flex-row items-center justify-between gap-3 p-3 sm:p-4 rounded-xl border transition-all shadow-sm relative ${isChecked ? 'border-primary/30 shadow-primary/10 bg-primary/5' : 'border-outline-variant/40 hover:border-primary/30 bg-white'}`}>
+                            <div key={index} className={`flex flex-row items-center justify-between gap-3 p-3 sm:p-4 rounded-xl border transition-all shadow-sm relative ${isChecked ? 'border-primary/30 shadow-primary/10 bg-primary/5' : trackingPaused ? 'border-amber-200 bg-amber-50/55 hover:border-amber-300' : 'border-outline-variant/40 hover:border-primary/30 bg-white'}`}>
                               <div className="w-full sm:flex-1 min-w-0 flex flex-col justify-center gap-0.5">
-                                <div style={{ color: appearance.textColor || undefined }} className={`text-[14px] sm:text-[15px] font-bold truncate flex items-center gap-1.5 ${appearance.isOil ? '' : isChecked ? 'text-primary' : 'text-on-surface'}`}>
-                                  {material?.name || 'Nguyên liệu không xác định'}
+                                <div style={{ color: appearance.textColor || undefined }} className={`flex min-w-0 flex-wrap items-center gap-1.5 text-[14px] font-bold sm:text-[15px] ${appearance.isOil ? '' : isChecked ? 'text-primary' : 'text-on-surface'}`}>
+                                  <span className="min-w-0 truncate">{material?.name || 'Nguyên liệu không xác định'}</span>
                                   {appearance.concentrationLabel && <span className="rounded border border-slate-300 px-1.5 py-0.5 text-[8px] font-bold text-slate-600">{appearance.concentrationLabel}</span>}
+                                  {trackingPaused && (
+                                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-200 bg-white px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wide text-amber-700">
+                                      <span className="material-symbols-outlined text-[13px]">pause_circle</span>
+                                      Tạm dừng theo dõi
+                                    </span>
+                                  )}
                                   {isChecked && <span className="material-symbols-outlined text-[16px]">check_circle</span>}
                                 </div>
                                 <div className="text-[12px] text-on-surface-variant mb-1">

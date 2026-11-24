@@ -22,6 +22,8 @@ import ExpenseManagement from './pages/ExpenseManagement';
 import POS from './pages/POS';
 import PostManagement from './pages/PostManagement';
 import MessengerBotManagement from './pages/MessengerBotManagement';
+import LabelMockupStudio from './pages/LabelMockupStudio';
+import PublicMockup from './pages/PublicMockup';
 
 import ShopLayout from './pages/shop/ShopLayout';
 import ShopHome from './pages/shop/ShopHome';
@@ -77,7 +79,9 @@ export default function App() {
           <Route path="/admin/tools/tiktok" element={<ProtectedRoute><TiktokCalculator /></ProtectedRoute>} />
           <Route path="/admin/posts" element={<ProtectedRoute><PostManagement /></ProtectedRoute>} />
           <Route path="/admin/messenger-bot" element={<ProtectedRoute><MessengerBotManagement /></ProtectedRoute>} />
+          <Route path="/admin/tools/label-mockup" element={<ProtectedRoute><LabelMockupStudio /></ProtectedRoute>} />
           <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+          <Route path="/mockup/:token" element={<PublicMockup />} />
           
           {/* Shop Public Routes */}
           <Route path="/" element={<ShopLayout />}>
