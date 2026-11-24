@@ -154,7 +154,7 @@ function disposeTree(root) {
   });
 }
 
-export function MockupViewport({ labelSource, labelWidth, labelHeight, labelTop, labelRotation, finish, lid, rendererRef }) {
+export function MockupViewport({ labelSource, labelWidth, labelHeight, labelTop, labelRotation, finish, lid, rendererRef, compact = false }) {
   const hostRef = useRef(null);
   const sceneRef = useRef(null);
   const groupRef = useRef(null);
@@ -194,7 +194,14 @@ export function MockupViewport({ labelSource, labelWidth, labelHeight, labelTop,
     const group = new THREE.Group(); scene.add(group);
     sceneRef.current = scene; groupRef.current = group;
 
-    let previousFitDistance = null;
+    let fittedDistance = null;
+    let userZoomRatio = 1;
+    const rememberUserZoom = () => {
+      if (!fittedDistance) return;
+      const distance = camera.position.distanceTo(controls.target);
+      userZoomRatio = THREE.MathUtils.clamp(distance / fittedDistance, .76, 2.15);
+    };
+    controls.addEventListener('end', rememberUserZoom);
     const resize = () => {
       const width = host.clientWidth; const height = host.clientHeight;
       if (!width || !height) return;
@@ -207,17 +214,16 @@ export function MockupViewport({ labelSource, labelWidth, labelHeight, labelTop,
       const horizontalFov = 2 * Math.atan(Math.tan(verticalFov / 2) * aspect);
       const objectHeight = lid === 'none' ? 88 : 98;
       const objectWidth = 76;
-      const heightDistance = (objectHeight / 2) / Math.tan(verticalFov / 2) * 1.2;
-      const widthDistance = (objectWidth / 2) / Math.tan(horizontalFov / 2) * 1.18;
+      const narrowScreen = aspect < .72;
+      const heightDistance = (objectHeight / 2) / Math.tan(verticalFov / 2) * (narrowScreen ? 1.24 : 1.2);
+      const widthDistance = (objectWidth / 2) / Math.tan(horizontalFov / 2) * (narrowScreen ? 1.36 : 1.18);
       const fitDistance = Math.max(heightDistance, widthDistance);
-      const currentDistance = camera.position.distanceTo(controls.target);
-      const zoomRatio = previousFitDistance ? currentDistance / previousFitDistance : 1;
-      const nextDistance = fitDistance * zoomRatio;
+      const nextDistance = fitDistance * userZoomRatio;
       const viewDirection = camera.position.clone().sub(controls.target).normalize();
       camera.position.copy(controls.target).add(viewDirection.multiplyScalar(nextDistance));
       controls.minDistance = fitDistance * .72;
       controls.maxDistance = fitDistance * 2.15;
-      previousFitDistance = fitDistance;
+      fittedDistance = fitDistance;
       controls.update();
     };
     const observer = new ResizeObserver(resize);
@@ -245,6 +251,7 @@ export function MockupViewport({ labelSource, labelWidth, labelHeight, labelTop,
       window.removeEventListener('resize', resize);
       window.removeEventListener('orientationchange', resize);
       window.visualViewport?.removeEventListener('resize', resize);
+      controls.removeEventListener('end', rememberUserZoom);
       controls.dispose(); disposeTree(group);
       pmrem.dispose(); renderer.dispose(); renderer.domElement.remove(); rendererRef.current = null;
     };
@@ -465,7 +472,7 @@ export function MockupViewport({ labelSource, labelWidth, labelHeight, labelTop,
     }
   }, [finish, labelHeight, labelRotation, labelSource, labelTop, labelWidth, lid]);
 
-  return <div ref={hostRef} className="h-full min-h-[540px] w-full cursor-grab active:cursor-grabbing sm:min-h-[700px]" />;
+  return <div ref={hostRef} className={`h-full w-full cursor-grab touch-none active:cursor-grabbing ${compact ? 'min-h-0' : 'min-h-[540px] sm:min-h-[700px]'}`} />;
 }
 
 export default function LabelMockupStudio() {

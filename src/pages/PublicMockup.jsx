@@ -38,12 +38,12 @@ export default function PublicMockup() {
   }
 
   return (
-    <main className="min-h-screen bg-[#91969a] text-slate-900">
-      <header className="fixed inset-x-0 top-0 z-10 flex items-center justify-between gap-4 border-b border-white/20 bg-white/85 px-4 py-3 shadow-sm backdrop-blur-xl sm:px-7">
+    <main className="h-[100dvh] overflow-hidden bg-[#91969a] text-slate-900">
+      <header className="fixed inset-x-0 top-0 z-10 flex h-16 items-center justify-between gap-3 border-b border-white/20 bg-white/90 px-4 shadow-sm backdrop-blur-xl sm:px-7">
         <div className="min-w-0"><p className="text-base font-black tracking-tight">CANDLET</p><p className="truncate text-[11px] font-medium text-slate-500">Bản xem trước tem custom 3D</p></div>
         <div className="min-w-0 text-right"><p className="max-w-[190px] truncate text-xs font-bold text-slate-700 sm:max-w-sm">{mockup.label_file_name}</p><p className="mt-0.5 text-[10px] text-slate-400">Tem {mockup.label_width} × {mockup.label_height} mm</p></div>
       </header>
-      <section className="h-screen min-h-[620px] pt-[65px]">
+      <section className="fixed inset-x-0 bottom-0 top-16 overflow-hidden">
         <MockupViewport
           labelSource={labelSource}
           labelWidth={mockup.label_width}
@@ -53,9 +53,10 @@ export default function PublicMockup() {
           finish={mockup.finish}
           lid={mockup.lid}
           rendererRef={rendererRef}
+          compact
         />
       </section>
-      <div className="pointer-events-none fixed bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-white/85 px-4 py-2 text-[11px] font-bold text-slate-600 shadow-lg backdrop-blur">KÉO ĐỂ XOAY · CUỘN ĐỂ PHÓNG TO</div>
+      <div className="pointer-events-none fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-full bg-white/90 px-3.5 py-2 text-[10px] font-bold text-slate-600 shadow-lg backdrop-blur sm:px-4 sm:text-[11px]">KÉO ĐỂ XOAY · CUỘN ĐỂ PHÓNG TO</div>
     </main>
   );
 }
