@@ -8,7 +8,7 @@ import { mockupService } from '../services/mockupService';
 
 const DIAMETER = 70;
 const HEIGHT = 84;
-const MOCKUP_PREVIEW_VERSION = 3;
+const MOCKUP_PREVIEW_VERSION = 4;
 const finishOptions = [
   { id: 'frosted', name: 'Kính trắng mờ', color: '#e8e9e6' },
   { id: 'clear', name: 'Kính trong', color: '#dce7e8' },
@@ -150,6 +150,7 @@ function createMockupShareBanner(rendererCanvas, fileName, labelWidth, labelHeig
     ctx.letterSpacing = '6px';
     ctx.fillText('CANDLET', 72, 94);
     ctx.restore();
+    ctx.letterSpacing = '0px';
     ctx.fillStyle = '#9d6f57';
     ctx.fillRect(72, 126, 64, 4);
     ctx.fillStyle = '#372321';
@@ -687,7 +688,7 @@ export default function LabelMockupStudio() {
       const previewBlob = await createMockupShareBanner(rendererRef.current?.domElement, fileName, labelWidth, labelHeight);
       const [upload, previewUpload] = await Promise.all([
         uploadService.uploadProductImage(new File([blob], `${safeName}.png`, { type: 'image/png' })),
-        uploadService.uploadProductImage(new File([previewBlob], `${safeName}-mockup.jpg`, { type: 'image/jpeg' })),
+        uploadService.uploadProductImage(new File([previewBlob], `${safeName}-mockup-v4.jpg`, { type: 'image/jpeg' })),
       ]);
       const labelUrl = upload.data?.data?.url || upload.data?.data?.path;
       const previewUrl = previewUpload.data?.data?.url || previewUpload.data?.data?.path;

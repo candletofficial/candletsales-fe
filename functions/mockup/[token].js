@@ -1,6 +1,6 @@
 const API_BASE_URL = 'https://candletshop-api.onrender.com/api';
 const TOKEN_PATTERN = /^[A-Za-z0-9_-]{16}$/;
-const PREVIEW_VERSION = '3';
+const PREVIEW_VERSION = '4';
 
 function escapeHtml(value) {
   return String(value || '')
