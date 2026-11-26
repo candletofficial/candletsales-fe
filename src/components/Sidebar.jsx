@@ -139,6 +139,13 @@ const NAV_ITEMS = [
     label: 'Bài viết & Câu chuyện',
   },
   {
+    to: '/admin/custom-page',
+    icon: (
+      <span className="material-symbols-outlined text-[20px]">edit_note</span>
+    ),
+    label: 'Trang Custom',
+  },
+  {
     isSection: true,
     label: 'Công cụ',
   },

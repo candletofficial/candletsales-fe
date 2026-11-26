@@ -35,6 +35,7 @@ const ROUTE_TITLES = {
   '/admin/expenses': 'Quản Lý Chi Phí | Candlet Admin',
   '/admin/users': 'Quản Trị Người Dùng | Candlet Admin',
   '/admin/posts': 'Quản Trị Bài Viết & Câu Chuyện | Candlet Admin',
+  '/admin/custom-page': 'Quản Lý Trang Custom | Candlet Admin',
   '/admin/settings': 'Cài Đặt Hệ Thống | Candlet Admin',
   '/admin/tools/shopee': 'Công Cụ Tính Phí Shopee | Candlet Admin',
   '/admin/tools/tiktok': 'Công Cụ Tính Phí TikTok Shop | Candlet Admin',

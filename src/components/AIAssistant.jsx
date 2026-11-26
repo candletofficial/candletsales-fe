@@ -30,6 +30,7 @@ const PAGE_LABELS = {
   '/admin/tools/shopee': 'Công cụ tính giá Shopee',
   '/admin/tools/tiktok': 'Công cụ tính giá TikTok',
   '/admin/posts': 'Quản lý bài viết',
+  '/admin/custom-page': 'Quản lý trang Custom',
   '/admin/messenger-bot': 'Cấu hình Messenger Bot',
   '/admin/users': 'Quản lý tài khoản',
   '/admin/settings': 'Cài đặt hệ thống',
