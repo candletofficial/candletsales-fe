@@ -203,15 +203,15 @@ export default function CorporateGifts() {
       <div className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-3 z-50 flex flex-col items-end gap-2 sm:bottom-6 sm:right-6" aria-label="Liên hệ nhanh">
         <a href={ZALO_URL} target="_blank" rel="noreferrer" title="Liên hệ Candlet qua Zalo" className="block h-10 w-10 transition hover:-translate-y-0.5 hover:scale-105" aria-label="Liên hệ Candlet qua Zalo">
           <svg viewBox="0 0 48 48" role="img" aria-hidden="true" className="h-full w-full drop-shadow-[0_3px_5px_rgba(0,0,0,.18)]">
-            <rect width="48" height="48" rx="11" fill="#0068ff" />
-            <path d="M9 9.5h30a3.5 3.5 0 0 1 3.5 3.5v19a3.5 3.5 0 0 1-3.5 3.5H24.5l-7.2 5v-5H9A3.5 3.5 0 0 1 5.5 32V13A3.5 3.5 0 0 1 9 9.5Z" fill="#fff" />
-            <text x="24" y="27.3" fill="#0068ff" fontFamily="Arial, sans-serif" fontSize="11.2" fontWeight="700" textAnchor="middle">Zalo</text>
+            <circle cx="24" cy="24" r="23" fill="#50131a" stroke="#d8b99a" strokeWidth="1.5" />
+            <path d="M13.5 13h21a3.5 3.5 0 0 1 3.5 3.5v13a3.5 3.5 0 0 1-3.5 3.5h-9.2L19 37.5V33h-5.5a3.5 3.5 0 0 1-3.5-3.5v-13a3.5 3.5 0 0 1 3.5-3.5Z" fill="#fff8ee" />
+            <path d="M17.2 18.2h13.5l-8.3 10.1h8.5" fill="none" stroke="#a65f4b" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" />
           </svg>
         </a>
         <a href={FANPAGE_URL} target="_blank" rel="noreferrer" title="Mở Fanpage Candlet" className="block h-10 w-10 transition hover:-translate-y-0.5 hover:scale-105" aria-label="Mở Fanpage Candlet trên Facebook">
           <svg viewBox="0 0 48 48" role="img" aria-hidden="true" className="h-full w-full drop-shadow-[0_3px_5px_rgba(0,0,0,.18)]">
-            <circle cx="24" cy="24" r="24" fill="#0866ff" />
-            <path d="M27.2 42V26.3h5.3l.8-6.1h-6.1v-3.9c0-1.8.5-3 3.1-3h3.3V7.8c-.6-.1-2.5-.3-4.8-.3-4.8 0-8 2.9-8 8.2v4.5h-5.4v6.1h5.4V42h6.4Z" fill="#fff" />
+            <circle cx="24" cy="24" r="23" fill="#a65f4b" stroke="#d8b99a" strokeWidth="1.5" />
+            <path d="M27.2 41V26.3h5.1l.8-5.8h-5.9v-3.7c0-1.7.5-2.9 3-2.9h3.2V8.7c-.6-.1-2.4-.3-4.6-.3-4.6 0-7.7 2.8-7.7 7.9v4.2h-5.2v5.8h5.2V41h6.1Z" fill="#fff8ee" />
           </svg>
         </a>
       </div>
