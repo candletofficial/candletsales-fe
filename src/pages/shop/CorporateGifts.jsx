@@ -202,10 +202,10 @@ export default function CorporateGifts() {
 
       <div className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-3 z-50 flex flex-col items-end gap-2.5 sm:bottom-6 sm:right-6" aria-label="Liên hệ nhanh">
         <a href={ZALO_URL} target="_blank" rel="noreferrer" title="Liên hệ Candlet qua Zalo" className="block h-12 w-12 transition hover:-translate-y-0.5 hover:scale-105" aria-label="Liên hệ Candlet qua Zalo">
-          <img src="https://cdn.simpleicons.org/zalo/0068FF" alt="Zalo" className="h-full w-full object-contain" />
+          <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Icon_of_Zalo.svg" alt="Zalo" className="h-full w-full object-contain" />
         </a>
         <a href={FANPAGE_URL} target="_blank" rel="noreferrer" title="Mở Fanpage Candlet" className="block h-12 w-12 transition hover:-translate-y-0.5 hover:scale-105" aria-label="Mở Fanpage Candlet trên Facebook">
-          <img src="https://cdn.simpleicons.org/facebook/0866FF" alt="Facebook" className="h-full w-full object-contain" />
+          <img src="https://upload.wikimedia.org/wikipedia/commons/b/b9/2023_Facebook_icon.svg" alt="Facebook" className="h-full w-full object-contain" />
         </a>
       </div>
     </main>
