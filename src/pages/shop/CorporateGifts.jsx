@@ -201,16 +201,18 @@ export default function CorporateGifts() {
       </section>
 
       <div className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-3 z-50 flex flex-col items-end gap-2 sm:bottom-6 sm:right-6" aria-label="Liên hệ nhanh">
-        <a href={ZALO_URL} target="_blank" rel="noreferrer" title="Liên hệ Candlet qua Zalo" className="block h-10 w-10 transition hover:-translate-y-0.5 hover:scale-105" aria-label="Liên hệ Candlet qua Zalo">
+        <a href={ZALO_URL} target="_blank" rel="noreferrer" title="Liên hệ Candlet qua Zalo" className="block h-10 w-10" aria-label="Liên hệ Candlet qua Zalo">
           <svg viewBox="0 0 48 48" role="img" aria-hidden="true" className="h-full w-full drop-shadow-[0_3px_5px_rgba(0,0,0,.18)]">
-            <circle cx="24" cy="24" r="23" fill="#0068ff" />
-            <text x="24" y="32" fill="#fff" fontFamily="Arial, sans-serif" fontSize="23" fontWeight="700" textAnchor="middle">Z</text>
+            <rect width="48" height="48" rx="9" fill="#066aff" />
+            <path d="M14 0h34v30.5C48 38 39.5 43 29.5 43c-6.2 0-11.5-1.4-16.1-3.8L7.5 41l2-5.2C5.7 31.6 4 26.7 5 20.5 6.3 12 9.2 5.5 14 0Z" fill="#fff" />
+            <text x="27" y="28.7" fill="#066aff" fontFamily="Arial, Helvetica, sans-serif" fontSize="14.2" fontWeight="700" letterSpacing="-.8" textAnchor="middle">Zalo</text>
           </svg>
         </a>
-        <a href={FANPAGE_URL} target="_blank" rel="noreferrer" title="Mở Fanpage Candlet" className="block h-10 w-10 transition hover:-translate-y-0.5 hover:scale-105" aria-label="Mở Fanpage Candlet trên Facebook">
+        <a href={FANPAGE_URL} target="_blank" rel="noreferrer" title="Mở Fanpage Candlet" className="block h-10 w-10" aria-label="Mở Fanpage Candlet trên Facebook">
           <svg viewBox="0 0 48 48" role="img" aria-hidden="true" className="h-full w-full drop-shadow-[0_3px_5px_rgba(0,0,0,.18)]">
-            <circle cx="24" cy="24" r="23" fill="#0866ff" />
-            <path d="M27.2 41V26.3h5.1l.8-5.8h-5.9v-3.7c0-1.7.5-2.9 3-2.9h3.2V8.7c-.6-.1-2.4-.3-4.6-.3-4.6 0-7.7 2.8-7.7 7.9v4.2h-5.2v5.8h5.2V41h6.1Z" fill="#fff" />
+            <defs><linearGradient id="facebookBlue" x1="24" y1="0" x2="24" y2="48" gradientUnits="userSpaceOnUse"><stop stopColor="#16a4f5" /><stop offset="1" stopColor="#0866d8" /></linearGradient></defs>
+            <rect width="48" height="48" rx="9" fill="url(#facebookBlue)" />
+            <path d="M28.5 48V28.9h6.4l1-7.5h-7.4v-4.8c0-2.2.6-3.7 3.8-3.7h4.1V6.2c-.7-.1-3.1-.3-5.9-.3-5.8 0-9.8 3.5-9.8 10v5.5h-6.5v7.5h6.5V48h7.8Z" fill="#fff" />
           </svg>
         </a>
       </div>
