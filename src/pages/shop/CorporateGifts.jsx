@@ -29,36 +29,41 @@ export default function CorporateGifts() {
   }, [scentQuery]);
 
   return (
-    <main className="overflow-hidden bg-[#f7f3ed] text-brand-charcoal">
-      <section className="relative border-b border-[#dfd5ca] bg-[#efe7dc]">
-        <div className="absolute inset-0 opacity-50 [background-image:radial-gradient(circle_at_15%_15%,#fff_0,transparent_30%),radial-gradient(circle_at_90%_80%,#d7bd9e_0,transparent_28%)]" />
-        <div className="relative mx-auto grid max-w-7xl gap-10 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[.95fr_1.05fr] lg:items-center lg:py-24">
+    <main className="overflow-hidden bg-[#e8e3dc] text-brand-charcoal">
+      <section className="relative bg-[#173e34] text-white">
+        <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(255,255,255,.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.08)_1px,transparent_1px)] [background-size:32px_32px]" />
+        <div className="relative mx-auto grid min-h-[620px] max-w-7xl gap-10 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[.85fr_1.15fr] lg:items-center lg:py-24">
           <div className="max-w-2xl">
-            <p className="text-[10px] font-black uppercase tracking-[.25em] text-[#96624f]">Candlet · Custom candle studio</p>
-            <h1 className="mt-4 font-serif-display text-4xl font-normal leading-[1.06] sm:text-6xl lg:text-7xl">Hương riêng.<br /><span className="italic text-[#76493e]">Dấu ấn riêng.</span></h1>
-            <p className="mt-6 max-w-xl text-sm leading-7 text-stone-600 sm:text-base">Nến thơm custom dành cho doanh nghiệp, sự kiện và những món quà mang nhận diện của bạn. Chọn cốc, nắp, mùi hương, nhãn dán và bao bì trong một quy trình rõ ràng.</p>
+            <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[.25em] text-[#d8b887]"><span className="h-px w-10 bg-[#d8b887]" /> Catalogue · 01.11.2026</div>
+            <h1 className="mt-5 font-serif-display text-5xl font-normal leading-[1.02] sm:text-6xl lg:text-7xl">Hương riêng.<br /><span className="italic text-[#e9cda5]">Dấu ấn riêng.</span></h1>
+            <p className="mt-6 max-w-xl text-sm leading-7 text-white/68 sm:text-base">Nến thơm custom dành cho doanh nghiệp, sự kiện và những món quà mang nhận diện của bạn. Chọn cốc, nắp, mùi hương, nhãn dán và bao bì trong một quy trình rõ ràng.</p>
             <div className="mt-7 flex flex-wrap gap-2">
-              {['Từ 20 cốc', '63 mùi hương', '200 ml & 300 ml'].map(item => <span key={item} className="rounded-full border border-[#cab5a3] bg-white/65 px-4 py-2 text-[10px] font-black uppercase tracking-wider text-[#68443b]">{item}</span>)}
+              {['Từ 20 cốc', '63 mùi hương', '200 ml & 300 ml'].map(item => <span key={item} className="rounded-full border border-white/20 bg-white/8 px-4 py-2 text-[10px] font-black uppercase tracking-wider text-[#f2dec2]">{item}</span>)}
             </div>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <a href="https://zalo.me/0328624761" target="_blank" rel="noreferrer" className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#3b2925] px-6 text-xs font-black uppercase tracking-wider text-white transition hover:-translate-y-0.5 hover:bg-[#623f37]"><i className="ph-bold ph-chat-circle-dots text-lg" /> Nhận tư vấn & báo giá</a>
-              <a href="#catalogue" className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-[#bda895] bg-white/55 px-6 text-xs font-bold uppercase tracking-wider text-[#4c342f] transition hover:bg-white">Xem catalogue <i className="ph-bold ph-arrow-down" /></a>
+              <a href="https://zalo.me/0328624761" target="_blank" rel="noreferrer" className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#f1dfc4] px-6 text-xs font-black uppercase tracking-wider text-[#173e34] transition hover:-translate-y-0.5 hover:bg-white"><i className="ph-bold ph-chat-circle-dots text-lg" /> Nhận tư vấn & báo giá</a>
+              <a href="#catalogue" className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-white/25 px-6 text-xs font-bold uppercase tracking-wider text-white transition hover:bg-white/10">Mở tài liệu <i className="ph-bold ph-arrow-down" /></a>
             </div>
           </div>
-          <div className="relative mx-auto w-full max-w-xl">
-            <div className="absolute -right-5 -top-5 h-full w-full rounded-[2.25rem] border border-[#bfa995]" />
-            <div className="relative overflow-hidden rounded-[2.25rem] bg-[#d7c3ac] p-3 shadow-[0_30px_80px_rgba(65,43,35,.18)]">
-              <img src="/story-craft.jpg" alt="Nến thơm custom Candlet" className="aspect-[4/3] w-full rounded-[1.65rem] object-cover" />
-              <div className="absolute bottom-7 left-7 right-7 flex items-end justify-between rounded-2xl border border-white/60 bg-white/88 p-4 backdrop-blur">
-                <div><p className="text-[9px] font-black uppercase tracking-[.18em] text-[#9a6955]">Cốc 200 ml từ</p><p className="mt-1 font-serif-display text-3xl font-bold text-[#432d28]">85.000đ</p></div>
-                <p className="max-w-32 text-right text-[10px] leading-4 text-stone-500">Chưa gồm hộp, túi quà và phụ kiện khác</p>
-              </div>
-            </div>
+          <div className="relative mx-auto flex h-[390px] w-full max-w-2xl items-end justify-center sm:h-[480px]">
+            <div className="absolute inset-x-4 bottom-0 h-52 rounded-[50%] bg-black/20 blur-2xl" />
+            <img src="/custom-catalogue/cup-white-matte.webp" alt="Cốc nến trắng mờ" className="relative z-10 h-[82%] w-auto object-contain drop-shadow-[0_26px_25px_rgba(0,0,0,.28)]" />
+            <img src="/custom-catalogue/cup-amber.webp" alt="Cốc nến nâu hổ phách" className="absolute bottom-0 left-[2%] z-20 h-[63%] w-auto -rotate-3 object-contain drop-shadow-[0_24px_20px_rgba(0,0,0,.3)] sm:left-[8%]" />
+            <img src="/custom-catalogue/cup-black.webp" alt="Cốc nến đen bóng" className="absolute bottom-0 right-[2%] z-20 h-[68%] w-auto rotate-3 object-contain drop-shadow-[0_24px_20px_rgba(0,0,0,.3)] sm:right-[5%]" />
+            <div className="absolute right-0 top-0 z-30 border border-white/20 bg-[#173e34]/80 px-4 py-3 text-right backdrop-blur"><p className="text-[9px] font-black uppercase tracking-[.18em] text-[#d8b887]">Cốc 200 ml từ</p><p className="mt-1 font-serif-display text-2xl text-white">85.000đ</p></div>
           </div>
         </div>
       </section>
 
-      <section id="catalogue" className="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-24">
+      <nav className="border-b border-[#cfc7bd] bg-[#f7f3ed]" aria-label="Mục lục catalogue">
+        <div className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-5 py-4 sm:px-8">
+          {[['01', 'Bảng giá', '#catalogue'], ['02', 'Cốc', '#cups'], ['03', 'Nắp & nhãn', '#lids'], ['04', 'Mùi hương', '#scents'], ['05', 'Nến tạo hình', '#shaped'], ['06', 'Quy trình', '#process']].map(([number, label, href]) => <a key={number} href={href} className="flex shrink-0 items-center gap-2 border-r border-stone-300 px-4 py-1 text-[10px] font-black uppercase tracking-wider text-[#65463e] first:pl-0 last:border-r-0"><span className="text-[#af7d5f]">{number}</span>{label}</a>)}
+        </div>
+      </nav>
+
+      <div className="mx-auto max-w-[1360px] px-3 py-6 sm:px-6 sm:py-10">
+        <div className="space-y-6">
+      <section id="catalogue" className="mx-auto max-w-7xl bg-[#fffdf9] px-5 py-14 shadow-[0_12px_45px_rgba(52,38,32,.08)] sm:px-10 sm:py-20 lg:px-14">
         <div className="grid gap-10 lg:grid-cols-[.72fr_1.28fr]">
           <div>
             <p className="text-[10px] font-black uppercase tracking-[.22em] text-[#98614e]">01 · Nến thơm custom</p>
@@ -70,28 +75,28 @@ export default function CorporateGifts() {
         </div>
       </section>
 
-      <section className="border-y border-[#ded4ca] bg-white px-5 py-14 sm:px-8 sm:py-24">
+      <section id="cups" className="mx-auto max-w-7xl bg-[#fffdf9] px-5 py-14 shadow-[0_12px_45px_rgba(52,38,32,.08)] sm:px-10 sm:py-20 lg:px-14">
         <div className="mx-auto max-w-7xl">
           <div className="max-w-2xl"><p className="text-[10px] font-black uppercase tracking-[.22em] text-[#98614e]">02 · Chọn cốc</p><h2 className="mt-3 font-serif-display text-3xl sm:text-5xl">Bảng màu cốc nến</h2><p className="mt-4 text-sm leading-7 text-stone-600">Chọn dung tích 200 ml hoặc 300 ml, sau đó chọn màu cốc. 200 ml và 300 ml là dung tích cốc, không phải khối lượng sáp.</p></div>
           <div className="mt-9 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
-            {cups.map(([code, name, color]) => <article key={code} className="rounded-2xl border border-stone-200 bg-[#faf8f5] p-3"><div className="h-24 rounded-xl border border-black/5 shadow-inner" style={{ background: color }} /><p className="mt-3 text-[9px] font-black uppercase tracking-widest text-[#a06c57]">{code}</p><h3 className="mt-1 text-sm font-bold">{name}</h3></article>)}
+            {cups.map(([code, name, color, image]) => <article key={code} className="border border-stone-200 bg-[#faf8f5] p-3"><div className="grid h-32 place-items-center overflow-hidden border border-black/5" style={{ background: color }}>{image && <img src={image} alt={`Cốc nến ${name}`} className="h-full w-full object-contain mix-blend-multiply" />}</div><p className="mt-3 text-[9px] font-black uppercase tracking-widest text-[#a06c57]">{code}</p><h3 className="mt-1 text-sm font-bold">{name}</h3></article>)}
           </div>
           <p className="mt-5 text-xs leading-5 text-stone-500">Cốc 200 ml là mẫu trong catalogue. Kích thước, màu, nắp và khối lượng nến của cốc 300 ml được xác nhận theo mẫu thực tế; thời gian cháy được xác nhận theo thành phẩm.</p>
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-24">
+      <section id="lids" className="mx-auto max-w-7xl bg-[#fffdf9] px-5 py-14 shadow-[0_12px_45px_rgba(52,38,32,.08)] sm:px-10 sm:py-20 lg:px-14">
         <div className="grid gap-10 lg:grid-cols-[.8fr_1.2fr]">
           <div><p className="text-[10px] font-black uppercase tracking-[.22em] text-[#98614e]">03 · Nắp & nhãn dán</p><h2 className="mt-3 font-serif-display text-3xl sm:text-5xl">Hoàn thiện từng chi tiết</h2><p className="mt-4 text-sm leading-7 text-stone-600">Chọn nắp phù hợp và thêm nhãn dán mang nhận diện của bạn.</p></div>
           <div className="space-y-4">
-            <div className="grid gap-3 sm:grid-cols-3">{lids.map(([code, name, size]) => <article key={code} className="rounded-2xl border border-[#dfd4c8] bg-white p-5"><p className="text-[9px] font-black uppercase tracking-widest text-[#a06c57]">{code}</p><h3 className="mt-2 text-base font-black">{name}</h3><p className="mt-1 text-xs text-stone-500">{size}</p></article>)}</div>
+            <div className="grid gap-3 sm:grid-cols-3">{lids.map(([code, name, size, image]) => <article key={code} className="border border-[#dfd4c8] bg-white p-4"><img src={image} alt={name} className="aspect-[1.18] w-full bg-white object-cover" /><p className="mt-4 text-[9px] font-black uppercase tracking-widest text-[#a06c57]">{code}</p><div className="mt-1 flex items-end justify-between gap-3"><h3 className="text-base font-black">{name}</h3><p className="text-xs text-stone-500">{size}</p></div></article>)}</div>
             <div className="rounded-2xl bg-[#3b2925] p-6 text-white"><p className="text-xs font-black uppercase tracking-[.16em] text-[#e7c39e]">Nhãn dán tùy chỉnh</p><div className="mt-5 grid gap-5 sm:grid-cols-3">{[['01', 'Nội dung của bạn', 'Logo, tên thương hiệu, tên sự kiện, lời nhắn hoặc tên mùi hương.'], ['02', 'Quy cách rõ ràng', 'Thống nhất kích thước, chất liệu, số màu và số mẫu nhãn.'], ['03', 'Duyệt trước khi làm', 'Gửi file logo, duyệt thiết kế và mẫu theo thỏa thuận.']].map(([number, title, text]) => <div key={number}><span className="font-serif-display text-2xl text-[#d6a77e]">{number}</span><h3 className="mt-2 text-sm font-black">{title}</h3><p className="mt-1 text-xs leading-5 text-white/65">{text}</p></div>)}</div></div>
             <p className="text-xs leading-5 text-stone-500">Nắp kim loại có màu vàng, bạc và đen. Mẫu 80 mm cần kiểm tra độ vừa với cốc 70 mm trước khi chốt. Tùy chọn thêm: hộp, túi quà, thiệp, nơ, khắc hoặc in trực tiếp lên nắp.</p>
           </div>
         </div>
       </section>
 
-      <section className="border-y border-[#d8ccbf] bg-[#eee4d8] px-5 py-14 sm:px-8 sm:py-24">
+      <section id="scents" className="mx-auto max-w-7xl bg-[#f2ece3] px-5 py-14 shadow-[0_12px_45px_rgba(52,38,32,.08)] sm:px-10 sm:py-20 lg:px-14">
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end"><div className="max-w-2xl"><p className="text-[10px] font-black uppercase tracking-[.22em] text-[#98614e]">04 · Chọn mùi hương</p><h2 className="mt-3 font-serif-display text-3xl sm:text-5xl">Thư viện 63 mùi hương</h2><p className="mt-4 text-sm leading-7 text-stone-600">Tìm theo mã, tên mùi hoặc tầng hương. Tình trạng mùi được xác nhận tại thời điểm đặt hàng.</p></div><label className="flex h-12 w-full items-center gap-3 rounded-full border border-[#c9b8a7] bg-white px-5 md:w-96"><i className="ph ph-magnifying-glass text-lg text-[#8b5a4c]" /><input value={scentQuery} onChange={event => setScentQuery(event.target.value)} placeholder="Tìm mã, tên hoặc nốt hương..." className="min-w-0 flex-1 bg-transparent text-sm outline-none" /></label></div>
           <div className="mt-8 flex items-center justify-between border-b border-[#cdbdad] pb-3"><p className="text-[10px] font-black uppercase tracking-widest text-stone-500">Danh mục mùi hương</p><span className="rounded-full bg-white px-3 py-1 text-[10px] font-black text-[#71473e]">{filteredScents.length} lựa chọn</span></div>
@@ -102,23 +107,25 @@ export default function CorporateGifts() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-24">
+      <section id="shaped" className="mx-auto max-w-7xl bg-[#fffdf9] px-5 py-14 shadow-[0_12px_45px_rgba(52,38,32,.08)] sm:px-10 sm:py-20 lg:px-14">
         <div className="grid gap-10 lg:grid-cols-[.72fr_1.28fr]">
           <div><p className="text-[10px] font-black uppercase tracking-[.22em] text-[#98614e]">05 · Nến tạo hình</p><h2 className="mt-3 font-serif-display text-3xl leading-tight sm:text-5xl">Quà tặng doanh nghiệp <span className="italic text-[#855648]">thú vị</span></h2><p className="mt-5 text-sm leading-7 text-stone-600">06 mẫu lấy cảm hứng từ đồ uống, sử dụng cốc thủy tinh và nắp bần. Mỗi cốc có khối lượng nến 180 g.</p></div>
-          <div><PriceTable headers={['Số lượng', 'Đơn giá / cốc']} rows={shapedPrices} /><div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">{shapedCandles.map(([number, name, color]) => <article key={number} className="rounded-xl border border-stone-200 bg-white p-4"><p className="text-[9px] font-black text-[#a06954]">{number}</p><h3 className="mt-1 text-sm font-black">{name}</h3><p className="mt-1 text-xs text-stone-500">Màu: {color} · 180 g</p></article>)}</div><p className="mt-4 text-xs leading-5 text-stone-500">Cốc cao 95 mm, đường kính 70 mm; khối lượng cả bao bì khoảng 330 g. Đơn giá chưa gồm hộp, túi quà, phụ kiện, vận chuyển, nhãn tùy chỉnh và thuế/VAT.</p></div>
+          <div><PriceTable headers={['Số lượng', 'Đơn giá / cốc']} rows={shapedPrices} /><div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">{shapedCandles.map(([number, name, color, image]) => <article key={number} className="overflow-hidden border border-stone-200 bg-white"><img src={image} alt={`Nến tạo hình ${name}`} className="aspect-[1.2] w-full object-cover" /><div className="p-4"><p className="text-[9px] font-black text-[#a06954]">{number}</p><h3 className="mt-1 text-sm font-black">{name}</h3><p className="mt-1 text-xs text-stone-500">Màu: {color} · 180 g</p></div></article>)}</div><p className="mt-4 text-xs leading-5 text-stone-500">Cốc cao 95 mm, đường kính 70 mm; khối lượng cả bao bì khoảng 330 g. Đơn giá chưa gồm hộp, túi quà, phụ kiện, vận chuyển, nhãn tùy chỉnh và thuế/VAT.</p></div>
         </div>
       </section>
 
-      <section className="bg-[#3b2925] px-5 py-14 text-white sm:px-8 sm:py-24"><div className="mx-auto max-w-7xl"><p className="text-[10px] font-black uppercase tracking-[.22em] text-[#deb992]">06 · Quy trình đặt hàng</p><h2 className="mt-3 max-w-2xl font-serif-display text-3xl sm:text-5xl">Từ lựa chọn đến thành phẩm</h2><div className="mt-9 grid gap-px overflow-hidden rounded-2xl bg-white/10 md:grid-cols-5">{processSteps.map(([number, title, text]) => <article key={number} className="bg-[#3b2925] p-5"><p className="font-serif-display text-3xl text-[#d9a97e]">{number}</p><h3 className="mt-5 text-sm font-black">{title}</h3><p className="mt-2 text-xs leading-5 text-white/60">{text}</p></article>)}</div></div></section>
+      <section id="process" className="mx-auto max-w-7xl bg-[#173e34] px-5 py-14 text-white shadow-[0_12px_45px_rgba(52,38,32,.12)] sm:px-10 sm:py-20 lg:px-14"><div><p className="text-[10px] font-black uppercase tracking-[.22em] text-[#deb992]">06 · Quy trình đặt hàng</p><h2 className="mt-3 max-w-2xl font-serif-display text-3xl sm:text-5xl">Từ lựa chọn đến thành phẩm</h2><div className="mt-9 grid gap-px overflow-hidden bg-white/10 md:grid-cols-5">{processSteps.map(([number, title, text]) => <article key={number} className="bg-[#173e34] p-5"><p className="font-serif-display text-3xl text-[#d9a97e]">{number}</p><h3 className="mt-5 text-sm font-black">{title}</h3><p className="mt-2 text-xs leading-5 text-white/60">{text}</p></article>)}</div></div></section>
 
-      <section className="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-24">
+      <section className="mx-auto max-w-7xl bg-[#fffdf9] px-5 py-14 shadow-[0_12px_45px_rgba(52,38,32,.08)] sm:px-10 sm:py-20 lg:px-14">
         <div className="grid gap-5 lg:grid-cols-2">
           <article className="rounded-[1.8rem] border border-stone-200 bg-white p-6 sm:p-8"><h2 className="font-serif-display text-2xl sm:text-3xl">Thanh toán, sản xuất & giao hàng</h2><p className="mt-5 text-sm leading-7 text-stone-600">Thông thường, Candlet đề xuất đặt cọc 50% khi xác nhận đơn và thanh toán 50% còn lại trước khi bàn giao. Yêu cầu riêng về giá, tiến độ và phương thức thanh toán sẽ được thống nhất trước khi triển khai.</p><ul className="mt-5 space-y-3">{productionPolicies.map(item => <li key={item} className="flex gap-3 text-sm leading-6 text-stone-600"><i className="ph-fill ph-check-circle mt-1 shrink-0 text-[#9b6551]" /><span>{item}</span></li>)}</ul></article>
           <article className="rounded-[1.8rem] border border-stone-200 bg-[#eee4d8] p-6 sm:p-8"><h2 className="font-serif-display text-2xl sm:text-3xl">Thay đổi, hủy đơn & chất lượng</h2><div className="mt-5 space-y-4 text-sm leading-6 text-stone-600"><p><strong className="text-[#5f3c34]">Trước khi duyệt thiết kế:</strong> Có thể điều chỉnh nội dung theo thỏa thuận.</p><p><strong className="text-[#5f3c34]">Sau khi duyệt và đã in:</strong> Các thay đổi phát sinh được báo chi phí riêng.</p><p><strong className="text-[#5f3c34]">Sau khi sản xuất:</strong> Không tự động chấp nhận hủy; hai bên đối soát chi phí đã phát sinh và thống nhất phương án.</p><p><strong className="text-[#5f3c34]">Khi nhận hàng:</strong> Báo thiếu, vỡ hũ hoặc lỗi trong 48 giờ, kèm hình ảnh/video. Candlet kiểm tra và đổi, bù hoặc khắc phục lỗi thuộc trách nhiệm sản xuất.</p></div></article>
         </div>
       </section>
 
-      <section className="border-t border-[#ddd1c5] px-5 py-14 sm:px-8 sm:py-24"><div className="mx-auto grid max-w-7xl gap-8 rounded-[2rem] bg-[#75483d] px-6 py-10 text-white sm:px-10 lg:grid-cols-[1fr_.8fr] lg:items-center lg:px-14 lg:py-14"><div><p className="text-[10px] font-black uppercase tracking-[.23em] text-[#f0cda7]">Thông tin cần gửi để chốt cấu hình</p><h2 className="mt-3 font-serif-display text-3xl sm:text-5xl">Sẵn sàng tạo dấu ấn riêng?</h2><p className="mt-4 max-w-2xl text-sm leading-7 text-white/70">Gửi số lượng, ngày cần nhận, dung tích, mã cốc, mã nắp, mã mùi, nội dung nhãn, phụ kiện và địa điểm giao hàng. Candlet sẽ xác nhận giá và tiến độ.</p></div><div className="flex flex-col gap-3 lg:items-end"><a href="https://zalo.me/0328624761" target="_blank" rel="noreferrer" className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-white px-6 text-xs font-black uppercase tracking-wider text-[#5b382f] lg:w-64"><i className="ph-bold ph-chat-circle-dots text-lg" /> Trao đổi qua Zalo</a><Link to="/shop" className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full border border-white/25 px-6 text-xs font-bold uppercase tracking-wider lg:w-64">Xem sản phẩm mẫu <i className="ph-bold ph-arrow-right" /></Link></div></div></section>
+      <section className="mx-auto max-w-7xl bg-[#75483d] px-6 py-12 text-white shadow-[0_12px_45px_rgba(52,38,32,.12)] sm:px-10 lg:px-14 lg:py-16"><div className="grid gap-8 lg:grid-cols-[1fr_.8fr] lg:items-center"><div><p className="text-[10px] font-black uppercase tracking-[.23em] text-[#f0cda7]">Thông tin cần gửi để chốt cấu hình</p><h2 className="mt-3 font-serif-display text-3xl sm:text-5xl">Sẵn sàng tạo dấu ấn riêng?</h2><p className="mt-4 max-w-2xl text-sm leading-7 text-white/70">Gửi số lượng, ngày cần nhận, dung tích, mã cốc, mã nắp, mã mùi, nội dung nhãn, phụ kiện và địa điểm giao hàng. Candlet sẽ xác nhận giá và tiến độ.</p></div><div className="flex flex-col gap-3 lg:items-end"><a href="https://zalo.me/0328624761" target="_blank" rel="noreferrer" className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-white px-6 text-xs font-black uppercase tracking-wider text-[#5b382f] lg:w-64"><i className="ph-bold ph-chat-circle-dots text-lg" /> Trao đổi qua Zalo</a><Link to="/shop" className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full border border-white/25 px-6 text-xs font-bold uppercase tracking-wider lg:w-64">Xem sản phẩm mẫu <i className="ph-bold ph-arrow-right" /></Link></div></div></section>
+        </div>
+      </div>
     </main>
   );
 }

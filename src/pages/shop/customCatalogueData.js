@@ -10,17 +10,23 @@ export const shapedPrices = [
 ];
 
 export const cups = [
-  ['C01', 'Trắng bóng', '#f6f4ef'], ['C02', 'Trắng mờ', '#e9e7e1'], ['C03', 'Hồng mờ', '#d9aaa7'],
-  ['C04', 'Nâu hổ phách', '#7a3f24'], ['C05', 'Hồng bóng', '#d77d82'], ['C06', 'Đen bóng', '#262321'], ['C07', 'Trong suốt', '#f4f7f6'],
+  ['C01', 'Trắng bóng', '#f6f4ef'], ['C02', 'Trắng mờ', '#e9e7e1', '/custom-catalogue/cup-white-matte.webp'], ['C03', 'Hồng mờ', '#d9aaa7'],
+  ['C04', 'Nâu hổ phách', '#7a3f24', '/custom-catalogue/cup-amber.webp'], ['C05', 'Hồng bóng', '#d77d82'], ['C06', 'Đen bóng', '#262321', '/custom-catalogue/cup-black.webp'], ['C07', 'Trong suốt', '#f4f7f6'],
 ];
 
 export const lids = [
-  ['N01', 'Nắp tre', '70 mm'], ['N02', 'Nắp gỗ thông', '70 mm'], ['N03', 'Nắp kim loại', '80 mm · vàng / bạc / đen'],
+  ['N01', 'Nắp tre', '70 mm', '/custom-catalogue/lid-bamboo.webp'],
+  ['N02', 'Nắp gỗ thông', '70 mm', '/custom-catalogue/lid-pine.webp'],
+  ['N03', 'Nắp kim loại', '80 mm · vàng / bạc / đen', '/custom-catalogue/lid-metal.webp'],
 ];
 
 export const shapedCandles = [
-  ['01', 'Cà phê hạt', 'Nâu cà phê'], ['02', 'Latte caramel', 'Nâu caramel'], ['03', 'Latte chanh', 'Vàng'],
-  ['04', 'Latte oải hương', 'Tím'], ['05', 'Latte dâu tây', 'Hồng'], ['06', 'Latte matcha', 'Xanh lá'],
+  ['01', 'Cà phê hạt', 'Nâu cà phê', '/custom-catalogue/shape-coffee.webp'],
+  ['02', 'Latte caramel', 'Nâu caramel', '/custom-catalogue/shape-caramel.webp'],
+  ['03', 'Latte chanh', 'Vàng', '/custom-catalogue/shape-lemon.webp'],
+  ['04', 'Latte oải hương', 'Tím', '/custom-catalogue/shape-lavender.webp'],
+  ['05', 'Latte dâu tây', 'Hồng', '/custom-catalogue/shape-strawberry.webp'],
+  ['06', 'Latte matcha', 'Xanh lá', '/custom-catalogue/shape-matcha.webp'],
 ];
 
 export const processSteps = [
