@@ -6,6 +6,7 @@ import {
 } from './customCatalogueData';
 
 const ZALO_URL = 'https://zalo.me/0328624761';
+const FANPAGE_URL = 'https://www.facebook.com/candlet.shop';
 
 function Eyebrow({ children, light = false }) {
   return (
@@ -198,6 +199,15 @@ export default function CorporateGifts() {
       <section className="px-4 pb-16 sm:px-8 sm:pb-24">
         <div className="relative mx-auto max-w-7xl overflow-hidden rounded-[2rem] bg-brand-burgundy px-6 py-10 text-white sm:px-10 sm:py-14 lg:px-16"><div className="absolute -right-24 -top-32 h-80 w-80 rounded-full bg-brand-terracotta/35 blur-3xl" /><div className="relative grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center"><div><p className="text-[10px] font-black uppercase tracking-[.2em] text-brand-sand">Bắt đầu đơn custom</p><h2 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">Bạn đã có ý tưởng? Candlet giúp bạn hoàn thiện.</h2><p className="mt-4 max-w-2xl text-sm leading-7 text-white/65">Gửi số lượng, ngày cần nhận và các mã lựa chọn. Candlet sẽ tư vấn cấu hình, xác nhận giá và tiến độ.</p></div><div className="flex flex-col gap-3 sm:flex-row lg:flex-col"><a href={ZALO_URL} target="_blank" rel="noreferrer" className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-brand-sand px-7 text-xs font-black uppercase tracking-wider text-brand-deepWine"><i className="ph-bold ph-chat-circle-dots text-lg" /> Trao đổi qua Zalo</a><Link to="/shop" className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-white/25 px-7 text-xs font-bold uppercase tracking-wider">Xem sản phẩm mẫu <i className="ph-bold ph-arrow-right" /></Link></div></div></div>
       </section>
+
+      <div className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-3 z-50 flex flex-col items-end gap-2.5 sm:bottom-6 sm:right-6" aria-label="Liên hệ nhanh">
+        <a href={ZALO_URL} target="_blank" rel="noreferrer" title="Liên hệ Candlet qua Zalo" className="block h-12 w-12 transition hover:-translate-y-0.5 hover:scale-105" aria-label="Liên hệ Candlet qua Zalo">
+          <img src="https://cdn.simpleicons.org/zalo/0068FF" alt="Zalo" className="h-full w-full object-contain" />
+        </a>
+        <a href={FANPAGE_URL} target="_blank" rel="noreferrer" title="Mở Fanpage Candlet" className="block h-12 w-12 transition hover:-translate-y-0.5 hover:scale-105" aria-label="Mở Fanpage Candlet trên Facebook">
+          <img src="https://cdn.simpleicons.org/facebook/0866FF" alt="Facebook" className="h-full w-full object-contain" />
+        </a>
+      </div>
     </main>
   );
 }

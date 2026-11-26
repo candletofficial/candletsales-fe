@@ -473,29 +473,33 @@ export default function ShopHome() {
       </section>
 
       {/* Dịch vụ custom và quà tặng doanh nghiệp */}
-      <section className="dashed-grid-border relative overflow-hidden border-b border-dashed bg-[#f7f1e9]" data-purpose="corporate-custom-intro">
-        <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-amber-200/25 blur-3xl" />
-        <div className="relative mx-auto grid max-w-7xl lg:grid-cols-[.92fr_1.08fr]">
-          <div className="relative min-h-72 overflow-hidden border-b border-dashed border-stone-300 lg:min-h-[460px] lg:border-b-0 lg:border-r">
-            <img src="/story-craft.jpg" alt="Nến thơm custom dành cho doanh nghiệp" className="absolute inset-0 h-full w-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#35231f]/70 via-transparent to-transparent" />
-            <div className="absolute inset-x-5 bottom-5 flex items-end justify-between gap-4 rounded-2xl border border-white/40 bg-white/86 p-4 text-[#3f2b27] shadow-xl backdrop-blur sm:inset-x-8 sm:bottom-8">
-              <div><p className="text-[9px] font-black uppercase tracking-[.18em] text-[#9c6651]">Nến custom từ</p><p className="mt-1 font-serif-display text-3xl font-bold">85.000đ</p></div>
-              <p className="max-w-36 text-right text-[10px] font-semibold leading-4 text-stone-500">Cốc 200 ml · nhãn custom cơ bản</p>
+      <section className="relative overflow-hidden border-b border-brand-sand/70 bg-brand-cream text-brand-charcoal" data-purpose="corporate-custom-intro">
+        <div className="absolute -right-32 -top-44 h-[30rem] w-[30rem] rounded-full bg-brand-terracotta/10 blur-3xl" />
+        <div className="absolute -bottom-48 left-1/4 h-80 w-80 rounded-full bg-brand-gold/10 blur-3xl" />
+        <div className="relative mx-auto grid max-w-7xl gap-10 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[1.12fr_.88fr] lg:items-end lg:gap-20 lg:py-24">
+          <div className="reveal-from-left">
+            <div className="flex items-center gap-3 text-[9px] font-black uppercase tracking-[.22em] text-brand-terracotta sm:text-[10px]"><span className="h-px w-9 bg-brand-terracotta" /> Candlet Custom Studio</div>
+            <h2 className="mt-5 max-w-3xl font-serif-display text-4xl font-normal leading-[1.08] text-brand-burgundy sm:text-6xl">Một chiếc nến,<br /><span className="italic text-brand-terracotta">mang dấu ấn của bạn</span></h2>
+            <p className="mt-6 max-w-2xl text-sm leading-7 text-brand-muted sm:text-base sm:leading-8">Dành cho doanh nghiệp, hộ kinh doanh, sự kiện và quà tặng. Bạn tự chọn cốc, nắp, mùi hương, nhãn thương hiệu và quy cách đóng gói; Candlet hỗ trợ hoàn thiện từ thiết kế đến sản xuất.</p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Link to="/custom-candles" className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-brand-burgundy px-6 text-[11px] font-black uppercase tracking-wider text-white transition hover:-translate-y-0.5 hover:bg-brand-deepWine">Xem catalogue & bảng giá <i className="ph-bold ph-arrow-right" /></Link>
+              <a href="https://zalo.me/0328624761" target="_blank" rel="noreferrer" className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-brand-burgundy/30 bg-white/50 px-6 text-[11px] font-bold uppercase tracking-wider text-brand-burgundy transition hover:border-brand-burgundy hover:bg-white"><i className="ph-bold ph-chat-circle-dots text-base" /> Nhận tư vấn</a>
             </div>
           </div>
 
-          <div className="reveal-from-right flex flex-col justify-center px-5 py-10 sm:px-10 sm:py-14 lg:px-14">
-            <div className="flex items-center gap-3 text-[9px] font-black uppercase tracking-[.22em] text-[#98624f] sm:text-[10px]"><span className="h-px w-10 bg-[#b88d73]" /> Candlet Custom Studio</div>
-            <h2 className="mt-4 max-w-2xl font-serif-display text-3xl font-normal leading-tight text-[#332521] sm:text-5xl">Một chiếc nến,<br /><span className="italic text-[#87564a]">mang dấu ấn của bạn</span></h2>
-            <p className="mt-4 max-w-xl text-xs leading-6 text-stone-600 sm:text-sm sm:leading-7">Dành cho doanh nghiệp, hộ kinh doanh, sự kiện và quà tặng. Tự chọn cốc, nắp, mùi hương, nhãn thương hiệu và quy cách đóng gói.</p>
-            <div className="mt-6 grid grid-cols-3 divide-x divide-stone-300 border-y border-stone-300 py-4 text-center">
-              {[['20+', 'Số lượng'], ['63', 'Mùi hương'], ['07', 'Màu cốc']].map(([value, label]) => <div key={label}><p className="font-serif-display text-2xl font-bold text-[#76493e]">{value}</p><p className="mt-1 text-[9px] font-black uppercase tracking-wider text-stone-500">{label}</p></div>)}
-            </div>
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-              <Link to="/custom-candles" className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#3c2b27] px-5 text-[11px] font-black uppercase tracking-wider text-white transition hover:-translate-y-0.5 hover:bg-[#664238]">Xem catalogue & bảng giá <i className="ph-bold ph-arrow-right" /></Link>
-              <a href="https://zalo.me/0328624761" target="_blank" rel="noreferrer" className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-[#bda998] bg-white/50 px-5 text-[11px] font-bold uppercase tracking-wider text-[#503731] transition hover:bg-white"><i className="ph-bold ph-chat-circle-dots text-base" /> Nhận tư vấn</a>
-            </div>
+          <div className="reveal-from-right grid grid-cols-2 border-y border-brand-sand">
+            {[
+              ['20+', 'Số lượng tối thiểu', 'Linh hoạt cho đơn thử nghiệm'],
+              ['63', 'Mùi hương', 'Nhiều nhóm hương để lựa chọn'],
+              ['06', 'Màu cốc', 'Có thể yêu cầu màu riêng'],
+              ['85K', 'Giá tham khảo từ', 'Cốc 200 ml · nhãn cơ bản'],
+            ].map(([value, label, note], index) => (
+              <div key={label} className={`py-6 ${index % 2 ? 'border-l border-brand-sand pl-5 sm:pl-8' : 'pr-5 sm:pr-8'} ${index < 2 ? 'border-b border-brand-sand' : ''}`}>
+                <p className="text-2xl font-black tracking-tight text-brand-terracotta sm:text-3xl">{value}</p>
+                <p className="mt-2 text-[10px] font-black uppercase tracking-[.14em] text-brand-burgundy">{label}</p>
+                <p className="mt-1.5 text-[10px] leading-4 text-brand-muted sm:text-xs sm:leading-5">{note}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
