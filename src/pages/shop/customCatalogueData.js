@@ -19,9 +19,9 @@ export const cups = [
 ];
 
 export const lids = [
-  ['N01', 'Nắp tre', '70 mm', '/custom-catalogue/lid-bamboo.webp'],
-  ['N02', 'Nắp gỗ thông', '70 mm', '/custom-catalogue/lid-pine.webp'],
-  ['N03', 'Nắp kim loại', '80 mm · vàng / bạc / đen', '/custom-catalogue/lid-metal.webp'],
+  ['N01', 'Nắp tre', '70 mm', '/custom-catalogue/lid-bamboo-transparent.png'],
+  ['N02', 'Nắp gỗ thông', '70 mm', '/custom-catalogue/lid-pine-transparent.png'],
+  ['N03', 'Nắp kim loại', '80 mm · vàng / bạc / đen', '/custom-catalogue/lid-metal-transparent.png'],
 ];
 
 export const shapedCandles = [
