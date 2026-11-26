@@ -15,8 +15,7 @@ export const cups = [
   ['C03', 'Hồng phấn mờ', '#f0c4cb', '/custom-catalogue/official/cup-pink-matte.webp'],
   ['C04', 'Nâu hổ phách', '#9a4e26', '/custom-catalogue/official/cup-amber.webp'],
   ['C05', 'Hồng san hô mờ', '#e9a19b', '/custom-catalogue/official/cup-pink-frosted.webp'],
-  ['C06', 'Đen mờ', '#252525', '/custom-catalogue/official/cup-black-matte.webp'],
-  ['C07', 'Trong suốt', '#f6f7f5', '/custom-catalogue/official/cup-clear.webp'],
+  ['C06', 'Trong suốt', '#f6f7f5', '/custom-catalogue/official/cup-clear.webp'],
 ];
 
 export const lids = [
