@@ -200,12 +200,12 @@ export default function CorporateGifts() {
         <div className="relative mx-auto max-w-7xl overflow-hidden rounded-[2rem] bg-brand-burgundy px-6 py-10 text-white sm:px-10 sm:py-14 lg:px-16"><div className="absolute -right-24 -top-32 h-80 w-80 rounded-full bg-brand-terracotta/35 blur-3xl" /><div className="relative grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center"><div><p className="text-[10px] font-black uppercase tracking-[.2em] text-brand-sand">Bắt đầu đơn custom</p><h2 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">Bạn đã có ý tưởng? Candlet giúp bạn hoàn thiện.</h2><p className="mt-4 max-w-2xl text-sm leading-7 text-white/65">Gửi số lượng, ngày cần nhận và các mã lựa chọn. Candlet sẽ tư vấn cấu hình, xác nhận giá và tiến độ.</p></div><div className="flex flex-col gap-3 sm:flex-row lg:flex-col"><a href={ZALO_URL} target="_blank" rel="noreferrer" className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-brand-sand px-7 text-xs font-black uppercase tracking-wider text-brand-deepWine"><i className="ph-bold ph-chat-circle-dots text-lg" /> Trao đổi qua Zalo</a><Link to="/shop" className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-white/25 px-7 text-xs font-bold uppercase tracking-wider">Xem sản phẩm mẫu <i className="ph-bold ph-arrow-right" /></Link></div></div></div>
       </section>
 
-      <div className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-3 z-50 flex flex-col items-end gap-2.5 sm:bottom-6 sm:right-6" aria-label="Liên hệ nhanh">
-        <a href={ZALO_URL} target="_blank" rel="noreferrer" title="Liên hệ Candlet qua Zalo" className="block h-12 w-12 transition hover:-translate-y-0.5 hover:scale-105" aria-label="Liên hệ Candlet qua Zalo">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Icon_of_Zalo.svg" alt="Zalo" className="h-full w-full object-contain" />
+      <div className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-3 z-50 flex flex-col items-end gap-2 sm:bottom-6 sm:right-6" aria-label="Liên hệ nhanh">
+        <a href={ZALO_URL} target="_blank" rel="noreferrer" title="Liên hệ Candlet qua Zalo" className="block h-10 w-10 transition hover:-translate-y-0.5 hover:scale-105" aria-label="Liên hệ Candlet qua Zalo">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Icon_of_Zalo.svg" alt="Zalo" className="h-full w-full animate-float-gentle object-contain drop-shadow-[0_3px_5px_rgba(0,0,0,.18)]" />
         </a>
-        <a href={FANPAGE_URL} target="_blank" rel="noreferrer" title="Mở Fanpage Candlet" className="block h-12 w-12 transition hover:-translate-y-0.5 hover:scale-105" aria-label="Mở Fanpage Candlet trên Facebook">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/b/b9/2023_Facebook_icon.svg" alt="Facebook" className="h-full w-full object-contain" />
+        <a href={FANPAGE_URL} target="_blank" rel="noreferrer" title="Mở Fanpage Candlet" className="block h-10 w-10 transition hover:-translate-y-0.5 hover:scale-105" aria-label="Mở Fanpage Candlet trên Facebook">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/b/b9/2023_Facebook_icon.svg" alt="Facebook" className="h-full w-full animate-float-gentle object-contain drop-shadow-[0_3px_5px_rgba(0,0,0,.18)] [animation-delay:-2.2s]" />
         </a>
       </div>
     </main>
