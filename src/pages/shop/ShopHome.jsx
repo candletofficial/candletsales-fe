@@ -472,6 +472,48 @@ export default function ShopHome() {
         </div>
       </section>
 
+      {/* Dịch vụ custom và quà tặng doanh nghiệp */}
+      <section className="relative overflow-hidden border-b border-stone-200 bg-[#2f201e] text-white" data-purpose="corporate-custom-intro">
+        <div className="absolute -right-24 -top-32 h-96 w-96 rounded-full bg-[#d8a678]/16 blur-3xl" />
+        <div className="absolute -bottom-32 left-1/3 h-72 w-72 rounded-full bg-[#9d6657]/18 blur-3xl" />
+        <div className="relative mx-auto grid max-w-7xl gap-8 px-5 py-10 sm:px-8 sm:py-16 lg:grid-cols-[1.08fr_.92fr] lg:items-center">
+          <div className="reveal-from-left">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/6 px-3 py-1.5 text-[9px] font-black uppercase tracking-[.2em] text-[#efc8a4] sm:text-[10px]">
+              <i className="ph-fill ph-sparkle" /> Candlet Custom Studio
+            </div>
+            <h2 className="mt-4 max-w-2xl font-serif-display text-3xl font-normal leading-tight sm:text-5xl">
+              Nến custom & quà tặng <span className="italic text-[#e8c19d]">mang dấu ấn riêng</span>
+            </h2>
+            <p className="mt-4 max-w-2xl text-xs leading-6 text-white/65 sm:text-sm sm:leading-7">
+              Dành cho doanh nghiệp, hộ kinh doanh, sự kiện và những dịp tri ân. Từ 50 hũ, Candlet hỗ trợ chọn cốc, mùi hương, thiết kế nhãn, in logo và hoàn thiện hộp quà theo yêu cầu.
+            </p>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <Link to="/qua-tang-doanh-nghiep" className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#efcfad] px-5 text-[11px] font-black uppercase tracking-wider text-[#3d2824] transition hover:-translate-y-0.5 hover:bg-white">
+                Xem dịch vụ & chính sách <i className="ph-bold ph-arrow-right" />
+              </Link>
+              <a href="https://zalo.me/0328624761" target="_blank" rel="noreferrer" className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-white/18 px-5 text-[11px] font-bold uppercase tracking-wider text-white transition hover:bg-white/8">
+                <i className="ph-bold ph-chat-circle-dots text-base" /> Nhận báo giá
+              </a>
+            </div>
+          </div>
+
+          <div className="reveal-from-right grid grid-cols-2 gap-3 sm:gap-4">
+            {[
+              ['ph-pen-nib', 'Nhãn & logo riêng', 'Thiết kế phù hợp nhận diện'],
+              ['ph-candle', 'Cốc & mùi hương', 'Lựa chọn theo nhu cầu'],
+              ['ph-gift', 'Hộp quà & thiệp', 'Bao bì báo giá riêng'],
+              ['ph-buildings', 'Từ 50 hũ', 'Ưu đãi theo số lượng'],
+            ].map(([icon, title, text]) => (
+              <article key={title} className="rounded-2xl border border-white/10 bg-white/7 p-4 backdrop-blur-sm transition hover:-translate-y-1 hover:bg-white/10 sm:p-5">
+                <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#efcfad] text-lg text-[#4c302b]"><i className={`ph-bold ${icon}`} /></span>
+                <h3 className="mt-4 text-xs font-black sm:text-sm">{title}</h3>
+                <p className="mt-1 text-[10px] leading-4 text-white/50 sm:text-xs sm:leading-5">{text}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Dải Ruy-Băng Hương Thơm Chuyển Động Thanh Lịch (Editorial Marquee Ribbon) */}
       <div
         aria-hidden="true"

@@ -47,6 +47,7 @@ import ShopWishlist from './pages/shop/ShopWishlist';
 import ShopGuide from './pages/shop/ShopGuide';
 import ShopStories from './pages/shop/ShopStories';
 import ShopStoryDetail from './pages/shop/ShopStoryDetail';
+import CorporateGifts from './pages/shop/CorporateGifts';
 import { WebsiteThemeProvider } from './hooks/useWebsiteTheme';
 import AIAssistant from './components/AIAssistant';
 
@@ -101,6 +102,7 @@ export default function App() {
             <Route path="stories" element={<ShopStories />} />
             <Route path="stories/:slug" element={<ShopStoryDetail />} />
             <Route path="about" element={<ShopStories />} />
+            <Route path="qua-tang-doanh-nghiep" element={<CorporateGifts />} />
             <Route path="profile" element={<ShopProtectedRoute><ShopProfile /></ShopProtectedRoute>} />
             <Route path="wishlist" element={<ShopProtectedRoute><ShopWishlist /></ShopProtectedRoute>} />
           </Route>

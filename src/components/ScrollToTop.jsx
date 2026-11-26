@@ -8,6 +8,7 @@ const ROUTE_TITLES = {
   '/cam-nang': 'Cẩm Nang Chăm Sóc Nến Thơm | Candlet',
   '/stories': 'Câu Chuyện Mùi Hương & Cảm Xúc | Candlet',
   '/about': 'Về Candlet — Xưởng Nến Thủ Công',
+  '/qua-tang-doanh-nghiep': 'Quà Tặng Doanh Nghiệp & Nến Custom | Candlet',
   '/cart': 'Giỏ Hàng | Candlet',
   '/checkout': 'Thanh Toán Đơn Hàng | Candlet',
   '/orders': 'Tra Cứu Đơn Hàng | Candlet',
