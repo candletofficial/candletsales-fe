@@ -203,15 +203,14 @@ export default function CorporateGifts() {
       <div className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-3 z-50 flex flex-col items-end gap-2 sm:bottom-6 sm:right-6" aria-label="Liên hệ nhanh">
         <a href={ZALO_URL} target="_blank" rel="noreferrer" title="Liên hệ Candlet qua Zalo" className="block h-10 w-10 transition hover:-translate-y-0.5 hover:scale-105" aria-label="Liên hệ Candlet qua Zalo">
           <svg viewBox="0 0 48 48" role="img" aria-hidden="true" className="h-full w-full drop-shadow-[0_3px_5px_rgba(0,0,0,.18)]">
-            <circle cx="24" cy="24" r="23" fill="#50131a" stroke="#d8b99a" strokeWidth="1.5" />
-            <path d="M13 13.5h22a3.5 3.5 0 0 1 3.5 3.5v12.5A3.5 3.5 0 0 1 35 33H25l-6 4.2V33h-6a3.5 3.5 0 0 1-3.5-3.5V17a3.5 3.5 0 0 1 3.5-3.5Z" fill="#fff8ee" />
-            <text x="24" y="27.1" fill="#50131a" fontFamily="Arial, sans-serif" fontSize="11.5" fontWeight="700" letterSpacing="-.4" textAnchor="middle">Zalo</text>
+            <circle cx="24" cy="24" r="23" fill="#0068ff" />
+            <text x="24" y="32" fill="#fff" fontFamily="Arial, sans-serif" fontSize="23" fontWeight="700" textAnchor="middle">Z</text>
           </svg>
         </a>
         <a href={FANPAGE_URL} target="_blank" rel="noreferrer" title="Mở Fanpage Candlet" className="block h-10 w-10 transition hover:-translate-y-0.5 hover:scale-105" aria-label="Mở Fanpage Candlet trên Facebook">
           <svg viewBox="0 0 48 48" role="img" aria-hidden="true" className="h-full w-full drop-shadow-[0_3px_5px_rgba(0,0,0,.18)]">
-            <circle cx="24" cy="24" r="23" fill="#a65f4b" stroke="#d8b99a" strokeWidth="1.5" />
-            <path d="M27.2 41V26.3h5.1l.8-5.8h-5.9v-3.7c0-1.7.5-2.9 3-2.9h3.2V8.7c-.6-.1-2.4-.3-4.6-.3-4.6 0-7.7 2.8-7.7 7.9v4.2h-5.2v5.8h5.2V41h6.1Z" fill="#fff8ee" />
+            <circle cx="24" cy="24" r="23" fill="#0866ff" />
+            <path d="M27.2 41V26.3h5.1l.8-5.8h-5.9v-3.7c0-1.7.5-2.9 3-2.9h3.2V8.7c-.6-.1-2.4-.3-4.6-.3-4.6 0-7.7 2.8-7.7 7.9v4.2h-5.2v5.8h5.2V41h6.1Z" fill="#fff" />
           </svg>
         </a>
       </div>
