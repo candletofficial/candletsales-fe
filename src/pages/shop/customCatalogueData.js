@@ -10,8 +10,13 @@ export const shapedPrices = [
 ];
 
 export const cups = [
-  ['C01', 'Trắng bóng', '#f6f4ef'], ['C02', 'Trắng mờ', '#e9e7e1', '/custom-catalogue/cup-white-matte.webp'], ['C03', 'Hồng mờ', '#d9aaa7'],
-  ['C04', 'Nâu hổ phách', '#7a3f24', '/custom-catalogue/cup-amber.webp'], ['C05', 'Hồng bóng', '#d77d82'], ['C06', 'Đen bóng', '#262321', '/custom-catalogue/cup-black.webp'], ['C07', 'Trong suốt', '#f4f7f6'],
+  ['C01', 'Trắng đục', '#f3f5f4', '/custom-catalogue/official/cup-white-matte.webp'],
+  ['C02', 'Trắng mờ', '#edf0f1', '/custom-catalogue/official/cup-white-frosted.webp'],
+  ['C03', 'Hồng phấn mờ', '#f0c4cb', '/custom-catalogue/official/cup-pink-matte.webp'],
+  ['C04', 'Nâu hổ phách', '#9a4e26', '/custom-catalogue/official/cup-amber.webp'],
+  ['C05', 'Hồng san hô mờ', '#e9a19b', '/custom-catalogue/official/cup-pink-frosted.webp'],
+  ['C06', 'Đen mờ', '#252525', '/custom-catalogue/official/cup-black-matte.webp'],
+  ['C07', 'Trong suốt', '#f6f7f5', '/custom-catalogue/official/cup-clear.webp'],
 ];
 
 export const lids = [

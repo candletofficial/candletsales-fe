@@ -47,9 +47,9 @@ export default function CorporateGifts() {
           </div>
           <div className="relative mx-auto flex h-[390px] w-full max-w-2xl items-end justify-center sm:h-[480px]">
             <div className="absolute inset-x-4 bottom-0 h-52 rounded-[50%] bg-black/20 blur-2xl" />
-            <img src="/custom-catalogue/cup-white-matte.webp" alt="Cốc nến trắng mờ" className="relative z-10 h-[82%] w-auto object-contain drop-shadow-[0_26px_25px_rgba(0,0,0,.28)]" />
-            <img src="/custom-catalogue/cup-amber.webp" alt="Cốc nến nâu hổ phách" className="absolute bottom-0 left-[2%] z-20 h-[63%] w-auto -rotate-3 object-contain drop-shadow-[0_24px_20px_rgba(0,0,0,.3)] sm:left-[8%]" />
-            <img src="/custom-catalogue/cup-black.webp" alt="Cốc nến đen bóng" className="absolute bottom-0 right-[2%] z-20 h-[68%] w-auto rotate-3 object-contain drop-shadow-[0_24px_20px_rgba(0,0,0,.3)] sm:right-[5%]" />
+            <img src="/custom-catalogue/official/cup-white-frosted.webp" alt="Cốc nến trắng mờ chính thức" className="relative z-10 h-[82%] w-auto object-contain drop-shadow-[0_26px_25px_rgba(0,0,0,.28)]" />
+            <img src="/custom-catalogue/official/cup-amber.webp" alt="Cốc nến nâu hổ phách chính thức" className="absolute bottom-0 left-[2%] z-20 h-[63%] w-auto -rotate-3 object-contain drop-shadow-[0_24px_20px_rgba(0,0,0,.3)] sm:left-[8%]" />
+            <img src="/custom-catalogue/official/cup-black-matte.webp" alt="Cốc nến đen mờ chính thức" className="absolute bottom-0 right-[2%] z-20 h-[68%] w-auto rotate-3 object-contain drop-shadow-[0_24px_20px_rgba(0,0,0,.3)] sm:right-[5%]" />
             <div className="absolute right-0 top-0 z-30 border border-white/20 bg-[#173e34]/80 px-4 py-3 text-right backdrop-blur"><p className="text-[9px] font-black uppercase tracking-[.18em] text-[#d8b887]">Cốc 200 ml từ</p><p className="mt-1 font-serif-display text-2xl text-white">85.000đ</p></div>
           </div>
         </div>
@@ -79,7 +79,7 @@ export default function CorporateGifts() {
         <div className="mx-auto max-w-7xl">
           <div className="max-w-2xl"><p className="text-[10px] font-black uppercase tracking-[.22em] text-[#98614e]">02 · Chọn cốc</p><h2 className="mt-3 font-serif-display text-3xl sm:text-5xl">Bảng màu cốc nến</h2><p className="mt-4 text-sm leading-7 text-stone-600">Chọn dung tích 200 ml hoặc 300 ml, sau đó chọn màu cốc. 200 ml và 300 ml là dung tích cốc, không phải khối lượng sáp.</p></div>
           <div className="mt-9 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
-            {cups.map(([code, name, color, image]) => <article key={code} className="border border-stone-200 bg-[#faf8f5] p-3"><div className="grid h-32 place-items-center overflow-hidden border border-black/5" style={{ background: color }}>{image && <img src={image} alt={`Cốc nến ${name}`} className="h-full w-full object-contain mix-blend-multiply" />}</div><p className="mt-3 text-[9px] font-black uppercase tracking-widest text-[#a06c57]">{code}</p><h3 className="mt-1 text-sm font-bold">{name}</h3></article>)}
+            {cups.map(([code, name, color, image]) => <article key={code} className="border border-stone-200 bg-[#faf8f5] p-3"><div className="grid h-36 place-items-center overflow-hidden border border-black/5" style={{ background: color }}>{image && <img src={image} alt={`Cốc nến ${name}`} className="h-full w-full object-contain" />}</div><p className="mt-3 text-[9px] font-black uppercase tracking-widest text-[#a06c57]">{code}</p><h3 className="mt-1 text-sm font-bold">{name}</h3></article>)}
           </div>
           <p className="mt-5 text-xs leading-5 text-stone-500">Cốc 200 ml là mẫu trong catalogue. Kích thước, màu, nắp và khối lượng nến của cốc 300 ml được xác nhận theo mẫu thực tế; thời gian cháy được xác nhận theo thành phẩm.</p>
         </div>
