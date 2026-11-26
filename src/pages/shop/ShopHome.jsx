@@ -473,43 +473,29 @@ export default function ShopHome() {
       </section>
 
       {/* Dịch vụ custom và quà tặng doanh nghiệp */}
-      <section className="relative overflow-hidden border-b border-stone-200 bg-[#2f201e] text-white" data-purpose="corporate-custom-intro">
-        <div className="absolute -right-24 -top-32 h-96 w-96 rounded-full bg-[#d8a678]/16 blur-3xl" />
-        <div className="absolute -bottom-32 left-1/3 h-72 w-72 rounded-full bg-[#9d6657]/18 blur-3xl" />
-        <div className="relative mx-auto grid max-w-7xl gap-8 px-5 py-10 sm:px-8 sm:py-16 lg:grid-cols-[1.08fr_.92fr] lg:items-center">
-          <div className="reveal-from-left">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/6 px-3 py-1.5 text-[9px] font-black uppercase tracking-[.2em] text-[#efc8a4] sm:text-[10px]">
-              <i className="ph-fill ph-sparkle" /> Candlet Custom Studio
-            </div>
-            <h2 className="mt-4 max-w-2xl font-serif-display text-3xl font-normal leading-tight sm:text-5xl">
-              Nến custom & quà tặng <span className="italic text-[#e8c19d]">mang dấu ấn riêng</span>
-            </h2>
-            <p className="mt-4 max-w-2xl text-xs leading-6 text-white/65 sm:text-sm sm:leading-7">
-              Dành cho doanh nghiệp, hộ kinh doanh, sự kiện và những dịp tri ân. Từ 50 hũ, Candlet hỗ trợ chọn cốc, mùi hương, thiết kế nhãn, in logo và hoàn thiện hộp quà theo yêu cầu.
-            </p>
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-              <Link to="/qua-tang-doanh-nghiep" className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#efcfad] px-5 text-[11px] font-black uppercase tracking-wider text-[#3d2824] transition hover:-translate-y-0.5 hover:bg-white">
-                Xem dịch vụ & chính sách <i className="ph-bold ph-arrow-right" />
-              </Link>
-              <a href="https://zalo.me/0328624761" target="_blank" rel="noreferrer" className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-white/18 px-5 text-[11px] font-bold uppercase tracking-wider text-white transition hover:bg-white/8">
-                <i className="ph-bold ph-chat-circle-dots text-base" /> Nhận báo giá
-              </a>
+      <section className="dashed-grid-border relative overflow-hidden border-b border-dashed bg-[#f7f1e9]" data-purpose="corporate-custom-intro">
+        <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-amber-200/25 blur-3xl" />
+        <div className="relative mx-auto grid max-w-7xl lg:grid-cols-[.92fr_1.08fr]">
+          <div className="relative min-h-72 overflow-hidden border-b border-dashed border-stone-300 lg:min-h-[460px] lg:border-b-0 lg:border-r">
+            <img src="/story-craft.jpg" alt="Nến thơm custom dành cho doanh nghiệp" className="absolute inset-0 h-full w-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#35231f]/70 via-transparent to-transparent" />
+            <div className="absolute inset-x-5 bottom-5 flex items-end justify-between gap-4 rounded-2xl border border-white/40 bg-white/86 p-4 text-[#3f2b27] shadow-xl backdrop-blur sm:inset-x-8 sm:bottom-8">
+              <div><p className="text-[9px] font-black uppercase tracking-[.18em] text-[#9c6651]">Nến custom từ</p><p className="mt-1 font-serif-display text-3xl font-bold">85.000đ</p></div>
+              <p className="max-w-36 text-right text-[10px] font-semibold leading-4 text-stone-500">Cốc 200 ml · nhãn custom cơ bản</p>
             </div>
           </div>
 
-          <div className="reveal-from-right grid grid-cols-2 gap-3 sm:gap-4">
-            {[
-              ['ph-pen-nib', 'Nhãn & logo riêng', 'Thiết kế phù hợp nhận diện'],
-              ['ph-candle', 'Cốc & mùi hương', 'Lựa chọn theo nhu cầu'],
-              ['ph-gift', 'Hộp quà & thiệp', 'Bao bì báo giá riêng'],
-              ['ph-buildings', 'Từ 50 hũ', 'Ưu đãi theo số lượng'],
-            ].map(([icon, title, text]) => (
-              <article key={title} className="rounded-2xl border border-white/10 bg-white/7 p-4 backdrop-blur-sm transition hover:-translate-y-1 hover:bg-white/10 sm:p-5">
-                <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#efcfad] text-lg text-[#4c302b]"><i className={`ph-bold ${icon}`} /></span>
-                <h3 className="mt-4 text-xs font-black sm:text-sm">{title}</h3>
-                <p className="mt-1 text-[10px] leading-4 text-white/50 sm:text-xs sm:leading-5">{text}</p>
-              </article>
-            ))}
+          <div className="reveal-from-right flex flex-col justify-center px-5 py-10 sm:px-10 sm:py-14 lg:px-14">
+            <div className="flex items-center gap-3 text-[9px] font-black uppercase tracking-[.22em] text-[#98624f] sm:text-[10px]"><span className="h-px w-10 bg-[#b88d73]" /> Candlet Custom Studio</div>
+            <h2 className="mt-4 max-w-2xl font-serif-display text-3xl font-normal leading-tight text-[#332521] sm:text-5xl">Một chiếc nến,<br /><span className="italic text-[#87564a]">mang dấu ấn của bạn</span></h2>
+            <p className="mt-4 max-w-xl text-xs leading-6 text-stone-600 sm:text-sm sm:leading-7">Dành cho doanh nghiệp, hộ kinh doanh, sự kiện và quà tặng. Tự chọn cốc, nắp, mùi hương, nhãn thương hiệu và quy cách đóng gói.</p>
+            <div className="mt-6 grid grid-cols-3 divide-x divide-stone-300 border-y border-stone-300 py-4 text-center">
+              {[['20+', 'Số lượng'], ['63', 'Mùi hương'], ['07', 'Màu cốc']].map(([value, label]) => <div key={label}><p className="font-serif-display text-2xl font-bold text-[#76493e]">{value}</p><p className="mt-1 text-[9px] font-black uppercase tracking-wider text-stone-500">{label}</p></div>)}
+            </div>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <Link to="/custom-candles" className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#3c2b27] px-5 text-[11px] font-black uppercase tracking-wider text-white transition hover:-translate-y-0.5 hover:bg-[#664238]">Xem catalogue & bảng giá <i className="ph-bold ph-arrow-right" /></Link>
+              <a href="https://zalo.me/0328624761" target="_blank" rel="noreferrer" className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-[#bda998] bg-white/50 px-5 text-[11px] font-bold uppercase tracking-wider text-[#503731] transition hover:bg-white"><i className="ph-bold ph-chat-circle-dots text-base" /> Nhận tư vấn</a>
+            </div>
           </div>
         </div>
       </section>

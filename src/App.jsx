@@ -102,7 +102,8 @@ export default function App() {
             <Route path="stories" element={<ShopStories />} />
             <Route path="stories/:slug" element={<ShopStoryDetail />} />
             <Route path="about" element={<ShopStories />} />
-            <Route path="qua-tang-doanh-nghiep" element={<CorporateGifts />} />
+            <Route path="custom-candles" element={<CorporateGifts />} />
+            <Route path="qua-tang-doanh-nghiep" element={<Navigate to="/custom-candles" replace />} />
             <Route path="profile" element={<ShopProtectedRoute><ShopProfile /></ShopProtectedRoute>} />
             <Route path="wishlist" element={<ShopProtectedRoute><ShopWishlist /></ShopProtectedRoute>} />
           </Route>

@@ -197,7 +197,7 @@ export default function ShopLayout() {
   const navLinks = [
     { label: 'Trang Chủ', path: '/' },
     { label: 'Cửa Hàng Nến', path: '/shop' },
-    { label: 'Quà Doanh Nghiệp', path: '/qua-tang-doanh-nghiep' },
+    { label: 'Nến Custom', path: '/custom-candles' },
     { label: 'Cẩm Nang', path: '/guide' },
     { label: 'Câu Chuyện', path: '/stories' },
   ];
