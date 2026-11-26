@@ -204,8 +204,8 @@ export default function CorporateGifts() {
         <a href={ZALO_URL} target="_blank" rel="noreferrer" title="Liên hệ Candlet qua Zalo" className="block h-10 w-10 transition hover:-translate-y-0.5 hover:scale-105" aria-label="Liên hệ Candlet qua Zalo">
           <svg viewBox="0 0 48 48" role="img" aria-hidden="true" className="h-full w-full drop-shadow-[0_3px_5px_rgba(0,0,0,.18)]">
             <circle cx="24" cy="24" r="23" fill="#50131a" stroke="#d8b99a" strokeWidth="1.5" />
-            <path d="M13.5 13h21a3.5 3.5 0 0 1 3.5 3.5v13a3.5 3.5 0 0 1-3.5 3.5h-9.2L19 37.5V33h-5.5a3.5 3.5 0 0 1-3.5-3.5v-13a3.5 3.5 0 0 1 3.5-3.5Z" fill="#fff8ee" />
-            <path d="M17.2 18.2h13.5l-8.3 10.1h8.5" fill="none" stroke="#a65f4b" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" />
+            <path d="M13 13.5h22a3.5 3.5 0 0 1 3.5 3.5v12.5A3.5 3.5 0 0 1 35 33H25l-6 4.2V33h-6a3.5 3.5 0 0 1-3.5-3.5V17a3.5 3.5 0 0 1 3.5-3.5Z" fill="#fff8ee" />
+            <text x="24" y="27.1" fill="#50131a" fontFamily="Arial, sans-serif" fontSize="11.5" fontWeight="700" letterSpacing="-.4" textAnchor="middle">Zalo</text>
           </svg>
         </a>
         <a href={FANPAGE_URL} target="_blank" rel="noreferrer" title="Mở Fanpage Candlet" className="block h-10 w-10 transition hover:-translate-y-0.5 hover:scale-105" aria-label="Mở Fanpage Candlet trên Facebook">
