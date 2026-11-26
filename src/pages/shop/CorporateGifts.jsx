@@ -202,10 +202,17 @@ export default function CorporateGifts() {
 
       <div className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-3 z-50 flex flex-col items-end gap-2 sm:bottom-6 sm:right-6" aria-label="Liên hệ nhanh">
         <a href={ZALO_URL} target="_blank" rel="noreferrer" title="Liên hệ Candlet qua Zalo" className="block h-10 w-10 transition hover:-translate-y-0.5 hover:scale-105" aria-label="Liên hệ Candlet qua Zalo">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Icon_of_Zalo.svg" alt="Zalo" className="h-full w-full animate-float-gentle object-contain drop-shadow-[0_3px_5px_rgba(0,0,0,.18)]" />
+          <svg viewBox="0 0 48 48" role="img" aria-hidden="true" className="h-full w-full drop-shadow-[0_3px_5px_rgba(0,0,0,.18)]">
+            <rect width="48" height="48" rx="11" fill="#0068ff" />
+            <path d="M9 9.5h30a3.5 3.5 0 0 1 3.5 3.5v19a3.5 3.5 0 0 1-3.5 3.5H24.5l-7.2 5v-5H9A3.5 3.5 0 0 1 5.5 32V13A3.5 3.5 0 0 1 9 9.5Z" fill="#fff" />
+            <text x="24" y="27.3" fill="#0068ff" fontFamily="Arial, sans-serif" fontSize="11.2" fontWeight="700" textAnchor="middle">Zalo</text>
+          </svg>
         </a>
         <a href={FANPAGE_URL} target="_blank" rel="noreferrer" title="Mở Fanpage Candlet" className="block h-10 w-10 transition hover:-translate-y-0.5 hover:scale-105" aria-label="Mở Fanpage Candlet trên Facebook">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/b/b9/2023_Facebook_icon.svg" alt="Facebook" className="h-full w-full animate-float-gentle object-contain drop-shadow-[0_3px_5px_rgba(0,0,0,.18)] [animation-delay:-2.2s]" />
+          <svg viewBox="0 0 48 48" role="img" aria-hidden="true" className="h-full w-full drop-shadow-[0_3px_5px_rgba(0,0,0,.18)]">
+            <circle cx="24" cy="24" r="24" fill="#0866ff" />
+            <path d="M27.2 42V26.3h5.3l.8-6.1h-6.1v-3.9c0-1.8.5-3 3.1-3h3.3V7.8c-.6-.1-2.5-.3-4.8-.3-4.8 0-8 2.9-8 8.2v4.5h-5.4v6.1h5.4V42h6.4Z" fill="#fff" />
+          </svg>
         </a>
       </div>
     </main>
