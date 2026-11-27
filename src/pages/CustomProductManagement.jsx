@@ -42,14 +42,13 @@ function ProductForm({ product, products, materials, onClose, onSaved }) {
       ingredient_id: item.ingredient_id?._id || item.ingredient_id || '',
       quantity: Number(item.quantity) || 0,
     }));
-    const used = new Set();
-    const recipe = CORE_RECIPE.map(core => {
-      const matchIndex = ingredients.findIndex((entry, index) => !used.has(index) && matchesRole(materials.find(material => material._id === entry.ingredient_id), core.role));
-      if (matchIndex >= 0) used.add(matchIndex);
-      const match = matchIndex >= 0 ? ingredients[matchIndex] : null;
-      return { ...core, ingredient_id: match?.ingredient_id || '', quantity: match?.quantity || core.quantity };
+    const recipe = ingredients.map(entry => {
+      const material = materials.find(item => String(item._id) === String(entry.ingredient_id));
+      const core = CORE_RECIPE.find(item => matchesRole(material, item.role));
+      return core
+        ? { ...core, ingredient_id: entry.ingredient_id, quantity: entry.quantity }
+        : { role: 'extra', label: 'Nguyên liệu bổ sung', unit: material?.unit || '', ...entry };
     });
-    ingredients.forEach((entry, index) => { if (!used.has(index)) recipe.push({ role: 'extra', label: 'Nguyên liệu bổ sung', unit: '', ...entry }); });
     return {
       productId: product.productId || newCode(), name: product.name || '', custom_group: product.custom_group || '',
       base_price: Number(product.base_price) || 0, description: product.description || '', recipe,
