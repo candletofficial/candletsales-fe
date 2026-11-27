@@ -3184,7 +3184,17 @@ export default function OrderManagement() {
                         {/* 3. Sản phẩm */}
                         <td className="px-5 py-3.5 align-middle">
                           <div className="space-y-1 min-w-[180px] max-w-[240px]">
-                            {!order.items || order.items.length === 0 ? (
+                            {order.custom_group ? (
+                              <div className="flex items-center gap-2">
+                                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary-container text-primary">
+                                  <span className="material-symbols-outlined text-[16px]">folder_special</span>
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="truncate text-[12.5px] font-bold text-stone-800">{order.custom_group}</p>
+                                  <p className="text-[9px] font-bold uppercase tracking-wide text-primary">Đơn custom</p>
+                                </div>
+                              </div>
+                            ) : !order.items || order.items.length === 0 ? (
                               <span className="text-xs italic text-stone-400">Không kèm sản phẩm</span>
                             ) : (
                               <>
