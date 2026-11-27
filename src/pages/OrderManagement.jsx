@@ -2218,7 +2218,8 @@ function OrderCostModal({ order, productMap, onClose }) {
     return { ...item, currentUnitCost: unitCost, lineCost: unitCost * (Number(item.quantity) || 0) };
   });
   const productCost = itemRows.reduce((sum, item) => sum + item.lineCost, 0);
-  const packagingCost = Number(order.packaging_cost) || 0;
+  const isCustomOrder = Boolean(order.custom_group);
+  const packagingCost = isCustomOrder ? 0 : (Number(order.packaging_cost) || 0);
   const logisticsCost = Number(order.logistics_cost) || 0;
   const returnCost = Number(order.return_cost) || 0;
   const seedingCost = Number(order.seeding_cost) || 0;
@@ -2249,7 +2250,7 @@ function OrderCostModal({ order, productMap, onClose }) {
         : order.is_seeding ? 'Đơn seeding' : 'Đơn bán hàng';
   const costRows = [
     ['Giá vốn sản phẩm', productCost, 'inventory_2'],
-    ['Chi phí đóng gói', packagingCost, 'package_2'],
+    ...(!isCustomOrder ? [['Chi phí đóng gói', packagingCost, 'package_2']] : []),
     ['Chi phí vận chuyển', logisticsCost, 'local_shipping'],
     ...(isReturned ? [['Chi phí hoàn hàng', returnCost, 'assignment_return']] : []),
     ...(order.is_seeding ? [['Chi phí seeding bổ sung', seedingCost, 'featured_seasonal_and_gifts'], ['Giá trị đơn bù trừ', -(Number(order.total_price) || 0), 'remove_circle']] : []),
@@ -2315,7 +2316,13 @@ function OrderCostModal({ order, productMap, onClose }) {
               <span className="font-mono text-sm font-black text-slate-900 bg-slate-100 px-2.5 py-1 rounded-lg">{formatPrice(productCost)}</span>
             </div>
             <div className="border border-slate-100 rounded-2xl overflow-hidden divide-y divide-slate-100 bg-slate-50/60">
-              {itemRows.length ? itemRows.map((item, index) => (
+              {isCustomOrder ? (
+                <div className="flex items-center gap-3 p-3">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary-container text-primary"><span className="material-symbols-outlined text-[17px]">folder_special</span></span>
+                  <div className="min-w-0 flex-1"><p className="truncate text-[13px] font-bold text-slate-900">{order.custom_group}</p><p className="text-[10px] font-bold uppercase tracking-wide text-primary">Đơn custom · {itemRows.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0)} sản phẩm</p></div>
+                  <p className="shrink-0 font-mono text-sm font-black text-slate-800">{formatPrice(productCost)}</p>
+                </div>
+              ) : itemRows.length ? itemRows.map((item, index) => (
                 <div key={`${item.sku_id || item.product_id}-${index}`} className="p-3 flex items-center gap-3 hover:bg-white transition-colors">
                   <span className="w-7 h-7 rounded-lg bg-white border border-slate-200 text-[11px] font-black text-slate-500 flex items-center justify-center shrink-0">{index + 1}</span>
                   <div className="min-w-0 flex-1">
@@ -2726,7 +2733,7 @@ export default function OrderManagement() {
   const returnedOrders  = baseFilteredOrders.filter(o => o.status === 'returned' || ['returning', 'returned', 'failed'].includes(o.delivery_status));
   const totalRevenue = normalActiveOrders.reduce((s, o) => s + (o.total_price || 0), 0);
   const totalItems   = normalActiveOrders.reduce((s, o) => s + (o.items?.reduce((a, i) => a + i.quantity, 0) || 0), 0);
-  const totalCost    = activeOrders.reduce((s, o) => s + (o.seeding_cost || 0) + (o.items?.reduce((a, i) => a + currentItemUnitCost(i, productCostMap) * i.quantity, 0) || 0) + (o.logistics_cost || 0) + (o.packaging_cost || 0), 0)
+  const totalCost    = activeOrders.reduce((s, o) => s + (o.seeding_cost || 0) + (o.items?.reduce((a, i) => a + currentItemUnitCost(i, productCostMap) * i.quantity, 0) || 0) + (o.logistics_cost || 0) + (o.custom_group ? 0 : (o.packaging_cost || 0)), 0)
                      + returnedOrders.reduce((s, o) => s + (o.return_cost || 0), 0); // thêm chi phí hoàn
   const totalProfit  = totalRevenue - totalCost;
   const profitMargin = totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(1) : 0;
