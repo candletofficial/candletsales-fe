@@ -12,10 +12,11 @@ const newCode = () => `CUS-${Date.now().toString().slice(-7)}`;
 const CORE_RECIPE = [
   { role: 'soy', label: 'Sáp đậu nành', quantity: 0.105, unit: 'kg' },
   { role: 'beeswax', label: 'Sáp ong', quantity: 0.025, unit: 'kg' },
-  { role: 'oil', label: 'Tinh dầu (chưa xác định)', quantity: 10, unit: 'ml' },
   { role: 'ipm', label: 'IPM', quantity: 3, unit: 'ml' },
   { role: 'jar', label: 'Cốc thủy tinh', quantity: 1, unit: 'cốc' },
-  { role: 'wick', label: 'Bấc', quantity: 1, unit: 'cái' },
+  { role: 'cotton_wick', label: 'Bấc cotton', quantity: 1, unit: 'cái' },
+  { role: 'wick_sticker', label: 'Dán bấc', quantity: 1, unit: 'cái' },
+  { role: 'oil', label: 'Tinh dầu (chưa xác định)', quantity: 10, unit: 'ml' },
 ];
 
 const matchesRole = (material, role) => {
@@ -25,7 +26,8 @@ const matchesRole = (material, role) => {
   if (role === 'ipm') return /(^|\s)ipm($|\s)/.test(text) || text.includes('isopropyl myristate');
   if (role === 'oil') return material?.isConcentratedOil === true || text.includes('tinh dau');
   if (role === 'jar') return text.includes('coc thuy tinh') || text.includes('ly thuy tinh') || text.includes('hu thuy tinh');
-  if (role === 'wick') return /(^|\s)bac($|\s)/.test(text) || text.includes('bac cotton') || text.includes('tim nen');
+  if (role === 'cotton_wick') return !text.includes('dan bac') && (text.includes('bac cotton') || text.includes('tim nen cotton'));
+  if (role === 'wick_sticker') return text.includes('dan bac') || text.includes('keo dan tim') || text.includes('mieng dan bac');
   return false;
 };
 
@@ -109,16 +111,16 @@ function ProductForm({ product, products, materials, onClose, onSaved }) {
 
         <div className="overflow-y-auto p-5 sm:p-7">
           {error && <div className="mb-5 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs font-semibold text-red-700"><span className="material-symbols-outlined text-[18px]">error</span>{error}</div>}
-          <section className="grid gap-4 md:grid-cols-2">
-            <div className="block"><span className="mb-1.5 block text-xs font-bold">Nhóm đơn custom *</span><SearchableSelect value={form.custom_group} onChange={value => setForm(current => ({ ...current, custom_group: value }))} options={groups.map(group => ({ value: group, label: group }))} placeholder="Chọn hoặc tạo nhóm custom" searchPlaceholder="Tìm nhóm hoặc nhập tên nhóm mới..." ariaLabel="Nhóm đơn custom" allowCustomValue customValueLabel="Tạo nhóm mới" portalMenu className="min-h-11 rounded-xl border border-outline-variant bg-white !px-3 !py-2.5 hover:border-primary/50" /><span className="mt-1 block text-[10px] text-on-surface-variant">Các sản phẩm cùng đơn khách hàng nên dùng cùng tên nhóm.</span></div>
-            <label className="block"><span className="mb-1.5 block text-xs font-bold">Tên sản phẩm *</span><input value={form.name} onChange={event => setForm(current => ({ ...current, name: event.target.value }))} placeholder="Ví dụ: Nến hũ 200 ml · Mùi Lavender" className="w-full rounded-xl border border-outline-variant px-3.5 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" /></label>
-            <label className="block"><span className="mb-1.5 block text-xs font-bold">Mã sản phẩm *</span><input value={form.productId} onChange={event => setForm(current => ({ ...current, productId: event.target.value }))} className="w-full rounded-xl border border-outline-variant px-3.5 py-2.5 font-mono text-sm outline-none focus:border-primary" /></label>
-            <label className="block"><span className="mb-1.5 block text-xs font-bold">Đơn giá bán</span><div className="relative"><input type="number" min="0" value={form.base_price} onChange={event => setForm(current => ({ ...current, base_price: event.target.value }))} className="w-full rounded-xl border border-outline-variant px-3.5 py-2.5 pr-10 text-sm font-bold outline-none focus:border-primary" /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-on-surface-variant">đ</span></div></label>
-            <label className="block"><span className="mb-1.5 block text-xs font-bold">Số lượng trong nhóm *</span><div className="relative"><input type="number" min="1" step="1" value={form.custom_quantity} onChange={event => setForm(current => ({ ...current, custom_quantity: event.target.value }))} className="w-full rounded-xl border border-outline-variant px-3.5 py-2.5 pr-12 text-sm font-bold outline-none focus:border-primary" /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-on-surface-variant">SP</span></div><span className="mt-1 block text-[10px] text-on-surface-variant">Số lượng sản phẩm này khi thêm cả nhóm vào đơn hàng.</span></label>
-            <label className="block md:col-span-2"><span className="mb-1.5 block text-xs font-bold">Ghi chú</span><textarea rows="2" value={form.description} onChange={event => setForm(current => ({ ...current, description: event.target.value }))} placeholder="Quy cách cốc, tem, màu sắc hoặc ghi chú riêng của khách..." className="w-full rounded-xl border border-outline-variant px-3.5 py-2.5 text-sm outline-none focus:border-primary" /></label>
+          <section className="grid gap-x-3 gap-y-3 md:grid-cols-12">
+            <div className="md:col-span-6"><span className="mb-1 block text-[11px] font-bold">Nhóm đơn custom *</span><SearchableSelect value={form.custom_group} onChange={value => setForm(current => ({ ...current, custom_group: value }))} options={groups.map(group => ({ value: group, label: group }))} placeholder="Chọn hoặc tạo nhóm custom" searchPlaceholder="Tìm nhóm hoặc nhập tên nhóm mới..." ariaLabel="Nhóm đơn custom" allowCustomValue customValueLabel="Tạo nhóm mới" portalMenu className="min-h-10 rounded-xl border border-outline-variant bg-white !px-3 !py-2 hover:border-primary/50" /></div>
+            <label className="block md:col-span-6"><span className="mb-1 block text-[11px] font-bold">Tên sản phẩm *</span><input value={form.name} onChange={event => setForm(current => ({ ...current, name: event.target.value }))} placeholder="Ví dụ: Nến hũ 200 ml · Mùi Lavender" className="h-10 w-full rounded-xl border border-outline-variant px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" /></label>
+            <label className="block md:col-span-3"><span className="mb-1 block text-[11px] font-bold">Mã sản phẩm *</span><input value={form.productId} onChange={event => setForm(current => ({ ...current, productId: event.target.value }))} className="h-10 w-full rounded-xl border border-outline-variant px-3 font-mono text-xs outline-none focus:border-primary" /></label>
+            <label className="block md:col-span-3"><span className="mb-1 block text-[11px] font-bold">Đơn giá</span><div className="relative"><input type="number" min="0" value={form.base_price} onChange={event => setForm(current => ({ ...current, base_price: event.target.value }))} className="h-10 w-full rounded-xl border border-outline-variant px-3 pr-8 text-sm font-bold outline-none focus:border-primary" /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-on-surface-variant">đ</span></div></label>
+            <label className="block md:col-span-2"><span className="mb-1 block text-[11px] font-bold">Số lượng *</span><div className="relative"><input type="number" min="1" step="1" value={form.custom_quantity} onChange={event => setForm(current => ({ ...current, custom_quantity: event.target.value }))} className="h-10 w-full rounded-xl border border-outline-variant px-3 pr-9 text-sm font-bold outline-none focus:border-primary" /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-bold text-on-surface-variant">SP</span></div></label>
+            <label className="block md:col-span-4"><span className="mb-1 block text-[11px] font-bold">Ghi chú</span><input value={form.description} onChange={event => setForm(current => ({ ...current, description: event.target.value }))} placeholder="Cốc, tem, màu sắc..." className="h-10 w-full rounded-xl border border-outline-variant px-3 text-sm outline-none focus:border-primary" /></label>
           </section>
 
-          <section className="mt-7 overflow-hidden rounded-2xl border border-outline-variant">
+          <section className="mt-5 overflow-hidden rounded-2xl border border-outline-variant">
             <div className="flex flex-col gap-2 border-b border-outline-variant bg-surface-container-low px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5"><div><h3 className="text-sm font-black text-on-surface">Công thức cho 1 sản phẩm</h3><p className="mt-1 text-[10px] text-on-surface-variant">Công thức được tạo sẵn theo định lượng gợi ý; có thể thay đổi hoặc xoá thành phần không sử dụng.</p></div><span className="rounded-full bg-white px-3 py-1.5 text-[10px] font-black text-primary">Giá vốn ước tính: {formatMoney(estimatedCost)}đ</span></div>
             <div className="divide-y divide-outline-variant/60">
               {form.recipe.map((row, index) => {
