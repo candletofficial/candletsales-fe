@@ -30,7 +30,7 @@ const defaultRecipe = materials => CORE_RECIPE.map(row => ({
 }));
 
 const emptyForm = materials => ({
-  productId: newCode(), name: '', custom_group: '', base_price: 0, description: '',
+  productId: newCode(), name: '', custom_group: '', custom_quantity: 1, base_price: 0, description: '',
   recipe: defaultRecipe(materials),
 });
 
@@ -51,7 +51,7 @@ function ProductForm({ product, products, materials, onClose, onSaved }) {
     });
     return {
       productId: product.productId || newCode(), name: product.name || '', custom_group: product.custom_group || '',
-      base_price: Number(product.base_price) || 0, description: product.description || '', recipe,
+      custom_quantity: Math.max(1, Number(product.custom_quantity) || 1), base_price: Number(product.base_price) || 0, description: product.description || '', recipe,
     };
   });
   const [saving, setSaving] = useState(false);
@@ -79,7 +79,7 @@ function ProductForm({ product, products, materials, onClose, onSaved }) {
     if (new Set(ids).size !== ids.length) return setError('Một nguyên vật liệu không thể xuất hiện hai lần trong công thức.');
     const payload = {
       product_type: 'custom', productId: form.productId.trim(), name: form.name.trim(),
-      custom_group: form.custom_group.trim(), base_price: Number(form.base_price) || 0,
+      custom_group: form.custom_group.trim(), custom_quantity: Math.max(1, Math.trunc(Number(form.custom_quantity) || 1)), base_price: Number(form.base_price) || 0,
       original_price: 0, description: form.description.trim(),
       base_ingredients: form.recipe.map(row => ({ ingredient_id: row.ingredient_id, quantity: Number(row.quantity) })),
     };
@@ -87,9 +87,9 @@ function ProductForm({ product, products, materials, onClose, onSaved }) {
       setSaving(true);
       if (product?._id) await productService.updateProduct(product._id, payload);
       else await productService.createProduct(payload);
-      onSaved(product ? 'Đã cập nhật sản phẩm custom.' : 'Đã tạo sản phẩm custom.');
+      onSaved(product ? 'Đã cập nhật sản phẩm trong đơn custom.' : 'Đã thêm sản phẩm vào đơn custom.');
     } catch (err) {
-      setError(err.response?.data?.message || 'Không thể lưu sản phẩm custom.');
+      setError(err.response?.data?.message || 'Không thể lưu sản phẩm trong đơn custom.');
     } finally { setSaving(false); }
   };
 
@@ -98,7 +98,7 @@ function ProductForm({ product, products, materials, onClose, onSaved }) {
       <button type="button" aria-label="Đóng" className="absolute inset-0 bg-[#241815]/55 backdrop-blur-sm" onClick={onClose} />
       <form onSubmit={save} className="relative flex max-h-[94vh] w-full max-w-4xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl">
         <header className="flex items-start justify-between border-b border-outline-variant bg-gradient-to-r from-primary-container/70 to-white px-5 py-5 sm:px-7">
-          <div className="flex gap-3"><span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-primary text-white"><span className="material-symbols-outlined">experiment</span></span><div><p className="text-[10px] font-black uppercase tracking-[.16em] text-secondary">Sản phẩm nội bộ · Không hiển thị tại shop</p><h2 className="mt-1 text-xl font-black text-on-surface">{product ? 'Chỉnh sửa sản phẩm custom' : 'Tạo sản phẩm custom'}</h2></div></div>
+          <div className="flex gap-3"><span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-primary text-white"><span className="material-symbols-outlined">experiment</span></span><div><p className="text-[10px] font-black uppercase tracking-[.16em] text-secondary">Đơn custom · Không hiển thị tại shop</p><h2 className="mt-1 text-xl font-black text-on-surface">{product ? 'Chỉnh sửa sản phẩm trong đơn custom' : 'Thêm sản phẩm vào đơn custom'}</h2></div></div>
           <button type="button" onClick={onClose} className="grid h-9 w-9 place-items-center rounded-xl text-on-surface-variant hover:bg-white"><span className="material-symbols-outlined">close</span></button>
         </header>
 
@@ -109,6 +109,7 @@ function ProductForm({ product, products, materials, onClose, onSaved }) {
             <label className="block"><span className="mb-1.5 block text-xs font-bold">Tên sản phẩm *</span><input value={form.name} onChange={event => setForm(current => ({ ...current, name: event.target.value }))} placeholder="Ví dụ: Nến hũ 200 ml · Mùi Lavender" className="w-full rounded-xl border border-outline-variant px-3.5 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" /></label>
             <label className="block"><span className="mb-1.5 block text-xs font-bold">Mã sản phẩm *</span><input value={form.productId} onChange={event => setForm(current => ({ ...current, productId: event.target.value }))} className="w-full rounded-xl border border-outline-variant px-3.5 py-2.5 font-mono text-sm outline-none focus:border-primary" /></label>
             <label className="block"><span className="mb-1.5 block text-xs font-bold">Đơn giá bán</span><div className="relative"><input type="number" min="0" value={form.base_price} onChange={event => setForm(current => ({ ...current, base_price: event.target.value }))} className="w-full rounded-xl border border-outline-variant px-3.5 py-2.5 pr-10 text-sm font-bold outline-none focus:border-primary" /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-on-surface-variant">đ</span></div></label>
+            <label className="block"><span className="mb-1.5 block text-xs font-bold">Số lượng trong nhóm *</span><div className="relative"><input type="number" min="1" step="1" value={form.custom_quantity} onChange={event => setForm(current => ({ ...current, custom_quantity: event.target.value }))} className="w-full rounded-xl border border-outline-variant px-3.5 py-2.5 pr-12 text-sm font-bold outline-none focus:border-primary" /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-on-surface-variant">SP</span></div><span className="mt-1 block text-[10px] text-on-surface-variant">Số lượng sản phẩm này khi thêm cả nhóm vào đơn hàng.</span></label>
             <label className="block md:col-span-2"><span className="mb-1.5 block text-xs font-bold">Ghi chú</span><textarea rows="2" value={form.description} onChange={event => setForm(current => ({ ...current, description: event.target.value }))} placeholder="Quy cách cốc, tem, màu sắc hoặc ghi chú riêng của khách..." className="w-full rounded-xl border border-outline-variant px-3.5 py-2.5 text-sm outline-none focus:border-primary" /></label>
           </section>
 
@@ -154,6 +155,9 @@ export default function CustomProductManagement() {
   const [editing, setEditing] = useState(undefined);
   const [toast, setToast] = useState(null);
   const [deleting, setDeleting] = useState(null);
+  const [expandedGroup, setExpandedGroup] = useState('');
+  const [quantityDrafts, setQuantityDrafts] = useState({});
+  const [savingQuantity, setSavingQuantity] = useState(null);
 
   const load = async () => {
     setLoading(true);
@@ -161,7 +165,7 @@ export default function CustomProductManagement() {
       const [productResponse, materialResponse] = await Promise.all([productService.getProducts({ type: 'custom' }), materialService.getMaterials()]);
       setProducts(productResponse.data.data || []);
       setMaterials(materialResponse.data.data || []);
-    } catch (error) { setToast({ type: 'error', text: error.response?.data?.message || 'Không thể tải dữ liệu sản phẩm custom.' }); }
+    } catch (error) { setToast({ type: 'error', text: error.response?.data?.message || 'Không thể tải dữ liệu đơn custom.' }); }
     finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
@@ -181,9 +185,27 @@ export default function CustomProductManagement() {
 
   const showToast = (text, type = 'success') => { setToast({ text, type }); setTimeout(() => setToast(null), 3000); };
   const remove = async product => {
-    try { setDeleting(product._id); await productService.deleteProduct(product._id); showToast('Đã xóa sản phẩm custom.'); await load(); }
+    try { setDeleting(product._id); await productService.deleteProduct(product._id); showToast('Đã xóa sản phẩm khỏi đơn custom.'); await load(); }
     catch (error) { showToast(error.response?.data?.message || 'Không thể xóa sản phẩm.', 'error'); }
     finally { setDeleting(null); }
+  };
+  const saveQuantity = async (product, rawQuantity) => {
+    const quantity = Math.max(1, Math.trunc(Number(rawQuantity) || 1));
+    setQuantityDrafts(current => ({ ...current, [product._id]: quantity }));
+    if (quantity === Math.max(1, Number(product.custom_quantity) || 1)) return;
+    try {
+      setSavingQuantity(product._id);
+      await productService.updateProduct(product._id, {
+        product_type: 'custom', productId: product.productId, name: product.name,
+        custom_group: product.custom_group, custom_quantity: quantity,
+        base_price: Number(product.base_price) || 0, original_price: Number(product.original_price) || 0,
+        description: product.description || '', image: product.image || null, images: product.images || [],
+        base_ingredients: (product.base_ingredients || []).map(item => ({ ingredient_id: item.ingredient_id?._id || item.ingredient_id, quantity: Number(item.quantity) || 0 })),
+      });
+      setProducts(current => current.map(item => item._id === product._id ? { ...item, custom_quantity: quantity } : item));
+      setQuantityDrafts(current => { const next = { ...current }; delete next[product._id]; return next; });
+    } catch (error) { showToast(error.response?.data?.message || 'Không thể cập nhật số lượng.', 'error'); }
+    finally { setSavingQuantity(null); }
   };
 
   return <Layout>
@@ -193,7 +215,7 @@ export default function CustomProductManagement() {
 
       <header className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary to-secondary px-6 py-7 text-white shadow-lg sm:px-8 lg:px-10">
         <div className="absolute -right-20 -top-24 h-64 w-64 rounded-full border-[45px] border-white/[.05]" />
-        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between"><div><p className="text-[10px] font-black uppercase tracking-[.18em] text-white/60">Sản phẩm nội bộ</p><h1 className="mt-2 text-2xl font-black sm:text-3xl">Sản phẩm Custom</h1><p className="mt-2 max-w-2xl text-xs leading-6 text-white/70">Quản lý công thức theo từng nhóm đơn custom. Các sản phẩm này chỉ dùng khi tạo đơn trong admin và không xuất hiện tại cửa hàng.</p><div className="mt-5 flex gap-2"><span className="rounded-full bg-white/10 px-3 py-1.5 text-[10px] font-bold">{groups.length} nhóm</span><span className="rounded-full bg-white/10 px-3 py-1.5 text-[10px] font-bold">{products.length} sản phẩm</span></div></div><button type="button" onClick={() => setEditing(null)} className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-white px-5 text-xs font-black text-primary shadow-sm"><span className="material-symbols-outlined text-[19px]">add</span>Tạo sản phẩm custom</button></div>
+        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between"><div><p className="text-[10px] font-black uppercase tracking-[.18em] text-white/60">Quản lý nội bộ</p><h1 className="mt-2 text-2xl font-black sm:text-3xl">Đơn Custom</h1><p className="mt-2 max-w-2xl text-xs leading-6 text-white/70">Quản lý sản phẩm, công thức và số lượng theo từng đơn custom. Dữ liệu chỉ dùng trong admin và không xuất hiện tại cửa hàng.</p><div className="mt-5 flex gap-2"><span className="rounded-full bg-white/10 px-3 py-1.5 text-[10px] font-bold">{groups.length} đơn</span><span className="rounded-full bg-white/10 px-3 py-1.5 text-[10px] font-bold">{products.length} sản phẩm</span></div></div><button type="button" onClick={() => setEditing(null)} className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-white px-5 text-xs font-black text-primary shadow-sm"><span className="material-symbols-outlined text-[19px]">add</span>Thêm sản phẩm vào đơn custom</button></div>
       </header>
 
       <div className="mt-5 flex flex-col gap-3 rounded-2xl border border-outline-variant bg-white p-3 shadow-sm sm:flex-row">
@@ -201,8 +223,27 @@ export default function CustomProductManagement() {
         <select value={selectedGroup} onChange={event => setSelectedGroup(event.target.value)} className="h-11 rounded-xl border border-outline-variant bg-white px-4 text-xs font-bold text-on-surface outline-none focus:border-primary"><option value="all">Tất cả nhóm ({products.length})</option>{groups.map(group => <option key={group} value={group}>{group} ({products.filter(item => item.custom_group === group).length})</option>)}</select>
       </div>
 
-      {loading ? <div className="mt-5 grid min-h-64 place-items-center rounded-2xl border border-outline-variant bg-white"><span className="material-symbols-outlined animate-spin text-3xl text-primary">progress_activity</span></div> : Object.keys(grouped).length === 0 ? <div className="mt-5 grid min-h-64 place-items-center rounded-2xl border border-dashed border-outline-variant bg-white text-center"><div><span className="material-symbols-outlined text-4xl text-on-surface-variant/40">inventory_2</span><p className="mt-2 text-sm font-black text-on-surface">Chưa có sản phẩm phù hợp</p><p className="mt-1 text-xs text-on-surface-variant">Tạo sản phẩm custom đầu tiên hoặc thay đổi bộ lọc.</p></div></div> : <div className="mt-5 space-y-5">
-        {Object.entries(grouped).map(([group, entries]) => <section key={group} className="overflow-hidden rounded-2xl border border-outline-variant bg-white shadow-sm"><header className="flex items-center justify-between border-b border-outline-variant bg-surface-container-low px-5 py-4"><div className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-primary-container text-primary"><span className="material-symbols-outlined text-[19px]">folder_special</span></span><div><h2 className="text-sm font-black text-on-surface">{group}</h2><p className="mt-0.5 text-[10px] text-on-surface-variant">{entries.length} sản phẩm · Chọn nhóm này khi tạo đơn hàng</p></div></div></header><div className="divide-y divide-outline-variant/60">{entries.map(product => <article key={product._id} className="grid gap-4 px-5 py-4 hover:bg-primary-container/10 lg:grid-cols-[minmax(230px,1.2fr)_minmax(260px,1.4fr)_110px_100px]"><div><div className="flex items-center gap-2"><span className="rounded-md bg-primary-container px-2 py-1 font-mono text-[9px] font-black text-primary">{product.productId}</span><span className="rounded-md bg-amber-50 px-2 py-1 text-[9px] font-bold text-amber-700">Không bán tại shop</span></div><h3 className="mt-2 text-sm font-black text-on-surface">{product.name}</h3>{product.description && <p className="mt-1 line-clamp-2 text-[10px] leading-4 text-on-surface-variant">{product.description}</p>}</div><div className="flex flex-wrap content-start gap-1.5">{(product.base_ingredients || []).map(item => <span key={item._id || item.ingredient_id?._id} className="rounded-lg border border-outline-variant bg-white px-2.5 py-1.5 text-[10px] text-on-surface-variant"><b className="text-on-surface">{item.ingredient_id?.name || 'Nguyên liệu'}</b> · {item.quantity}{item.ingredient_id?.unit || ''}</span>)}</div><div><p className="text-[9px] font-bold uppercase text-on-surface-variant">Đơn giá</p><p className="mt-1 text-sm font-black text-primary">{formatMoney(product.base_price)}đ</p><p className="mt-1 text-[9px] text-on-surface-variant">Vốn {formatMoney(product.base_cost)}đ</p></div><div className="flex items-center justify-end gap-1"><button type="button" onClick={() => setEditing(product)} className="grid h-9 w-9 place-items-center rounded-xl text-primary hover:bg-primary-container"><span className="material-symbols-outlined text-[18px]">edit</span></button><button type="button" disabled={deleting === product._id} onClick={() => { if (window.confirm(`Xóa sản phẩm “${product.name}”?`)) remove(product); }} className="grid h-9 w-9 place-items-center rounded-xl text-red-500 hover:bg-red-50 disabled:opacity-40"><span className="material-symbols-outlined text-[18px]">delete</span></button></div></article>)}</div></section>)}
+      {loading ? <div className="mt-5 grid min-h-64 place-items-center rounded-2xl border border-outline-variant bg-white"><span className="material-symbols-outlined animate-spin text-3xl text-primary">progress_activity</span></div> : Object.keys(grouped).length === 0 ? <div className="mt-5 grid min-h-64 place-items-center rounded-2xl border border-dashed border-outline-variant bg-white text-center"><div><span className="material-symbols-outlined text-4xl text-on-surface-variant/40">inventory_2</span><p className="mt-2 text-sm font-black text-on-surface">Chưa có đơn custom phù hợp</p><p className="mt-1 text-xs text-on-surface-variant">Tạo đơn custom đầu tiên hoặc thay đổi bộ lọc.</p></div></div> : <div className="mt-5 space-y-5">
+        {Object.entries(grouped).map(([group, entries]) => {
+          const expanded = expandedGroup === group;
+          const groupQuantity = entries.reduce((sum, product) => sum + Math.max(1, Number(product.custom_quantity) || 1), 0);
+          const groupValue = entries.reduce((sum, product) => sum + (Number(product.base_price) || 0) * Math.max(1, Number(product.custom_quantity) || 1), 0);
+          return <section key={group} className={`overflow-hidden rounded-2xl border bg-white shadow-sm transition-colors ${expanded ? 'border-primary/30' : 'border-outline-variant'}`}>
+            <button type="button" onClick={() => setExpandedGroup(current => current === group ? '' : group)} className="flex w-full flex-col gap-4 px-5 py-5 text-left hover:bg-primary-container/10 sm:flex-row sm:items-center">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-primary-container text-primary"><span className="material-symbols-outlined text-[22px]">folder_special</span></span>
+              <span className="min-w-0 flex-1"><span className="block truncate text-[15px] font-black text-on-surface">{group}</span><span className="mt-1 block text-[10px] text-on-surface-variant">Nhóm đơn custom · Không hiển thị tại shop</span></span>
+              <span className="flex w-full items-center justify-between gap-5 sm:w-auto sm:justify-end">
+                <span><span className="block text-[9px] font-bold uppercase tracking-wide text-on-surface-variant">Mẫu / Số lượng</span><span className="mt-0.5 block text-sm font-black text-on-surface">{entries.length} / {groupQuantity}</span></span>
+                <span><span className="block text-[9px] font-bold uppercase tracking-wide text-on-surface-variant">Tổng đơn giá</span><span className="mt-0.5 block text-sm font-black text-primary">{formatMoney(groupValue)}đ</span></span>
+                <span className="inline-flex items-center gap-1 text-[10px] font-black text-primary">{expanded ? 'Thu gọn' : 'Xem chi tiết'}<span className={`material-symbols-outlined text-[18px] transition-transform ${expanded ? 'rotate-180' : ''}`}>expand_more</span></span>
+              </span>
+            </button>
+            {expanded && <div className="divide-y divide-outline-variant/60 border-t border-outline-variant/60">{entries.map(product => {
+              const quantity = quantityDrafts[product._id] ?? Math.max(1, Number(product.custom_quantity) || 1);
+              return <article key={product._id} className="grid gap-4 px-5 py-4 hover:bg-primary-container/10 lg:grid-cols-[minmax(210px,1.1fr)_minmax(240px,1.3fr)_130px_130px_90px] lg:items-center"><div><div className="flex flex-wrap items-center gap-2"><span className="rounded-md bg-primary-container px-2 py-1 font-mono text-[9px] font-black text-primary">{product.productId}</span><span className="rounded-md bg-amber-50 px-2 py-1 text-[9px] font-bold text-amber-700">Không bán tại shop</span></div><h3 className="mt-2 text-sm font-black text-on-surface">{product.name}</h3>{product.description && <p className="mt-1 line-clamp-2 text-[10px] leading-4 text-on-surface-variant">{product.description}</p>}</div><div className="flex flex-wrap content-start gap-1.5">{(product.base_ingredients || []).map(item => <span key={item._id || item.ingredient_id?._id} className="rounded-lg border border-outline-variant bg-white px-2.5 py-1.5 text-[10px] text-on-surface-variant"><b className="text-on-surface">{item.ingredient_id?.name || 'Nguyên liệu'}</b> · {item.quantity}{item.ingredient_id?.unit || ''}</span>)}</div><div><p className="mb-1.5 text-[9px] font-bold uppercase text-on-surface-variant">Số lượng trong đơn</p><div className="flex h-9 items-center overflow-hidden rounded-xl border border-outline-variant bg-white focus-within:border-primary"><button type="button" disabled={savingQuantity === product._id || quantity <= 1} onClick={() => saveQuantity(product, quantity - 1)} className="grid h-full w-8 place-items-center text-on-surface-variant hover:bg-surface-container-low disabled:opacity-30"><span className="material-symbols-outlined text-[16px]">remove</span></button><input type="number" min="1" step="1" value={quantity} onChange={event => setQuantityDrafts(current => ({ ...current, [product._id]: event.target.value }))} onBlur={event => saveQuantity(product, event.target.value)} onKeyDown={event => { if (event.key === 'Enter') event.currentTarget.blur(); }} className="min-w-0 flex-1 bg-transparent text-center text-xs font-black outline-none" /><button type="button" disabled={savingQuantity === product._id} onClick={() => saveQuantity(product, Number(quantity) + 1)} className="grid h-full w-8 place-items-center text-primary hover:bg-primary-container disabled:opacity-30"><span className="material-symbols-outlined text-[16px]">add</span></button></div></div><div><p className="text-[9px] font-bold uppercase text-on-surface-variant">Đơn giá / Thành tiền</p><p className="mt-1 text-sm font-black text-primary">{formatMoney(product.base_price)}đ</p><p className="mt-1 text-[9px] text-on-surface-variant">{formatMoney((Number(product.base_price) || 0) * Math.max(1, Number(quantity) || 1))}đ · Vốn {formatMoney(product.base_cost)}đ/SP</p></div><div className="flex items-center justify-end gap-1"><button type="button" aria-label={`Chỉnh sửa ${product.name}`} onClick={() => setEditing(product)} className="grid h-9 w-9 place-items-center rounded-xl text-primary hover:bg-primary-container"><span className="material-symbols-outlined text-[18px]">edit</span></button><button type="button" aria-label={`Xoá ${product.name}`} disabled={deleting === product._id} onClick={() => { if (window.confirm(`Xóa sản phẩm “${product.name}”?`)) remove(product); }} className="grid h-9 w-9 place-items-center rounded-xl text-red-500 hover:bg-red-50 disabled:opacity-40"><span className="material-symbols-outlined text-[18px]">delete</span></button></div></article>;
+            })}</div>}
+          </section>;
+        })}
       </div>}
     </div>
   </Layout>;

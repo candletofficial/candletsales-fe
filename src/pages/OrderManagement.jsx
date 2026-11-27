@@ -260,10 +260,19 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
     .filter(product => product.product_type === 'custom' && product.custom_group)
     .map(product => product.custom_group))].sort((a, b) => a.localeCompare(b, 'vi')), [products]);
 
+  const productById = useMemo(() => new Map(products.map(product => [String(product._id), product])), [products]);
+  const regularOrderItemEntries = useMemo(() => items.map((item, index) => ({ item, index })).filter(entry => productById.get(String(entry.item.product_id))?.product_type !== 'custom'), [items, productById]);
+  const customOrderItemGroups = useMemo(() => items.map((item, index) => ({ item, index, product: productById.get(String(item.product_id)) })).filter(entry => entry.product?.product_type === 'custom').reduce((result, entry) => {
+    const group = entry.product.custom_group || customGroup || 'Đơn custom';
+    if (!result[group]) result[group] = [];
+    result[group].push(entry);
+    return result;
+  }, {}), [customGroup, items, productById]);
+  const displayedOrderItemCount = regularOrderItemEntries.length + Object.keys(customOrderItemGroups).length;
+
   const filteredProducts = useMemo(() => {
-    const scopedProducts = productGroupFilter === 'all' ? products
-      : productGroupFilter === 'sellable' ? products.filter(product => product.product_type !== 'custom')
-        : products.filter(product => product.product_type === 'custom' && product.custom_group === productGroupFilter);
+    const scopedProducts = ['all', 'sellable'].includes(productGroupFilter)
+      ? products.filter(product => product.product_type !== 'custom') : [];
     if (!productSearch) return scopedProducts;
     const term = productSearch.toLowerCase();
     return scopedProducts.filter(p => {
@@ -273,6 +282,14 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
       return matchName || matchSku || matchInnerSku;
     });
   }, [products, productSearch, productGroupFilter]);
+
+  const filteredCustomGroups = useMemo(() => customProductGroups.map(group => ({ group, products: products.filter(product => product.product_type === 'custom' && product.custom_group === group) })).filter(entry => {
+    if (productGroupFilter === 'sellable') return false;
+    if (productGroupFilter !== 'all' && productGroupFilter !== entry.group) return false;
+    if (!productSearch) return true;
+    const term = productSearch.toLowerCase();
+    return entry.group.toLowerCase().includes(term) || entry.products.some(product => product.name?.toLowerCase().includes(term) || product.productId?.toLowerCase().includes(term));
+  }), [customProductGroups, productGroupFilter, productSearch, products]);
 
   // Thêm sản phẩm / SKU vào đơn hàng
   const handlePickProduct = (product, sku = null) => {
@@ -315,6 +332,28 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
       }]);
     }
     setShowProductPicker(false);
+  };
+
+  const handlePickCustomGroup = (group, groupProducts) => {
+    const groupIds = new Set(groupProducts.map(product => String(product._id)));
+    setCustomGroup(group);
+    setProductGroupFilter(group);
+    setItems(current => {
+      const retained = current.filter(item => !groupIds.has(String(item.product_id)));
+      return [...retained, ...groupProducts.map(product => {
+        const existing = current.find(item => String(item.product_id) === String(product._id) && !item.sku_id);
+        return existing ? { ...existing, quantity: Math.max(1, Number(product.custom_quantity) || 1) } : { product_id: product._id, productId: product.productId, product_name: product.name, product_image: product.image || null, sku_id: null, sku_label: '', unit_price: product.base_price || 0, unit_cost: product.base_cost || 0, quantity: Math.max(1, Number(product.custom_quantity) || 1) };
+      })];
+    });
+    setAppliedDiscount({ code: null, amount: 0 });
+    setShowProductPicker(false);
+  };
+
+  const removeCustomOrderGroup = group => {
+    const ids = new Set(products.filter(product => product.product_type === 'custom' && product.custom_group === group).map(product => String(product._id)));
+    setItems(current => current.filter(item => !ids.has(String(item.product_id))));
+    if (customGroup === group) setCustomGroup('');
+    setAppliedDiscount({ code: null, amount: 0 });
   };
 
   const handleQtyChange = (idx, val) => {
@@ -1239,7 +1278,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                   <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-[20px] text-primary">inventory_2</span>
                     <h3 className="text-[14px] font-bold text-stone-900">
-                      Sản phẩm trong đơn ({items.length})
+                      Sản phẩm trong đơn ({displayedOrderItemCount})
                     </h3>
                   </div>
                   <button
@@ -1252,16 +1291,6 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                   </button>
                 </div>
 
-                {customProductGroups.length > 0 && (
-                  <label className="flex flex-col gap-1.5 rounded-xl border border-primary/15 bg-primary-container/20 px-3.5 py-3 sm:flex-row sm:items-center sm:justify-between">
-                    <span><span className="block text-[11px] font-bold text-stone-800">Nhóm đơn custom</span><span className="block text-[10px] text-stone-500">Chọn nhóm theo đơn custom của khách hàng.</span></span>
-                    <select value={customGroup} onChange={event => { const value = event.target.value; setCustomGroup(value); setProductGroupFilter(value || 'all'); }} className="h-9 min-w-52 rounded-lg border border-primary/20 bg-white px-3 text-xs font-bold text-stone-800 outline-none focus:border-primary">
-                      <option value="">Không thuộc nhóm custom</option>
-                      {customProductGroups.map(group => <option key={group} value={group}>{group}</option>)}
-                    </select>
-                  </label>
-                )}
-
                 {/* Items List */}
                 {items.length === 0 ? (
                   <div className="border-2 border-dashed border-stone-200 rounded-2xl py-12 text-center text-stone-400 space-y-2">
@@ -1271,7 +1300,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                   </div>
                 ) : (
                   <div className="divide-y divide-stone-100 max-h-[380px] overflow-y-auto pr-1">
-                    {items.map((item, idx) => (
+                    {regularOrderItemEntries.map(({ item, index: idx }) => (
                       <div key={idx} className="py-3 flex items-center justify-between gap-3 first:pt-0 last:pb-0 group">
                         {/* Ảnh & Tên */}
                         <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -1355,6 +1384,15 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                         </button>
                       </div>
                     ))}
+                    {Object.entries(customOrderItemGroups).map(([group, entries]) => {
+                      const totalQuantity = entries.reduce((sum, entry) => sum + (Number(entry.item.quantity) || 0), 0);
+                      const totalAmount = entries.reduce((sum, entry) => sum + (isReplacementMode ? (entry.item.unit_cost || 0) : entry.item.unit_price) * entry.item.quantity, 0);
+                      return <div key={group} className="flex items-center justify-between gap-3 py-4 first:pt-0 last:pb-0">
+                        <div className="flex min-w-0 flex-1 items-center gap-3"><span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl border border-primary/20 bg-primary-container text-primary"><span className="material-symbols-outlined text-[22px]">folder_special</span></span><div className="min-w-0"><p className="truncate text-[13px] font-bold text-stone-900">{group}</p><p className="mt-0.5 text-[11px] text-stone-500">Đơn custom · {entries.length} mẫu · {totalQuantity} sản phẩm</p></div></div>
+                        <div className="w-24 shrink-0 text-right"><p className={`font-mono text-[13px] font-bold ${isReplacementMode ? 'text-red-600' : 'text-primary'}`}>{formatPrice(totalAmount)}</p></div>
+                        <button type="button" onClick={() => removeCustomOrderGroup(group)} className="rounded-lg p-1.5 text-stone-300 transition-colors hover:bg-red-50 hover:text-red-600" title="Xoá đơn custom khỏi đơn hàng"><span className="material-symbols-outlined text-[18px]">delete</span></button>
+                      </div>;
+                    })}
                   </div>
                 )}
               </div>
@@ -1607,7 +1645,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                 <select value={productGroupFilter} onChange={event => { const value = event.target.value; setProductGroupFilter(value); if (value !== 'all' && value !== 'sellable') setCustomGroup(value); }} className="h-10 rounded-lg border border-outline-variant/50 bg-surface-container-low px-3 text-[12px] font-bold text-on-surface outline-none focus:border-primary focus:bg-white">
                   <option value="all">Tất cả sản phẩm</option>
                   <option value="sellable">Sản phẩm thường</option>
-                  {customProductGroups.map(group => <option key={group} value={group}>Custom · {group}</option>)}
+                  {customProductGroups.map(group => <option key={group} value={group}>Đơn custom · {group}</option>)}
                 </select>
                 <div className="relative">
                   <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant">search</span>
@@ -1616,7 +1654,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
               </div>
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
-              {filteredProducts.length === 0 && (
+              {filteredProducts.length === 0 && filteredCustomGroups.length === 0 && (
                 <p className="text-center text-on-surface-variant py-8">Chưa có sản phẩm nào phù hợp.</p>
               )}
               {filteredProducts.map(product => (
@@ -1664,6 +1702,11 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                   })}
                 </div>
               ))}
+              {filteredCustomGroups.length > 0 && <div className="pt-2"><div className="mb-2 flex items-center gap-2 px-1"><span className="h-px flex-1 bg-outline-variant/40" /><span className="text-[9px] font-bold uppercase tracking-[.14em] text-on-surface-variant">Đơn custom</span><span className="h-px flex-1 bg-outline-variant/40" /></div><div className="space-y-2">{filteredCustomGroups.map(({ group, products: groupProducts }) => {
+                const totalQuantity = groupProducts.reduce((sum, product) => sum + Math.max(1, Number(product.custom_quantity) || 1), 0);
+                const totalAmount = groupProducts.reduce((sum, product) => sum + (Number(product.base_price) || 0) * Math.max(1, Number(product.custom_quantity) || 1), 0);
+                return <button type="button" key={group} onClick={() => handlePickCustomGroup(group, groupProducts)} className="flex w-full items-center gap-3 rounded-xl border border-primary/20 bg-primary-container/15 px-4 py-3.5 text-left transition-colors hover:border-primary/40 hover:bg-primary-container/35"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary text-white"><span className="material-symbols-outlined text-[20px]">folder_special</span></span><span className="min-w-0 flex-1"><span className="block truncate text-[14px] font-bold text-on-surface">{group}</span><span className="mt-0.5 block text-[11px] text-on-surface-variant">Đơn custom · {groupProducts.length} mẫu · {totalQuantity} sản phẩm</span></span><span className="shrink-0 text-right"><span className="block text-[12px] font-bold text-primary">{formatPrice(totalAmount)}</span><span className="mt-0.5 block text-[9px] font-semibold text-on-surface-variant">Thêm vào đơn</span></span><span className="material-symbols-outlined shrink-0 text-[18px] text-primary">add</span></button>;
+              })}</div></div>}
             </div>
           </div>
         </div>

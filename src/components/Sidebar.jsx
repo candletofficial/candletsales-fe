@@ -76,7 +76,7 @@ const NAV_ITEMS = [
     icon: (
       <span className="material-symbols-outlined text-[20px]">experiment</span>
     ),
-    label: 'Sản phẩm Custom',
+    label: 'Đơn Custom',
   },
   {
     to: '/admin/pos',

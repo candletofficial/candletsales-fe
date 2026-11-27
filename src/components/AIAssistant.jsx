@@ -19,7 +19,7 @@ const PAGE_LABELS = {
   '/admin/orders': 'Quản lý đơn hàng',
   '/admin/pos': 'Bán hàng tại quầy (POS)',
   '/admin/products': 'Quản lý sản phẩm & Công thức',
-  '/admin/custom-products': 'Quản lý sản phẩm Custom',
+  '/admin/custom-products': 'Quản lý đơn Custom',
   '/admin/materials': 'Kho nguyên vật liệu',
   '/admin/essential-oils': 'Quản lý tinh dầu',
   '/admin/imports': 'Quản lý nhập kho',
