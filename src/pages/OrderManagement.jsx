@@ -1728,7 +1728,8 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
               {filteredCustomGroups.length > 0 && <div className="pt-2"><div className="mb-2 flex items-center gap-2 px-1"><span className="h-px flex-1 bg-outline-variant/40" /><span className="text-[9px] font-bold uppercase tracking-[.14em] text-on-surface-variant">Đơn custom</span><span className="h-px flex-1 bg-outline-variant/40" /></div><div className="space-y-2">{filteredCustomGroups.map(({ group, products: groupProducts }) => {
                 const totalQuantity = groupProducts.reduce((sum, product) => sum + Math.max(1, Number(product.custom_quantity) || 1), 0);
                 const totalAmount = groupProducts.reduce((sum, product) => sum + (Number(product.base_price) || 0) * Math.max(1, Number(product.custom_quantity) || 1), 0);
-                return <button type="button" key={group} onClick={() => handlePickCustomGroup(group, groupProducts)} className="flex w-full items-center gap-3 rounded-xl border border-primary/20 bg-primary-container/15 px-4 py-3.5 text-left transition-colors hover:border-primary/40 hover:bg-primary-container/35"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary text-white"><span className="material-symbols-outlined text-[20px]">folder_special</span></span><span className="min-w-0 flex-1"><span className="block truncate text-[14px] font-bold text-on-surface">{group}</span><span className="mt-0.5 block text-[11px] text-on-surface-variant">Đơn custom · {groupProducts.length} mẫu · {totalQuantity} sản phẩm</span></span><span className="shrink-0 text-right"><span className="block text-[12px] font-bold text-primary">{formatPrice(totalAmount)}</span><span className="mt-0.5 block text-[9px] font-semibold text-on-surface-variant">Thêm vào đơn</span></span><span className="material-symbols-outlined shrink-0 text-[18px] text-primary">add</span></button>;
+                const locked = groupProducts.some(product => product.custom_group_locked);
+                return <button type="button" key={group} disabled={locked} onClick={() => handlePickCustomGroup(group, groupProducts)} className="flex w-full items-center gap-3 rounded-xl border border-primary/20 bg-primary-container/15 px-4 py-3.5 text-left transition-colors hover:border-primary/40 hover:bg-primary-container/35 disabled:cursor-not-allowed disabled:border-outline-variant disabled:bg-surface-container-low disabled:opacity-65"><span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${locked ? 'bg-outline-variant text-on-surface-variant' : 'bg-primary text-white'}`}><span className="material-symbols-outlined text-[20px]">{locked ? 'lock' : 'folder_special'}</span></span><span className="min-w-0 flex-1"><span className="block truncate text-[14px] font-bold text-on-surface">{group}</span><span className="mt-0.5 block text-[11px] text-on-surface-variant">{locked ? 'Đã được dùng · Không thể thêm lại' : `Đơn custom · ${groupProducts.length} mẫu · ${totalQuantity} sản phẩm`}</span></span><span className="shrink-0 text-right"><span className="block text-[12px] font-bold text-primary">{formatPrice(totalAmount)}</span><span className="mt-0.5 block text-[9px] font-semibold text-on-surface-variant">{locked ? 'Đã khóa' : 'Thêm vào đơn'}</span></span><span className="material-symbols-outlined shrink-0 text-[18px] text-primary">{locked ? 'lock' : 'add'}</span></button>;
               })}</div></div>}
             </div>
           </div>
@@ -3139,7 +3140,7 @@ export default function OrderManagement() {
                     return (
                       <tr
                         key={order._id}
-                        onClick={() => setModal({ type: 'edit', data: order })}
+                        onClick={() => setModal({ type: order.custom_group ? 'cost' : 'edit', data: order })}
                         className={`transition-colors cursor-pointer group ${
                           isCancelled
                             ? 'bg-stone-50/80 opacity-[0.52] grayscale-[35%] hover:bg-stone-100/80 hover:opacity-75'
@@ -3419,14 +3420,15 @@ export default function OrderManagement() {
                             </button>
                             <button
                               type="button"
+                              disabled={Boolean(order.custom_group)}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setModal({ type: 'edit', data: order });
+                                if (!order.custom_group) setModal({ type: 'edit', data: order });
                               }}
-                              className="w-8 h-8 rounded-xl bg-stone-100 hover:bg-primary hover:text-white text-stone-600 flex items-center justify-center transition-all shadow-2xs cursor-pointer"
-                              title="Xem và chỉnh sửa đơn hàng"
+                              className="w-8 h-8 rounded-xl bg-stone-100 hover:bg-primary hover:text-white text-stone-600 flex items-center justify-center transition-all shadow-2xs cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-stone-100 disabled:hover:text-stone-600"
+                              title={order.custom_group ? 'Đơn custom đã được chốt' : 'Xem và chỉnh sửa đơn hàng'}
                             >
-                              <span className="material-symbols-outlined text-[18px]">edit_note</span>
+                              <span className="material-symbols-outlined text-[18px]">{order.custom_group ? 'lock' : 'edit_note'}</span>
                             </button>
                           </div>
                         </td>
