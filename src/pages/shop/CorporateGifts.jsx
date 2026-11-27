@@ -198,7 +198,7 @@ export default function CorporateGifts() {
             <div className="mt-6 grid gap-3 md:grid-cols-3">
               {labelTypes.map(([name, description, suitable], index) => (
                 <article key={name} className="group relative overflow-hidden rounded-2xl border border-brand-sand bg-white p-5 transition hover:-translate-y-0.5 hover:border-brand-terracotta/50 hover:shadow-lg hover:shadow-brand-burgundy/5 sm:p-6">
-                  <div className="flex items-start justify-between"><span className="text-[10px] font-black tracking-widest text-brand-terracotta">0{index + 1}</span><i className={`ph-light ${index === 0 ? 'ph-sticker' : index === 1 ? 'ph-drop-half-bottom' : 'ph-sparkle'} text-2xl text-brand-terracotta/60`} /></div>
+                  <div className="flex items-start justify-between"><span className="text-[10px] font-black tracking-widest text-brand-terracotta">0{index + 1}</span><i className={`${index === 2 ? 'ph-bold ph-sun' : `ph-light ${index === 0 ? 'ph-sticker' : 'ph-drop-half-bottom'}`} text-2xl text-brand-terracotta/60`} /></div>
                   <h4 className="mt-5 text-xl font-black text-brand-burgundy">{name}</h4>
                   <p className="mt-3 text-xs leading-6 text-brand-muted">{description}</p>
                   <div className="mt-5 border-t border-brand-sand/70 pt-4 text-[10px] font-bold leading-5 text-brand-terracotta">{suitable}</div>
