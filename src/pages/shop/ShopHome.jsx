@@ -8,6 +8,8 @@ import CandleAtmosphereCanvas from '../../components/CandleAtmosphereCanvas';
 import { resolveTagColor } from '../../utils/productTagUtils';
 import { getImageUrl } from '../../utils/imageUtils';
 import { shippingDiscountLabel, shippingDiscountConditions } from '../../utils/couponUtils';
+import systemConfigService from '../../services/systemConfigService';
+import { CUSTOM_PAGE_CONFIG_KEY, defaultCustomPageConfig, mergeCustomPageConfig } from './customPageConfig';
 
 const AROMA_MARQUEE_ITEMS = [
   '100% Sáp Thực Vật Hữu Cơ',
@@ -29,6 +31,7 @@ export default function ShopHome() {
   const [copiedCouponId, setCopiedCouponId] = useState(null);
   const [activeMobileCoupon, setActiveMobileCoupon] = useState(0);
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('all');
+  const [customPageConfig, setCustomPageConfig] = useState(defaultCustomPageConfig);
   const couponTouchStartX = useRef(null);
   const couponTouchDeltaX = useRef(0);
   const isVoucherPausedRef = useRef(false);
@@ -49,9 +52,10 @@ export default function ShopHome() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [prodRes, couponRes] = await Promise.allSettled([
+        const [prodRes, couponRes, customConfigRes] = await Promise.allSettled([
           shopService.getProducts(),
-          shopService.getActiveCoupons(user?._id)
+          shopService.getActiveCoupons(user?._id),
+          systemConfigService.getConfig(CUSTOM_PAGE_CONFIG_KEY),
         ]);
 
         if (prodRes.status === 'fulfilled') {
@@ -70,6 +74,10 @@ export default function ShopHome() {
           } else if (Array.isArray(cData)) {
             setCoupons(cData);
           }
+        }
+
+        if (customConfigRes.status === 'fulfilled') {
+          setCustomPageConfig(mergeCustomPageConfig(customConfigRes.value?.data?.value));
         }
       } catch (error) {
         console.error("Lỗi khi tải dữ liệu trang chủ:", error);
@@ -483,15 +491,15 @@ export default function ShopHome() {
             <p className="mt-6 max-w-2xl text-sm leading-7 text-brand-muted sm:text-base sm:leading-8">Dành cho doanh nghiệp, hộ kinh doanh, sự kiện và quà tặng. Bạn tự chọn cốc, nắp, mùi hương, nhãn thương hiệu và quy cách đóng gói; Candlet hỗ trợ hoàn thiện từ thiết kế đến sản xuất.</p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link to="/custom-candles" className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-brand-burgundy px-6 text-[11px] font-black uppercase tracking-wider text-white transition hover:-translate-y-0.5 hover:bg-brand-deepWine">Xem catalogue & bảng giá <i className="ph-bold ph-arrow-right" /></Link>
-              <a href="https://zalo.me/0328624761" target="_blank" rel="noreferrer" className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-brand-burgundy/30 bg-white/50 px-6 text-[11px] font-bold uppercase tracking-wider text-brand-burgundy transition hover:border-brand-burgundy hover:bg-white"><i className="ph-bold ph-chat-circle-dots text-base" /> Nhận tư vấn</a>
+              <a href={customPageConfig.contact.zaloUrl || `https://zalo.me/${customPageConfig.contact.zaloPhone}`} target="_blank" rel="noreferrer" className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-brand-burgundy/30 bg-white/50 px-6 text-[11px] font-bold uppercase tracking-wider text-brand-burgundy transition hover:border-brand-burgundy hover:bg-white"><i className="ph-bold ph-chat-circle-dots text-base" /> Nhận tư vấn</a>
             </div>
           </div>
 
           <div className="reveal-from-right grid grid-cols-2 border-y border-brand-sand">
             {[
-              ['20+', 'Số lượng tối thiểu', 'Linh hoạt cho đơn thử nghiệm'],
-              ['63', 'Mùi hương', 'Nhiều nhóm hương để lựa chọn'],
-              ['06', 'Màu cốc', 'Có thể yêu cầu màu riêng'],
+              ['10+', 'Số lượng tối thiểu', 'Linh hoạt cho đơn thử nghiệm'],
+              [String(customPageConfig.scents.length), 'Mùi hương', 'Nhiều nhóm hương để lựa chọn'],
+              [String(customPageConfig.cups.length).padStart(2, '0'), 'Màu cốc', 'Có thể yêu cầu màu riêng'],
               ['85K', 'Giá tham khảo từ', 'Cốc 200 ml · nhãn cơ bản'],
             ].map(([value, label, note], index) => (
               <div key={label} className={`py-6 ${index % 2 ? 'border-l border-brand-sand pl-5 sm:pl-8' : 'pr-5 sm:pr-8'} ${index < 2 ? 'border-b border-brand-sand' : ''}`}>
