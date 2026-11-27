@@ -2219,11 +2219,12 @@ function OrderCostModal({ order, productMap, onClose }) {
   });
   const productCost = itemRows.reduce((sum, item) => sum + item.lineCost, 0);
   const isCustomOrder = Boolean(order.custom_group);
+  const customOtherCost = isCustomOrder ? (Number(order.custom_other_cost) || 0) : 0;
   const packagingCost = isCustomOrder ? 0 : (Number(order.packaging_cost) || 0);
   const logisticsCost = Number(order.logistics_cost) || 0;
   const returnCost = Number(order.return_cost) || 0;
   const seedingCost = Number(order.seeding_cost) || 0;
-  let countedCost = productCost + packagingCost + logisticsCost;
+  let countedCost = productCost + packagingCost + customOtherCost + logisticsCost;
   let countedRevenue = order.is_replacement || order.is_seeding ? 0 : (Number(order.total_price) || 0);
   let note = 'Giá vốn và các chi phí trực tiếp của đơn được trừ khỏi doanh thu.';
 
@@ -2236,7 +2237,7 @@ function OrderCostModal({ order, productMap, onClose }) {
     countedRevenue = 0;
     note = 'Đơn hoàn bị loại khỏi doanh thu và giá vốn; báo cáo chỉ trừ chi phí hoàn hàng.';
   } else if (order.is_seeding) {
-    countedCost = productCost + packagingCost + logisticsCost + seedingCost - (Number(order.total_price) || 0);
+    countedCost = productCost + packagingCost + customOtherCost + logisticsCost + seedingCost - (Number(order.total_price) || 0);
     note = 'Đơn seeding không ghi nhận doanh thu; giá trị đơn được bù trừ vào tổng chi phí seeding.';
   } else if (order.is_replacement) {
     note = 'Đơn giao bù không ghi nhận doanh thu; toàn bộ chi phí trực tiếp được tính là chi phí giao bù.';
@@ -2251,6 +2252,7 @@ function OrderCostModal({ order, productMap, onClose }) {
   const costRows = [
     ['Giá vốn sản phẩm', productCost, 'inventory_2'],
     ...(!isCustomOrder ? [['Chi phí đóng gói', packagingCost, 'package_2']] : []),
+    ...(isCustomOrder && customOtherCost > 0 ? [['Chi phí khác', customOtherCost, 'receipt_long']] : []),
     ['Chi phí vận chuyển', logisticsCost, 'local_shipping'],
     ...(isReturned ? [['Chi phí hoàn hàng', returnCost, 'assignment_return']] : []),
     ...(order.is_seeding ? [['Chi phí seeding bổ sung', seedingCost, 'featured_seasonal_and_gifts'], ['Giá trị đơn bù trừ', -(Number(order.total_price) || 0), 'remove_circle']] : []),
@@ -2733,7 +2735,7 @@ export default function OrderManagement() {
   const returnedOrders  = baseFilteredOrders.filter(o => o.status === 'returned' || ['returning', 'returned', 'failed'].includes(o.delivery_status));
   const totalRevenue = normalActiveOrders.reduce((s, o) => s + (o.total_price || 0), 0);
   const totalItems   = normalActiveOrders.reduce((s, o) => s + (o.items?.reduce((a, i) => a + i.quantity, 0) || 0), 0);
-  const totalCost    = activeOrders.reduce((s, o) => s + (o.seeding_cost || 0) + (o.items?.reduce((a, i) => a + currentItemUnitCost(i, productCostMap) * i.quantity, 0) || 0) + (o.logistics_cost || 0) + (o.custom_group ? 0 : (o.packaging_cost || 0)), 0)
+  const totalCost    = activeOrders.reduce((s, o) => s + (o.seeding_cost || 0) + (o.items?.reduce((a, i) => a + currentItemUnitCost(i, productCostMap) * i.quantity, 0) || 0) + (o.logistics_cost || 0) + (o.custom_group ? (o.custom_other_cost || 0) : (o.packaging_cost || 0)), 0)
                      + returnedOrders.reduce((s, o) => s + (o.return_cost || 0), 0); // thêm chi phí hoàn
   const totalProfit  = totalRevenue - totalCost;
   const profitMargin = totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(1) : 0;
