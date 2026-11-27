@@ -259,6 +259,17 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
   const customProductGroups = useMemo(() => [...new Set(products
     .filter(product => product.product_type === 'custom' && product.custom_group)
     .map(product => product.custom_group))].sort((a, b) => a.localeCompare(b, 'vi')), [products]);
+  const customGroupTemplate = useMemo(() => products.find(product => (
+    product.product_type === 'custom' && product.custom_group === customGroup
+  )), [customGroup, products]);
+  const customOtherCost = customGroup
+    ? (isEdit && order?.custom_group === customGroup
+      ? Number(order.custom_other_cost) || 0
+      : Number(customGroupTemplate?.custom_other_cost) || 0)
+    : 0;
+  const customerPayable = Math.max(0, Number(totalPrice || 0) - Number(appliedDiscount.amount || 0)
+    + (source === 'website' ? Number(shippingFee || 0) : 0));
+  const actualCustomRevenue = Math.max(0, customerPayable - customOtherCost);
 
   const productById = useMemo(() => new Map(products.map(product => [String(product._id), product])), [products]);
   const regularOrderItemEntries = useMemo(() => items.map((item, index) => ({ item, index })).filter(entry => productById.get(String(entry.item.product_id))?.product_type !== 'custom'), [items, productById]);
@@ -1535,13 +1546,22 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                         <span className="text-[11px] text-stone-500 font-normal">Không bao gồm phí ship do shop chi trả</span>
                       </div>
                       <span className="text-xl sm:text-2xl font-black font-mono text-primary">
-                        {formatPrice(Math.max(0, (() => {
-                          const base = totalPrice - appliedDiscount.amount;
-                          if (source === 'website') return base + shippingFee;
-                          return base;
-                        })()))}
+                        {formatPrice(customerPayable)}
                       </span>
                     </div>
+
+                    {customGroup && (
+                      <div className="space-y-2 border-t border-dashed border-blue-100 pt-2.5">
+                        <div className="flex items-center justify-between gap-3 text-[12px] font-semibold text-rose-700">
+                          <span>Chi phí khác:</span>
+                          <span className="font-mono">-{formatPrice(customOtherCost)}</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-3 rounded-xl bg-primary-container/45 px-3 py-2.5">
+                          <div><p className="text-[11px] font-black uppercase tracking-wide text-on-surface">Thực tế nhận được</p><p className="text-[9px] text-on-surface-variant">Số tiền cộng vào tài sản</p></div>
+                          <span className="font-mono text-lg font-black text-primary">{formatPrice(actualCustomRevenue)}</span>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Doanh thu thực sau khi trừ phí ship shop chịu */}
                     {logisticsCost > 0 && (
