@@ -1009,8 +1009,6 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                           onClick={() => {
                             if (source !== src.id) {
                               setSource(src.id);
-                              setDiscountCodeInput('');
-                              setAppliedDiscount({ code: null, amount: 0 });
                               setCouponError('');
                             }
                           }}
