@@ -56,6 +56,10 @@ function ProductForm({ product, products, materials, onClose, onSaved }) {
         ? { ...core, ingredient_id: entry.ingredient_id, quantity: entry.quantity }
         : { role: 'extra', label: 'Nguyên liệu bổ sung', unit: material?.unit || '', ...entry };
     });
+    recipe.push(...(product.custom_cost_items || []).map(item => ({
+      role: 'manual', label: 'Nguyên liệu ngoài kho', name: item.name || '',
+      quantity: Number(item.quantity) || 0, unit: item.unit || '', unit_cost: Number(item.unit_cost) || 0,
+    })));
     return {
       productId: product.productId || newCode(), name: product.name || '', custom_group: product.custom_group || '',
       custom_quantity: Math.max(1, Number(product.custom_quantity) || 1), base_price: Number(product.base_price) || 0, description: product.description || '', recipe,
@@ -69,6 +73,7 @@ function ProductForm({ product, products, materials, onClose, onSaved }) {
     recipe: current.recipe.map((row, rowIndex) => rowIndex === index ? { ...row, ...patch } : row),
   }));
   const estimatedCost = form.recipe.reduce((sum, row) => {
+    if (row.role === 'manual') return sum + (Number(row.unit_cost) || 0) * (Number(row.quantity) || 0);
     const material = materials.find(item => item._id === row.ingredient_id);
     return sum + (Number(material?.price) || 0) * (Number(row.quantity) || 0);
   }, 0);
@@ -79,16 +84,22 @@ function ProductForm({ product, products, materials, onClose, onSaved }) {
     if (!form.custom_group.trim()) return setError('Vui lòng nhập hoặc chọn nhóm đơn custom.');
     if (!form.name.trim()) return setError('Vui lòng nhập tên sản phẩm.');
     if (form.recipe.length === 0) return setError('Công thức phải có ít nhất một nguyên vật liệu.');
-    const missing = form.recipe.find(row => !row.ingredient_id);
+    const missing = form.recipe.find(row => row.role !== 'manual' && !row.ingredient_id);
     if (missing) return setError(`Vui lòng chọn nguyên vật liệu cho dòng “${missing.label}”.`);
+    const missingManualName = form.recipe.find(row => row.role === 'manual' && !row.name?.trim());
+    if (missingManualName) return setError('Vui lòng nhập tên nguyên liệu ngoài kho.');
     if (form.recipe.some(row => Number(row.quantity) <= 0)) return setError('Định lượng nguyên vật liệu phải lớn hơn 0.');
-    const ids = form.recipe.map(row => row.ingredient_id);
+    if (form.recipe.some(row => row.role === 'manual' && (!Number.isFinite(Number(row.unit_cost)) || Number(row.unit_cost) < 0))) return setError('Đơn giá nguyên liệu ngoài kho không hợp lệ.');
+    const ids = form.recipe.filter(row => row.role !== 'manual').map(row => row.ingredient_id);
     if (new Set(ids).size !== ids.length) return setError('Một nguyên vật liệu không thể xuất hiện hai lần trong công thức.');
     const payload = {
       product_type: 'custom', productId: form.productId.trim(), name: form.name.trim(),
       custom_group: form.custom_group.trim(), custom_quantity: Math.max(1, Math.trunc(Number(form.custom_quantity) || 1)), base_price: Number(form.base_price) || 0,
       original_price: 0, description: form.description.trim(),
-      base_ingredients: form.recipe.map(row => ({ ingredient_id: row.ingredient_id, quantity: Number(row.quantity) })),
+      base_ingredients: form.recipe.filter(row => row.role !== 'manual').map(row => ({ ingredient_id: row.ingredient_id, quantity: Number(row.quantity) })),
+      custom_cost_items: form.recipe.filter(row => row.role === 'manual').map(row => ({
+        name: row.name.trim(), quantity: Number(row.quantity), unit: row.unit.trim(), unit_cost: Number(row.unit_cost),
+      })),
     };
     try {
       setSaving(true);
@@ -126,6 +137,14 @@ function ProductForm({ product, products, materials, onClose, onSaved }) {
               {form.recipe.map((row, index) => {
                 const selected = materials.find(item => item._id === row.ingredient_id);
                 const options = row.role === 'oil' ? materials.filter(item => matchesRole(item, 'oil')) : materials;
+                if (row.role === 'manual') return <div key={`manual-${index}`} className="grid gap-3 bg-amber-50/30 p-4 sm:grid-cols-[150px_minmax(0,1fr)_105px_80px_120px_36px] sm:items-center sm:px-5">
+                  <div><p className="text-xs font-black text-on-surface">Ngoài kho</p><p className="mt-0.5 text-[9px] font-bold uppercase tracking-wider text-amber-700">Chỉ tính giá vốn</p></div>
+                  <input value={row.name} onChange={event => updateRecipe(index, { name: event.target.value })} placeholder="Tên nguyên liệu / sản phẩm" className="h-10 min-w-0 rounded-xl border border-outline-variant bg-white px-3 text-xs outline-none focus:border-primary" />
+                  <input type="number" min="0.0001" step="any" value={row.quantity} onChange={event => updateRecipe(index, { quantity: event.target.value })} placeholder="Số lượng" className="h-10 min-w-0 rounded-xl border border-outline-variant bg-white px-3 text-right text-xs font-black outline-none focus:border-primary" />
+                  <input value={row.unit} onChange={event => updateRecipe(index, { unit: event.target.value })} placeholder="Đơn vị" className="h-10 min-w-0 rounded-xl border border-outline-variant bg-white px-3 text-xs outline-none focus:border-primary" />
+                  <label className="flex h-10 items-center rounded-xl border border-outline-variant bg-white"><input type="number" min="0" step="any" value={row.unit_cost} onChange={event => updateRecipe(index, { unit_cost: event.target.value })} placeholder="Đơn giá" className="min-w-0 flex-1 bg-transparent px-3 text-right text-xs font-black outline-none" /><span className="border-l border-outline-variant px-2 text-[10px] font-bold text-on-surface-variant">đ</span></label>
+                  <button type="button" aria-label={`Xoá ${row.name || 'nguyên liệu ngoài kho'}`} onClick={() => setForm(current => ({ ...current, recipe: current.recipe.filter((_, rowIndex) => rowIndex !== index) }))} className="grid h-9 w-9 place-items-center rounded-lg text-red-500 transition-colors hover:bg-red-50"><span className="material-symbols-outlined text-[18px]">delete</span></button>
+                </div>;
                 return <div key={`${row.role}-${index}`} className="grid gap-3 bg-white p-4 sm:grid-cols-[150px_minmax(0,1fr)_120px_36px] sm:items-center sm:px-5">
                   <div><p className="text-xs font-black text-on-surface">{row.label}</p><p className="mt-0.5 text-[9px] font-bold uppercase tracking-wider text-on-surface-variant">{row.role === 'oil' && !row.ingredient_id ? 'Cần chọn mùi' : row.role === 'extra' ? 'Bổ sung' : 'Gợi ý mặc định'}</p></div>
                   <SearchableSelect
@@ -143,7 +162,10 @@ function ProductForm({ product, products, materials, onClose, onSaved }) {
                 </div>;
               })}
             </div>
-            <button type="button" onClick={() => setForm(current => ({ ...current, recipe: [...current.recipe, { role: 'extra', label: 'Nguyên liệu bổ sung', ingredient_id: '', quantity: 1, unit: '' }] }))} className="m-4 inline-flex h-9 items-center gap-1.5 rounded-xl border border-dashed border-primary/40 px-3 text-[10px] font-bold text-primary hover:bg-primary-container"><span className="material-symbols-outlined text-[17px]">add</span>Thêm nguyên liệu</button>
+            <div className="m-4 flex flex-wrap gap-2">
+              <button type="button" onClick={() => setForm(current => ({ ...current, recipe: [...current.recipe, { role: 'extra', label: 'Nguyên liệu bổ sung', ingredient_id: '', quantity: 1, unit: '' }] }))} className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-dashed border-primary/40 px-3 text-[10px] font-bold text-primary hover:bg-primary-container"><span className="material-symbols-outlined text-[17px]">add</span>Nguyên liệu trong kho</button>
+              <button type="button" onClick={() => setForm(current => ({ ...current, recipe: [...current.recipe, { role: 'manual', label: 'Nguyên liệu ngoài kho', name: '', quantity: 1, unit: 'cái', unit_cost: 0 }] }))} className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-dashed border-amber-400 px-3 text-[10px] font-bold text-amber-700 hover:bg-amber-50"><span className="material-symbols-outlined text-[17px]">add</span>Nguyên liệu ngoài kho</button>
+            </div>
           </section>
         </div>
 
@@ -176,9 +198,17 @@ function CustomOrderConfigModal({ group, products, onClose, onSaved }) {
       current.cost += usedQuantity * (Number(material.price) || 0);
       totals.set(key, current);
     });
+    (product.custom_cost_items || []).forEach((item, index) => {
+      const key = `manual:${normalize(item.name)}:${normalize(item.unit)}:${Number(item.unit_cost) || 0}`;
+      const usedQuantity = (Number(item.quantity) || 0) * productQuantity;
+      const current = totals.get(key) || { id: `${key}:${index}`, name: item.name || 'Nguyên liệu ngoài kho', sku: '', unit: item.unit || '', quantity: 0, cost: 0, stock: 0, tracked: false };
+      current.quantity += usedQuantity;
+      current.cost += usedQuantity * (Number(item.unit_cost) || 0);
+      totals.set(key, current);
+    });
     return totals;
   }, new Map()).values()].sort((a, b) => a.name.localeCompare(b.name, 'vi'));
-  const shortageCount = materialTotals.filter(material => material.quantity > material.stock).length;
+  const shortageCount = materialTotals.filter(material => material.tracked !== false && material.quantity > material.stock).length;
   const baseCost = materialTotals.reduce((sum, material) => sum + material.cost, 0);
   const discountAmount = form.discount_type === 'percent'
     ? grossRevenue * Math.min(100, Math.max(0, Number(form.discount_value) || 0)) / 100
@@ -219,7 +249,7 @@ function CustomOrderConfigModal({ group, products, onClose, onSaved }) {
         </div>
 
         <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(290px,.65fr)]">
-          <section className="overflow-hidden rounded-xl border border-outline-variant"><header className="flex items-center justify-between gap-3 bg-surface-container-low px-3.5 py-2.5"><div><h3 className="text-[11px] font-black text-on-surface">Nguyên vật liệu</h3><p className={`text-[8px] font-semibold ${shortageCount ? 'text-red-600' : 'text-emerald-700'}`}>{shortageCount ? `${shortageCount} nguyên liệu đang thiếu` : 'Tồn kho đáp ứng đủ đơn'}</p></div><b className="shrink-0 text-[11px] text-on-surface">{materialTotals.length} loại · {formatMoney(baseCost)}đ</b></header><div className="max-h-[360px] divide-y divide-outline-variant/60 overflow-y-auto">{materialTotals.length > 0 ? materialTotals.map(material => { const shortage = Math.max(0, material.quantity - material.stock); return <div key={material.id} className="grid grid-cols-[minmax(0,1fr)_auto_auto_auto] items-center gap-2.5 px-3.5 py-2"><div className="min-w-0"><p className="truncate text-[11px] font-semibold text-on-surface">{material.name}</p><p className="truncate text-[8px] text-on-surface-variant">{material.sku || 'Không có mã'} · Kho {formatQuantity(material.stock)} {material.unit}</p></div><span className="rounded-md bg-primary-container px-2 py-1 text-[9px] font-black text-primary">Cần {formatQuantity(material.quantity)} {material.unit}</span><span className={`rounded-md px-2 py-1 text-[9px] font-black ${shortage > 0 ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-700'}`}>{shortage > 0 ? `Thiếu ${formatQuantity(shortage)} ${material.unit}` : 'Đủ'}</span><b className="min-w-14 text-right text-[10px] text-on-surface">{formatMoney(material.cost)}đ</b></div>; }) : <p className="px-4 py-8 text-center text-xs text-on-surface-variant">Chưa có nguyên vật liệu.</p>}</div></section>
+          <section className="overflow-hidden rounded-xl border border-outline-variant"><header className="flex items-center justify-between gap-3 bg-surface-container-low px-3.5 py-2.5"><div><h3 className="text-[11px] font-black text-on-surface">Nguyên vật liệu</h3><p className={`text-[8px] font-semibold ${shortageCount ? 'text-red-600' : 'text-emerald-700'}`}>{shortageCount ? `${shortageCount} nguyên liệu đang thiếu` : 'Tồn kho đáp ứng đủ đơn'}</p></div><b className="shrink-0 text-[11px] text-on-surface">{materialTotals.length} loại · {formatMoney(baseCost)}đ</b></header><div className="max-h-[360px] divide-y divide-outline-variant/60 overflow-y-auto">{materialTotals.length > 0 ? materialTotals.map(material => { const shortage = material.tracked === false ? 0 : Math.max(0, material.quantity - material.stock); return <div key={material.id} className="grid grid-cols-[minmax(0,1fr)_auto_auto_auto] items-center gap-2.5 px-3.5 py-2"><div className="min-w-0"><p className="truncate text-[11px] font-semibold text-on-surface">{material.name}</p><p className="truncate text-[8px] text-on-surface-variant">{material.tracked === false ? 'Ngoài kho · Chỉ tính giá vốn' : `${material.sku || 'Không có mã'} · Kho ${formatQuantity(material.stock)} ${material.unit}`}</p></div><span className="rounded-md bg-primary-container px-2 py-1 text-[9px] font-black text-primary">Cần {formatQuantity(material.quantity)} {material.unit}</span><span className={`rounded-md px-2 py-1 text-[9px] font-black ${material.tracked === false ? 'bg-amber-50 text-amber-700' : shortage > 0 ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-700'}`}>{material.tracked === false ? 'Không theo dõi' : shortage > 0 ? `Thiếu ${formatQuantity(shortage)} ${material.unit}` : 'Đủ'}</span><b className="min-w-14 text-right text-[10px] text-on-surface">{formatMoney(material.cost)}đ</b></div>; }) : <p className="px-4 py-8 text-center text-xs text-on-surface-variant">Chưa có nguyên vật liệu.</p>}</div></section>
 
           <section className="rounded-xl border border-outline-variant p-4"><h3 className="text-xs font-black text-on-surface">Điều chỉnh đơn hàng</h3><div className="mt-3 space-y-3"><label className="block"><span className="mb-1 block text-[10px] font-bold">Hình thức giảm giá</span><select value={form.discount_type} onChange={event => setForm(current => ({ ...current, discount_type: event.target.value, discount_value: 0 }))} className="h-9 w-full rounded-lg border border-outline-variant bg-white px-3 text-xs outline-none focus:border-primary"><option value="none">Không giảm giá</option><option value="percent">Theo phần trăm (%)</option><option value="fixed">Số tiền cố định</option></select></label><label className="block"><span className="mb-1 block text-[10px] font-bold">Mức giảm</span><div className="relative"><input type="number" min="0" max={form.discount_type === 'percent' ? 100 : undefined} disabled={form.discount_type === 'none'} value={form.discount_value} onChange={event => setForm(current => ({ ...current, discount_value: event.target.value }))} className="h-9 w-full rounded-lg border border-outline-variant px-3 pr-8 text-xs font-bold outline-none focus:border-primary disabled:bg-surface-container-low disabled:text-on-surface-variant" /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-on-surface-variant">{form.discount_type === 'percent' ? '%' : 'đ'}</span></div></label><label className="block"><span className="mb-1 block text-[10px] font-bold">Chi phí khác</span><div className="relative"><input type="number" min="0" value={form.other_cost} onChange={event => setForm(current => ({ ...current, other_cost: event.target.value }))} className="h-9 w-full rounded-lg border border-outline-variant px-3 pr-8 text-xs font-bold outline-none focus:border-primary" /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-on-surface-variant">đ</span></div></label></div><div className="mt-3 space-y-1.5 rounded-lg bg-surface-container-low p-3 text-[10px]"><p className="flex justify-between gap-3"><span className="text-on-surface-variant">Giảm giá</span><b>{formatMoney(discountAmount)}đ</b></p><p className="flex justify-between gap-3"><span className="text-on-surface-variant">Doanh thu sau giảm</span><b className="text-primary">{formatMoney(netRevenue)}đ</b></p></div></section>
         </div>
@@ -291,6 +321,9 @@ export default function CustomProductManagement() {
           ingredient_id: item.ingredient_id?._id || item.ingredient_id,
           quantity: Number(item.quantity) || 0,
         })),
+        custom_cost_items: (product.custom_cost_items || []).map(item => ({
+          name: item.name, quantity: Number(item.quantity) || 0, unit: item.unit || '', unit_cost: Number(item.unit_cost) || 0,
+        })),
       });
       showToast(`Đã nhân bản “${product.name}”.`);
       await load();
@@ -310,6 +343,7 @@ export default function CustomProductManagement() {
         base_price: Number(product.base_price) || 0, original_price: Number(product.original_price) || 0,
         description: product.description || '', image: product.image || null, images: product.images || [],
         base_ingredients: (product.base_ingredients || []).map(item => ({ ingredient_id: item.ingredient_id?._id || item.ingredient_id, quantity: Number(item.quantity) || 0 })),
+        custom_cost_items: (product.custom_cost_items || []).map(item => ({ name: item.name, quantity: Number(item.quantity) || 0, unit: item.unit || '', unit_cost: Number(item.unit_cost) || 0 })),
       });
       setProducts(current => current.map(item => item._id === product._id ? { ...item, custom_quantity: quantity } : item));
       setQuantityDrafts(current => { const next = { ...current }; delete next[product._id]; return next; });
