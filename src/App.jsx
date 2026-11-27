@@ -24,6 +24,7 @@ import PostManagement from './pages/PostManagement';
 import MessengerBotManagement from './pages/MessengerBotManagement';
 import LabelMockupStudio from './pages/LabelMockupStudio';
 import CustomPageManagement from './pages/CustomPageManagement';
+import CustomProductManagement from './pages/CustomProductManagement';
 import PublicMockup from './pages/PublicMockup';
 
 import ShopLayout from './pages/shop/ShopLayout';
@@ -83,6 +84,7 @@ export default function App() {
           <Route path="/admin/messenger-bot" element={<ProtectedRoute><MessengerBotManagement /></ProtectedRoute>} />
           <Route path="/admin/tools/label-mockup" element={<ProtectedRoute><LabelMockupStudio /></ProtectedRoute>} />
           <Route path="/admin/custom-page" element={<ProtectedRoute><CustomPageManagement /></ProtectedRoute>} />
+          <Route path="/admin/custom-products" element={<ProtectedRoute><CustomProductManagement /></ProtectedRoute>} />
           <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="/mockup/:token" element={<PublicMockup />} />
           

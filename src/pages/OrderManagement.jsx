@@ -114,6 +114,8 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
   const [error, setError] = useState('');
   const [showProductPicker, setShowProductPicker] = useState(false);
   const [productSearch, setProductSearch] = useState('');
+  const [customGroup, setCustomGroup] = useState(order?.custom_group || '');
+  const [productGroupFilter, setProductGroupFilter] = useState(order?.custom_group || 'all');
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [requiredDepositAmount, setRequiredDepositAmount] = useState(0);
 
@@ -183,6 +185,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
           customer_name: canEditCustomer ? customerName : undefined,
           customer_phone: canEditCustomer ? customerPhone : undefined,
           customer_address: canEditCustomer ? customerAddress : undefined,
+          custom_group: customGroup,
           payment_method: canEditCustomer ? paymentMethod : undefined,
           shippingMethod,
           shipping_carrier: shippingCarrier,
@@ -253,19 +256,30 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
     if (autoTotal) setTotalPrice(calcTotal());
   }, [items, autoTotal, calcTotal]);
 
+  const customProductGroups = useMemo(() => [...new Set(products
+    .filter(product => product.product_type === 'custom' && product.custom_group)
+    .map(product => product.custom_group))].sort((a, b) => a.localeCompare(b, 'vi')), [products]);
+
   const filteredProducts = useMemo(() => {
-    if (!productSearch) return products;
+    const scopedProducts = productGroupFilter === 'all' ? products
+      : productGroupFilter === 'sellable' ? products.filter(product => product.product_type !== 'custom')
+        : products.filter(product => product.product_type === 'custom' && product.custom_group === productGroupFilter);
+    if (!productSearch) return scopedProducts;
     const term = productSearch.toLowerCase();
-    return products.filter(p => {
+    return scopedProducts.filter(p => {
       const matchName = p.name?.toLowerCase().includes(term);
       const matchSku = p.productId?.toLowerCase().includes(term);
       const matchInnerSku = p.skus?.some(sku => sku.sku?.toLowerCase().includes(term));
       return matchName || matchSku || matchInnerSku;
     });
-  }, [products, productSearch]);
+  }, [products, productSearch, productGroupFilter]);
 
   // Thêm sản phẩm / SKU vào đơn hàng
   const handlePickProduct = (product, sku = null) => {
+    if (product.product_type === 'custom' && product.custom_group) {
+      setCustomGroup(product.custom_group);
+      setProductGroupFilter(product.custom_group);
+    }
     const unit_price = sku ? (sku.price || product.base_price || 0) : (product.base_price || 0);
     const unit_cost = sku ? (sku.cost || product.base_cost || 0) : (product.base_cost || 0);
     const sku_label = sku
@@ -370,6 +384,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
         customer_name: canEditCustomer ? customerName : undefined,
         customer_phone: canEditCustomer ? customerPhone : undefined,
         customer_address: canEditCustomer ? customerAddress : undefined,
+        custom_group: customGroup,
         payment_method: canEditCustomer ? paymentMethod : undefined,
         shippingMethod, 
         delivery_status: managesDelivery ? deliveryStatus : undefined,
@@ -1237,6 +1252,16 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                   </button>
                 </div>
 
+                {customProductGroups.length > 0 && (
+                  <label className="flex flex-col gap-1.5 rounded-xl border border-primary/15 bg-primary-container/20 px-3.5 py-3 sm:flex-row sm:items-center sm:justify-between">
+                    <span><span className="block text-[11px] font-bold text-stone-800">Nhóm đơn custom</span><span className="block text-[10px] text-stone-500">Chọn nhóm theo đơn custom của khách hàng.</span></span>
+                    <select value={customGroup} onChange={event => { const value = event.target.value; setCustomGroup(value); setProductGroupFilter(value || 'all'); }} className="h-9 min-w-52 rounded-lg border border-primary/20 bg-white px-3 text-xs font-bold text-stone-800 outline-none focus:border-primary">
+                      <option value="">Không thuộc nhóm custom</option>
+                      {customProductGroups.map(group => <option key={group} value={group}>{group}</option>)}
+                    </select>
+                  </label>
+                )}
+
                 {/* Items List */}
                 {items.length === 0 ? (
                   <div className="border-2 border-dashed border-stone-200 rounded-2xl py-12 text-center text-stone-400 space-y-2">
@@ -1578,16 +1603,16 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                   <span className="material-symbols-outlined text-[20px] text-on-surface-variant">close</span>
                 </button>
               </div>
-              <div className="relative">
-                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant">search</span>
-                <input
-                  type="text"
-                  placeholder="Tìm tên hoặc mã sản phẩm..."
-                  value={productSearch}
-                  onChange={(e) => setProductSearch(e.target.value)}
-                  className="w-full bg-surface-container-low border border-outline-variant/50 rounded-lg pl-9 pr-3 py-2 text-[13px] text-on-surface focus:outline-none focus:border-primary focus:bg-white transition-all"
-                  autoFocus
-                />
+              <div className="grid gap-2 sm:grid-cols-[190px_1fr]">
+                <select value={productGroupFilter} onChange={event => { const value = event.target.value; setProductGroupFilter(value); if (value !== 'all' && value !== 'sellable') setCustomGroup(value); }} className="h-10 rounded-lg border border-outline-variant/50 bg-surface-container-low px-3 text-[12px] font-bold text-on-surface outline-none focus:border-primary focus:bg-white">
+                  <option value="all">Tất cả sản phẩm</option>
+                  <option value="sellable">Sản phẩm thường</option>
+                  {customProductGroups.map(group => <option key={group} value={group}>Custom · {group}</option>)}
+                </select>
+                <div className="relative">
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant">search</span>
+                  <input type="text" placeholder="Tìm tên hoặc mã sản phẩm..." value={productSearch} onChange={(e) => setProductSearch(e.target.value)} className="h-10 w-full rounded-lg border border-outline-variant/50 bg-surface-container-low pl-9 pr-3 text-[13px] text-on-surface outline-none transition-all focus:border-primary focus:bg-white" autoFocus />
+                </div>
               </div>
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
@@ -1610,7 +1635,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
                     )}
                     <div className="flex-1">
                       <p className="font-bold text-[14px] text-on-surface">{product.name}</p>
-                      <p className="text-[11px] text-on-surface-variant">{product.productId}</p>
+                      <p className="text-[11px] text-on-surface-variant">{product.productId}{product.product_type === 'custom' ? ` · ${product.custom_group}` : ''}</p>
                     </div>
                     {(!product.skus || product.skus.length === 0) && (
                       <span className="text-[13px] font-bold text-primary">{formatPrice(product.base_price)}</span>
@@ -2508,13 +2533,14 @@ export default function OrderManagement() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [resOrders, resProducts, resReturnCost] = await Promise.all([
+      const [resOrders, resProducts, resCustomProducts, resReturnCost] = await Promise.all([
         orderService.getOrders(),
         productService.getProducts({ type: 'sellable' }),
+        productService.getProducts({ type: 'custom' }),
         systemConfigService.getConfig('return_cost_per_platform'),
       ]);
       setOrders(resOrders.data.data);
-      if (resProducts.data.success) setProducts(resProducts.data.data);
+      if (resProducts.data.success) setProducts([...(resProducts.data.data || []), ...(resCustomProducts.data?.data || [])]);
       if (resReturnCost && resReturnCost.success && resReturnCost.data.value) {
         try {
           setReturnCostConfig(JSON.parse(resReturnCost.data.value));

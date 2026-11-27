@@ -22,6 +22,7 @@ const ROUTE_TITLES = {
   '/admin/register': 'Đăng Ký Quản Trị | Candlet Admin',
   '/admin/dashboard': 'Tổng Quan Kinh Doanh | Candlet Admin',
   '/admin/products': 'Quản Lý Sản Phẩm | Candlet Admin',
+  '/admin/custom-products': 'Sản Phẩm Custom | Candlet Admin',
   '/admin/orders': 'Quản Lý Đơn Hàng | Candlet Admin',
   '/admin/messenger-bot': 'Bot Messenger | Candlet Admin',
   '/admin/pos': 'Bán Hàng Tại Quầy (POS) | Candlet Admin',

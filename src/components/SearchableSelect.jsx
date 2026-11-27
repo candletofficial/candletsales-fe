@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 
 const searchText = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/gi, 'd').toLowerCase().trim();
 
-export default function SearchableSelect({ options, value, onChange, placeholder = "-- Chọn --", className = "", disabled = false, inlineMenu = false, portalMenu = false, searchPlaceholder = "Tìm kiếm...", ariaLabel }) {
+export default function SearchableSelect({ options, value, onChange, placeholder = "-- Chọn --", className = "", disabled = false, inlineMenu = false, portalMenu = false, searchPlaceholder = "Tìm kiếm...", ariaLabel, allowCustomValue = false, customValueLabel = "Dùng giá trị mới" }) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
   const wrapperRef = useRef(null);
@@ -45,10 +45,13 @@ export default function SearchableSelect({ options, value, onChange, placeholder
   }, [isOpen, portalMenu]);
 
   const selectedOption = options.find(opt => String(opt.value) === String(value));
+  const selectedCustomValue = allowCustomValue && value && !selectedOption ? String(value) : '';
   
   const filteredOptions = options.filter(opt => 
     searchText(opt.label).includes(searchText(search))
   );
+  const trimmedSearch = search.trim();
+  const canUseCustomValue = allowCustomValue && trimmedSearch && !options.some(opt => searchText(String(opt.value)) === searchText(trimmedSearch) || searchText(opt.label) === searchText(trimmedSearch));
 
   const menu = isOpen && !disabled ? (
     <div ref={menuRef} style={portalMenu && menuPosition ? menuPosition : undefined} className={`${portalMenu ? 'fixed z-[200]' : inlineMenu ? 'relative' : 'absolute z-[100] min-w-[300px] left-0'} w-full mt-2 bg-white border border-outline-variant/30 rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] max-h-[300px] flex flex-col overflow-hidden`}>
@@ -62,7 +65,8 @@ export default function SearchableSelect({ options, value, onChange, placeholder
         {filteredOptions.length > 0 ? filteredOptions.map(opt => {
           const isSelected = String(opt.value) === String(value);
           return <button type="button" key={opt.value} style={opt.toneColor ? { color: opt.toneColor } : undefined} className={`w-full text-left px-3 py-2.5 text-[14px] cursor-pointer rounded-lg transition-colors flex items-center justify-between gap-2 focus-visible:outline-2 focus-visible:outline-primary ${isSelected ? 'ring-1 ring-inset ring-primary/25 font-bold' : 'hover:bg-surface-container-low'} ${opt.toneColor ? '' : (isSelected ? 'bg-primary-container text-on-primary-container' : 'text-on-surface')}`} onClick={() => { onChange(opt.value); setIsOpen(false); triggerRef.current?.focus(); }}><span className={inlineMenu ? 'min-w-0 break-words' : 'truncate'}>{opt.label}</span><span className="ml-auto flex shrink-0 items-center gap-1.5">{opt.badge && <span className={`rounded-full px-2 py-0.5 text-[9px] font-bold ring-1 ring-inset ${opt.badgeClass || ''}`}>{opt.badge}</span>}{isSelected && <span className="material-symbols-outlined text-[18px]">check</span>}</span></button>;
-        }) : <div className="p-6 text-center text-[13px] text-on-surface-variant flex flex-col items-center"><span className="material-symbols-outlined text-[32px] opacity-30 mb-2">search_off</span>Không tìm thấy kết quả</div>}
+        }) : !canUseCustomValue && <div className="p-6 text-center text-[13px] text-on-surface-variant flex flex-col items-center"><span className="material-symbols-outlined text-[32px] opacity-30 mb-2">search_off</span>Không tìm thấy kết quả</div>}
+        {canUseCustomValue && <button type="button" className="mt-1 flex w-full items-center gap-2 rounded-lg border border-dashed border-primary/30 bg-primary-container/30 px-3 py-2.5 text-left text-[13px] font-semibold text-primary hover:bg-primary-container" onClick={() => { onChange(trimmedSearch); setIsOpen(false); triggerRef.current?.focus(); }}><span className="material-symbols-outlined text-[18px]">add</span><span className="min-w-0"><span className="block text-[10px] font-bold uppercase tracking-wide text-primary/70">{customValueLabel}</span><span className="block truncate">{trimmedSearch}</span></span></button>}
       </div>
     </div>
   ) : null;
@@ -79,8 +83,8 @@ export default function SearchableSelect({ options, value, onChange, placeholder
         onClick={() => { if (!disabled) { setIsOpen(!isOpen); setSearch(''); } }}
       >
         <span className="flex min-w-0 flex-1 items-center gap-1.5 rounded-md px-1.5 py-0.5 pr-2 text-left">
-          <span style={selectedOption?.toneColor ? { color: selectedOption.toneColor } : undefined} className={`min-w-0 truncate ${!selectedOption ? 'text-on-surface-variant' : selectedOption.toneColor ? 'font-semibold' : 'font-medium text-on-surface'}`}>
-            {selectedOption ? selectedOption.label : placeholder}
+          <span style={selectedOption?.toneColor ? { color: selectedOption.toneColor } : undefined} className={`min-w-0 truncate ${!selectedOption && !selectedCustomValue ? 'text-on-surface-variant' : selectedOption?.toneColor ? 'font-semibold' : 'font-medium text-on-surface'}`}>
+            {selectedOption ? selectedOption.label : selectedCustomValue || placeholder}
           </span>
           {selectedOption?.badge && <span className={`shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold ring-1 ring-inset ${selectedOption.badgeClass || ''}`}>{selectedOption.badge}</span>}
         </span>

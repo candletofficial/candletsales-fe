@@ -1746,11 +1746,14 @@ export default function ProductManagement() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [resProd, resMat] = await Promise.all([
-        productService.getProducts(),
+      const [resSellable, resFormula, resMat] = await Promise.all([
+        productService.getProducts({ type: 'sellable' }),
+        productService.getProducts({ type: 'sub_formula' }),
         materialService.getMaterials()
       ]);
-      if (resProd.data.success) setProducts(resProd.data.data);
+      if (resSellable.data.success && resFormula.data.success) {
+        setProducts([...(resSellable.data.data || []), ...(resFormula.data.data || [])]);
+      }
       if (resMat.data.success) setMaterials(resMat.data.data);
     } catch (err) {
       showToast('Lỗi khi tải dữ liệu', 'error');
