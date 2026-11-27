@@ -72,6 +72,7 @@ function ProductForm({ product, products, materials, onClose, onSaved }) {
     setError('');
     if (!form.custom_group.trim()) return setError('Vui lòng nhập hoặc chọn nhóm đơn custom.');
     if (!form.name.trim()) return setError('Vui lòng nhập tên sản phẩm.');
+    if (form.recipe.length === 0) return setError('Công thức phải có ít nhất một nguyên vật liệu.');
     const missing = form.recipe.find(row => !row.ingredient_id);
     if (missing) return setError(`Vui lòng chọn nguyên vật liệu cho dòng “${missing.label}”.`);
     if (form.recipe.some(row => Number(row.quantity) <= 0)) return setError('Định lượng nguyên vật liệu phải lớn hơn 0.');
@@ -113,13 +114,13 @@ function ProductForm({ product, products, materials, onClose, onSaved }) {
           </section>
 
           <section className="mt-7 overflow-hidden rounded-2xl border border-outline-variant">
-            <div className="flex flex-col gap-2 border-b border-outline-variant bg-surface-container-low px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5"><div><h3 className="text-sm font-black text-on-surface">Công thức cho 1 sản phẩm</h3><p className="mt-1 text-[10px] text-on-surface-variant">Bốn thành phần mặc định luôn được giữ lại; chọn đúng nguyên liệu đang có trong kho.</p></div><span className="rounded-full bg-white px-3 py-1.5 text-[10px] font-black text-primary">Giá vốn ước tính: {formatMoney(estimatedCost)}đ</span></div>
+            <div className="flex flex-col gap-2 border-b border-outline-variant bg-surface-container-low px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5"><div><h3 className="text-sm font-black text-on-surface">Công thức cho 1 sản phẩm</h3><p className="mt-1 text-[10px] text-on-surface-variant">Công thức được tạo sẵn theo định lượng gợi ý; có thể thay đổi hoặc xoá thành phần không sử dụng.</p></div><span className="rounded-full bg-white px-3 py-1.5 text-[10px] font-black text-primary">Giá vốn ước tính: {formatMoney(estimatedCost)}đ</span></div>
             <div className="divide-y divide-outline-variant/60">
               {form.recipe.map((row, index) => {
                 const selected = materials.find(item => item._id === row.ingredient_id);
                 const options = row.role === 'oil' ? materials.filter(item => matchesRole(item, 'oil')) : materials;
                 return <div key={`${row.role}-${index}`} className="grid gap-3 bg-white p-4 sm:grid-cols-[150px_minmax(0,1fr)_120px_36px] sm:items-center sm:px-5">
-                  <div><p className="text-xs font-black text-on-surface">{row.label}</p><p className="mt-0.5 text-[9px] font-bold uppercase tracking-wider text-on-surface-variant">{row.role === 'oil' && !row.ingredient_id ? 'Cần chọn mùi' : row.role === 'extra' ? 'Bổ sung' : 'Mặc định'}</p></div>
+                  <div><p className="text-xs font-black text-on-surface">{row.label}</p><p className="mt-0.5 text-[9px] font-bold uppercase tracking-wider text-on-surface-variant">{row.role === 'oil' && !row.ingredient_id ? 'Cần chọn mùi' : row.role === 'extra' ? 'Bổ sung' : 'Gợi ý mặc định'}</p></div>
                   <SearchableSelect
                     value={row.ingredient_id}
                     onChange={value => updateRecipe(index, { ingredient_id: value })}
@@ -131,7 +132,7 @@ function ProductForm({ product, products, materials, onClose, onSaved }) {
                     className="min-h-10 rounded-xl border border-outline-variant bg-white !px-3 !py-2 hover:border-primary/50"
                   />
                   <label className="flex items-center rounded-xl border border-outline-variant bg-surface-container-lowest"><input type="number" min="0.001" step="0.001" value={row.quantity} onChange={event => updateRecipe(index, { quantity: event.target.value })} className="min-w-0 flex-1 bg-transparent px-3 py-2.5 text-right text-xs font-black outline-none" /><span className="border-l border-outline-variant px-2 text-[10px] font-bold text-on-surface-variant">{selected?.unit || row.unit || 'đv'}</span></label>
-                  {row.role === 'extra' ? <button type="button" onClick={() => setForm(current => ({ ...current, recipe: current.recipe.filter((_, rowIndex) => rowIndex !== index) }))} className="grid h-9 w-9 place-items-center rounded-lg text-red-500 hover:bg-red-50"><span className="material-symbols-outlined text-[18px]">delete</span></button> : <span className="grid h-9 w-9 place-items-center text-emerald-600"><span className="material-symbols-outlined text-[18px]">lock</span></span>}
+                  <button type="button" aria-label={`Xoá ${row.label}`} onClick={() => setForm(current => ({ ...current, recipe: current.recipe.filter((_, rowIndex) => rowIndex !== index) }))} className="grid h-9 w-9 place-items-center rounded-lg text-red-500 transition-colors hover:bg-red-50"><span className="material-symbols-outlined text-[18px]">delete</span></button>
                 </div>;
               })}
             </div>
