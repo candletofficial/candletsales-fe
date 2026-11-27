@@ -4,6 +4,7 @@ export const productService = {
   getProducts: (params) => api.get('/products', { params }),
   createProduct: (data) => api.post('/products', data),
   updateShopOrder: (orderedProductIds) => api.put('/products/shop-order', { orderedProductIds }),
+  updateCustomGroupSettings: (data) => api.put('/products/custom-group-settings', data),
   updateProduct: (id, data) => api.put(`/products/${id}`, data),
   deleteProduct: (id) => api.delete(`/products/${id}`),
 };

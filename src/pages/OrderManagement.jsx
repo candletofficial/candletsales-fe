@@ -336,6 +336,11 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
 
   const handlePickCustomGroup = (group, groupProducts) => {
     const groupIds = new Set(groupProducts.map(product => String(product._id)));
+    const grossValue = groupProducts.reduce((sum, product) => sum + (Number(product.base_price) || 0) * Math.max(1, Number(product.custom_quantity) || 1), 0);
+    const settings = groupProducts[0] || {};
+    const configuredDiscount = settings.custom_discount_type === 'percent'
+      ? grossValue * Math.min(100, Math.max(0, Number(settings.custom_discount_value) || 0)) / 100
+      : settings.custom_discount_type === 'fixed' ? Math.min(grossValue, Math.max(0, Number(settings.custom_discount_value) || 0)) : 0;
     setCustomGroup(group);
     setProductGroupFilter(group);
     setItems(current => {
@@ -345,7 +350,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
         return existing ? { ...existing, quantity: Math.max(1, Number(product.custom_quantity) || 1) } : { product_id: product._id, productId: product.productId, product_name: product.name, product_image: product.image || null, sku_id: null, sku_label: '', unit_price: product.base_price || 0, unit_cost: product.base_cost || 0, quantity: Math.max(1, Number(product.custom_quantity) || 1) };
       })];
     });
-    setAppliedDiscount({ code: null, amount: 0 });
+    setAppliedDiscount({ code: null, amount: configuredDiscount });
     setShowProductPicker(false);
   };
 
