@@ -116,6 +116,7 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
   const [productSearch, setProductSearch] = useState('');
   const [customGroup, setCustomGroup] = useState(order?.custom_group || '');
   const [productGroupFilter, setProductGroupFilter] = useState(order?.custom_group || 'all');
+  const [expandedCustomGroup, setExpandedCustomGroup] = useState('');
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [requiredDepositAmount, setRequiredDepositAmount] = useState(0);
 
@@ -261,9 +262,8 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
     .map(product => product.custom_group))].sort((a, b) => a.localeCompare(b, 'vi')), [products]);
 
   const filteredProducts = useMemo(() => {
-    const scopedProducts = productGroupFilter === 'all' ? products
-      : productGroupFilter === 'sellable' ? products.filter(product => product.product_type !== 'custom')
-        : products.filter(product => product.product_type === 'custom' && product.custom_group === productGroupFilter);
+    const scopedProducts = ['all', 'sellable'].includes(productGroupFilter)
+      ? products.filter(product => product.product_type !== 'custom') : [];
     if (!productSearch) return scopedProducts;
     const term = productSearch.toLowerCase();
     return scopedProducts.filter(p => {
@@ -273,6 +273,18 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
       return matchName || matchSku || matchInnerSku;
     });
   }, [products, productSearch, productGroupFilter]);
+
+  const filteredCustomGroups = useMemo(() => customProductGroups.map(group => ({
+    group,
+    products: products.filter(product => product.product_type === 'custom' && product.custom_group === group),
+  })).filter(entry => {
+    if (productGroupFilter === 'sellable') return false;
+    if (productGroupFilter !== 'all' && productGroupFilter !== entry.group) return false;
+    if (!productSearch) return true;
+    const term = productSearch.toLowerCase();
+    return entry.group.toLowerCase().includes(term) || entry.products.some(product =>
+      product.name?.toLowerCase().includes(term) || product.productId?.toLowerCase().includes(term));
+  }), [customProductGroups, productGroupFilter, productSearch, products]);
 
   // Thêm sản phẩm / SKU vào đơn hàng
   const handlePickProduct = (product, sku = null) => {
@@ -314,6 +326,32 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
         quantity: 1,
       }]);
     }
+    setShowProductPicker(false);
+  };
+
+  const handlePickCustomGroup = (group, groupProducts) => {
+    setCustomGroup(group);
+    setProductGroupFilter(group);
+    setItems(current => {
+      const next = current.map(item => ({ ...item }));
+      groupProducts.forEach(product => {
+        const existing = next.findIndex(item => item.product_id === product._id && !item.sku_id);
+        if (existing >= 0) next[existing].quantity += 1;
+        else next.push({
+          product_id: product._id,
+          productId: product.productId,
+          product_name: product.name,
+          product_image: product.image || null,
+          sku_id: null,
+          sku_label: '',
+          unit_price: product.base_price || 0,
+          unit_cost: product.base_cost || 0,
+          quantity: 1,
+        });
+      });
+      return next;
+    });
+    setAppliedDiscount({ code: null, amount: 0 });
     setShowProductPicker(false);
   };
 
@@ -1616,9 +1654,24 @@ function OrderModal({ order, products, onClose, onSave, onDelete, onMarkReturn, 
               </div>
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
-              {filteredProducts.length === 0 && (
+              {filteredProducts.length === 0 && filteredCustomGroups.length === 0 && (
                 <p className="text-center text-on-surface-variant py-8">Chưa có sản phẩm nào phù hợp.</p>
               )}
+              {filteredCustomGroups.map(({ group, products: groupProducts }) => {
+                const expanded = expandedCustomGroup === group;
+                return <section key={group} className="overflow-hidden rounded-xl border border-primary/20 bg-primary-container/10">
+                  <button type="button" onClick={() => setExpandedCustomGroup(current => current === group ? '' : group)} className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-primary-container/30">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary text-white"><span className="material-symbols-outlined text-[20px]">folder_special</span></span>
+                    <span className="min-w-0 flex-1"><span className="block truncate text-[14px] font-bold text-on-surface">{group}</span><span className="mt-0.5 block text-[11px] text-on-surface-variant">Nhóm custom · {groupProducts.length} sản phẩm</span></span>
+                    <span className="shrink-0 text-[11px] font-bold text-primary">{expanded ? 'Thu gọn' : 'Xem chi tiết'}</span>
+                    <span className={`material-symbols-outlined shrink-0 text-[18px] text-primary transition-transform ${expanded ? 'rotate-180' : ''}`}>expand_more</span>
+                  </button>
+                  {expanded && <div className="border-t border-primary/15 bg-white px-4 py-3">
+                    <div className="max-h-52 space-y-1 overflow-y-auto pr-1">{groupProducts.map(product => <div key={product._id} className="flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-surface-container-low"><span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-primary-container text-[10px] font-bold text-primary">{product.name?.charAt(0) || 'C'}</span><span className="min-w-0 flex-1"><span className="block truncate text-[12px] font-semibold text-on-surface">{product.name}</span><span className="block truncate text-[9px] text-on-surface-variant">{product.productId}</span></span><span className="shrink-0 text-[11px] font-bold text-primary">{formatPrice(product.base_price)}</span></div>)}</div>
+                    <button type="button" onClick={() => handlePickCustomGroup(group, groupProducts)} className="mt-3 inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-xs font-bold text-white hover:bg-primary/90"><span className="material-symbols-outlined text-[18px]">playlist_add</span>Thêm cả nhóm vào đơn</button>
+                  </div>}
+                </section>;
+              })}
               {filteredProducts.map(product => (
                 <div key={product._id} className="border border-outline-variant/30 rounded-xl overflow-hidden">
                   {/* Sản phẩm không có phân loại → chọn thẳng */}
