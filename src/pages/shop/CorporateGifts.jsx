@@ -62,7 +62,7 @@ export default function CorporateGifts() {
   }, []);
 
   const {
-    contact, hero, introCards, configure, packaging, packagingSteps, pricing,
+    contact, hero, introCards, configure, packaging, packagingSteps, labels, labelTypes, pricing,
     shaped, process, policyIntro, cups, customPrices, lids, processSteps,
     policies, scents, shapedCandles, shapedPrices, cta,
   } = pageConfig;
@@ -95,7 +95,7 @@ export default function CorporateGifts() {
 
       <nav className="sticky top-0 z-40 border-b border-brand-sand/80 bg-brand-cream/95 backdrop-blur" aria-label="Điều hướng trang custom">
         <div className="no-scrollbar mx-auto flex max-w-7xl gap-2 overflow-x-auto px-4 py-3 sm:px-8">
-          {[['Cấu hình', '#configure'], ['Bảng giá', '#pricing'], ['Nến tạo hình', '#shaped'], ['Quy trình', '#process'], ['Chính sách', '#policies']].map(([label, href], index) => (
+          {[['Cấu hình', '#configure'], ['Tem & thiết kế', '#labels'], ['Bảng giá', '#pricing'], ['Nến tạo hình', '#shaped'], ['Quy trình', '#process'], ['Chính sách', '#policies']].map(([label, href], index) => (
             <a key={href} href={href} className="flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-wider text-brand-burgundy transition hover:bg-white"><span className="text-brand-terracotta">0{index + 1}</span>{label}</a>
           ))}
         </div>
@@ -161,6 +161,49 @@ export default function CorporateGifts() {
               {!scentQuery && filteredScents.length > 8 && (
                 <button type="button" onClick={() => setShowAllScents(value => !value)} className="mx-auto mt-7 flex h-11 items-center gap-2 rounded-full border border-brand-burgundy px-6 text-[10px] font-black uppercase tracking-wider text-brand-burgundy transition hover:bg-brand-burgundy hover:text-white">{showAllScents ? 'Thu gọn danh sách' : `Xem đủ ${filteredScents.length} mùi hương`} <i className={`ph-bold ${showAllScents ? 'ph-caret-up' : 'ph-caret-down'}`} /></button>
               )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="labels" className="scroll-mt-20 border-y border-brand-sand/60 bg-brand-warmIvory px-4 py-14 sm:px-8 sm:py-24">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid gap-8 lg:grid-cols-[.78fr_1.22fr] lg:gap-16">
+            <div>
+              <Eyebrow>{labels.eyebrow}</Eyebrow>
+              <h2 className="mt-4 text-3xl font-black leading-tight tracking-tight text-brand-burgundy sm:text-5xl">{labels.title}</h2>
+              <p className="mt-5 text-sm leading-7 text-brand-muted sm:text-base">{labels.description}</p>
+              <div className="mt-7 flex gap-3 rounded-2xl border border-brand-sand bg-white p-4">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand-cream text-brand-terracotta"><i className="ph-bold ph-ruler text-xl" /></span>
+                <p className="text-xs leading-6 text-brand-muted">{labels.fileNote}</p>
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <article className="rounded-2xl border border-brand-sand bg-white p-5 sm:p-6">
+                <div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-brand-burgundy text-white"><i className="ph-bold ph-file-arrow-up text-xl" /></span><span className="text-[9px] font-black uppercase tracking-[.16em] text-brand-terracotta">Đã có thiết kế</span></div>
+                <h3 className="mt-5 text-lg font-black text-brand-burgundy">{labels.hasFileTitle}</h3>
+                <p className="mt-3 text-xs leading-6 text-brand-muted">{labels.hasFileDescription}</p>
+              </article>
+              <article className="rounded-2xl border border-brand-sand bg-brand-cream p-5 sm:p-6">
+                <div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-brand-terracotta text-white"><i className="ph-bold ph-pen-nib text-xl" /></span><span className="text-[9px] font-black uppercase tracking-[.16em] text-brand-terracotta">Cần hỗ trợ thiết kế</span></div>
+                <h3 className="mt-5 text-lg font-black text-brand-burgundy">{labels.noFileTitle}</h3>
+                <p className="mt-3 text-xs leading-6 text-brand-muted">{labels.noFileDescription}</p>
+              </article>
+            </div>
+          </div>
+
+          <div className="mt-12 border-t border-brand-sand/80 pt-8 sm:mt-16 sm:pt-10">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-[10px] font-black uppercase tracking-[.18em] text-brand-terracotta">Chất liệu tem</p><h3 className="mt-2 text-2xl font-black text-brand-burgundy sm:text-3xl">Chọn loại tem theo hiệu ứng mong muốn</h3></div><p className="max-w-md text-xs leading-5 text-brand-muted">Candlet sẽ tư vấn lại theo màu cốc, thiết kế và ngân sách của đơn hàng.</p></div>
+            <div className="mt-6 grid gap-3 md:grid-cols-3">
+              {labelTypes.map(([name, description, suitable], index) => (
+                <article key={name} className="group relative overflow-hidden rounded-2xl border border-brand-sand bg-white p-5 transition hover:-translate-y-0.5 hover:border-brand-terracotta/50 hover:shadow-lg hover:shadow-brand-burgundy/5 sm:p-6">
+                  <div className="flex items-start justify-between"><span className="text-[10px] font-black tracking-widest text-brand-terracotta">0{index + 1}</span><i className={`ph-light ${index === 0 ? 'ph-sticker' : index === 1 ? 'ph-drop-half-bottom' : 'ph-sparkle'} text-2xl text-brand-terracotta/60`} /></div>
+                  <h4 className="mt-5 text-xl font-black text-brand-burgundy">{name}</h4>
+                  <p className="mt-3 text-xs leading-6 text-brand-muted">{description}</p>
+                  <div className="mt-5 border-t border-brand-sand/70 pt-4 text-[10px] font-bold leading-5 text-brand-terracotta">{suitable}</div>
+                </article>
+              ))}
             </div>
           </div>
         </div>

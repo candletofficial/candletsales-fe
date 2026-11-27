@@ -10,6 +10,7 @@ const clone = value => JSON.parse(JSON.stringify(value));
 const tabs = [
   ['general', 'Nội dung & liên hệ', 'contact_page', 'Tiêu đề, mô tả và kênh tư vấn'],
   ['products', 'Cốc, nắp & mẫu', 'coffee_maker', 'Danh mục và hình ảnh sản phẩm'],
+  ['labels', 'Tem & thiết kế', 'sell', 'File thiết kế và các loại tem'],
   ['scents', 'Mùi hương', 'spa', 'Mã mùi và ba tầng hương'],
   ['pricing', 'Bảng giá', 'payments', 'Mức giá theo số lượng'],
   ['policies', 'Quy trình & chính sách', 'fact_check', 'Các bước và điều khoản đặt hàng'],
@@ -299,6 +300,24 @@ export default function CustomPageManagement() {
             </Section>
             <Section icon="bakery_dining" title={`Nến tạo hình (${config.shapedCandles.length})`}>
               <ArrayEditor rows={config.shapedCandles} columns={[{ label: 'Mã mẫu' }, { label: 'Tên mẫu' }, { label: 'Màu sắc' }, { label: 'Đường dẫn ảnh' }]} onChange={value => setList('shapedCandles', value)} addLabel="Thêm mẫu" />
+            </Section>
+          </>}
+
+          {activeTab === 'labels' && <>
+            <Section icon="design_services" title="Nội dung hướng dẫn thiết kế" description="Giải thích quy cách file và cách Candlet hỗ trợ khách chưa có thiết kế.">
+              <div className="grid gap-4 md:grid-cols-2">
+                <Field label="Nhãn nhỏ" value={config.labels.eyebrow} onChange={value => setGroup('labels', 'eyebrow', value)} />
+                <Field label="Tiêu đề" value={config.labels.title} onChange={value => setGroup('labels', 'title', value)} />
+                <div className="md:col-span-2"><Field multiline label="Mô tả chung" value={config.labels.description} onChange={value => setGroup('labels', 'description', value)} /></div>
+                <Field label="Tiêu đề khi đã có file" value={config.labels.hasFileTitle} onChange={value => setGroup('labels', 'hasFileTitle', value)} />
+                <Field label="Tiêu đề khi chưa có file" value={config.labels.noFileTitle} onChange={value => setGroup('labels', 'noFileTitle', value)} />
+                <Field multiline label="Yêu cầu với file có sẵn" value={config.labels.hasFileDescription} onChange={value => setGroup('labels', 'hasFileDescription', value)} />
+                <Field multiline label="Nội dung hỗ trợ thiết kế" value={config.labels.noFileDescription} onChange={value => setGroup('labels', 'noFileDescription', value)} />
+                <div className="md:col-span-2"><Field multiline label="Lưu ý kích thước và vị trí dán" value={config.labels.fileNote} onChange={value => setGroup('labels', 'fileNote', value)} /></div>
+              </div>
+            </Section>
+            <Section icon="label" title={`Các loại tem (${config.labelTypes.length})`} description="Mô tả công dụng và trường hợp phù hợp của từng chất liệu tem.">
+              <ArrayEditor rows={config.labelTypes} columns={[{ label: 'Tên loại tem' }, { label: 'Công dụng', multiline: true }, { label: 'Phù hợp với' }]} onChange={value => setList('labelTypes', value)} addLabel="Thêm loại tem" />
             </Section>
           </>}
 
