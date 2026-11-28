@@ -109,10 +109,11 @@ export default function App() {
             <Route path="about" element={<ShopStories />} />
             <Route path="custom-candles" element={<CorporateGifts />} />
             <Route path="qua-tang-doanh-nghiep" element={<Navigate to="/custom-candles" replace />} />
-            <Route path="chinh-sach-quyen-rieng" element={<LegalPage type="privacy" />} />
-            <Route path="privacy-policy" element={<Navigate to="/chinh-sach-quyen-rieng" replace />} />
-            <Route path="tuyen-bo-quyen-so-huu-va-quyen-tac-gia" element={<LegalPage type="copyright" />} />
-            <Route path="copyright" element={<Navigate to="/tuyen-bo-quyen-so-huu-va-quyen-tac-gia" replace />} />
+            <Route path="privacy-policy" element={<LegalPage type="privacy" />} />
+            <Route path="chinh-sach-quyen-rieng" element={<Navigate to="/privacy-policy" replace />} />
+            <Route path="copyright-ownership" element={<LegalPage type="copyright" />} />
+            <Route path="copyright" element={<Navigate to="/copyright-ownership" replace />} />
+            <Route path="tuyen-bo-quyen-so-huu-va-quyen-tac-gia" element={<Navigate to="/copyright-ownership" replace />} />
             <Route path="profile" element={<ShopProtectedRoute><ShopProfile /></ShopProtectedRoute>} />
             <Route path="wishlist" element={<ShopProtectedRoute><ShopWishlist /></ShopProtectedRoute>} />
           </Route>

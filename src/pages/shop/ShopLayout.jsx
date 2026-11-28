@@ -967,13 +967,13 @@ export default function ShopLayout() {
                   </Link>
                 </li>
                 <li>
-                  <Link to="/chinh-sach-quyen-rieng" className="text-stone-300 sm:hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
+                  <Link to="/privacy-policy" className="text-stone-300 sm:hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
                     <i className="ph ph-shield-check text-xs text-amber-400/60"></i>
                     <span>Chính Sách Quyền Riêng Tư</span>
                   </Link>
                 </li>
                 <li>
-                  <Link to="/tuyen-bo-quyen-so-huu-va-quyen-tac-gia" className="text-stone-300 sm:hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
+                  <Link to="/copyright-ownership" className="text-stone-300 sm:hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
                     <i className="ph ph-copyright text-xs text-amber-400/60"></i>
                     <span>Quyền Sở Hữu & Tác Giả</span>
                   </Link>
