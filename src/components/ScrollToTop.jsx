@@ -9,6 +9,8 @@ const ROUTE_TITLES = {
   '/stories': 'Câu Chuyện Mùi Hương & Cảm Xúc | Candlet',
   '/about': 'Về Candlet — Xưởng Nến Thủ Công',
   '/custom-candles': 'Nến Custom & Quà Tặng Doanh Nghiệp | Candlet',
+  '/chinh-sach-quyen-rieng': 'Chính Sách Quyền Riêng Tư | Candlet',
+  '/tuyen-bo-quyen-so-huu-va-quyen-tac-gia': 'Quyền Sở Hữu & Quyền Tác Giả | Candlet',
   '/cart': 'Giỏ Hàng | Candlet',
   '/checkout': 'Thanh Toán Đơn Hàng | Candlet',
   '/orders': 'Tra Cứu Đơn Hàng | Candlet',

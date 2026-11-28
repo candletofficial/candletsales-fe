@@ -967,6 +967,18 @@ export default function ShopLayout() {
                   </Link>
                 </li>
                 <li>
+                  <Link to="/chinh-sach-quyen-rieng" className="text-stone-300 sm:hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
+                    <i className="ph ph-shield-check text-xs text-amber-400/60"></i>
+                    <span>Chính Sách Quyền Riêng Tư</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/tuyen-bo-quyen-so-huu-va-quyen-tac-gia" className="text-stone-300 sm:hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
+                    <i className="ph ph-copyright text-xs text-amber-400/60"></i>
+                    <span>Quyền Sở Hữu & Tác Giả</span>
+                  </Link>
+                </li>
+                <li>
                   <Link to="/" className="text-stone-300 sm:hover:text-amber-200 transition-colors flex items-center gap-1.5 group">
                     <i className="ph ph-arrows-clockwise text-xs text-amber-400/60"></i>
                     <span>Chính Sách Đổi Trả 1 - 1</span>
@@ -1000,7 +1012,7 @@ export default function ShopLayout() {
                 </div>
                 <div className="flex items-center gap-2.5">
                   <i className="ph ph-envelope-simple text-amber-300 text-base shrink-0"></i>
-                  <a href="mailto:hello@candlet.vn" className="sm:hover:text-amber-200 transition-colors font-mono">
+                  <a href="mailto:candlet.official@gmail.com" className="sm:hover:text-amber-200 transition-colors font-mono">
                     candlet.official@gmail.com
                   </a>
                 </div>
