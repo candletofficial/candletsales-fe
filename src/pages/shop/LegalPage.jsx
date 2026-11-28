@@ -289,103 +289,89 @@ export default function LegalPage({ type }) {
   }, [page.description]);
 
   return (
-    <main className="min-h-screen bg-[#FBF7F2] font-jakarta text-stone-800 selection:bg-brand-burgundy selection:text-white">
-      <header className="relative overflow-hidden border-b border-[#E8DDD3] bg-[#2B0C10] text-white">
-        <div className="pointer-events-none absolute -right-24 -top-32 h-96 w-96 rounded-full bg-amber-300/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-36 left-1/4 h-80 w-80 rounded-full bg-[#A14E3B]/25 blur-3xl" />
-        <div className="relative mx-auto max-w-6xl px-4 py-14 sm:px-8 sm:py-20 lg:py-24">
-          <nav className="mb-8 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-stone-300" aria-label="Đường dẫn trang">
-            <Link to="/" className="transition-colors hover:text-amber-200">Trang chủ</Link>
-            <i className="ph-bold ph-caret-right text-[9px] text-amber-300/70" />
-            <span className="text-amber-200">Thông tin pháp lý</span>
+    <main className="min-h-screen bg-[#FFFDF9] font-jakarta text-stone-800 selection:bg-brand-burgundy selection:text-white">
+      <header className="border-b border-stone-200 bg-gradient-to-b from-[#F7EFE8] via-[#FBF7F2] to-[#FFFDF9]">
+        <section className="mx-auto max-w-6xl px-4 py-12 sm:px-8 sm:py-18 lg:py-22">
+          <nav className="mb-8 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-stone-500" aria-label="Đường dẫn trang">
+            <Link to="/" className="transition-colors hover:text-brand-burgundy">Trang chủ</Link>
+            <i className="ph-bold ph-caret-right text-[8px] text-stone-400" />
+            <span className="text-[#A14E3B]">Thông tin pháp lý</span>
           </nav>
 
-          <div className="max-w-4xl">
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-amber-200/20 bg-white/10 px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-amber-200 backdrop-blur-sm">
-              <i className={`ph-bold ${page.icon} text-sm`} />
-              {page.eyebrow}
-            </div>
-            <h1 className="font-serif-display text-3xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
-              {page.title}
-            </h1>
-            <p className="mt-5 max-w-3xl text-sm leading-7 text-stone-200 sm:text-base sm:leading-8">
-              {page.intro}
-            </p>
-            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-stone-300">
-              <span className="inline-flex items-center gap-2"><i className="ph ph-calendar-blank text-amber-300" /> Cập nhật ngày 28/11/2026</span>
-              <span className="inline-flex items-center gap-2"><i className="ph ph-storefront text-amber-300" /> Áp dụng cho website và các kênh chính thức của Candlet</span>
-            </div>
-          </div>
-        </div>
+          <p className="mb-4 flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.22em] text-[#A14E3B]">
+            <i className={`ph-bold ${page.icon} text-base`} />
+            {page.eyebrow}
+          </p>
+          <h1 className="max-w-4xl font-serif-display text-3xl font-bold leading-[1.15] text-brand-burgundy sm:text-5xl lg:text-6xl">
+            {page.title}
+          </h1>
+          <p className="mt-5 max-w-3xl text-sm leading-7 text-stone-600 sm:text-base sm:leading-8">
+            {page.intro}
+          </p>
+          <ul className="mt-7 flex flex-wrap gap-x-7 gap-y-2 border-t border-stone-200/80 pt-5 text-xs text-stone-500">
+            <li className="inline-flex items-center gap-2"><i className="ph ph-calendar-blank text-[#A14E3B]" /> Cập nhật ngày 28/11/2026</li>
+            <li className="inline-flex items-center gap-2"><i className="ph ph-storefront text-[#A14E3B]" /> Website và các kênh chính thức của Candlet</li>
+          </ul>
+        </section>
       </header>
 
-      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:px-8 sm:py-14 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-12 lg:py-16">
-        <aside className="lg:sticky lg:top-24 lg:self-start">
-          <div className="rounded-2xl border border-[#E6D8CB] bg-white p-5 shadow-[0_12px_40px_rgba(67,32,22,0.05)]">
-            <p className="mb-4 flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.18em] text-[#A14E3B]">
-              <i className="ph-bold ph-list" /> Nội dung chính
-            </p>
-            <nav className="space-y-0.5" aria-label="Mục lục">
-              {page.sections.map((section, index) => (
-                <a key={section.id} href={`#${section.id}`} className="group flex items-start gap-3 rounded-lg px-2 py-2 text-xs font-semibold leading-5 text-stone-600 transition-colors hover:bg-[#FBF7F2] hover:text-brand-burgundy">
-                  <span className="mt-0.5 font-mono text-[10px] text-stone-400 group-hover:text-[#A14E3B]">{String(index + 1).padStart(2, '0')}</span>
-                  <span>{section.title}</span>
-                </a>
-              ))}
-              <a href="#lien-he" className="group flex items-start gap-3 rounded-lg px-2 py-2 text-xs font-semibold leading-5 text-stone-600 transition-colors hover:bg-[#FBF7F2] hover:text-brand-burgundy">
-                <span className="mt-0.5 font-mono text-[10px] text-stone-400 group-hover:text-[#A14E3B]">{String(page.sections.length + 1).padStart(2, '0')}</span>
-                <span>Thông tin liên hệ</span>
+      <section className="mx-auto max-w-6xl px-4 py-10 sm:px-8 sm:py-14 lg:grid lg:grid-cols-[230px_minmax(0,1fr)] lg:gap-16 lg:py-18">
+        <aside className="mb-8 border-b border-stone-200 pb-5 lg:sticky lg:top-24 lg:mb-0 lg:self-start lg:border-b-0 lg:pb-0">
+          <p className="mb-3 flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.18em] text-[#A14E3B]">
+            <i className="ph-bold ph-list" /> Nội dung chính
+          </p>
+          <nav className="no-scrollbar -mx-4 flex gap-5 overflow-x-auto px-4 lg:mx-0 lg:block lg:border-l lg:border-stone-200 lg:px-0" aria-label="Mục lục">
+            {page.sections.map((section, index) => (
+              <a key={section.id} href={`#${section.id}`} className="group flex shrink-0 items-baseline gap-2 whitespace-nowrap py-2 text-xs font-semibold text-stone-500 transition-colors hover:text-brand-burgundy lg:whitespace-normal lg:px-4 lg:py-2.5">
+                <span className="font-mono text-[9px] text-stone-400 group-hover:text-[#A14E3B]">{String(index + 1).padStart(2, '0')}</span>
+                <span>{section.title}</span>
               </a>
-            </nav>
-          </div>
+            ))}
+            <a href="#lien-he" className="group flex shrink-0 items-baseline gap-2 whitespace-nowrap py-2 text-xs font-semibold text-stone-500 transition-colors hover:text-brand-burgundy lg:whitespace-normal lg:px-4 lg:py-2.5">
+              <span className="font-mono text-[9px] text-stone-400 group-hover:text-[#A14E3B]">{String(page.sections.length + 1).padStart(2, '0')}</span>
+              <span>Thông tin liên hệ</span>
+            </a>
+          </nav>
         </aside>
 
-        <article className="overflow-hidden rounded-2xl border border-[#E6D8CB] bg-white shadow-[0_18px_55px_rgba(67,32,22,0.06)]">
-          <div className="divide-y divide-[#EEE4DC] px-5 sm:px-9">
-            {page.sections.map((section, index) => (
-              <section key={section.id} id={section.id} className="scroll-mt-24 py-8 sm:py-10">
-                <div className="mb-4 flex items-start gap-4">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#F6EBE2] font-serif-display text-sm font-bold text-[#8F3A31]">
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
-                  <h2 className="pt-1 font-serif-display text-xl font-bold leading-snug text-brand-burgundy sm:text-2xl">
-                    {section.title}
-                  </h2>
-                </div>
-                <div className="legal-copy pl-0 text-sm leading-7 text-stone-600 sm:pl-[3.25rem] sm:text-[15px] sm:leading-8">
-                  {section.content}
-                </div>
-              </section>
-            ))}
-          </div>
-
-          <section id="lien-he" className="scroll-mt-24 border-t border-[#E6D8CB] bg-gradient-to-br from-[#F8EEE6] to-[#FFF9F2] p-5 sm:p-9">
-            <div className="grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
-              <div>
-                <span className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#A14E3B]">Liên hệ Candlet</span>
-                <h2 className="mt-2 font-serif-display text-2xl font-bold text-brand-burgundy">Bạn cần giải đáp hoặc gửi yêu cầu?</h2>
-                <p className="mt-2 max-w-xl text-sm leading-6 text-stone-600">
-                  Vui lòng nêu rõ nội dung cần hỗ trợ và thông tin giúp Candlet xác minh yêu cầu. Chúng tôi sẽ phản hồi qua kênh liên hệ bạn đã cung cấp.
+        <article className="border-t border-stone-200 lg:border-t-0">
+          {page.sections.map((section, index) => (
+              <section key={section.id} id={section.id} className="legal-copy scroll-mt-24 border-b border-stone-200 py-8 sm:py-10">
+                <p className="section-number mb-2 font-mono text-[10px] font-bold tracking-[0.16em] text-[#B76A4F]">
+                  {String(index + 1).padStart(2, '0')}
                 </p>
-              </div>
-              <div className="flex flex-col gap-2.5 text-sm font-bold">
-                <a href={`mailto:${CONTACT.email}`} className="inline-flex min-h-11 items-center gap-3 rounded-xl border border-[#D8C2B2] bg-white px-4 text-brand-burgundy transition-colors hover:border-[#A14E3B]">
-                  <i className="ph-bold ph-envelope-simple text-lg text-[#A14E3B]" />
-                  {CONTACT.email}
-                </a>
-                <a href={CONTACT.phoneHref} className="inline-flex min-h-11 items-center gap-3 rounded-xl border border-[#D8C2B2] bg-white px-4 text-brand-burgundy transition-colors hover:border-[#A14E3B]">
-                  <i className="ph-bold ph-phone text-lg text-[#A14E3B]" />
-                  {CONTACT.phoneDisplay}
-                </a>
-              </div>
-            </div>
+                <h2 className="mb-4 font-serif-display text-xl font-bold leading-snug text-brand-burgundy sm:text-2xl">
+                  {section.title}
+                </h2>
+                {section.content}
+              </section>
+          ))}
+
+          <section id="lien-he" className="mt-10 scroll-mt-24 rounded-2xl bg-brand-burgundy px-5 py-7 text-white sm:px-8 sm:py-9">
+            <span className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-amber-200">Liên hệ Candlet</span>
+            <h2 className="mt-2 font-serif-display text-2xl font-bold">Bạn cần giải đáp hoặc gửi yêu cầu?</h2>
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-stone-200">
+              Vui lòng nêu rõ nội dung cần hỗ trợ và thông tin giúp Candlet xác minh yêu cầu. Chúng tôi sẽ phản hồi qua kênh liên hệ bạn đã cung cấp.
+            </p>
+            <address className="mt-6 flex flex-wrap gap-x-7 gap-y-3 text-sm font-bold not-italic">
+              <a href={`mailto:${CONTACT.email}`} className="inline-flex items-center gap-2 text-amber-100 transition-colors hover:text-white">
+                <i className="ph-bold ph-envelope-simple text-lg text-amber-300" />
+                {CONTACT.email}
+              </a>
+              <a href={CONTACT.phoneHref} className="inline-flex items-center gap-2 text-amber-100 transition-colors hover:text-white">
+                <i className="ph-bold ph-phone text-lg text-amber-300" />
+                {CONTACT.phoneDisplay}
+              </a>
+            </address>
           </section>
         </article>
-      </div>
+      </section>
 
       <style>{`
-        .legal-copy p + p { margin-top: 1rem; }
-        .legal-copy ul { margin: 0.75rem 0 0; display: grid; gap: 0.65rem; }
+        .legal-copy > p:not(.section-number), .legal-copy > ul { color: #57534e; font-size: 0.9375rem; line-height: 1.9; }
+        .legal-copy > p:not(.section-number) + p { margin-top: 1rem; }
+        .legal-copy > p:not(.section-number) + ul { margin-top: 0.75rem; }
+        .legal-copy ul { display: grid; gap: 0.65rem; }
         .legal-copy li { position: relative; padding-left: 1.25rem; }
         .legal-copy li::before { content: ''; position: absolute; left: 0; top: 0.75rem; width: 0.35rem; height: 0.35rem; border-radius: 999px; background: #B76A4F; }
         .legal-copy strong { color: #3F2722; font-weight: 700; }
