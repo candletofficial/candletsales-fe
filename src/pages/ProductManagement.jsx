@@ -210,6 +210,11 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
     if (p.skus) {
       p.skus = p.skus.map(sku => ({
         ...sku,
+        use_base_formula: sku.use_base_formula !== false,
+        formula_components: (sku.formula_components || []).map(item => ({
+          ...item,
+          formula_id: typeof item.formula_id === 'object' && item.formula_id ? item.formula_id._id : item.formula_id,
+        })),
         extra_ingredients: sku.extra_ingredients ? sku.extra_ingredients.map(item => ({
           ...item,
           ingredient_id: typeof item.ingredient_id === 'object' && item.ingredient_id ? item.ingredient_id._id : item.ingredient_id
@@ -241,6 +246,7 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
   const [newGalleryUrl, setNewGalleryUrl] = useState('');
   const [showBatchUrlInput, setShowBatchUrlInput] = useState(false);
   const [editingSkuImageIndex, setEditingSkuImageIndex] = useState(null);
+  const [expandedSkuCards, setExpandedSkuCards] = useState(() => new Set([0]));
 
   // States hỗ trợ tải file ảnh lên máy chủ
   const [uploadingMain, setUploadingMain] = useState(false);
@@ -267,7 +273,11 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
       const mat = materials.find(m => m._id === item.ingredient_id);
       return total + (mat ? mat.price * (Number(item.quantity) || 0) : 0);
     }, 0);
-    return currentBaseCost + extraCost;
+    const formulaCost = (sku.formula_components || []).reduce((total, item) => {
+      const formula = products.find(entry => entry._id === item.formula_id);
+      return total + (formula ? (Number(formula.base_cost || 0) * (Number(item.quantity) || 0)) / Math.max(1, Number(formula.batch_yield) || 1) : 0);
+    }, 0);
+    return (sku.use_base_formula === false ? 0 : currentBaseCost) + extraCost + formulaCost;
   };
 
   const financialSummary = useMemo(() => {
@@ -281,7 +291,11 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
         const material = materials.find(entry => entry._id === item.ingredient_id);
         return total + (material ? material.price * (Number(item.quantity) || 0) : 0);
       }, 0);
-      const cost = currentBaseCost + extraCost;
+      const formulaCost = (sku.formula_components || []).reduce((total, item) => {
+        const formula = products.find(entry => entry._id === item.formula_id);
+        return total + (formula ? (Number(formula.base_cost || 0) * (Number(item.quantity) || 0)) / Math.max(1, Number(formula.batch_yield) || 1) : 0);
+      }, 0);
+      const cost = (sku.use_base_formula === false ? 0 : currentBaseCost) + extraCost + formulaCost;
       const price = Number(sku.price ?? form.base_price) || 0;
       const profit = price - cost;
       const margin = price > 0 ? Math.round((profit / price) * 100) : 0;
@@ -300,7 +314,7 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
       margin: range('margin'),
       usesSkuCosts: Array.isArray(form.skus) && form.skus.length > 0,
     };
-  }, [form.skus, form.base_price, currentBaseCost, materials]);
+  }, [form.skus, form.base_price, currentBaseCost, materials, products]);
 
   const formatMoneyRange = ({ min, max }) => (
     min === max ? formatPrice(min) : `${formatPrice(min)} – ${formatPrice(max)}`
@@ -330,8 +344,10 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
         id: `V${Math.floor(1000 + Math.random() * 9000)}`,
         price: form.base_price || 0,
         image: '',
+        use_base_formula: true,
         combination: combo,
-        extra_ingredients: []
+        extra_ingredients: [],
+        formula_components: []
       };
     });
 
@@ -1429,7 +1445,7 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
               <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 bg-white p-4 rounded-xl border border-stone-200 shadow-xs">
                 <div>
                   <h3 className="text-sm font-bold text-stone-900">Danh sách các mã phân loại SKU ({form.skus.length} SKU)</h3>
-                  <p className="text-xs text-stone-500 mt-0.5">Mỗi SKU có thể cài giá bán và nguyên liệu phụ riêng biệt</p>
+                  <p className="text-xs text-stone-500 mt-0.5">Mỗi SKU có thể cài giá bán, công thức phụ và nguyên liệu bổ sung riêng</p>
                 </div>
                 <button 
                   type="button" 
@@ -1448,9 +1464,10 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
                   const linkableImages = [...new Set([form.image, ...(form.images || [])].filter(Boolean))];
 
                   return (
-                    <div key={sIdx} className="relative rounded-xl border border-stone-200 bg-white shadow-xs focus-within:z-20">
-                      <div className="flex flex-wrap items-center justify-between gap-3 rounded-t-xl border-b border-stone-200 bg-stone-50/80 px-4 py-2.5">
+                    <div key={sIdx} className={`relative overflow-hidden rounded-2xl border-2 bg-white shadow-sm transition focus-within:z-20 ${expandedSkuCards.has(sIdx) ? 'border-indigo-200 ring-2 ring-indigo-50' : 'border-stone-200 hover:border-indigo-200'}`}>
+                      <div className={`flex flex-wrap items-center justify-between gap-3 px-4 py-3 ${expandedSkuCards.has(sIdx) ? 'border-b border-indigo-100 bg-gradient-to-r from-indigo-50 to-white' : 'bg-stone-50/80'}`}>
                         <div className="flex items-center gap-2.5">
+                          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-indigo-600 font-mono text-xs font-black text-white shadow-sm">{String(sIdx + 1).padStart(2, '0')}</span>
                           <input 
                             value={sku.id} 
                             onChange={e => {
@@ -1512,9 +1529,24 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
                           >
                             Xoá
                           </button>
+                          <button
+                            type="button"
+                            onClick={() => setExpandedSkuCards(current => {
+                              const next = new Set(current);
+                              if (next.has(sIdx)) next.delete(sIdx);
+                              else next.add(sIdx);
+                              return next;
+                            })}
+                            className="flex size-8 items-center justify-center rounded-lg border border-indigo-200 bg-white text-indigo-700 transition hover:bg-indigo-50"
+                            aria-label={expandedSkuCards.has(sIdx) ? 'Thu gọn phân loại' : 'Mở chi tiết phân loại'}
+                            title={expandedSkuCards.has(sIdx) ? 'Thu gọn' : 'Mở chi tiết'}
+                          >
+                            <span className={`material-symbols-outlined text-xl transition-transform ${expandedSkuCards.has(sIdx) ? 'rotate-180' : ''}`}>expand_more</span>
+                          </button>
                         </div>
                       </div>
 
+                      {expandedSkuCards.has(sIdx) && <>
                       <div className="border-b border-stone-100 bg-white px-3.5 py-3">
                         {sku.image && editingSkuImageIndex !== sIdx ? (
                           <div className="flex items-center gap-3 rounded-xl border border-emerald-100 bg-emerald-50/40 p-2.5">
@@ -1599,6 +1631,99 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
                         )}
                       </div>
 
+                      <section className="border-b border-stone-100 bg-indigo-50/35 px-3.5 py-3.5">
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={sku.use_base_formula !== false}
+                          onClick={() => {
+                            const newSkus = [...form.skus];
+                            newSkus[sIdx].use_base_formula = newSkus[sIdx].use_base_formula === false;
+                            setForm({ ...form, skus: newSkus });
+                          }}
+                          className={`mb-3 flex w-full items-center justify-between gap-3 rounded-xl border px-3 py-2.5 text-left transition ${sku.use_base_formula !== false ? 'border-emerald-200 bg-emerald-50/80' : 'border-amber-200 bg-amber-50/80'}`}
+                        >
+                          <span className="flex min-w-0 items-center gap-2.5">
+                            <span className={`material-symbols-outlined text-xl ${sku.use_base_formula !== false ? 'text-emerald-700' : 'text-amber-700'}`}>{sku.use_base_formula !== false ? 'account_tree' : 'add_shopping_cart'}</span>
+                            <span>
+                              <strong className={`block text-xs ${sku.use_base_formula !== false ? 'text-emerald-900' : 'text-amber-900'}`}>{sku.use_base_formula !== false ? 'Dùng công thức gốc của sản phẩm' : 'Tách riêng công thức · Phân loại bán thêm'}</strong>
+                              <small className="mt-0.5 block text-[10px] font-medium text-stone-500">{sku.use_base_formula !== false ? 'Giá vốn và nguyên liệu gồm BOM gốc cộng phần riêng bên dưới.' : 'Không dùng BOM gốc; chỉ tính công thức phụ và nguyên liệu riêng.'}</small>
+                            </span>
+                          </span>
+                          <span className={`relative h-5 w-9 shrink-0 rounded-full transition ${sku.use_base_formula !== false ? 'bg-emerald-500' : 'bg-amber-400'}`}>
+                            <span className={`absolute top-0.5 size-4 rounded-full bg-white shadow-sm transition-transform ${sku.use_base_formula !== false ? 'translate-x-[18px]' : 'translate-x-0.5'}`} />
+                          </span>
+                        </button>
+
+                        <header className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                          <p className="text-[11px] font-bold uppercase tracking-wide text-indigo-800">
+                            Công thức phụ riêng cho phân loại
+                          </p>
+                          <button
+                            type="button"
+                            disabled={!subFormulaOptions.length}
+                            onClick={() => {
+                              const newSkus = [...form.skus];
+                              newSkus[sIdx].formula_components = [...(newSkus[sIdx].formula_components || []), { formula_id: '', quantity: 1 }];
+                              setForm({ ...form, skus: newSkus });
+                            }}
+                            className="inline-flex min-h-8 items-center gap-1.5 rounded-lg border border-indigo-200 bg-white px-2.5 py-1.5 text-xs font-bold text-indigo-700 transition hover:border-indigo-300 hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-40"
+                          >
+                            <span className="material-symbols-outlined text-[15px]">add</span> Gắn công thức phụ
+                          </button>
+                        </header>
+
+                        {(sku.formula_components || []).length > 0 ? (
+                          <div className="space-y-2">
+                            {sku.formula_components.map((item, componentIndex) => (
+                              <div key={componentIndex} className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                                <div className="min-w-0 flex-1">
+                                  <SearchableSelect
+                                    options={subFormulaOptions.filter(option => option.value === item.formula_id || !(sku.formula_components || []).some(component => component.formula_id === option.value))}
+                                    value={item.formula_id}
+                                    onChange={value => {
+                                      const newSkus = [...form.skus];
+                                      newSkus[sIdx].formula_components[componentIndex].formula_id = value;
+                                      setForm({ ...form, skus: newSkus });
+                                    }}
+                                    placeholder="-- Chọn công thức phụ --"
+                                  />
+                                </div>
+                                <label className="flex items-center gap-2 text-xs font-semibold text-stone-600">
+                                  <span className="whitespace-nowrap">Số phần / SP</span>
+                                  <input
+                                    type="number"
+                                    min="0.0001"
+                                    step="0.01"
+                                    value={item.quantity}
+                                    onChange={event => {
+                                      const newSkus = [...form.skus];
+                                      newSkus[sIdx].formula_components[componentIndex].quantity = Number(event.target.value);
+                                      setForm({ ...form, skus: newSkus });
+                                    }}
+                                    className="w-24 rounded-lg border border-indigo-200 bg-white px-3 py-2 text-sm font-bold outline-none focus:border-indigo-500"
+                                  />
+                                </label>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const newSkus = [...form.skus];
+                                    newSkus[sIdx].formula_components.splice(componentIndex, 1);
+                                    setForm({ ...form, skus: newSkus });
+                                  }}
+                                  className="flex size-9 shrink-0 items-center justify-center rounded-lg text-stone-400 transition hover:bg-red-50 hover:text-red-600"
+                                  aria-label="Bỏ công thức phụ khỏi phân loại"
+                                >
+                                  <span className="material-symbols-outlined text-lg">delete</span>
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-xs italic text-stone-400">Chưa gắn công thức phụ riêng cho phân loại này.</p>
+                        )}
+                      </section>
+
                       {/* Extra Ingredients for SKU */}
                       <div className="rounded-b-xl bg-white p-3.5">
                         <div className="flex items-center justify-between mb-2">
@@ -1612,7 +1737,7 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
                               newSkus[sIdx].extra_ingredients.push({ ingredient_id: '', quantity: 1 });
                               setForm({ ...form, skus: newSkus });
                             }} 
-                            className="text-xs text-primary font-bold hover:underline flex items-center gap-0.5"
+                            className="inline-flex min-h-8 items-center gap-1.5 rounded-lg border border-primary/20 bg-primary/5 px-2.5 py-1.5 text-xs font-bold text-primary transition hover:border-primary/35 hover:bg-primary/10"
                           >
                             <span className="material-symbols-outlined text-[15px]">add</span> Thêm nguyên liệu phụ
                           </button>
@@ -1668,6 +1793,7 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
                           <p className="text-xs text-stone-400 italic">Không có nguyên liệu phụ riêng (chỉ dùng công thức gốc BOM).</p>
                         )}
                       </div>
+                      </>}
                     </div>
                   );
                 })}
