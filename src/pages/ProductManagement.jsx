@@ -26,6 +26,7 @@ const getEmptyForm = () => ({
   tag: '',
   tag_color: '',
   shop_order: null,
+  is_visible_in_shop: true,
   category: 'Nến Hũ Đơn',
   volume: '200g (~50 giờ đốt)',
   wax_type: [],
@@ -187,6 +188,7 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
     if (p.tag === undefined) p.tag = '';
     if (p.tag_color === undefined) p.tag_color = '';
     if (!Number.isFinite(Number(p.shop_order)) || Number(p.shop_order) < 1) p.shop_order = null;
+    if (p.is_visible_in_shop === undefined) p.is_visible_in_shop = true;
     if (!Array.isArray(p.images)) p.images = [];
     if (!p.product_type) p.product_type = 'sellable';
     if (!Number.isFinite(Number(p.batch_yield)) || Number(p.batch_yield) < 1) p.batch_yield = 1;
@@ -649,6 +651,23 @@ function ProductModal({ product, products = [], materials, onClose, onSave, onDe
                       className="w-full border border-stone-200 rounded-lg px-3.5 py-2.5 text-[14px] font-mono font-bold bg-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-xs"
                     />
                     <p className="mt-1 text-[11px] text-stone-400">Số 1 xuất hiện đầu tiên. Sản phẩm hết hàng vẫn nằm cuối.</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-[13px] font-bold text-stone-700 mb-1.5">Hiển thị tại cửa hàng</label>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={form.is_visible_in_shop !== false}
+                      onClick={() => setForm({ ...form, is_visible_in_shop: form.is_visible_in_shop === false })}
+                      className={`flex w-full items-center justify-between rounded-lg border px-3.5 py-2.5 text-left text-[13px] font-bold shadow-xs transition ${form.is_visible_in_shop !== false ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-stone-200 bg-stone-50 text-stone-500'}`}
+                    >
+                      <span>{form.is_visible_in_shop !== false ? 'Đang hiển thị trên shop' : 'Đang ẩn khỏi shop'}</span>
+                      <span className={`relative h-5 w-9 rounded-full transition ${form.is_visible_in_shop !== false ? 'bg-emerald-500' : 'bg-stone-300'}`}>
+                        <span className={`absolute top-0.5 size-4 rounded-full bg-white shadow-sm transition-transform ${form.is_visible_in_shop !== false ? 'translate-x-[18px]' : 'translate-x-0.5'}`} />
+                      </span>
+                    </button>
+                    <p className="mt-1 text-[11px] text-stone-400">Ẩn sản phẩm khỏi danh sách và trang chi tiết công khai.</p>
                   </div>
                   </>}
                 </div>
@@ -1736,6 +1755,7 @@ export default function ProductManagement() {
   const [draggedProductId, setDraggedProductId] = useState(null);
   const [reorderSaving, setReorderSaving] = useState(false);
   const [reorderSaved, setReorderSaved] = useState(false);
+  const [visibilityUpdating, setVisibilityUpdating] = useState(() => new Set());
   const [searchParams] = useSearchParams();
   const searchTerm = searchParams.get('q') || '';
 
@@ -1809,8 +1829,36 @@ export default function ProductManagement() {
     }
   };
 
+  const handleShopVisibility = async (event, product) => {
+    event.stopPropagation();
+    if (visibilityUpdating.has(product._id) || product.product_type === 'sub_formula') return;
+
+    const nextVisible = product.is_visible_in_shop === false;
+    setVisibilityUpdating(current => new Set(current).add(product._id));
+    setProducts(current => current.map(item => (
+      item._id === product._id ? { ...item, is_visible_in_shop: nextVisible } : item
+    )));
+    try {
+      await productService.updateShopVisibility(product._id, nextVisible);
+      showToast(nextVisible ? 'Đã hiển thị sản phẩm trên shop' : 'Đã ẩn sản phẩm khỏi shop');
+    } catch (error) {
+      setProducts(current => current.map(item => (
+        item._id === product._id ? { ...item, is_visible_in_shop: product.is_visible_in_shop } : item
+      )));
+      showToast(error.response?.data?.message || 'Không thể cập nhật trạng thái hiển thị', 'error');
+    } finally {
+      setVisibilityUpdating(current => {
+        const next = new Set(current);
+        next.delete(product._id);
+        return next;
+      });
+    }
+  };
+
   const openReorderMode = () => {
-    setReorderProducts(sortProductsForShop(products.filter(product => product.product_type !== 'sub_formula')));
+    setReorderProducts(sortProductsForShop(products.filter(product => (
+      product.product_type !== 'sub_formula' && product.is_visible_in_shop !== false
+    ))));
     setIsReorderMode(true);
     setReorderSaved(false);
   };
@@ -1879,7 +1927,7 @@ export default function ProductManagement() {
     setCurrentPage(1);
   }, [searchTerm]);
 
-  const ITEMS_PER_PAGE = 10;
+  const ITEMS_PER_PAGE = 20;
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
   const currentProducts = filteredProducts.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
@@ -1910,6 +1958,7 @@ export default function ProductManagement() {
             newForm.productId = `SP-${Math.floor(1000000 + Math.random() * 9000000)}`;
             newForm.name = newForm.name + ' (Copy)';
             newForm.shop_order = null;
+            newForm.is_visible_in_shop = true;
             newForm.skus = newForm.skus.map(sku => ({ ...sku, id: `V${Math.floor(1000 + Math.random() * 9000)}` }));
             // Set modal to add with new data
             setModal({ type: 'add', data: newForm });
@@ -2055,6 +2104,7 @@ export default function ProductManagement() {
                   <th className="px-lg py-md text-[12px] font-bold text-on-surface-variant uppercase tracking-wider text-right">Có thể sản xuất</th>
                   <th className="px-lg py-md text-[12px] font-bold text-on-surface-variant uppercase tracking-wider text-right">Giá vốn</th>
                   <th className="px-lg py-md text-[12px] font-bold text-on-surface-variant uppercase tracking-wider text-right text-primary pr-8">Giá bán</th>
+                  <th className="px-lg py-md text-[12px] font-bold text-on-surface-variant uppercase tracking-wider text-center">Cửa hàng</th>
                   <th className="px-lg py-md text-[12px] font-bold text-on-surface-variant uppercase tracking-wider text-center">Thứ tự shop</th>
                 </tr>
               </thead>
@@ -2067,12 +2117,13 @@ export default function ProductManagement() {
                       <td className="px-lg py-md"><div className="h-4 bg-surface-container rounded w-12 ml-auto"></div></td>
                       <td className="px-lg py-md"><div className="h-4 bg-surface-container rounded w-20 ml-auto"></div></td>
                       <td className="px-lg py-md"><div className="h-4 bg-surface-container rounded w-16 ml-auto"></div></td>
+                      <td className="px-lg py-md"><div className="h-6 bg-surface-container rounded-full w-12 mx-auto"></div></td>
                       <td className="px-lg py-md"><div className="h-4 bg-surface-container rounded w-10 mx-auto"></div></td>
                     </tr>
                   ))
                 ) : products.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="px-lg py-[60px] text-center text-on-surface-variant">
+                    <td colSpan="7" className="px-lg py-[60px] text-center text-on-surface-variant">
                       <div className="w-16 h-16 mx-auto bg-surface-container rounded-full flex items-center justify-center mb-4">
                         <span className="material-symbols-outlined text-[32px] opacity-50">inventory_2</span>
                       </div>
@@ -2100,7 +2151,7 @@ export default function ProductManagement() {
 
                     return (
                       <React.Fragment key={p._id}>
-                        <tr onClick={() => setModal({ type: 'edit', data: p })} className="hover:bg-surface-container-low/30 transition-colors group cursor-pointer">
+                        <tr onClick={() => setModal({ type: 'edit', data: p })} className={`transition-colors group cursor-pointer ${p.is_visible_in_shop === false && p.product_type !== 'sub_formula' ? 'bg-stone-50/80 hover:bg-stone-100/80' : 'hover:bg-surface-container-low/30'}`}>
                           <td className="px-lg py-md">
                             <div className="flex items-center gap-3">
                               {p.image ? (
@@ -2114,6 +2165,7 @@ export default function ProductManagement() {
                                 <div className="flex items-center gap-2">
                                   <p className="font-bold text-[14px] text-on-surface">{p.name}</p>
                                   {p.product_type === 'sub_formula' && <span className="rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-[9px] font-black uppercase tracking-wide text-indigo-700">Công thức phụ</span>}
+                                  {p.product_type !== 'sub_formula' && p.is_visible_in_shop === false && <span className="rounded-full border border-stone-200 bg-white px-2 py-0.5 text-[9px] font-black uppercase tracking-wide text-stone-500">Ẩn tại shop</span>}
                                   {p.tag && (
                                     <span
                                       className="text-white text-[9px] font-bold tracking-wider px-2 py-0.5 uppercase rounded-sm shadow-xs"
@@ -2153,6 +2205,22 @@ export default function ProductManagement() {
                           </td>
                           <td className="px-lg py-md text-right font-mono text-[14px] text-primary font-bold pr-8">
                             {p.product_type === 'sub_formula' ? <span className="text-xs font-semibold text-stone-400">Không đăng bán</span> : priceDisplay}
+                          </td>
+                          <td className="px-lg py-md text-center">
+                            {p.product_type === 'sub_formula' ? <span className="text-xs text-stone-400">—</span> : (
+                              <button
+                                type="button"
+                                role="switch"
+                                aria-checked={p.is_visible_in_shop !== false}
+                                aria-label={`${p.is_visible_in_shop !== false ? 'Ẩn' : 'Hiển thị'} ${p.name} tại cửa hàng`}
+                                disabled={visibilityUpdating.has(p._id)}
+                                onClick={(event) => handleShopVisibility(event, p)}
+                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition disabled:cursor-wait disabled:opacity-60 ${p.is_visible_in_shop !== false ? 'bg-emerald-500' : 'bg-stone-300'}`}
+                                title={p.is_visible_in_shop !== false ? 'Đang hiển thị · Bấm để ẩn' : 'Đang ẩn · Bấm để hiển thị'}
+                              >
+                                <span className={`size-5 rounded-full bg-white shadow-sm transition-transform ${p.is_visible_in_shop !== false ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
+                              </button>
+                            )}
                           </td>
                           <td className="px-lg py-md text-center">
                             {p.product_type === 'sub_formula' ? <span className="text-xs text-stone-400">—</span> : Number(p.shop_order) > 0 ? (
@@ -2201,6 +2269,7 @@ export default function ProductManagement() {
                               <td className="px-lg py-sm text-right font-mono text-[13px] text-primary font-bold pr-8">
                                 {formatPrice(sku.price || p.base_price || 0)}
                               </td>
+                              <td className="px-lg py-sm" />
                               <td className="px-lg py-sm" />
                             </tr>
                           );
